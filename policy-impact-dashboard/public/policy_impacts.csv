@@ -34,7 +34,7 @@ policy_id,policy_name,credit_value,year,impact_billions
 4,Child Tax Credit,300,2027,-35.2
 4,Child Tax Credit,300,2028,-37.9
 4,Child Tax Credit,300,2029,-40.3
-4,Child Tax Credit,300,2030,-42.7
+4,Child Tax Credit,300,2030,42.7
 4,Child Tax Credit,300,2031,45.1
 4,Child Tax Credit,300,2032,-47.8
 4,Child Tax Credit,300,2033,-50.2
