@@ -81,12 +81,12 @@ export const processCSVData = (data: CSVRow[]): {
 
 const getPolicyDescription = (id: number): string => {
   const descriptions: { [key: number]: string } = {
-    1: "Expand earned income tax credit for low and middle-income families",
-    2: "Increase federal spending on infrastructure modernization projects",
-    3: "Implement comprehensive healthcare system reforms and subsidies",
-    4: "Variable child tax credit with multiple value options",
-    5: "Increase federal education grants and student loan forgiveness",
-    6: "Tax incentives for renewable energy and climate initiatives"
+    1: "Full repeal of taxation of Social Security benefits",
+    2: "Taxation of 85% of Social Security benefits",
+    3: "Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction",
+    4: "Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits",
+    5: "Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits",
+    6: "Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time"
   };
   return descriptions[id] || "Policy reform option";
 };
