@@ -45,11 +45,11 @@
 }
 
 .impact-value.positive {
-  color: #27ae60;
+  color: #2C6496;
 }
 
 .impact-value.negative {
-  color: #e74c3c;
+  color: #2C6496;
 }
 
 .impact-table {
@@ -94,11 +94,11 @@
 }
 
 .impact-cell.positive {
-  color: #27ae60;
+  color: #2C6496;
 }
 
 .impact-cell.negative {
-  color: #e74c3c;
+  color: #2C6496;
 }
 
 .impact-chart {
@@ -208,12 +208,12 @@
 }
 
 .bar.positive {
-  background: linear-gradient(180deg, #27ae60 0%, #2ecc71 100%);
+  background: #2C6496;
   border-radius: 4px 4px 0 0;
 }
 
 .bar.negative {
-  background: linear-gradient(180deg, #c0392b 0%, #e74c3c 100%);
+  background: #2C6496;
   border-radius: 0 0 4px 4px;
 }
 

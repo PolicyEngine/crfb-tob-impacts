@@ -9,9 +9,9 @@ interface ImpactDisplayProps {
 }
 
 const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditValue }) => {
-  const formatCurrency = (value: number): string => {
+  const formatCurrency = (value: number, includeSign: boolean = true): string => {
     const absValue = Math.abs(value);
-    const sign = value < 0 ? '-' : '+';
+    const sign = value < 0 ? '-' : (includeSign ? '+' : '');
     
     if (absValue >= 1000) {
       return `${sign}$${(absValue / 1000).toFixed(1)}T`;
@@ -40,7 +40,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
         <div className="total-impact">
           <span>10-Year Total Impact:</span>
           <span className={`impact-value ${totalImpact < 0 ? 'negative' : 'positive'}`}>
-            {formatCurrency(totalImpact)}
+            {formatCurrency(totalImpact, false)}
           </span>
         </div>
       </div>
@@ -56,7 +56,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
               {currentYear + item.year - 1}
             </div>
             <div className={`table-cell impact-cell ${item.impact < 0 ? 'negative' : 'positive'}`}>
-              {formatCurrency(item.impact)}
+              {formatCurrency(item.impact, false)}
             </div>
           </div>
         ))}
@@ -92,7 +92,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
                           `${chartHeight - barHeight - 20}px`
                       }}
                     >
-                      {formatCurrency(item.impact).replace('+', '')}
+                      {formatCurrency(item.impact, false)}
                     </span>
                     <div 
                       className={`bar ${isNegative ? 'negative' : 'positive'}`}
