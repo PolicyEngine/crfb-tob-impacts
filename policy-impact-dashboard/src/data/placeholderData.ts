@@ -3,34 +3,34 @@ import { PolicyOption, PolicyImpact } from '../types';
 export const policyOptions: PolicyOption[] = [
   {
     id: 1,
-    name: "Tax Credit Expansion",
+    name: "Repeal Social Security Benefits Tax",
     description: "Expand earned income tax credit for low and middle-income families"
   },
   {
     id: 2,
-    name: "Infrastructure Investment",
+    name: "Flat Social Security Tax",
     description: "Increase federal spending on infrastructure modernization projects"
   },
   {
     id: 3,
-    name: "Healthcare Reform",
+    name: "Flat Social Security Tax with Bonus Senior Deduction Extension",
     description: "Implement comprehensive healthcare system reforms and subsidies"
   },
   {
     id: 4,
-    name: "Child Tax Credit",
-    description: "Variable child tax credit with multiple value options",
+    name: "Social Security Credit",
+    description: "Variable Social Security Credit with multiple value options",
     hasMultipleCreditValues: true,
     creditValues: [300, 600, 900, 1200, 1500]
   },
   {
     id: 5,
-    name: "Education Funding",
+    name: "Roth Style Swap",
     description: "Increase federal education grants and student loan forgiveness"
   },
   {
     id: 6,
-    name: "Green Energy Incentives",
+    name: "Roth Style Swap with Phase-In",
     description: "Tax incentives for renewable energy and climate initiatives"
   }
 ];
@@ -43,7 +43,7 @@ export const generatePlaceholderData = (policy: PolicyOption, creditValue?: numb
     let impact: number;
     
     switch (policy.id) {
-      case 1: // Tax Credit Expansion
+      case 1: // Repeal Social Security Benefits Tax
         impact = -120 - (year * 5) + Math.random() * 20 - 10;
         break;
       case 2: // Infrastructure
@@ -52,7 +52,7 @@ export const generatePlaceholderData = (policy: PolicyOption, creditValue?: numb
       case 3: // Healthcare
         impact = -300 + (year * 15) + Math.random() * 40 - 20;
         break;
-      case 4: // Child Tax Credit (varies by credit value)
+      case 4: // Social Security Credit (varies by credit value)
         const baseImpact = creditValue ? -(creditValue / 10) : -90;
         impact = baseImpact - (year * 8) + Math.random() * 25 - 12.5;
         break;
