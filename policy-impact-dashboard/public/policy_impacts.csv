@@ -1,0 +1,101 @@
+policy_id,policy_name,credit_value,year,impact_billions
+1,Repeal Social Security Benefits Tax,,2025,-125.5
+1,Repeal Social Security Benefits Tax,,2026,-130.2
+1,Repeal Social Security Benefits Tax,,2027,-135.8
+1,Repeal Social Security Benefits Tax,,2028,-140.1
+1,Repeal Social Security Benefits Tax,,2029,-145.3
+1,Repeal Social Security Benefits Tax,,2030,-150.7
+1,Repeal Social Security Benefits Tax,,2031,-155.2
+1,Repeal Social Security Benefits Tax,,2032,-160.8
+1,Repeal Social Security Benefits Tax,,2033,-165.4
+1,Repeal Social Security Benefits Tax,,2034,-170.9
+2,Flat Social Security Tax,,2025,-210.3
+2,Flat Social Security Tax,,2026,-220.7
+2,Flat Social Security Tax,,2027,-232.1
+2,Flat Social Security Tax,,2028,-241.5
+2,Flat Social Security Tax,,2029,-252.8
+2,Flat Social Security Tax,,2030,-260.4
+2,Flat Social Security Tax,,2031,-271.2
+2,Flat Social Security Tax,,2032,-280.6
+2,Flat Social Security Tax,,2033,-290.3
+2,Flat Social Security Tax,,2034,-301.7
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2025,-285.6
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2026,-270.3
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2027,-256.8
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2028,-241.2
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2029,-227.4
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2030,-210.8
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2031,-195.3
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2032,-180.7
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2033,-165.2
+3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2034,-150.6
+4,Social Security Credit,300,2025,-30.5
+4,Social Security Credit,300,2026,-32.8
+4,Social Security Credit,300,2027,-35.2
+4,Social Security Credit,300,2028,-37.9
+4,Social Security Credit,300,2029,-40.3
+4,Social Security Credit,300,2030,42.7
+4,Social Security Credit,300,2031,45.1
+4,Social Security Credit,300,2032,-47.8
+4,Social Security Credit,300,2033,-50.2
+4,Social Security Credit,300,2034,-52.9
+4,Social Security Credit,600,2025,-61.2
+4,Social Security Credit,600,2026,-65.7
+4,Social Security Credit,600,2027,-70.5
+4,Social Security Credit,600,2028,-75.8
+4,Social Security Credit,600,2029,-80.6
+4,Social Security Credit,600,2030,-85.4
+4,Social Security Credit,600,2031,-90.3
+4,Social Security Credit,600,2032,-95.6
+4,Social Security Credit,600,2033,-100.5
+4,Social Security Credit,600,2034,-105.8
+4,Social Security Credit,900,2025,-91.8
+4,Social Security Credit,900,2026,-98.5
+4,Social Security Credit,900,2027,-105.7
+4,Social Security Credit,900,2028,-113.7
+4,Social Security Credit,900,2029,-120.9
+4,Social Security Credit,900,2030,-128.1
+4,Social Security Credit,900,2031,-135.4
+4,Social Security Credit,900,2032,-143.4
+4,Social Security Credit,900,2033,-150.7
+4,Social Security Credit,900,2034,-158.7
+4,Social Security Credit,1200,2025,-122.4
+4,Social Security Credit,1200,2026,-131.4
+4,Social Security Credit,1200,2027,-141.0
+4,Social Security Credit,1200,2028,-151.6
+4,Social Security Credit,1200,2029,-161.2
+4,Social Security Credit,1200,2030,-170.8
+4,Social Security Credit,1200,2031,-180.6
+4,Social Security Credit,1200,2032,-191.2
+4,Social Security Credit,1200,2033,-201.0
+4,Social Security Credit,1200,2034,-211.6
+4,Social Security Credit,1500,2025,-153.0
+4,Social Security Credit,1500,2026,-164.2
+4,Social Security Credit,1500,2027,-176.2
+4,Social Security Credit,1500,2028,-189.5
+4,Social Security Credit,1500,2029,-201.5
+4,Social Security Credit,1500,2030,-213.5
+4,Social Security Credit,1500,2031,-225.7
+4,Social Security Credit,1500,2032,-239.0
+4,Social Security Credit,1500,2033,-251.2
+4,Social Security Credit,1500,2034,-264.5
+5,Roth Style Swap,,2025,-152.3
+5,Roth Style Swap,,2026,-155.8
+5,Roth Style Swap,,2027,-159.7
+5,Roth Style Swap,,2028,-163.2
+5,Roth Style Swap,,2029,-167.1
+5,Roth Style Swap,,2030,-170.6
+5,Roth Style Swap,,2031,-174.5
+5,Roth Style Swap,,2032,-178.0
+5,Roth Style Swap,,2033,-181.9
+5,Roth Style Swap,,2034,-185.4
+6,Roth Style Swap with Phase-In,,2025,-75.8
+6,Roth Style Swap with Phase-In,,2026,-70.2
+6,Roth Style Swap with Phase-In,,2027,-64.3
+6,Roth Style Swap with Phase-In,,2028,-59.1
+6,Roth Style Swap with Phase-In,,2029,-53.5
+6,Roth Style Swap with Phase-In,,2030,-48.3
+6,Roth Style Swap with Phase-In,,2031,-42.7
+6,Roth Style Swap with Phase-In,,2032,-37.5
+6,Roth Style Swap with Phase-In,,2033,-31.9
+6,Roth Style Swap with Phase-In,,2034,-26.7
