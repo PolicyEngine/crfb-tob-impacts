@@ -59,11 +59,20 @@ body {
 }
 
 .App-footer {
+  position: relative;
   text-align: center;
   padding: 30px;
   color: #718093;
   font-size: 0.9em;
   margin-top: 40px;
+}
+
+.footer-logo {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  height: 40px;
+  width: auto;
 }
 
 @media (max-width: 768px) {

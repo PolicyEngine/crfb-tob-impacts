@@ -52,7 +52,7 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1>10-Year Budgetary Impact Analysis</h1>
+          <h1>Social Security Taxation of Benefits</h1>
           <p className="subtitle">Loading policy data...</p>
         </header>
       </div>
@@ -63,7 +63,7 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1>10-Year Budgetary Impact Analysis</h1>
+          <h1>Social Security Taxation of Benefits</h1>
           <p className="subtitle" style={{ color: '#e74c3c' }}>{error}</p>
         </header>
       </div>
@@ -73,8 +73,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>10-Year Budgetary Impact Analysis</h1>
-        <p className="subtitle">Policy Reform Comparison Tool</p>
+        <h1>Social Security Taxation of Benefits</h1>
+        <p className="subtitle">10-Year Budgetary Impact Analysis</p>
       </header>
       
       <main className="App-main">
@@ -95,6 +95,7 @@ function App() {
       
       <footer className="App-footer">
         <p>Data loaded from policy_impacts.csv</p>
+        <img src="/policyengine.png" alt="PolicyEngine" className="footer-logo" />
       </footer>
     </div>
   );
