@@ -106,6 +106,7 @@
   padding: 25px;
   border-radius: 8px;
   position: relative;
+  overflow: hidden;
 }
 
 .chart-header {
@@ -153,7 +154,6 @@
   gap: 10px;
   position: relative;
   padding-bottom: 40px;
-  overflow: hidden;
 }
 
 .y-axis {
@@ -182,7 +182,7 @@
 .tick-line {
   position: absolute;
   left: 100%;
-  width: 1000px;
+  width: 2000px;
   height: 1px;
   background: #e9ecef;
   z-index: 1;
