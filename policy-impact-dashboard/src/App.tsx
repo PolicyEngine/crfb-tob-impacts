@@ -94,7 +94,7 @@ function App() {
       </main>
       
       <footer className="App-footer">
-        <p>Data loaded from policy_impacts.csv</p>
+        <p>Download Data</p>
         <button 
           className="download-button"
           onClick={() => {

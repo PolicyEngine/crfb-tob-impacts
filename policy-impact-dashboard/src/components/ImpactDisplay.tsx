@@ -1,5 +1,6 @@
 import React from 'react';
 import { PolicyImpact } from '../types';
+import html2canvas from 'html2canvas';
 import './ImpactDisplay.css';
 
 interface ImpactDisplayProps {
@@ -9,6 +10,25 @@ interface ImpactDisplayProps {
 }
 
 const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditValue }) => {
+  const handleSaveChart = async () => {
+    const chartElement = document.querySelector('.impact-chart') as HTMLElement;
+    if (chartElement) {
+      try {
+        const canvas = await html2canvas(chartElement, {
+          backgroundColor: '#f8f9fa',
+          scale: 2,
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${policyName.replace(/\s+/g, '_')}_impact_chart.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error saving chart:', error);
+      }
+    }
+  };
+
   const formatCurrency = (value: number, includeSign: boolean = true): string => {
     const absValue = Math.abs(value);
     const sign = value < 0 ? '-' : (includeSign ? '+' : '');
@@ -88,7 +108,12 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
       </div>
 
       <div className="impact-chart">
-        <h3>Impact Over Time</h3>
+        <div className="chart-header">
+          <h3>Impact Over Time</h3>
+          <button className="save-chart-button" onClick={handleSaveChart}>
+            Save Chart
+          </button>
+        </div>
         <img src="/policyengine.png" alt="PolicyEngine" className="chart-logo" />
         <div className="chart-container">
           <div className="y-axis">

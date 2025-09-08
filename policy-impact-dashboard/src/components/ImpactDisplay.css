@@ -108,12 +108,34 @@
   position: relative;
 }
 
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
 .impact-chart h3 {
   color: #2c3e50;
-  margin-bottom: 25px;
+  margin: 0;
   font-size: 1.4em;
   font-weight: 600;
-  text-align: center;
+}
+
+.save-chart-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-chart-button:hover {
+  background-color: #2980b9;
 }
 
 .chart-logo {
