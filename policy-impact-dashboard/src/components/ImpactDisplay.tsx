@@ -89,6 +89,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
 
       <div className="impact-chart">
         <h3>Impact Over Time</h3>
+        <img src="/policyengine.png" alt="PolicyEngine" className="chart-logo" />
         <div className="chart-container">
           <div className="y-axis">
             {yAxisTicks.map((tick) => (
