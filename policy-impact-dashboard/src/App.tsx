@@ -95,6 +95,19 @@ function App() {
       
       <footer className="App-footer">
         <p>Data loaded from policy_impacts.csv</p>
+        <button 
+          className="download-button"
+          onClick={() => {
+            const link = document.createElement('a');
+            link.href = '/policy_impacts.csv';
+            link.download = 'policy_impacts.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+        >
+          Download CSV Data
+        </button>
         <img src="/policyengine.png" alt="PolicyEngine" className="footer-logo" />
       </footer>
     </div>
