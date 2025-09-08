@@ -109,7 +109,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
 
       <div className="impact-chart">
         <div className="chart-header">
-          <h3>Impact Over Time</h3>
+          <h3>Impact of {policyName}{creditValue ? ` ($${creditValue})` : ''}</h3>
           <button className="save-chart-button" onClick={handleSaveChart}>
             Save Chart
           </button>
