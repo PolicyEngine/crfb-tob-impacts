@@ -63,7 +63,7 @@ export const processCSVData = (data: CSVRow[]): {
     }
     
     impactData.get(key)!.push({
-      year: year - 2024, // Convert to relative year (1-10)
+      year: year, // Keep the actual year
       impact: impact
     });
   });

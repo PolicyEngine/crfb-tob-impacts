@@ -59,11 +59,37 @@ body {
 }
 
 .App-footer {
+  position: relative;
   text-align: center;
   padding: 30px;
   color: #718093;
   font-size: 0.9em;
   margin-top: 40px;
+}
+
+.footer-logo {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  height: 40px;
+  width: auto;
+}
+
+.download-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+  background-color: #2980b9;
 }
 
 @media (max-width: 768px) {

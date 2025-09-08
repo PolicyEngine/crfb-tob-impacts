@@ -1,5 +1,6 @@
 import React from 'react';
 import { PolicyImpact } from '../types';
+import html2canvas from 'html2canvas';
 import './ImpactDisplay.css';
 
 interface ImpactDisplayProps {
@@ -9,6 +10,25 @@ interface ImpactDisplayProps {
 }
 
 const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditValue }) => {
+  const handleSaveChart = async () => {
+    const chartElement = document.querySelector('.impact-chart') as HTMLElement;
+    if (chartElement) {
+      try {
+        const canvas = await html2canvas(chartElement, {
+          backgroundColor: '#f8f9fa',
+          scale: 2,
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${policyName.replace(/\s+/g, '_')}_impact_chart.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      } catch (error) {
+        console.error('Error saving chart:', error);
+      }
+    }
+  };
+
   const formatCurrency = (value: number, includeSign: boolean = true): string => {
     const absValue = Math.abs(value);
     const sign = value < 0 ? '-' : (includeSign ? '+' : '');
@@ -21,16 +41,41 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
   };
 
   const totalImpact = data.reduce((sum, item) => sum + item.impact, 0);
-  const currentYear = new Date().getFullYear();
   
   // Calculate max impact for scaling
   const maxImpact = Math.max(...data.map(d => Math.abs(d.impact)));
-  const yAxisMax = Math.ceil(maxImpact / 50) * 50; // Round up to nearest 50
+  
+  // Determine appropriate rounding based on the scale of values
+  let yAxisMax: number;
+  let tickInterval: number;
+  
+  if (maxImpact <= 50) {
+    yAxisMax = Math.ceil(maxImpact / 10) * 10;
+    tickInterval = 20;
+  } else if (maxImpact <= 100) {
+    yAxisMax = Math.ceil(maxImpact / 20) * 20;
+    tickInterval = 40;
+  } else if (maxImpact <= 200) {
+    yAxisMax = Math.ceil(maxImpact / 40) * 40;
+    tickInterval = 40;
+  } else {
+    yAxisMax = Math.ceil(maxImpact / 50) * 50;
+    tickInterval = 50;
+  }
+  
   const chartHeight = 200; // Height for each half (positive and negative)
   
-  // Generate y-axis tick values (5 ticks including 0)
-  const tickInterval = yAxisMax / 2;
-  const yAxisTicks = [yAxisMax, tickInterval, 0, -tickInterval, -yAxisMax];
+  // Generate y-axis tick values for symmetric display
+  const yAxisTicks: number[] = [];
+  for (let i = yAxisMax; i >= -yAxisMax; i -= tickInterval) {
+    yAxisTicks.push(i);
+  }
+  
+  // Ensure 0 is included
+  if (!yAxisTicks.includes(0)) {
+    yAxisTicks.push(0);
+    yAxisTicks.sort((a, b) => b - a);
+  }
 
   return (
     <div className="impact-display">
@@ -53,7 +98,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
         {data.map((item) => (
           <div key={item.year} className="table-row">
             <div className="table-cell year-cell">
-              {currentYear + item.year - 1}
+              {item.year}
             </div>
             <div className={`table-cell impact-cell ${item.impact < 0 ? 'negative' : 'positive'}`}>
               {formatCurrency(item.impact, false)}
@@ -63,7 +108,13 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
       </div>
 
       <div className="impact-chart">
-        <h3>Impact Over Time</h3>
+        <div className="chart-header">
+          <h3>Impact of {policyName}{creditValue ? ` ($${creditValue})` : ''}</h3>
+          <button className="save-chart-button" onClick={handleSaveChart}>
+            Save Chart
+          </button>
+        </div>
+        <img src="/policyengine.png" alt="PolicyEngine" className="chart-logo" />
         <div className="chart-container">
           <div className="y-axis">
             {yAxisTicks.map((tick) => (
@@ -102,7 +153,7 @@ const ImpactDisplay: React.FC<ImpactDisplayProps> = ({ data, policyName, creditV
                       }}
                       title={`Year ${item.year}: ${formatCurrency(item.impact)}`}
                     />
-                    <span className="bar-label">Y{item.year}</span>
+                    <span className="bar-label">{item.year}</span>
                   </div>
                 );
               })}
