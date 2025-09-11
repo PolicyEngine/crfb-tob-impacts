@@ -12,7 +12,7 @@ Under current law, Social Security benefits become subject to federal income tax
 
 The revenue generated from this taxation is allocated to the OASI, DI, and HI trust funds based on current law formulas {cite}`ssa2023trustees`.
 
-Additionally, the Tax Cuts and Jobs Act included a "bonus senior deduction" of $6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
+Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of $6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
 
 ## Option 1: Full Repeal of Taxation of Social Security Benefits (No Bonus Senior Deduction After 2028)
 

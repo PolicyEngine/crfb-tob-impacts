@@ -58,24 +58,141 @@ Our analysis uses a current law baseline that incorporates:
 
 ### Policy Reform Implementation
 
-For each of the six policy options, we implement specific parameter changes:
+For each of the seven policy options, we implement specific parameter changes:
 
 **Option 1 (Full Repeal)**:
 ```
-Social Security taxation rate: 0% (all income levels)
+Parameters altered:
+- gov.irs.social_security.taxability.rate.base: 0% (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.rate.additional: 0% (2026-01-01 to 2100-12-31)
+
 Effective date: January 1, 2026
 Senior deduction: Expires 2028 as scheduled
 ```
 
 **Option 2 (85% Taxation)**:
 ```
-Social Security taxation rate: 85% (all beneficiaries)
-Income thresholds: Eliminated
-Effective date: January 1, 2026
+Parameters altered:
+- gov.irs.social_security.taxability.rate.base: 85% (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.JOINT: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SINGLE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SEPARATE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD: $0 (2024-01-01 to 2100-12-31)
+
+Effective date: January 1, 2024 (implementation date)
 Senior deduction: Expires 2028 as scheduled
 ```
 
-**Options 3-6**: Similar detailed parameter specifications based on policy descriptions in Chapter 2.
+**Option 3 (85% Taxation with Senior Deduction Extension)**:
+```
+Parameters altered:
+- gov.irs.social_security.taxability.rate.base: 85% (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.JOINT: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SINGLE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SEPARATE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE: $0 (2024-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD: $0 (2024-01-01 to 2100-12-31)
+- gov.contrib.crfb.senior_deduction_extension.applies: True (2025-01-01 to 2100-12-31)
+
+Effective date: January 1, 2024 (taxation), January 1, 2025 (deduction extension)
+Senior deduction: Permanently extended
+```
+
+**Option 4 (Tax Credit System)**:
+```
+Parameters altered:
+- gov.contrib.crfb.ss_credit.in_effect: True (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.ss_credit.amount.SINGLE: $300-$1500 variants (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.ss_credit.amount.JOINT: $300-$1500 variants (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.ss_credit.amount.SEPARATE: $300-$1500 variants (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.ss_credit.amount.HEAD_OF_HOUSEHOLD: $300-$1500 variants (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.ss_credit.amount.SURVIVING_SPOUSE: $300-$1500 variants (2026-01-01 to 2100-12-31)
+- gov.irs.deductions.senior_deduction.amount: $0 (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.rate.base: 85% (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SINGLE: $0 (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.JOINT: $0 (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SEPARATE: $0 (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD: $0 (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE: $0 (2026-01-01 to 2100-12-31)
+
+Effective date: January 1, 2026
+Senior deduction: Eliminated and replaced with credit
+Credit variants: $300, $600, $900, $1200, $1500
+```
+
+**Option 5 (Roth-Style Swap)**:
+```
+Parameters altered:
+- gov.irs.social_security.taxability.rate.base: 0% (2026-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.rate.additional: 0% (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.tax_employer_payroll_tax.in_effect: True (2025-01-01 to 2100-12-31)
+
+Effective date: January 1, 2025 (payroll tax), January 1, 2026 (benefit taxation repeal)
+Senior deduction: Expires 2028 as scheduled
+```
+
+**Option 6 (Phased Roth-Style Swap)**:
+```
+Parameters altered:
+- gov.contrib.crfb.tax_employer_payroll_tax.in_effect: True (2026-01-01 to 2100-12-31)
+- gov.contrib.crfb.tax_employer_payroll_tax.percentage: Phased implementation
+  * 13.07% (1/7.65) in 2026
+  * 26.14% (2/7.65) in 2027
+  * 39.22% (3/7.65) in 2028
+  * 52.29% (4/7.65) in 2029
+  * 65.36% (5/7.65) in 2030
+  * 78.43% (6/7.65) in 2031
+  * 91.50% (7/7.65) in 2032
+  * 100% (full amount) from 2033 onwards
+- gov.irs.social_security.taxability.rate.base: Phased reduction
+  * 45% in 2029
+  * 40% in 2030
+  * 35% in 2031
+  * 30% in 2032
+  * 25% in 2033
+  * 20% in 2034
+  * 15% in 2035
+  * 10% in 2036
+  * 5% in 2037
+  * 0% from 2038 onwards
+- gov.irs.social_security.taxability.rate.additional: Phased reduction
+  * 80% in 2029
+  * 75% in 2030
+  * 70% in 2031
+  * 65% in 2032
+  * 60% in 2033
+  * 55% in 2034
+  * 50% in 2035
+  * 45% in 2036
+  * 40% in 2037
+  * 35% in 2038
+  * 30% in 2039
+  * 25% in 2040
+  * 20% in 2041
+  * 15% in 2042
+  * 10% in 2043
+  * 5% in 2044
+  * 0% from 2045 onwards
+
+Effective date: January 1, 2026 (payroll tax phase-in), January 1, 2029 (benefit taxation phase-out)
+Senior deduction: Expires 2028 as scheduled
+```
+
+**Option 7 (Full Social Security Tax)**:
+```
+Parameters altered:
+- gov.irs.social_security.taxability.rate.base: 100% (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.rate.additional: 100% (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.JOINT: $0 (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SINGLE: $0 (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SEPARATE: $0 (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE: $0 (2025-01-01 to 2100-12-31)
+- gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD: $0 (2025-01-01 to 2100-12-31)
+
+Effective date: January 1, 2025
+Senior deduction: Expires 2028 as scheduled
+```
 
 ## Calculation Methodology
 
