@@ -1,0 +1,8 @@
+format: jb-book
+root: intro
+chapters:
+- file: policy_options
+- file: prior_research  
+- file: methodology
+- file: results
+- file: comparison
