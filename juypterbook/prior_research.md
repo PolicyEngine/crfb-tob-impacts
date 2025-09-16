@@ -20,13 +20,13 @@ CBO's regular "Budget Options" publications have included several relevant propo
 
 **Option 1: Eliminate Income Taxation of Social Security Benefits**
 - CBO estimates this would reduce revenue by approximately $40-50 billion annually
-- Would require alternative financing mechanisms for trust funds
-- Creates fiscal pressure on both Social Security and Medicare solvency
+- Would eliminate current trust fund revenue source
+- Affects both Social Security and Medicare trust fund revenues
 
 **Option 2: Subject All Social Security Benefits to Income Taxation**
 - CBO estimates this could raise $30-40 billion annually in additional revenue
-- Would significantly increase tax burden on middle-income retirees
-- Improves trust fund solvency but creates distributional concerns
+- Would extend taxation to additional beneficiaries
+- Increases trust fund revenues
 
 ### CBO Methodology
 
@@ -51,12 +51,12 @@ JCT analysis shows that the current partial taxation system:
 - Creates complex interaction effects with other retirement income
 - Results in varying effective tax rates across income distributions
 
-### Administrative Complexity
+### Administrative Structure
 
-JCT notes that the current two-tier system creates significant complexity:
-- "Combined income" calculation requires multiple income sources
-- Creates cliff effects at threshold levels
-- Complicates tax planning and preparation for retirees
+JCT notes that the current two-tier system includes:
+- "Combined income" calculation incorporating multiple income sources
+- Threshold-based taxation tiers
+- Multiple calculation steps for determining taxable benefits
 
 ## Tax Policy Center Research
 
@@ -73,11 +73,11 @@ TPC research shows that current benefit taxation:
 
 TPC has analyzed various reform proposals, including:
 
-**Full Repeal**: Would provide tax relief primarily to middle-income households, with limited benefit for very low or very high-income retirees.
+**Full Repeal**: Analysis shows effects concentrated among middle-income households, with smaller effects for households at income distribution extremes.
 
-**Universal Taxation**: Would increase tax burden significantly for current non-taxed beneficiaries, with regressive effects on households with limited other income sources.
+**Universal Taxation**: Would extend taxation to currently non-taxed beneficiaries, with varying effects across income levels.
 
-**Credit-Based Approaches**: Could provide more targeted relief while maintaining revenue, but would require careful design to avoid cliff effects.
+**Credit-Based Approaches**: Allows for variation in tax effects across income levels while maintaining revenue levels.
 
 ## Social Security Administration Analysis
 
@@ -87,7 +87,7 @@ The Social Security Administration's Office of the Chief Actuary provides analys
 
 SSA analysis shows that benefit taxation revenue:
 - Represents approximately 4% of total trust fund income
-- Provides critical margin for trust fund solvency
+- Contributes to trust fund revenues
 - Has grown as a share of total revenue due to lack of threshold indexation
 
 ### Long-Term Projections
@@ -103,10 +103,10 @@ Academic economists have contributed significant analysis of Social Security ben
 
 ### Efficiency Considerations
 
-Research on work disincentives shows that benefit taxation can create:
-- High effective marginal tax rates for working beneficiaries
-- Complex interactions with earnings test provisions
-- Retirement timing distortions
+Research on labor supply effects shows that benefit taxation affects:
+- Effective marginal tax rates for working beneficiaries
+- Interactions with earnings test provisions
+- Retirement timing decisions
 
 ### Equity Analysis
 
@@ -122,14 +122,14 @@ Research comparing U.S. benefit taxation to other countries shows:
 - Some countries provide tax preferences for pension income
 - U.S. system is relatively complex compared to international norms
 
-## Key Research Gaps
+## Areas for Additional Research
 
-Prior research has several limitations that our analysis aims to address:
+Prior research has focused primarily on:
 
-1. **Limited Dynamic Analysis**: Most existing estimates use static models that don't capture behavioral responses
-2. **Dated Microsimulation Data**: Many estimates rely on older survey data
-3. **Incomplete Policy Options**: Few studies analyze the full range of reform alternatives
-4. **Limited Distributional Detail**: Most analysis focuses on average effects rather than detailed distributional impacts
+1. **Static Analysis**: Most existing estimates use static models
+2. **Available Data**: Estimates based on survey data available at time of analysis
+3. **Selected Policy Options**: Studies typically examine specific reform proposals
+4. **Aggregate Effects**: Analysis often emphasizes overall revenue impacts
 
 ## Research Methodology Implications
 

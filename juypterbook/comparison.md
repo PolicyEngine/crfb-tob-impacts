@@ -16,7 +16,7 @@ Our baseline estimates can be compared to official government projections:
 - Social Security benefit taxation revenue: ~$47-49 billion annually {cite}`cbo2023`
 - Projected growth consistent with demographic and economic assumptions
 
-**Validation Assessment:** Our baseline estimates align closely with CBO projections, providing confidence in our modeling framework and data sources.
+**Comparison:** Our baseline estimates align with CBO projections.
 
 ## Policy Option Comparisons
 
@@ -135,12 +135,12 @@ Our baseline estimates can be compared to official government projections:
 
 ## Confidence Assessment
 
-### Areas of Agreement
+### Areas of Alignment
 
-1. **Direction of Effects**: Our estimates agree with prior research on the directional impact of each policy option
-2. **Relative Magnitudes**: The ordering of policy options by fiscal impact aligns with expectations
-3. **Key Trade-offs**: Similar findings on revenue vs. taxpayer relief trade-offs
-4. **Distributional Patterns**: Consistent with prior research on who is affected by benefit taxation
+1. **Direction of Effects**: Our estimates show similar directional impacts as prior research
+2. **Relative Magnitudes**: The ordering of policy options by fiscal impact follows similar patterns
+3. **Policy Characteristics**: Similar findings on revenue and taxpayer effects
+4. **Distributional Patterns**: Similar patterns to prior research on affected populations
 
 ### Areas of Uncertainty
 
@@ -167,11 +167,11 @@ Our baseline estimates can be compared to official government projections:
 
 ## Summary Assessment
 
-Our PolicyEngine analysis provides estimates that are:
-- **Generally Consistent** with the direction and relative magnitude of effects found in prior research
-- **Sometimes Different** in absolute magnitude due to methodological and data differences  
-- **Particularly Strong** in capturing complex tax code interactions and household-level effects
-- **Complementary** to existing government and academic analysis
+Our PolicyEngine analysis provides estimates that:
+- **Show similar patterns** to prior research in direction and relative magnitude of effects
+- **Differ in some cases** in absolute magnitude due to methodological and data differences
+- **Include detailed modeling** of tax code interactions and household-level effects
+- **Add to** existing government and academic analysis
 
 The differences in estimates underscore the importance of:
 - Transparent methodology and assumptions
@@ -179,4 +179,4 @@ The differences in estimates underscore the importance of:
 - Regular updating as new data and methods become available
 - Focus on robust policy insights rather than precise point estimates
 
-These comparisons support confidence in our analytical approach while highlighting areas where additional research would be valuable for policy development.
+These comparisons show alignment between different analytical approaches and identify areas for potential additional research.

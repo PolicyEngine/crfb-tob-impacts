@@ -78,24 +78,24 @@ When the policy is fully phased in, the revenues are allocated in the same manne
 
 The revenue loss from the phase-out of TOB is allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of TOB revenue earned by the OASI, DI, and HI trust funds.
 
-## Policy Design Considerations
+## Policy Design Characteristics
 
-Each option presents different tradeoffs:
+Each option has different characteristics:
 
-**Administrative Complexity:**
-- Options 1, 2, and 5 have relatively simple implementation
-- Options 4 and 6 require more complex administrative systems
-- Option 3 requires coordination between benefit taxation and deduction systems
+**Administrative Requirements:**
+- Options 1, 2, and 5 involve single-parameter changes
+- Options 4 and 6 involve multiple parameter changes
+- Option 3 involves coordination between benefit taxation and deduction systems
 
-**Taxpayer Impact:**
-- Options 1 and 5 reduce taxation for current beneficiaries
-- Options 2 and 3 increase taxation for lower-income beneficiaries  
-- Option 4 provides targeted relief through credit mechanism
-- Option 6 phases in changes to minimize disruption
+**Taxpayer Effects:**
+- Options 1 and 5 eliminate taxation for current beneficiaries
+- Options 2 and 3 extend taxation to additional beneficiaries
+- Option 4 includes a credit mechanism for Social Security beneficiaries
+- Option 6 implements changes gradually over multiple years
 
-**Trust Fund Solvency:**
-- Options generating significant revenue (2, 4, 5) improve trust fund outlook
-- Option 1 worsens trust fund solvency without alternative financing
-- Options 3 and 6 have mixed effects depending on implementation details
+**Trust Fund Revenue:**
+- Options 2, 4, and 5 generate additional revenue for trust funds
+- Option 1 reduces trust fund revenue
+- Options 3 and 6 have varying effects on trust fund revenue
 
-These considerations inform the quantitative analysis presented in subsequent chapters.
+The quantitative analysis in subsequent chapters examines these characteristics in detail.

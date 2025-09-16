@@ -21,13 +21,13 @@ This study examines six distinct approaches to reforming Social Security benefit
 
 The taxation of Social Security benefits represents a significant component of federal revenue, generating approximately $48 billion annually as of 2023 {cite}`cbo2023`. This revenue stream directly supports the solvency of Social Security and Medicare trust funds, making reform considerations particularly complex from both fiscal and social policy perspectives.
 
-The current system creates what economists term "tax cliffs" - sharp increases in effective marginal tax rates when income crosses taxation thresholds. These cliffs can create work disincentives and complicate retirement planning for beneficiaries.
+The current system results in changes in effective marginal tax rates when income crosses taxation thresholds, sometimes referred to as "tax cliffs."
 
 ## Policy Environment
 
-Social Security faces long-term financing challenges, with the combined OASI and DI trust funds projected to become insolvent in 2034 according to the 2023 Trustees Report. Any reform to benefit taxation must be evaluated not only for its direct budgetary impact but also for its effects on overall program solvency and intergenerational equity.
+According to the 2023 Trustees Report, the combined OASI and DI trust funds are projected to become depleted in 2034. Reforms to benefit taxation affect both direct budgetary impacts and overall program finances.
 
-The analysis presented here provides policymakers with quantitative estimates to inform discussions about potential reforms, while maintaining analytical neutrality regarding the merits of different approaches.
+This analysis provides quantitative estimates of the budgetary impacts of each reform option.
 
 ## Report Structure
 
