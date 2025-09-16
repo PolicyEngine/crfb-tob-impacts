@@ -17,6 +17,7 @@ __pycache__/
 # IDE files
 .vscode/
 .idea/
+settings.local.json
 
 # OS files
 .DS_Store
