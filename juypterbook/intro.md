@@ -19,7 +19,7 @@ This study examines six distinct approaches to reforming Social Security benefit
 
 ## Background and Context
 
-The taxation of Social Security benefits represents a significant component of federal revenue, generating approximately $48 billion annually as of 2023 {cite}`cbo2023`. This revenue stream directly supports the solvency of Social Security and Medicare trust funds, making reform considerations particularly complex from both fiscal and social policy perspectives.
+The taxation of Social Security benefits represents a significant component of federal revenue. This revenue stream directly supports the solvency of Social Security and Medicare trust funds, making reform considerations particularly complex from both fiscal and social policy perspectives.
 
 The current system results in changes in effective marginal tax rates when income crosses taxation thresholds, sometimes referred to as "tax cliffs."
 
@@ -27,24 +27,24 @@ The current system results in changes in effective marginal tax rates when incom
 
 According to the 2023 Trustees Report, the combined OASI and DI trust funds are projected to become depleted in 2034. Reforms to benefit taxation affect both direct budgetary impacts and overall program finances.
 
-This analysis provides quantitative estimates of the budgetary impacts of each reform option.
+This analysis provides quantitative estimates of both the budgetary impacts and household-level distributional effects of each reform option.
 
 ## Report Structure
 
-This report is organized into five main sections:
+This report is organized into six main sections:
 
 1. **Policy Options**: Detailed descriptions of the six reform scenarios analyzed
 2. **Prior Research**: Review of existing analysis, particularly Congressional Budget Office estimates
 3. **Methodology**: Description of our microsimulation modeling approach using PolicyEngine
-4. **Results**: Quantitative analysis of budgetary impacts for each option
-5. **Comparison**: How our estimates compare to other analytical sources
+4. **Policy Impacts**: Quantitative analysis of federal budgetary impacts for each option
+5. **Household Impacts**: Distributional analysis showing how reforms affect different income groups and household types
+6. **Comparison**: How our estimates compare to other analytical sources
 
 ## Scope and Limitations
 
-This analysis focuses on federal budgetary impacts and does not evaluate:
+This analysis focuses on federal budgetary impacts and household-level distributional effects. It does not evaluate:
 - State-level tax implications
 - Economic behavioral responses beyond those captured in the microsimulation model
-- Distributional effects across different demographic groups
 - Administrative implementation challenges
 - Political feasibility considerations
 

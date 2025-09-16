@@ -7,8 +7,14 @@ This chapter describes the six Social Security benefit taxation reform options a
 Under current law, Social Security benefits become subject to federal income taxation when a beneficiary's "combined income" exceeds certain thresholds {cite}`tpc2023ss`. Combined income is defined as adjusted gross income plus nontaxable interest plus half of Social Security benefits.
 
 **Taxation Thresholds (2024):**
-- Single filers: $25,000 (50% of benefits taxable), $34,000 (85% of benefits taxable)  
-- Joint filers: $32,000 (50% of benefits taxable), $44,000 (85% of benefits taxable)
+
+**Single filers:**
+- $25,000 (50% of benefits taxable)
+- $34,000 (85% of benefits taxable)
+
+**Joint filers:**
+- $32,000 (50% of benefits taxable)
+- $44,000 (85% of benefits taxable)
 
 The revenue generated from this taxation is allocated to the OASI, DI, and HI trust funds based on current law formulas {cite}`ssa2023trustees`.
 
