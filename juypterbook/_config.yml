@@ -1,0 +1,45 @@
+# Book settings
+title: "Social Security Taxation Reform: Policy Analysis and Impact Assessment"
+author: PolicyEngine
+logo: logo.png
+copyright: "2024"
+
+# Force re-execution of notebooks on each build
+execute:
+  execute_notebooks: cache
+  timeout: 300
+  allow_errors: false
+
+# Define the left-hand sidebar links
+repository:
+  url: https://github.com/PolicyEngine/crfb-tob-impacts
+  branch: main
+
+# HTML-specific settings
+html:
+  favicon: favicon.ico
+  use_edit_page_button: false
+  use_repository_button: true
+  use_issues_button: false
+  home_page_in_navbar: false
+  navbar_number_sections: false
+  announcement: ""
+  
+# LaTeX settings
+latex:
+  latex_engine: pdflatex
+  use_jupyterbook_latex: true
+
+# Bibliography
+bibtex_bibfiles:
+  - references.bib
+
+# Sphinx extensions
+sphinx:
+  config:
+    nb_execution_mode: "off"
+    html_theme_options:
+      repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
+      use_repository_button: true
+      use_edit_page_button: false
+      use_issues_button: false
