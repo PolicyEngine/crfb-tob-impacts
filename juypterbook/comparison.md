@@ -20,9 +20,18 @@ Our baseline estimates can be compared to official government projections:
 
 ## Policy Option Comparisons
 
+### Option 6: Phased Roth-Style Swap Comparison
+
+**Our Estimate:** -$1,123.5 billion over 10 years (revenue loss)
+
+**Comparison Notes:**
+- No direct comparable estimates available from CBO for this specific phased approach
+- The gradual implementation creates complex revenue patterns over time
+- Long-term effects would differ significantly from immediate implementation options
+
 ### Option 1: Full Repeal Comparison
 
-**Our Estimate:** -$1,089.6 billion over 10 years (-$109 billion annually)
+**Our Estimate:** $1,149.0 billion over 10 years (revenue loss from eliminating taxation)
 
 **CBO Budget Options (Historical Analysis):**
 - Estimated cost of full repeal: $400-500 billion over 10 years
@@ -36,9 +45,18 @@ Our baseline estimates can be compared to official government projections:
 
 **Assessment:** Our estimates are higher than historical CBO analysis, consistent with growing beneficiary population and benefit levels.
 
+### Option 5: Roth-Style Swap Comparison
+
+**Our Estimate:** -$756.2 billion over 10 years (revenue loss)
+
+**Comparison Notes:**
+- Limited comparable analysis available for this approach
+- The revenue pattern reflects the difference between current benefit taxation and employer contribution taxation
+- CBO has not published detailed estimates for this specific policy structure
+
 ### Option 2: Universal 85% Taxation Comparison
 
-**Our Estimate:** -$301.1 billion over 10 years (revenue loss)
+**Our Estimate:** -$219.3 billion over 10 years (revenue loss)
 
 **Joint Committee on Taxation Analysis:**
 - Historical JCT estimates suggested universal taxation could raise $200-300 billion over 10 years
@@ -51,6 +69,24 @@ Our baseline estimates can be compared to official government projections:
 - JCT estimates may assume different baseline taxation patterns
 
 **Assessment:** The difference highlights the importance of modeling complex tax interactions and current law baseline assumptions.
+
+### Option 4: Tax Credit System Comparison
+
+**Our Estimate:** -$86.8 billion over 10 years (revenue loss)
+
+**Comparison Notes:**
+- No direct comparable estimates available from CBO for this specific credit structure
+- The $500 credit combined with 85% taxation creates unique revenue patterns
+- Credit design affects low and middle-income taxpayers differently than historical proposals
+
+### Option 3: 85% Taxation with Senior Deduction Extension Comparison
+
+**Our Estimate:** -$27.9 billion over 10 years (revenue loss)
+
+**Comparison Notes:**
+- Limited comparable analysis combining benefit taxation expansion with permanent deduction extension
+- The interaction between these provisions creates complex net revenue effects
+- Revenue pattern changes significantly after 2028 due to deduction interactions
 
 ## Methodological Differences
 
