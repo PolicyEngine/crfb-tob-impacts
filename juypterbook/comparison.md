@@ -22,7 +22,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 6: Phased Roth-Style Swap Comparison
 
-**Our Estimate:** -\$1,123.5 billion over 10 years (revenue loss)
+**Our Estimate:** -\$1,123.5 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
 - No direct comparable estimates available from CBO for this specific phased approach
@@ -31,7 +31,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 1: Full Repeal Comparison
 
-**Our Estimate:** \$1,149.0 billion over 10 years (revenue loss from eliminating taxation)
+**Our Estimate:** \$1,149.0 billion over 10 years (cost from eliminating taxation)
 
 **CBO Budget Options (Historical Analysis):**
 - Estimated cost of full repeal: \$400-500 billion over 10 years
@@ -47,7 +47,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 5: Roth-Style Swap Comparison
 
-**Our Estimate:** -\$756.2 billion over 10 years (revenue loss)
+**Our Estimate:** -\$756.2 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
 - Limited comparable analysis available for this approach
@@ -56,7 +56,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 2: Universal 85% Taxation Comparison
 
-**Our Estimate:** -\$219.3 billion over 10 years (revenue loss)
+**Our Estimate:** -\$219.3 billion over 10 years (revenue increase)
 
 **Joint Committee on Taxation Analysis:**
 - Historical JCT estimates suggested universal taxation could raise \$200-300 billion over 10 years
@@ -72,7 +72,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 4: Tax Credit System Comparison
 
-**Our Estimate:** -\$86.8 billion over 10 years (revenue loss)
+**Our Estimate:** -\$86.8 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
 - No direct comparable estimates available from CBO for this specific credit structure
@@ -81,7 +81,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 3: 85% Taxation with Senior Deduction Extension Comparison
 
-**Our Estimate:** -\$27.9 billion over 10 years (revenue loss)
+**Our Estimate:** -\$27.9 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
 - Limited comparable analysis combining benefit taxation expansion with permanent deduction extension

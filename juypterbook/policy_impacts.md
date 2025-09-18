@@ -1,6 +1,6 @@
 # Policy Impacts
 
-This chapter presents the quantitative results of the analysis of six Social Security benefit taxation reform options. All estimates represent changes in federal tax revenue over the 10-year period 2026-2035, measured in billions of dollars. Negative values indicate revenue decreases, while positive values indicate revenue increases.
+This chapter presents the quantitative results of the analysis of six Social Security benefit taxation reform options. All estimates represent changes in federal tax revenue over the 10-year period 2026-2035, measured in billions of dollars. Positive values indicate costs (deficit increasing), while negative values indicate revenue increases (deficit reducing).
 
 ## Summary of 10-Year Budgetary Impacts
 
