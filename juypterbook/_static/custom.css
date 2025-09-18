@@ -1,0 +1,11 @@
+/* Enable code cell toggle functionality */
+.toggle {
+    cursor: pointer;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.toggle .fa-chevron-down,
+.toggle .fa-chevron-right {
+    padding-right: 0.25rem;
+}

@@ -24,6 +24,8 @@ html:
   home_page_in_navbar: false
   navbar_number_sections: false
   announcement: ""
+  extra_css:
+    - _static/custom.css
 
 # Parse and render settings
 parse:
@@ -41,7 +43,7 @@ parse:
 
 # MyST-NB settings for hiding code cells
 mystnb:
-  execution_mode: off
+  execution_mode: cache
   execution_timeout: 600
   execution_allow_errors: false
   remove_code_source: false
@@ -63,7 +65,7 @@ sphinx:
   extra_extensions:
     - sphinxcontrib.bibtex
   config:
-    nb_execution_mode: "off"
+    nb_execution_mode: "cache"
     nb_output_stderr: "show"
     html_theme_options:
       repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
