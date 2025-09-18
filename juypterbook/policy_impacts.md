@@ -15,6 +15,8 @@ The microsimulation analysis shows the following budgetary impacts across the si
 | **Option 5**: Roth-Style Swap | $-756.2 |
 | **Option 6**: Phased Roth-Style | $-1123.5 |
 
+<a href="_static/policy_impacts_summary.csv" download="policy_impacts_summary.csv" class="csv-download-btn">📊 Download Summary CSV</a>
+
 
 ## Year-by-Year Federal Budgetary Impact (2026-2035)
 
@@ -34,97 +36,4 @@ The microsimulation analysis shows the following budgetary impacts across the si
 | 2035 | $144.3 | $-22.8 | $4.4 | $-0.6 | $-93.9 | $-173.9 |
 | **2026-2035 Total** | **$1149.0** | **$-219.3** | **$-27.9** | **$-86.8** | **$-756.2** | **$-1123.5** |
 
-
-## Detailed Results by Policy Option
-
-### Option 1: Full Repeal of Social Security Benefits Taxation
-
-**10-Year Impact: $1149.0 billion**
-
-This option eliminates all federal income taxation of Social Security benefits. The revenue impact changes over time due to:
-- Changes in the number of Social Security beneficiaries
-- Changes in benefit levels
-- Expiration of senior deduction in 2029
-
-### Option 2: Taxation of 85% of Social Security Benefits
-
-**10-Year Impact: -$219.3 billion**
-
-This option taxes 85% of Social Security benefits for all recipients. The results show that expanding taxation to all beneficiaries at 85% does not offset the revenue change from eliminating income thresholds under the current senior deduction structure.
-
-### Option 3: 85% Taxation with Permanent Senior Deduction Extension
-
-**10-Year Impact: -$27.9 billion**
-
-This option taxes 85% of Social Security benefits while permanently extending the senior deduction. The change after 2028 reflects the interaction between expanded benefit taxation and the permanent senior deduction.
-
-### Option 4: Social Security Tax Credit System ($500 Credit)
-
-**10-Year Impact: -$86.8 billion**
-
-This option implements a $500 tax credit while expanding the taxation base to 85% of all benefits. The change after 2028 reflects the interaction between the credit system and the expiration of the senior deduction.
-
-### Option 5: Roth-Style Swap
-
-**10-Year Impact: -$756.2 billion**
-
-This option replaces benefit taxation with employer payroll contribution taxation. The revenue impact changes over time as the difference between benefit taxation revenue and employer contribution taxation revenue evolves.
-
-### Option 6: Phased Roth-Style Swap
-
-**10-Year Impact: -$1123.5 billion**
-
-This option implements a phased transition that includes:
-- Gradual reduction of benefit taxation revenue
-- Gradual increase of employer contribution taxation
-- Extended transition period
-
-## Key Findings
-
-### Revenue Impact Ranking
-
-From smallest to largest absolute revenue impact:
-1. **Option 3**: -$27.9 billion
-2. **Option 4**: -$86.8 billion
-3. **Option 2**: -$219.3 billion
-4. **Option 5**: -$756.2 billion
-5. **Option 1**: $1149.0 billion
-6. **Option 6**: -$1123.5 billion
-
-### Impact of Senior Deduction Expiration
-
-The scheduled 2028 expiration of the senior deduction affects the revenue patterns of several options:
-
-- **Options 1, 5, 6**: Revenue impacts change after 2028
-- **Option 2**: Revenue pattern changes after 2028
-- **Option 3**: Different pattern due to permanent extension
-- **Option 4**: Credit interacts with deduction expiration
-
-### Policy Design Observations
-
-1. **Tax Credit**: The $500 tax credit option combines a credit with expanded benefit taxation.
-
-2. **Roth-Style Swap**: The analysis shows different revenue impacts between benefit taxation and employer payroll contribution taxation.
-
-3. **Phase-in Effects**: Gradual implementation (Option 6) produces different revenue patterns than immediate implementation (Option 5).
-
-4. **Senior Deduction**: The permanent senior deduction extension (Option 3) affects the net revenue impact of expanded benefit taxation.
-
-## Distributional Considerations
-
-The analysis focuses on aggregate budgetary impacts. The distributional effects vary by option:
-
-- **Option 1**: Affects all current Social Security recipients
-- **Options 2 & 3**: Changes tax treatment for beneficiaries currently below thresholds
-- **Option 4**: Implements a credit for Social Security recipients
-- **Options 5 & 6**: Changes the tax treatment between retirees and current workers
-
-## Methodology Notes
-
-These estimates are based on static microsimulation analysis and do not account for:
-- Behavioral responses to tax changes
-- Economic growth effects
-- Administrative implementation costs
-- State tax interactions
-
-The results are presented for comparison with estimates from other analytical sources in the next chapter.
+<a href="_static/policy_impacts_yearly.csv" download="policy_impacts_yearly.csv" class="csv-download-btn">📊 Download Yearly Data CSV</a>

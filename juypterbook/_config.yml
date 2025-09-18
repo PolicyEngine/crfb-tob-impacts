@@ -26,6 +26,8 @@ html:
   announcement: ""
   extra_css:
     - _static/custom.css
+  extra_extensions:
+    - sphinx_external_toc_strict
 
 # Parse and render settings
 parse:
@@ -43,13 +45,14 @@ parse:
 
 # MyST-NB settings for hiding code cells
 mystnb:
-  execution_mode: cache
+  execution_mode: off
   execution_timeout: 600
   execution_allow_errors: false
+  execution_excludepatterns: ["methodology.ipynb"]
   remove_code_source: false
   remove_code_outputs: false
-  code_prompt_show: "Show code"
-  code_prompt_hide: "Hide code"
+  code_prompt_show: "Show implementation details"
+  code_prompt_hide: "Hide implementation details"
 
 # LaTeX settings
 latex:
@@ -65,8 +68,10 @@ sphinx:
   extra_extensions:
     - sphinxcontrib.bibtex
   config:
-    nb_execution_mode: "cache"
+    nb_execution_mode: "off"
     nb_output_stderr: "show"
+    nb_render_image_options:
+      width: "100%"
     html_theme_options:
       repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
       use_repository_button: true

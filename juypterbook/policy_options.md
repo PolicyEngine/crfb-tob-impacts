@@ -28,6 +28,22 @@ Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction"
 
 **Revenue Allocation Impact:** The effect on revenues to the OASDI and HI trust funds will be allocated as per current law. In other words, the revenue that would have been earned by the respective trust funds under current law is the revenue that they will lose under this option.
 
+```{dropdown} Option 1 Reform Code
+```python
+def get_option1_reform():
+    """Option 1: Full Repeal of Social Security Benefits Taxation"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.rate.base": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.rate.additional": {
+            "2026-01-01.2100-12-31": 0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform sets both the base and additional Social Security taxability rates to 0%, effectively eliminating all federal income taxation of Social Security benefits starting in 2026. The policy parameters `taxability.rate.base` and `taxability.rate.additional` control the percentage of benefits subject to taxation under the current two-tier system.
+
 ## Option 2: Taxation of 85% of Social Security Benefits (No Bonus Senior Deduction After 2028)
 
 **Start Date:** 2026
@@ -36,6 +52,34 @@ Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction"
 
 **Revenue Allocation:** The additional revenue from taxation of benefits (TOB) will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of TOB revenue earned by the OASI, DI, and HI trust funds.
 
+```{dropdown} Option 2 Reform Code
+```python
+def get_option2_reform():
+    """Option 2: Taxation of 85% of Social Security Benefits"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.rate.base": {
+            "2026-01-01.2100-12-31": 0.85
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform sets the base taxability rate to 85% and eliminates all income thresholds by setting them to $0 for all filing statuses. This means 85% of all Social Security benefits become taxable income regardless of the recipient's income level, effectively eliminating the current two-tier threshold system.
+
 ## Option 3: Taxation of 85% of Social Security Benefits and Permanent Extension of the Bonus Senior Deduction
 
 **Start Date:** 2026
@@ -43,6 +87,37 @@ Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction"
 **Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is permanently extended past 2028.
 
 **Revenue Allocation:** We want to see the full budget estimates for this proposal before deciding how the revenue raised should be allocated across the trust funds because extending the bonus senior deduction will have negative on-budget effects that we will want to incorporate into our decision. Please let us know if you can easily allocate the costs to the general fund onto the trust funds in your model.
+
+```{dropdown} Option 3 Reform Code
+```python
+def get_option3_reform():
+    """Option 3: 85% Taxation with Permanent Senior Deduction Extension"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.rate.base": {
+            "2026-01-01.2100-12-31": 0.85
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.contrib.crfb.senior_deduction_extension.applies": {
+            "2026-01-01.2100-12-31": True
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the $6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
 
 ## Option 4: Replace the Bonus Senior Deduction with a Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
 
@@ -60,6 +135,55 @@ Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction"
 
 **Revenue Allocation:** The additional revenue raised will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of contributions from TOB revenue to the OASI, DI, and HI trust funds.
 
+```{dropdown} Option 4 Reform Code
+```python
+def get_option4_reform():
+    """Option 4: Social Security Tax Credit System ($500 Credit)"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.rate.base": {
+            "2026-01-01.2100-12-31": 0.85
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.contrib.crfb.ss_credit.in_effect": {
+            "2026-01-01.2100-12-31": True
+        },
+        "gov.contrib.crfb.ss_credit.amount.JOINT": {
+            "2026-01-01.2100-12-31": 500
+        },
+        "gov.contrib.crfb.ss_credit.amount.SINGLE": {
+            "2026-01-01.2100-12-31": 500
+        },
+        "gov.contrib.crfb.ss_credit.amount.SEPARATE": {
+            "2026-01-01.2100-12-31": 500
+        },
+        "gov.contrib.crfb.ss_credit.amount.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 500
+        },
+        "gov.contrib.crfb.ss_credit.amount.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 500
+        },
+        "gov.irs.deductions.senior_deduction.amount": {
+            "2026-01-01.2100-12-31": 0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform implements 85% taxation like Options 2-3 but replaces the bonus senior deduction with a $500 nonrefundable tax credit. The `ss_credit.in_effect` parameter activates the credit system, `ss_credit.amount` sets the credit value for each filing status, and `senior_deduction.amount: 0` eliminates the bonus senior deduction. The credit can only offset taxes owed on Social Security benefits.
+
 ## Option 5: Roth-Style Swap: Substitute Income Taxation of Employer Payroll Contributions for Income Taxation of Social Security Benefits
 
 **Start Date:** 2026
@@ -67,6 +191,28 @@ Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction"
 **Policy Description:** Beginning in 2026, all employer payroll contributions are included in taxable income and all Social Security benefits are excluded from taxable income. The bonus senior deduction is allowed to expire at the end of 2028, as per current law.
 
 **Revenue Allocation:** Revenue from income taxation of employer Social Security contributions are allocated to the OASDI trust funds. Revenue from income taxation of Medicare contributions are allocated to the HI trust fund. The revenue that would've been earned by the OASDI and HI trust fund from TOB is the revenue that they will lose from the end of TOB.
+
+```{dropdown} Option 5 Reform Code
+```python
+def get_option5_reform():
+    """Option 5: Roth-Style Swap"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.rate.base": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.rate.additional": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
+            "2026-01-01.2100-12-31": True
+        },
+        "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
+            "2026-01-01.2100-12-31": 1.0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform implements a "Roth-style swap" by eliminating Social Security benefit taxation (setting rates to 0%) while making employer payroll contributions (7.65% Social Security + Medicare) fully taxable as employee income. The `tax_employer_payroll_tax.percentage: 1.0` parameter means 100% of employer payroll tax contributions become taxable income to the employee.
 
 ## Option 6: Phased Roth-Style Swap
 
@@ -84,24 +230,57 @@ When the policy is fully phased in, the revenues are allocated in the same manne
 
 The revenue loss from the phase-out of TOB is allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of TOB revenue earned by the OASI, DI, and HI trust funds.
 
-## Policy Design Characteristics
+```{dropdown} Option 6 Reform Code
+```python
+def get_option6_reform():
+    """Option 6: Phased Roth-Style Swap"""
+    reform_dict = {
+        "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
+            "2026-01-01.2100-12-31": True
+        },
+        "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
+            "2026-01-01.2026-12-31": 0.1307,
+            "2027-01-01.2027-12-31": 0.2614,
+            "2028-01-01.2028-12-31": 0.3922,
+            "2029-01-01.2029-12-31": 0.5229,
+            "2030-01-01.2030-12-31": 0.6536,
+            "2031-01-01.2031-12-31": 0.7843,
+            "2032-01-01.2032-12-31": 0.9150,
+            "2033-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.base": {
+            "2029-01-01.2029-12-31": 0.45,
+            "2030-01-01.2030-12-31": 0.40,
+            "2031-01-01.2031-12-31": 0.35,
+            "2032-01-01.2032-12-31": 0.30,
+            "2033-01-01.2033-12-31": 0.25,
+            "2034-01-01.2034-12-31": 0.20,
+            "2035-01-01.2035-12-31": 0.15,
+            "2036-01-01.2036-12-31": 0.10,
+            "2037-01-01.2037-12-31": 0.05,
+            "2038-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.rate.additional": {
+            "2029-01-01.2029-12-31": 0.80,
+            "2030-01-01.2030-12-31": 0.75,
+            "2031-01-01.2031-12-31": 0.70,
+            "2032-01-01.2032-12-31": 0.65,
+            "2033-01-01.2033-12-31": 0.60,
+            "2034-01-01.2034-12-31": 0.55,
+            "2035-01-01.2035-12-31": 0.50,
+            "2036-01-01.2036-12-31": 0.45,
+            "2037-01-01.2037-12-31": 0.40,
+            "2038-01-01.2038-12-31": 0.35,
+            "2039-01-01.2039-12-31": 0.30,
+            "2040-01-01.2040-12-31": 0.25,
+            "2041-01-01.2041-12-31": 0.20,
+            "2042-01-01.2042-12-31": 0.15,
+            "2043-01-01.2043-12-31": 0.10,
+            "2044-01-01.2044-12-31": 0.05,
+            "2045-01-01.2100-12-31": 0
+        }
+    }
+    return Reform.from_dict(reform_dict, country_id="us")
+```
 
-Each option has different characteristics:
-
-**Administrative Requirements:**
-- Options 1, 2, and 5 involve single-parameter changes
-- Options 4 and 6 involve multiple parameter changes
-- Option 3 involves coordination between benefit taxation and deduction systems
-
-**Taxpayer Effects:**
-- Options 1 and 5 eliminate taxation for current beneficiaries
-- Options 2 and 3 extend taxation to additional beneficiaries
-- Option 4 includes a credit mechanism for Social Security beneficiaries
-- Option 6 implements changes gradually over multiple years
-
-**Trust Fund Revenue:**
-- Options 2, 4, and 5 generate additional revenue for trust funds
-- Option 1 reduces trust fund revenue
-- Options 3 and 6 have varying effects on trust fund revenue
-
-The quantitative analysis in subsequent chapters examines these characteristics in detail.
+**Reform Explanation:** This complex phased reform gradually increases employer payroll tax inclusion (starting at 13.07% in 2026, reaching 100% by 2033) while simultaneously phasing down Social Security benefit taxation rates starting in 2029. The base rate decreases from current law (50%) to 45% in 2029, continuing down to 0% by 2038, while the additional rate phases from 85% down to 0% by 2045. This creates a gradual transition from taxing benefits to taxing employer contributions.
