@@ -9,11 +9,11 @@ This chapter compares our PolicyEngine estimates to existing analysis from autho
 Our baseline estimates can be compared to official government projections:
 
 **PolicyEngine Estimates (Annual Average 2026-2035):**
-- Social Security benefit taxation revenue: ~$48-50 billion annually
-- Growing to ~$55-60 billion by 2035
+- Social Security benefit taxation revenue: ~\$48-50 billion annually
+- Growing to ~\$55-60 billion by 2035
 
 **Congressional Budget Office (2023):**
-- Social Security benefit taxation revenue: ~$47-49 billion annually {cite}`cbo2023`
+- Social Security benefit taxation revenue: ~\$47-49 billion annually {cite}`cbo2023`
 - Projected growth consistent with demographic and economic assumptions
 
 **Comparison:** Our baseline estimates align with CBO projections.
@@ -22,7 +22,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 6: Phased Roth-Style Swap Comparison
 
-**Our Estimate:** -$1,123.5 billion over 10 years (revenue loss)
+**Our Estimate:** -\$1,123.5 billion over 10 years (revenue loss)
 
 **Comparison Notes:**
 - No direct comparable estimates available from CBO for this specific phased approach
@@ -31,10 +31,10 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 1: Full Repeal Comparison
 
-**Our Estimate:** $1,149.0 billion over 10 years (revenue loss from eliminating taxation)
+**Our Estimate:** \$1,149.0 billion over 10 years (revenue loss from eliminating taxation)
 
 **CBO Budget Options (Historical Analysis):**
-- Estimated cost of full repeal: $400-500 billion over 10 years
+- Estimated cost of full repeal: \$400-500 billion over 10 years
 - Note: CBO estimates are typically from earlier years with different baselines
 
 **Reconciliation Factors:**
@@ -47,7 +47,7 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 5: Roth-Style Swap Comparison
 
-**Our Estimate:** -$756.2 billion over 10 years (revenue loss)
+**Our Estimate:** -\$756.2 billion over 10 years (revenue loss)
 
 **Comparison Notes:**
 - Limited comparable analysis available for this approach
@@ -56,10 +56,10 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 2: Universal 85% Taxation Comparison
 
-**Our Estimate:** -$219.3 billion over 10 years (revenue loss)
+**Our Estimate:** -\$219.3 billion over 10 years (revenue loss)
 
 **Joint Committee on Taxation Analysis:**
-- Historical JCT estimates suggested universal taxation could raise $200-300 billion over 10 years
+- Historical JCT estimates suggested universal taxation could raise \$200-300 billion over 10 years
 - Note: JCT analysis assumed elimination of thresholds would increase revenue
 
 **Reconciliation Factors:**
@@ -72,16 +72,16 @@ Our baseline estimates can be compared to official government projections:
 
 ### Option 4: Tax Credit System Comparison
 
-**Our Estimate:** -$86.8 billion over 10 years (revenue loss)
+**Our Estimate:** -\$86.8 billion over 10 years (revenue loss)
 
 **Comparison Notes:**
 - No direct comparable estimates available from CBO for this specific credit structure
-- The $500 credit combined with 85% taxation creates unique revenue patterns
+- The \$500 credit combined with 85% taxation creates unique revenue patterns
 - Credit design affects low and middle-income taxpayers differently than historical proposals
 
 ### Option 3: 85% Taxation with Senior Deduction Extension Comparison
 
-**Our Estimate:** -$27.9 billion over 10 years (revenue loss)
+**Our Estimate:** -\$27.9 billion over 10 years (revenue loss)
 
 **Comparison Notes:**
 - Limited comparable analysis combining benefit taxation expansion with permanent deduction extension

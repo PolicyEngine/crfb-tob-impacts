@@ -9,16 +9,16 @@ Under current law, Social Security benefits become subject to federal income tax
 **Taxation Thresholds (2024):**
 
 **Single filers:**
-- $25,000 (50% of benefits taxable)
-- $34,000 (85% of benefits taxable)
+- \$25,000 (50% of benefits taxable)
+- \$34,000 (85% of benefits taxable)
 
 **Joint filers:**
-- $32,000 (50% of benefits taxable)
-- $44,000 (85% of benefits taxable)
+- \$32,000 (50% of benefits taxable)
+- \$44,000 (85% of benefits taxable)
 
 The revenue generated from this taxation is allocated to the OASI, DI, and HI trust funds based on current law formulas {cite}`ssa2023trustees`.
 
-Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of $6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
+Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of \$6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
 
 ## Option 1: Full Repeal of Taxation of Social Security Benefits (No Bonus Senior Deduction After 2028)
 
@@ -78,7 +78,7 @@ def get_option2_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform sets the base taxability rate to 85% and eliminates all income thresholds by setting them to $0 for all filing statuses. This means 85% of all Social Security benefits become taxable income regardless of the recipient's income level, effectively eliminating the current two-tier threshold system.
+**Reform Explanation:** This reform sets the base taxability rate to 85% and eliminates all income thresholds by setting them to \$0 for all filing statuses. This means 85% of all Social Security benefits become taxable income regardless of the recipient's income level, effectively eliminating the current two-tier threshold system.
 
 ## Option 3: Taxation of 85% of Social Security Benefits and Permanent Extension of the Bonus Senior Deduction
 
@@ -117,7 +117,7 @@ def get_option3_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the $6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
+**Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the \$6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
 
 ## Option 4: Replace the Bonus Senior Deduction with a Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
 
@@ -125,20 +125,20 @@ def get_option3_reform():
 
 **Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
 
-**Illustrative Example:** An individual with $5,000 in Social Security income and $10,000 in other income facing a 5% tax on income below $10k, a 10% tax on income above that amount, and a $600 nonrefundable credit.
+**Illustrative Example:** An individual with \$5,000 in Social Security income and \$10,000 in other income facing a 5% tax on income below \$10k, a 10% tax on income above that amount, and a \$600 nonrefundable credit.
 
 | Taxable Social Security Income | Other Income | Taxes for Determining Credit | Maximum Credit Amount | Credit Received | Taxes Before Credit | Taxes After Credit |
 |-------------------------------|--------------|----------------------------|---------------------|-----------------|--------------------|--------------------|
-| $5,000 × 85% = $4,250 | $10,000 | $4,250 × 10% = $425 | $600 | MIN(425, 600) = $425 | $925 | $500 |
+| \$5,000 × 85% = \$4,250 | \$10,000 | \$4,250 × 10% = \$425 | \$600 | MIN(425, 600) = \$425 | \$925 | \$500 |
 
-**Credit Amount:** We are still working to figure out the credit size. We want something that is going to cut taxes as much as the $6,000 deduction for low-income workers but also improve solvency. Let us know if there is something we could iterate; if not, we'll want to decide after we see the results from Option 3.
+**Credit Amount:** We are still working to figure out the credit size. We want something that is going to cut taxes as much as the \$6,000 deduction for low-income workers but also improve solvency. Let us know if there is something we could iterate; if not, we'll want to decide after we see the results from Option 3.
 
 **Revenue Allocation:** The additional revenue raised will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of contributions from TOB revenue to the OASI, DI, and HI trust funds.
 
 ```{dropdown} Option 4 Reform Code
 ```python
 def get_option4_reform():
-    """Option 4: Social Security Tax Credit System ($500 Credit)"""
+    """Option 4: Social Security Tax Credit System (\$500 Credit)"""
     return Reform.from_dict({
         "gov.irs.social_security.taxability.rate.base": {
             "2026-01-01.2100-12-31": 0.85
@@ -182,7 +182,7 @@ def get_option4_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform implements 85% taxation like Options 2-3 but replaces the bonus senior deduction with a $500 nonrefundable tax credit. The `ss_credit.in_effect` parameter activates the credit system, `ss_credit.amount` sets the credit value for each filing status, and `senior_deduction.amount: 0` eliminates the bonus senior deduction. The credit can only offset taxes owed on Social Security benefits.
+**Reform Explanation:** This reform implements 85% taxation like Options 2-3 but replaces the bonus senior deduction with a \$500 nonrefundable tax credit. The `ss_credit.in_effect` parameter activates the credit system, `ss_credit.amount` sets the credit value for each filing status, and `senior_deduction.amount: 0` eliminates the bonus senior deduction. The credit can only offset taxes owed on Social Security benefits.
 
 ## Option 5: Roth-Style Swap: Substitute Income Taxation of Employer Payroll Contributions for Income Taxation of Social Security Benefits
 

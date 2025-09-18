@@ -8,7 +8,7 @@ The Congressional Budget Office has extensively analyzed Social Security benefit
 
 ### Current System Revenue
 
-According to CBO estimates, the taxation of Social Security benefits generates approximately $48 billion annually in federal revenue as of 2023. This revenue is allocated to the Social Security and Medicare trust funds according to statutory formulas:
+According to CBO estimates, the taxation of Social Security benefits generates approximately \$48 billion annually in federal revenue as of 2023. This revenue is allocated to the Social Security and Medicare trust funds according to statutory formulas:
 
 - **OASI Trust Fund**: Receives the largest share of taxation revenue
 - **DI Trust Fund**: Receives a portion based on the relative size of disability benefits
@@ -19,12 +19,12 @@ According to CBO estimates, the taxation of Social Security benefits generates a
 CBO's regular "Budget Options" publications have included several relevant proposals:
 
 **Option 1: Eliminate Income Taxation of Social Security Benefits**
-- CBO estimates this would reduce revenue by approximately $40-50 billion annually
+- CBO estimates this would reduce revenue by approximately \$40-50 billion annually
 - Would eliminate current trust fund revenue source
 - Affects both Social Security and Medicare trust fund revenues
 
 **Option 2: Subject All Social Security Benefits to Income Taxation**
-- CBO estimates this could raise $30-40 billion annually in additional revenue
+- CBO estimates this could raise \$30-40 billion annually in additional revenue
 - Would extend taxation to additional beneficiaries
 - Increases trust fund revenues
 
@@ -42,7 +42,7 @@ The Joint Committee on Taxation provides detailed analysis of tax expenditures r
 
 ### Tax Expenditure Framework
 
-JCT treats the partial exclusion of Social Security benefits from taxation as a tax expenditure, estimating the revenue loss at approximately $30-35 billion annually. This framework suggests that full taxation would be the "normal" tax treatment.
+JCT treats the partial exclusion of Social Security benefits from taxation as a tax expenditure, estimating the revenue loss at approximately \$30-35 billion annually. This framework suggests that full taxation would be the "normal" tax treatment.
 
 ### Distribution Analysis
 
