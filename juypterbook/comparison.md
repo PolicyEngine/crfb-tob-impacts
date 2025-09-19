@@ -88,6 +88,16 @@ Our baseline estimates can be compared to official government projections:
 - The interaction between these provisions creates complex net revenue effects
 - Revenue pattern changes significantly after 2028 due to deduction interactions
 
+### Option 7: Eliminate Senior Deduction Comparison
+
+**Our Estimate:** -\$191.4 billion over 10 years (revenue increase)
+
+**Comparison Notes:**
+- Eliminating the additional standard deduction for seniors generates revenue starting in 2029
+- No direct comparable estimates available from CBO {cite}`cbo2023` for this specific provision in isolation
+- The revenue gain reflects the value of the foregone deduction for eligible taxpayers
+- Affects all elderly taxpayers, not just Social Security recipients
+
 ## Methodological Differences
 
 ### Data Sources

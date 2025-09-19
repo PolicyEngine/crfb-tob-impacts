@@ -1,10 +1,10 @@
 # Policy Impacts
 
-This chapter presents the quantitative results of the analysis of six Social Security benefit taxation reform options. All estimates represent changes in federal tax revenue over the 10-year period 2026-2035, measured in billions of dollars. Positive values indicate costs (deficit increasing), while negative values indicate revenue increases (deficit reducing).
+This chapter presents the quantitative results of the analysis of seven Social Security benefit taxation reform options. All estimates represent changes in federal tax revenue over the 10-year period 2026-2035, measured in billions of dollars. Positive values indicate costs (deficit increasing), while negative values indicate revenue increases (deficit reducing).
 
 ## Summary of 10-Year Budgetary Impacts
 
-The microsimulation analysis shows the following budgetary impacts across the six policy options:
+The microsimulation analysis shows the following budgetary impacts across the seven policy options:
 
 | Policy Option | 10-Year Impact (Billions) |
 |---|---|
@@ -14,6 +14,7 @@ The microsimulation analysis shows the following budgetary impacts across the si
 | **Option 4**: Tax Credit ($500) | -86.8 |
 | **Option 5**: Roth-Style Swap | -756.2 |
 | **Option 6**: Phased Roth-Style | -1123.5 |
+| **Option 7**: Eliminate Senior Deduction | -191.4 |
 
 <a href="_static/policy_impacts_summary.csv" download="policy_impacts_summary.csv" class="csv-download-btn">📊 Download Summary CSV</a>
 
@@ -30,5 +31,6 @@ The microsimulation analysis shows the following budgetary impacts across the si
 | **Option 4** | -24.4 | -24.6 | -24.6 | -2.9 | -2.8 | -2.4 | -2.0 | -1.5 | -1.0 | -0.6 | **-86.8** |
 | **Option 5** | -58.2 | -61.4 | -65.6 | -67.6 | -73.5 | -77.8 | -82.0 | -86.1 | -90.1 | -93.9 | **-756.2** |
 | **Option 6** | -18.7 | -39.9 | -63.7 | -83.3 | -106.7 | -130.7 | -156.9 | -174.9 | -174.8 | -173.9 | **-1123.5** |
+| **Option 7** | 0.0 | 0.0 | 0.0 | -27.3 | -27.3 | -27.3 | -27.3 | -27.3 | -27.3 | -27.6 | **-191.4** |
 
 <a href="_static/policy_impacts_yearly.csv" download="policy_impacts_yearly.csv" class="csv-download-btn">📊 Download Yearly Data CSV</a>

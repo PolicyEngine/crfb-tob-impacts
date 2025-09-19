@@ -1,6 +1,6 @@
 # Policy Options
 
-This chapter describes the six Social Security benefit taxation reform options analyzed in this study. Each option represents a different approach to modifying the current two-tier taxation system, with varying implications for revenue generation, taxpayer burden, and trust fund solvency.
+This chapter describes the seven Social Security benefit taxation reform options analyzed in this study. Each option represents a different approach to modifying the current two-tier taxation system, with varying implications for revenue generation, taxpayer burden, and trust fund solvency.
 
 ## Current Law Baseline
 
@@ -284,3 +284,24 @@ def get_option6_reform():
 ```
 
 **Reform Explanation:** This complex phased reform gradually increases employer payroll tax inclusion (starting at 13.07% in 2026, reaching 100% by 2033) while simultaneously phasing down Social Security benefit taxation rates starting in 2029. The base rate decreases from current law (50%) to 45% in 2029, continuing down to 0% by 2038, while the additional rate phases from 85% down to 0% by 2045. This creates a gradual transition from taxing benefits to taxing employer contributions.
+
+## Option 7: Eliminate Senior Deduction
+
+**Start Date:** 2026
+
+**Policy Description:** Beginning in 2026, the additional standard deduction for seniors (ages 65 and older) is eliminated. This removes the bonus \$1,950 standard deduction for single filers and \$1,550 per person for married filers who are age 65 or older. Social Security benefit taxation remains unchanged under current law.
+
+**Revenue Allocation:** The additional revenue generated from eliminating the senior deduction is directed to general revenues, not specifically allocated to the OASDI or HI trust funds.
+
+```{dropdown} Option 7 Reform Code
+```python
+def get_option7_reform():
+    """Option 7: Eliminate Senior Deduction"""
+    return Reform.from_dict({
+        "gov.irs.deductions.senior_deduction.amount": {
+            "2026-01-01.2100-12-31": 0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform eliminates the additional standard deduction for seniors by setting `senior_deduction.amount` to 0 starting in 2026. This affects all taxpayers age 65 and older, increasing their taxable income by removing the age-based deduction benefit while leaving Social Security benefit taxation unchanged.

@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-This analysis examines six policy options for reforming the taxation of Social Security benefits, evaluating their 10-year budgetary impacts from 2026-2035 using microsimulation modeling. The Committee for a Responsible Federal Budget (CRFB) requested this analysis to inform policy discussions around Social Security solvency and tax reform.
+This analysis examines seven policy options for reforming the taxation of Social Security benefits, evaluating their 10-year budgetary impacts from 2026-2035 using microsimulation modeling. The Committee for a Responsible Federal Budget (CRFB) requested this analysis to inform policy discussions around Social Security solvency and tax reform.
 
 Current law subjects Social Security benefits to income taxation under a two-tier system. Benefits become taxable when combined income, defined as the sum of an individual’s adjusted gross income (AGI), nontaxable interest and half of their Social Security benefits, exceeds certain thresholds, with up to 50% of benefits taxable at lower income levels and up to 85% at higher income levels. The revenue generated from this taxation is allocated to the Social Security and Medicare Hospital Insurance trust funds.
 
 ## Policy Options Analyzed
 
-This study examines six distinct approaches to reforming Social Security benefit taxation:
+This study examines seven distinct approaches to reforming Social Security benefit taxation:
 
 - **Option 1 (Full Repeal)**: Complete elimination of Social Security benefit income taxation
 - **Option 2 (85% Taxation)**: Taxation of 85% of all Social Security benefits regardless of income level
@@ -16,6 +16,7 @@ This study examines six distinct approaches to reforming Social Security benefit
 - **Option 4 (Tax Credit System)**: Replaces the bonus senior deduction with a \$500 nonrefundable tax credit applied against Social Security taxation
 - **Option 5 (Roth-Style Swap)**: Eliminates benefit taxation while making employer payroll contributions taxable to employees
 - **Option 6 (Phased Roth-Style Swap)**: Gradual implementation of the Roth-style approach over multiple years
+- **Option 7 (Eliminate Senior Deduction)**: Eliminates the additional standard deduction for seniors starting in 2026
 
 ## Background and Context
 
@@ -33,7 +34,7 @@ This analysis provides quantitative estimates of both the budgetary impacts and 
 
 This report is organized into six main sections:
 
-1. **Policy Options**: Detailed descriptions of the six reform scenarios analyzed
+1. **Policy Options**: Detailed descriptions of the seven reform scenarios analyzed
 2. **Prior Research**: Review of existing analysis, particularly Congressional Budget Office estimates
 3. **Methodology**: Description of our microsimulation modeling approach using PolicyEngine
 4. **Policy Impacts**: Quantitative analysis of federal budgetary impacts for each option
