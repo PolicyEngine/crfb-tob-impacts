@@ -1,6 +1,6 @@
 # Comparison to Other Analysis
 
-This chapter compares our PolicyEngine estimates to existing analysis from authoritative sources, including the Congressional Budget Office, Joint Committee on Taxation, and other research institutions. Understanding these comparisons helps validate our methodology and contextualize our findings within the broader analytical landscape.
+This chapter compares our PolicyEngine estimates to existing analysis from authoritative sources, including the Congressional Budget Office {cite}`cbo2023`, Joint Committee on Taxation {cite}`jct2023ss`, and other research institutions. Understanding these comparisons helps validate our methodology and contextualize our findings within the broader analytical landscape.
 
 ## Baseline Revenue Comparisons
 
@@ -16,7 +16,7 @@ Our baseline estimates can be compared to official government projections:
 - Social Security benefit taxation revenue: ~\$47-49 billion annually {cite}`cbo2023`
 - Projected growth consistent with demographic and economic assumptions
 
-**Comparison:** Our baseline estimates align with CBO projections.
+**Comparison:** Our baseline estimates align with CBO projections {cite}`cbo2023`.
 
 ## Policy Option Comparisons
 
@@ -25,7 +25,7 @@ Our baseline estimates can be compared to official government projections:
 **Our Estimate:** -\$1,123.5 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
-- No direct comparable estimates available from CBO for this specific phased approach
+- No direct comparable estimates available from CBO {cite}`cbo2023` for this specific phased approach
 - The gradual implementation creates complex revenue patterns over time
 - Long-term effects would differ significantly from immediate implementation options
 
@@ -33,17 +33,17 @@ Our baseline estimates can be compared to official government projections:
 
 **Our Estimate:** \$1,149.0 billion over 10 years (cost from eliminating taxation)
 
-**CBO Budget Options (Historical Analysis):**
+**CBO Budget Options (Historical Analysis) {cite}`cbo2023`:**
 - Estimated cost of full repeal: \$400-500 billion over 10 years
-- Note: CBO estimates are typically from earlier years with different baselines
+- Note: CBO estimates {cite}`cbo2023` are typically from earlier years with different baselines
 
 **Reconciliation Factors:**
 - Our estimates reflect more recent demographic projections showing larger retiree populations
 - Higher Social Security benefit levels in current projections
 - Different baseline economic assumptions
-- CBO estimates may not include interaction with senior deduction expiration
+- CBO estimates {cite}`cbo2023` may not include interaction with senior deduction expiration
 
-**Assessment:** Our estimates are higher than historical CBO analysis, consistent with growing beneficiary population and benefit levels.
+**Assessment:** Our estimates are higher than historical CBO analysis {cite}`cbo2023`, consistent with growing beneficiary population and benefit levels.
 
 ### Option 5: Roth-Style Swap Comparison
 
@@ -52,21 +52,21 @@ Our baseline estimates can be compared to official government projections:
 **Comparison Notes:**
 - Limited comparable analysis available for this approach
 - The revenue pattern reflects the difference between current benefit taxation and employer contribution taxation
-- CBO has not published detailed estimates for this specific policy structure
+- CBO {cite}`cbo2023` has not published detailed estimates for this specific policy structure
 
 ### Option 2: Universal 85% Taxation Comparison
 
 **Our Estimate:** -\$219.3 billion over 10 years (revenue increase)
 
-**Joint Committee on Taxation Analysis:**
-- Historical JCT estimates suggested universal taxation could raise \$200-300 billion over 10 years
-- Note: JCT analysis assumed elimination of thresholds would increase revenue
+**Joint Committee on Taxation Analysis {cite}`jct2023ss`:**
+- Historical JCT estimates {cite}`jct2022revenue` suggested universal taxation could raise \$200-300 billion over 10 years
+- Note: JCT analysis {cite}`jct2022revenue` assumed elimination of thresholds would increase revenue
 
 **Reconciliation Factors:**
-- Our analysis accounts for senior deduction interactions not captured in some JCT estimates
+- Our analysis accounts for senior deduction interactions not captured in some JCT estimates {cite}`jct2022revenue`
 - Different treatment of threshold elimination effects
 - Timing of senior deduction expiration affects comparison
-- JCT estimates may assume different baseline taxation patterns
+- JCT estimates {cite}`jct2022revenue` may assume different baseline taxation patterns
 
 **Assessment:** The difference highlights the importance of modeling complex tax interactions and current law baseline assumptions.
 
@@ -75,7 +75,7 @@ Our baseline estimates can be compared to official government projections:
 **Our Estimate:** -\$86.8 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
-- No direct comparable estimates available from CBO for this specific credit structure
+- No direct comparable estimates available from CBO {cite}`cbo2023` for this specific credit structure
 - The \$500 credit combined with 85% taxation creates unique revenue patterns
 - Credit design affects low and middle-income taxpayers differently than historical proposals
 
@@ -98,9 +98,9 @@ Our baseline estimates can be compared to official government projections:
 - Nationally representative microsimulation
 
 **Government Estimates:**
-- **CBO:** Mixture of survey data, administrative records, and economic modeling
-- **JCT:** Tax model based on administrative tax data and survey supplements
-- **SSA:** Actuarial models with administrative benefit data
+- **CBO {cite}`cbo2023`:** Mixture of survey data, administrative records, and economic modeling
+- **JCT {cite}`jct2022revenue`:** Tax model based on administrative tax data and survey supplements
+- **SSA {cite}`ssa2023trustees`:** Actuarial models with administrative benefit data
 
 ### Analytical Scope
 
@@ -111,9 +111,9 @@ Our baseline estimates can be compared to official government projections:
 - Open-source, transparent methodology
 
 **Government Analysis:**
-- **CBO:** Often includes limited dynamic effects and macroeconomic feedback
-- **JCT:** Static analysis similar to ours, but with different data sources
-- **SSA:** Long-term actuarial focus (75-year projections)
+- **CBO {cite}`cbo2023`:** Often includes limited dynamic effects and macroeconomic feedback
+- **JCT {cite}`jct2022revenue`:** Static analysis similar to ours, but with different data sources
+- **SSA {cite}`ssa2023trustees`:** Long-term actuarial focus (75-year projections)
 
 ### Key Assumption Differences
 
@@ -124,7 +124,7 @@ Our baseline estimates can be compared to official government projections:
 
 ## Academic Research Comparisons
 
-### Tax Policy Center Analysis
+### Tax Policy Center Analysis {cite}`tpc2023ss`
 
 **TPC Research on Benefit Taxation:**
 - Estimated 40% of beneficiaries currently pay taxes on benefits {cite}`tpc2023ss`
@@ -137,7 +137,7 @@ Our baseline estimates can be compared to official government projections:
 - Comparable estimates of threshold effects
 
 **Differences:**
-- TPC analysis often focuses on distributional rather than aggregate revenue effects
+- TPC analysis {cite}`tpc2024distribution` often focuses on distributional rather than aggregate revenue effects
 - Different baseline years and economic assumptions
 - Varying treatment of state tax interactions
 

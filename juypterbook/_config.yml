@@ -72,6 +72,8 @@ sphinx:
     nb_output_stderr: "show"
     nb_render_image_options:
       width: "100%"
+    bibtex_reference_style: author_year
+    bibtex_default_style: plain
     html_theme_options:
       repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
       use_repository_button: true
