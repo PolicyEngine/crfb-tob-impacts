@@ -1,13 +1,13 @@
 # Book settings
 title: "Social Security Taxation Reform: Policy Analysis and Impact Assessment"
 author: PolicyEngine
-logo: logo.png
+logo: policyengine.png
 copyright: "2024"
 
 # Force re-execution of notebooks on each build
 execute:
-  execute_notebooks: cache
-  timeout: 300
+  execute_notebooks: force
+  timeout: 600
   allow_errors: false
 
 # Define the left-hand sidebar links
@@ -17,14 +17,47 @@ repository:
 
 # HTML-specific settings
 html:
-  favicon: favicon.ico
+  favicon: policyengine.png
   use_edit_page_button: false
   use_repository_button: true
   use_issues_button: false
   home_page_in_navbar: false
   navbar_number_sections: false
   announcement: ""
-  
+  extra_css:
+    - _static/custom.css
+  extra_extensions:
+    - sphinx_external_toc_strict
+
+# Parse and render settings
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - deflist
+    - html_admonition
+    - html_image
+    - linkify
+    - replacements
+    - smartquotes
+    - substitution
+    - tasklist
+
+# MyST-NB settings for hiding code cells
+mystnb:
+  execution_mode: off
+  execution_timeout: 600
+  execution_allow_errors: false
+  execution_excludepatterns: ["methodology.ipynb"]
+  remove_code_source: false
+  remove_code_outputs: false
+  code_prompt_show: "Show implementation details"
+  code_prompt_hide: "Hide implementation details"
+  render_plugin: "default"
+  render_markdown_format: "commonmark"
+  render_image_options:
+    width: "100%"
+  render_figure_options: {}
+
 # LaTeX settings
 latex:
   latex_engine: pdflatex
@@ -36,8 +69,18 @@ bibtex_bibfiles:
 
 # Sphinx extensions
 sphinx:
+  extra_extensions:
+    - sphinxcontrib.bibtex
   config:
     nb_execution_mode: "off"
+    nb_output_stderr: "show"
+    nb_render_image_options:
+      width: "100%"
+    html_js_files:
+      - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js
+    suppress_warnings: ["mystnb.unknown_mime_type"]
+    bibtex_reference_style: author_year
+    bibtex_default_style: plain
     html_theme_options:
       repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
       use_repository_button: true
