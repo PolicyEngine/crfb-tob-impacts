@@ -6,154 +6,64 @@ This chapter examines how major analytical organizations have estimated the budg
 
 Several organizations have analyzed the budgetary impact of completely eliminating the taxation of Social Security benefits. These estimates vary based on methodology, data sources, and projection periods.
 
-### Congressional Budget Office Estimates
+**Important Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which includes a temporary \$6,000 bonus senior deduction (2025-2028). This new deduction reduces the baseline revenue from Social Security benefit taxation, which affects the cost estimates of full repeal.
 
-The Congressional Budget Office has provided multiple estimates for repealing Social Security benefit taxation in their Budget Options series and other publications {cite}`cbo2023`.
+### Committee for a Responsible Federal Budget Analysis (July 2024)
 
-| CBO Estimate Period | 10-Year Cost | Annual Average | Source Year |
-|-------------------|--------------|----------------|-------------|
-| 2023-2032 | \$410 billion | \$41 billion | 2022 Budget Options |
-| 2024-2033 | \$485 billion | \$48.5 billion | 2023 Update |
-| 2025-2034 | \$520 billion | \$52 billion | 2024 Baseline |
+CRFB analyzed the proposal to end taxation of Social Security benefits, emphasizing the impact on Social Security trust fund solvency {cite}`crfb2024trump`.
 
-**CBO Methodology Notes:**
-- Uses microsimulation model based on Current Population Survey data
-- Incorporates administrative tax data for calibration
-- Assumes static behavioral response (no labor supply changes)
-- Includes interaction effects with other tax provisions
+| Analysis Component | Impact |
+|-------------------|---------|
+| 10-Year Revenue Loss (2025-2034) | \$1.6-1.8 trillion |
+| Social Security 75-Year Shortfall Increase | 25% (0.9% of payroll) |
+| Medicare 75-Year Shortfall Increase | Nearly triples (0.6% of payroll) |
+| Social Security Trust Fund Insolvency | Moved from late 2033 to early 2032 |
+| Medicare Trust Fund Insolvency | Moved from 2036 to 2030 (6 years earlier) |
 
-### Joint Committee on Taxation Estimates
+**CRFB Methodology Notes:**
+- Based on CBO and Social Security Trustees estimates
+- Includes both direct revenue loss and trust fund impacts
+- Accounts for interaction with Medicare taxes
+- Static analysis without behavioral responses
+- Estimate produced before One Big Beautiful Bill provisions enacted
 
-The JCT has analyzed the revenue implications of eliminating Social Security benefit taxation as part of comprehensive tax reform proposals {cite}`jct2022revenue`.
+### Tax Foundation Analysis (August 2024)
 
-| JCT Estimate Period | 10-Year Cost | Annual Average | Report |
-|-------------------|--------------|----------------|---------|
-| 2022-2031 | \$380 billion | \$38 billion | JCX-22-18 |
-| 2023-2032 | \$425 billion | \$42.5 billion | JCX-23-06 |
-| 2024-2033 | \$470 billion | \$47 billion | JCX-24-03 |
+The Tax Foundation provided commentary on Trump's suggestion to end the taxation of Social Security benefits, characterizing it as "unsound and fiscally irresponsible" {cite}`taxfoundation2024trump`.
 
-**JCT Methodology Notes:**
-- Uses proprietary tax microsimulation model
-- Based on IRS Statistics of Income data
-- Includes state tax interaction effects in some estimates
-- Generally produces slightly lower estimates than CBO
+**Key Points from Tax Foundation:**
+- Criticized the proposal from a fiscal policy perspective
+- Noted significant budgetary implications
+- Emphasized the proposal would worsen federal deficits
+- Analysis conducted before One Big Beautiful Bill provisions
 
-### Tax Foundation Estimates
+### Congressional Budget Office
 
-The Tax Foundation has analyzed Social Security benefit taxation repeal as part of broader tax reform discussions using their dynamic scoring models {cite}`taxfoundation2023`.
+The Congressional Budget Office has analyzed Social Security benefit taxation in their Budget Options series and other publications {cite}`cbo2023`.
 
-| Tax Foundation Period | Static Cost | Dynamic Cost | GDP Impact |
-|---------------------|------------|--------------|------------|
-| 2024-2033 | \$455 billion | \$420 billion | +0.3% |
-| 2025-2034 | \$505 billion | \$465 billion | +0.4% |
+### Joint Committee on Taxation
 
-**Tax Foundation Methodology Notes:**
-- Uses Tax Foundation General Equilibrium Model
-- Incorporates dynamic economic effects
-- Assumes positive labor supply response from reduced taxation
-- Dynamic estimates lower due to projected economic growth effects
+The JCT has examined the revenue implications of Social Security benefit taxation reforms {cite}`jct2022revenue`.
 
 ## Full Taxation of Social Security Benefits
 
-Organizations have also analyzed proposals to tax Social Security benefits like other income sources, either by eliminating thresholds or taxing 100% of benefits.
-
-### Congressional Budget Office Estimates
-
-CBO has examined various forms of expanding Social Security benefit taxation beyond current law {cite}`cbo2023`.
-
-| CBO Proposal | Period | 10-Year Revenue | Annual Average |
-|------------|---------|-----------------|----------------|
-| Tax 85% of all benefits | 2023-2032 | -\$185 billion | -\$18.5 billion |
-| Tax 100% of all benefits | 2023-2032 | -\$320 billion | -\$32 billion |
-| Eliminate thresholds (keep rates) | 2023-2032 | -\$210 billion | -\$21 billion |
-
-**Key CBO Findings:**
-- Eliminating thresholds increases revenue even with partial taxation
-- Moving to 100% taxation would roughly double current revenue
-- Interaction with senior deduction affects net revenue impact
-- Distribution heavily affects middle-income beneficiaries
-
-### Joint Committee on Taxation Estimates
-
-JCT has analyzed full taxation proposals in the context of comprehensive tax reform {cite}`jct2023ss`.
-
-| JCT Proposal | Period | 10-Year Revenue | Distribution Impact |
-|------------|---------|-----------------|-------------------|
-| Universal 85% taxation | 2023-2032 | -\$175 billion | 60% from \$50-100k income |
-| 100% taxation | 2023-2032 | -\$310 billion | 55% from \$50-100k income |
-| Phase-in to full taxation | 2023-2032 | -\$250 billion | Gradual impact across incomes |
-
-**JCT Analysis Highlights:**
-- Most revenue from expanding taxation comes from middle-income households
-- Upper-income beneficiaries already pay tax on maximum share of benefits
-- Lower-income beneficiaries contribute relatively little additional revenue
-
-### Tax Foundation Analysis
-
-The Tax Foundation has examined full taxation options with focus on economic efficiency and simplification {cite}`taxfoundation2024`.
-
-| Tax Foundation Proposal | Static Revenue | Dynamic Revenue | Efficiency Gain |
-|----------------------|---------------|-----------------|-----------------|
-| Eliminate all thresholds | -\$200 billion | -\$185 billion | Reduces complexity |
-| 100% taxation | -\$305 billion | -\$280 billion | Eliminates distortions |
-| Gradual phase-in | -\$240 billion | -\$225 billion | Smooths transitions |
-
-**Tax Foundation Observations:**
-- Current threshold system creates high effective marginal tax rates
-- Full taxation would simplify compliance and administration
-- Dynamic effects relatively small due to retiree population characteristics
+Organizations have also analyzed proposals to tax Social Security benefits like other income sources, either by eliminating thresholds or taxing 100% of benefits. While specific estimates vary, analyses from CBO {cite}`cbo2023`, JCT {cite}`jct2023ss`, and other organizations generally find that expanding taxation would generate significant additional revenue, though less than might be expected due to the current tax treatment already affecting higher-income beneficiaries.
 
 ## Comparison of Organizational Estimates
 
-### Methodological Differences
+The variation in estimates across organizations reflects different methodological approaches, data sources, and modeling assumptions. Key differences include:
 
-The variation in estimates across organizations reflects several key methodological differences:
-
-| Factor | CBO | JCT | Tax Foundation |
-|--------|-----|-----|----------------|
-| **Data Source** | Enhanced CPS | IRS Tax Data | Combined Sources |
-| **Behavioral Response** | Static | Mostly Static | Dynamic |
-| **Time Horizon** | 10 years | 10 years | 10+ years |
-| **State Tax Effects** | Limited | Sometimes | Yes |
-| **Economic Feedback** | No | Limited | Yes |
-
-### Reconciling Estimate Differences
-
-Several factors explain why estimates vary across organizations:
-
-1. **Baseline Assumptions**: Different projections for benefit growth and beneficiary populations
-2. **Data Vintage**: More recent data typically shows higher costs due to aging population
-3. **Interaction Effects**: Treatment of senior deduction and other provisions varies
-4. **Behavioral Assumptions**: Static vs. dynamic scoring produces different results
-5. **Technical Specifications**: Details of implementation affect revenue estimates
+- **Data Sources**: Organizations use different underlying datasets (CPS, IRS tax data, or combinations)
+- **Behavioral Responses**: Static vs. dynamic scoring approaches
+- **Time Horizons**: Different projection periods
+- **Interaction Effects**: Varying treatment of state taxes and other provisions
 
 ## Implications for Current Analysis
 
-These prior estimates provide important context for our analysis:
+The prior research provides important context for our analysis:
 
-### Validation Benchmarks
-- Our Option 1 estimates should align with CBO/JCT range of \$400-500 billion
-- Full taxation estimates should show revenue gains of \$200-300 billion
-- Results outside these ranges warrant additional scrutiny
+- **Baseline Differences**: The One Big Beautiful Bill's temporary senior deduction (2025-2028) was not included in these prior estimates, affecting baseline comparisons
+- **Methodological Alignment**: Our use of PolicyEngine's microsimulation model follows similar approaches to CBO and JCT
+- **Trust Fund Impacts**: CRFB's analysis highlights the significant effects on Social Security and Medicare trust fund solvency
 
-### Methodological Considerations
-- Static analysis consistent with CBO/JCT approach for comparability
-- Enhanced CPS data provides appropriate basis for microsimulation
-- 10-year window allows comparison with official estimates
-
-### Policy Design Elements
-- Threshold elimination vs. rate changes have different impacts
-- Senior deduction interaction significantly affects net revenue
-- Distribution across income levels varies by design choice
-
-## Summary of Key Findings
-
-The review of prior research reveals several consistent findings:
-
-1. **Full Repeal Costs**: Range from \$380-520 billion over 10 years across organizations
-2. **Full Taxation Revenue**: Generates \$175-320 billion depending on design
-3. **Middle-Income Impact**: Most proposals primarily affect \$50-100k income households
-4. **Complexity Issues**: Current system creates administrative and compliance challenges
-5. **Trust Fund Effects**: Changes significantly impact Social Security and Medicare financing
-
-These estimates provide essential benchmarks for evaluating our microsimulation results in subsequent chapters.
+These external estimates serve as useful reference points, though direct comparisons must account for differences in baseline assumptions, particularly the new senior deduction provisions enacted after these analyses were completed.
