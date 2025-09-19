@@ -6,7 +6,7 @@ This chapter examines how major analytical organizations have estimated the budg
 
 Several organizations have analyzed the budgetary impact of completely eliminating the taxation of Social Security benefits. These estimates vary based on methodology, data sources, and projection periods.
 
-**Important Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which includes a temporary \$6,000 bonus senior deduction (2025-2028). This new deduction reduces the baseline revenue from Social Security benefit taxation, which affects the cost estimates of full repeal.
+**Important Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which, amoung several individual income tax provisions, includes a temporary \$6,000 bonus senior deduction (2025-2028). This new deduction reduces the baseline revenue from Social Security benefit taxation, which affects the cost estimates of full repeal.
 
 ### Committee for a Responsible Federal Budget Analysis (July 2024)
 
@@ -24,32 +24,32 @@ CRFB analyzed the proposal to end taxation of Social Security benefits using est
 |----------|---------|
 | 10-Year Revenue Loss (2025-2034) | \$1.8 trillion |
 
-**Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which includes a temporary senior deduction that affects the baseline.
-
 ### Tax Foundation Analysis (August 2024)
 
-The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation {cite}`taxfoundation2024trump`. While specific revenue estimates were not provided in their published analysis, they characterized the proposal as having significant negative budgetary implications.
+The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model {cite}`taxfoundation2024trump`.
 
-### Congressional Budget Office
+| Estimate | Impact |
+|----------|---------|
+| 10-Year Revenue Loss (2025-2034) - Conventional | \$1.4 trillion |
+| 10-Year Revenue Loss (2025-2034) - Dynamic | \$1.3 trillion |
 
-The Congressional Budget Office has analyzed Social Security benefit taxation in their Budget Options series and other publications {cite}`cbo2023`.
+The Tax Foundation notes that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
 
-### Joint Committee on Taxation
+## Bonus Senior Deduction
 
-The JCT has examined the revenue implications of Social Security benefit taxation reforms {cite}`jct2022revenue`.
+### Joint Committee on Taxation Estimates (2025)
+
+The Joint Committee on Taxation estimated the revenue impact of the bonus senior deduction included in the One Big Beautiful Bill Act {cite}`jct2025bonus`.
+
+| Provision | Fiscal Impact |
+|----------|---------------|
+| Bonus Senior Deduction (FY 2025-2034) | -\$66.3 billion |
+
+The JCT projects that the \$6,000 bonus senior deduction for taxpayers aged 65 and older will reduce federal revenues by \$66.3 billion over the ten fiscal years from 2025 through 2034. This deduction is scheduled to expire at the end of 2028 under current law, with the revenue loss concentrated in the years 2025-2028 when the deduction is in effect.
 
 ## Full Taxation of Social Security Benefits
 
 Organizations have also analyzed proposals to tax Social Security benefits like other income sources, either by eliminating thresholds or taxing 100% of benefits. While specific estimates vary, analyses from CBO {cite}`cbo2023`, JCT {cite}`jct2023ss`, and other organizations generally find that expanding taxation would generate significant additional revenue, though less than might be expected due to the current tax treatment already affecting higher-income beneficiaries.
-
-## Comparison of Organizational Estimates
-
-The variation in estimates across organizations reflects different methodological approaches, data sources, and modeling assumptions. Key differences include:
-
-- **Data Sources**: Organizations use different underlying datasets (CPS, IRS tax data, or combinations)
-- **Behavioral Responses**: Static vs. dynamic scoring approaches
-- **Time Horizons**: Different projection periods
-- **Interaction Effects**: Varying treatment of state taxes and other provisions
 
 ## Implications for Current Analysis
 

@@ -4,19 +4,15 @@ This chapter describes the seven Social Security benefit taxation reform options
 
 ## Current Law Baseline
 
-Under current law, Social Security benefits become subject to federal income taxation when a beneficiary's "combined income" exceeds certain thresholds {cite}`tpc2023ss`. Combined income is defined as adjusted gross income plus nontaxable interest plus half of Social Security benefits.
+Under current law, the taxation of Social Security benefits follows a two-tier system based on "combined income," which equals adjusted gross income plus nontaxable interest plus half of Social Security benefits {cite}`taxfoundation2024trump`.
 
-**Taxation Thresholds (2024):**
+**Current Taxation Structure:**
 
-**Single filers:**
-- \$25,000 (50% of benefits taxable)
-- \$34,000 (85% of benefits taxable)
+Taxpayers who earn less than \$25,000 (single filers) or \$32,000 (joint filers) in combined income pay no tax on their benefits. Households earning between those thresholds and up to \$34,000 (single filers) or \$44,000 (joint filers) pay tax on up to 50 percent of their benefits. Above those levels, up to 85 percent of benefits are taxed.
 
-**Joint filers:**
-- \$32,000 (50% of benefits taxable)
-- \$44,000 (85% of benefits taxable)
+**Revenue Allocation:**
 
-The revenue generated from this taxation is allocated to the OASI, DI, and HI trust funds based on current law formulas {cite}`ssa2023trustees`.
+Income tax revenue collected from Social Security benefits is allocated to the Social Security and Medicare trust funds. The revenue from taxation of up to 50 percent of benefits is dedicated to the Social Security Old-Age, Survivors, and Disability Insurance (OASDI) trust fund, while the remainder goes to the Medicare Hospital Insurance trust fund {cite}`ssa2023trustees`.
 
 Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of \$6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
 
