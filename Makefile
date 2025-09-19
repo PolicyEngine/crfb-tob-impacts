@@ -7,9 +7,10 @@ all: install data book dashboard
 install: install-python install-node
 
 install-python:
-	@echo "Installing Python dependencies..."
-	pip install --upgrade pip
-	pip install -r requirements.txt
+	@echo "Installing Python dependencies with uv..."
+	uv venv --python 3.13 || true
+	uv pip install -e .
+	uv pip install -e .[dev]
 
 install-node:
 	@echo "Installing Node dependencies..."
@@ -18,11 +19,11 @@ install-node:
 # Generate policy impact data
 data:
 	@echo "Generating policy impact data..."
-	python generate_policy_impacts.py
+	. .venv/bin/activate && python generate_policy_impacts.py
 
 data-quick:
 	@echo "Generating fiscal data only (skipping household)..."
-	python generate_policy_impacts.py --skip-household
+	. .venv/bin/activate && python generate_policy_impacts.py --skip-household
 
 # Build Jupyter Book documentation
 book:

@@ -10,11 +10,24 @@ This repository contains a Social Security taxation reform analysis project with
 
 ## Build and Development Commands
 
+### Setup with uv (Python 3.13)
+```bash
+# Install uv if needed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv --python 3.13
+source .venv/bin/activate
+uv pip install -e .
+uv pip install -e .[dev]  # For development dependencies
+```
+
 ### Jupyter Book Documentation
 ```bash
 # Build the Jupyter Book (uses MyST-NB)
+source .venv/bin/activate
 cd jupyterbook
-myst build .
+jupyter-book build .
 
 # The built documentation will be in jupyterbook/_build/html/
 ```
