@@ -1,9 +1,9 @@
 format: jb-book
 root: intro
 chapters:
-- file: policy_options
-- file: prior_research
+- file: policy-options
+- file: prior-research
 - file: methodology
-- file: policy_impacts
-- file: household_impacts
+- file: policy-impacts
+- file: household-impacts
 - file: bibliography
