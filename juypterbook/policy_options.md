@@ -285,18 +285,24 @@ def get_option6_reform():
 
 **Reform Explanation:** This complex phased reform gradually increases employer payroll tax inclusion (starting at 13.07% in 2026, reaching 100% by 2033) while simultaneously phasing down Social Security benefit taxation rates starting in 2029. The base rate decreases from current law (50%) to 45% in 2029, continuing down to 0% by 2038, while the additional rate phases from 85% down to 0% by 2045. This creates a gradual transition from taxing benefits to taxing employer contributions.
 
-## Option 7: Eliminate Senior Deduction
+## Option 7: Eliminate Bonus Senior Deduction
 
 **Start Date:** 2026
+**End Date:** 2028 (deduction expires in 2029 under current law)
 
-**Policy Description:** Beginning in 2026, the additional standard deduction for seniors (ages 65 and older) is eliminated. This removes the bonus \$1,950 standard deduction for single filers and \$1,550 per person for married filers who are age 65 or older. Social Security benefit taxation remains unchanged under current law.
+**Policy Description:** Beginning in 2026, the \$6,000 bonus senior deduction from the One Big Beautiful Bill is eliminated. This deduction, which is available to taxpayers aged 65 and older, includes a 6% phase-out that begins at \$75,000 for single filers and \$150,000 for joint filers. The elimination only affects tax years 2026-2028, as this temporary deduction is already scheduled to expire in 2029 under current law. Social Security benefit taxation remains unchanged.
 
-**Revenue Allocation:** The additional revenue generated from eliminating the senior deduction is directed to general revenues, not specifically allocated to the OASDI or HI trust funds.
+**Revenue Allocation:** The additional revenue generated from eliminating the bonus senior deduction is directed to general revenues, not specifically allocated to the OASDI or HI trust funds.
 
 ```{dropdown} Option 7 Reform Code
 ```python
 def get_option7_reform():
-    """Option 7: Eliminate Senior Deduction"""
+    """Option 7: Eliminate Bonus Senior Deduction
+
+    Eliminates the $6,000 bonus senior deduction from the One Big Beautiful Bill
+    that has a 6% phase-out beginning at $75k/$150k for single/joint filers.
+    The deduction expires in 2029, so there's only impact from 2026-2028.
+    """
     return Reform.from_dict({
         "gov.irs.deductions.senior_deduction.amount": {
             "2026-01-01.2100-12-31": 0
@@ -304,4 +310,4 @@ def get_option7_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform eliminates the additional standard deduction for seniors by setting `senior_deduction.amount` to 0 starting in 2026. This affects all taxpayers age 65 and older, increasing their taxable income by removing the age-based deduction benefit while leaving Social Security benefit taxation unchanged.
+**Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the \$6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.

@@ -88,15 +88,16 @@ Our baseline estimates can be compared to official government projections:
 - The interaction between these provisions creates complex net revenue effects
 - Revenue pattern changes significantly after 2028 due to deduction interactions
 
-### Option 7: Eliminate Senior Deduction Comparison
+### Option 7: Eliminate Bonus Senior Deduction Comparison
 
 **Our Estimate:** -\$191.4 billion over 10 years (revenue increase)
 
 **Comparison Notes:**
-- Eliminating the additional standard deduction for seniors generates revenue starting in 2029
-- No direct comparable estimates available from CBO {cite}`cbo2023` for this specific provision in isolation
-- The revenue gain reflects the value of the foregone deduction for eligible taxpayers
-- Affects all elderly taxpayers, not just Social Security recipients
+- Eliminates the \$6,000 bonus senior deduction from the One Big Beautiful Bill (2026-2028 only)
+- Deduction includes 6% phase-out beginning at \$75k for single filers and \$150k for joint filers
+- Revenue impact limited to 2026-2028 as the deduction expires in 2029 under current law
+- No direct comparable estimates available from CBO {cite}`cbo2023` for early termination of this provision
+- Affects elderly taxpayers eligible for the bonus deduction, with greater impact on middle-income seniors below phase-out thresholds
 
 ## Methodological Differences
 

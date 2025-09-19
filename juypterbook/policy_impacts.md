@@ -14,7 +14,7 @@ The microsimulation analysis shows the following budgetary impacts across the se
 | **Option 4**: Tax Credit ($500) | -86.8 |
 | **Option 5**: Roth-Style Swap | -756.2 |
 | **Option 6**: Phased Roth-Style | -1123.5 |
-| **Option 7**: Eliminate Senior Deduction | -191.4 |
+| **Option 7**: Eliminate Bonus Senior Deduction | -191.4 |
 
 <a href="_static/policy_impacts_summary.csv" download="policy_impacts_summary.csv" class="csv-download-btn">📊 Download Summary CSV</a>
 
