@@ -10,32 +10,25 @@ Several organizations have analyzed the budgetary impact of completely eliminati
 
 ### Committee for a Responsible Federal Budget Analysis (July 2024)
 
-CRFB analyzed the proposal to end taxation of Social Security benefits, emphasizing the impact on Social Security trust fund solvency {cite}`crfb2024trump`.
+CRFB analyzed the proposal to end taxation of Social Security benefits using estimates from both CBO and the Social Security Trustees {cite}`crfb2024trump`.
 
-| Analysis Component | Impact |
-|-------------------|---------|
-| 10-Year Revenue Loss (2025-2034) | \$1.6-1.8 trillion |
-| Social Security 75-Year Shortfall Increase | 25% (0.9% of payroll) |
-| Medicare 75-Year Shortfall Increase | Nearly triples (0.6% of payroll) |
-| Social Security Trust Fund Insolvency | Moved from late 2033 to early 2032 |
-| Medicare Trust Fund Insolvency | Moved from 2036 to 2030 (6 years earlier) |
+#### CBO-Based Estimates
 
-**CRFB Methodology Notes:**
-- Based on CBO and Social Security Trustees estimates
-- Includes both direct revenue loss and trust fund impacts
-- Accounts for interaction with Medicare taxes
-- Static analysis without behavioral responses
-- Estimate produced before One Big Beautiful Bill provisions enacted
+| Estimate | Impact |
+|----------|---------|
+| 10-Year Revenue Loss (2025-2034) | \$1.6 trillion |
+
+#### Social Security Trustees-Based Estimates
+
+| Estimate | Impact |
+|----------|---------|
+| 10-Year Revenue Loss (2025-2034) | \$1.8 trillion |
+
+**Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which includes a temporary senior deduction that affects the baseline.
 
 ### Tax Foundation Analysis (August 2024)
 
-The Tax Foundation provided commentary on Trump's suggestion to end the taxation of Social Security benefits, characterizing it as "unsound and fiscally irresponsible" {cite}`taxfoundation2024trump`.
-
-**Key Points from Tax Foundation:**
-- Criticized the proposal from a fiscal policy perspective
-- Noted significant budgetary implications
-- Emphasized the proposal would worsen federal deficits
-- Analysis conducted before One Big Beautiful Bill provisions
+The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation {cite}`taxfoundation2024trump`. While specific revenue estimates were not provided in their published analysis, they characterized the proposal as having significant negative budgetary implications.
 
 ### Congressional Budget Office
 

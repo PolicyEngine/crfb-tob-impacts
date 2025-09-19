@@ -20,14 +20,13 @@ This study examines seven distinct approaches to reforming Social Security benef
 
 ## Report Structure
 
-This report is organized into six main sections:
+This report is organized into five main sections:
 
 1. **Policy Options**: Detailed descriptions of the seven reform scenarios analyzed
-2. **Prior Research**: Review of existing analysis, particularly Congressional Budget Office estimates
+2. **Prior Research**: Review of existing analysis from CBO, CRFB, and Tax Foundation
 3. **Methodology**: Description of our microsimulation modeling approach using PolicyEngine
 4. **Policy Impacts**: Quantitative analysis of federal budgetary impacts for each option
 5. **Household Impacts**: Distributional analysis showing how reforms affect different income groups and household types
-6. **Comparison**: How our estimates compare to other analytical sources
 
 ## Scope and Limitations
 

@@ -119,11 +119,11 @@ def get_option3_reform():
 
 **Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the \$6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
 
-## Option 4: Replace the Bonus Senior Deduction with a Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
+## Option 4: Replace the Bonus Senior Deduction with a $500 Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
 
 **Start Date:** 2026
 
-**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
+**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a \$500 nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
 
 **Illustrative Example:** An individual with \$5,000 in Social Security income and \$10,000 in other income facing a 5% tax on income below \$10k, a 10% tax on income above that amount, and a \$500 nonrefundable credit.
 
@@ -131,7 +131,7 @@ def get_option3_reform():
 |-------------------------------|--------------|----------------------------|---------------------|-----------------|--------------------|--------------------|
 | \$5,000 × 85% = \$4,250 | \$10,000 | \$4,250 × 10% = \$425 | \$500 | MIN(425, 500) = \$425 | \$925 | \$500 |
 
-**Credit Amount:** We are still working to figure out the credit size. We want something that is going to cut taxes as much as the \$6,000 deduction for low-income workers but also improve solvency. Let us know if there is something we could iterate; if not, we'll want to decide after we see the results from Option 3.
+**Credit Amount:** The credit is set at \$500 per beneficiary, designed to partially offset the expanded taxation while improving trust fund solvency.
 
 **Revenue Allocation:** The additional revenue raised will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of contributions from TOB revenue to the OASI, DI, and HI trust funds.
 
@@ -286,9 +286,8 @@ def get_option6_reform():
 ## Option 7: Eliminate Bonus Senior Deduction
 
 **Start Date:** 2026
-**End Date:** 2028 (deduction expires in 2029 under current law)
 
-**Policy Description:** Beginning in 2026, the \$6,000 bonus senior deduction from the One Big Beautiful Bill is eliminated. This deduction, which is available to taxpayers aged 65 and older, includes a 6% phase-out that begins at \$75,000 for single filers and \$150,000 for joint filers. The elimination only affects tax years 2026-2028, as this temporary deduction is already scheduled to expire in 2029 under current law. Social Security benefit taxation remains unchanged.
+**Policy Description:** Beginning in 2026, the bonus senior deduction is eliminated.
 
 **Revenue Allocation:** The additional revenue generated from eliminating the bonus senior deduction is directed to general revenues, not specifically allocated to the OASDI or HI trust funds.
 
