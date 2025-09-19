@@ -53,6 +53,11 @@ mystnb:
   remove_code_outputs: false
   code_prompt_show: "Show implementation details"
   code_prompt_hide: "Hide implementation details"
+  render_plugin: "default"
+  render_markdown_format: "commonmark"
+  render_image_options:
+    width: "100%"
+  render_figure_options: {}
 
 # LaTeX settings
 latex:
@@ -72,6 +77,8 @@ sphinx:
     nb_output_stderr: "show"
     nb_render_image_options:
       width: "100%"
+    html_js_files:
+      - https://cdn.plot.ly/plotly-latest.min.js
     bibtex_reference_style: author_year
     bibtex_default_style: plain
     html_theme_options:
