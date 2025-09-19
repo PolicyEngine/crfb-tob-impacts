@@ -47,10 +47,6 @@ The Joint Committee on Taxation estimated the revenue impact of the bonus senior
 
 The JCT projects that the \$6,000 bonus senior deduction for taxpayers aged 65 and older will reduce federal revenues by \$66.3 billion over the ten fiscal years from 2025 through 2034. This deduction is scheduled to expire at the end of 2028 under current law, with the revenue loss concentrated in the years 2025-2028 when the deduction is in effect.
 
-## Full Taxation of Social Security Benefits
-
-Organizations have also analyzed proposals to tax Social Security benefits like other income sources, either by eliminating thresholds or taxing 100% of benefits. While specific estimates vary, analyses from CBO {cite}`cbo2023`, JCT {cite}`jct2023ss`, and other organizations generally find that expanding taxation would generate significant additional revenue, though less than might be expected due to the current tax treatment already affecting higher-income beneficiaries.
-
 ## Implications for Current Analysis
 
 The prior research provides important context for our analysis:
