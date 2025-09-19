@@ -1,5 +1,5 @@
 # Jupyter Book build outputs
-juypterbook/_build/
+jupyterbook/_build/
 _build/
 
 # Jupyter Notebook checkpoints
