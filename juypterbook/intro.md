@@ -18,18 +18,6 @@ This study examines seven distinct approaches to reforming Social Security benef
 - **Option 6 (Phased Roth-Style Swap)**: Gradual implementation of the Roth-style approach over multiple years
 - **Option 7 (Eliminate Bonus Senior Deduction)**: Eliminates the \$6,000 bonus senior deduction (with 6% phase-out at \$75k/\$150k) from 2026-2028
 
-## Background and Context
-
-The taxation of Social Security benefits represents a significant component of federal revenue. This revenue stream directly supports the solvency of Social Security and Medicare trust funds, making reform considerations particularly complex from both fiscal and social policy perspectives.
-
-The current system results in changes in effective marginal tax rates when income crosses taxation thresholds, sometimes referred to as "tax cliffs."
-
-## Policy Environment
-
-According to the 2023 Trustees Report, the combined OASI and DI trust funds are projected to become depleted in 2034. Reforms to benefit taxation affect both direct budgetary impacts and overall program finances.
-
-This analysis provides quantitative estimates of both the budgetary impacts and household-level distributional effects of each reform option.
-
 ## Report Structure
 
 This report is organized into six main sections:

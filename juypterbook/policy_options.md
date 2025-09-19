@@ -20,11 +20,11 @@ The revenue generated from this taxation is allocated to the OASI, DI, and HI tr
 
 Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of \$6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
 
-## Option 1: Full Repeal of Taxation of Social Security Benefits (No Bonus Senior Deduction After 2028)
+## Option 1: Full Repeal of Taxation of Social Security Benefits
 
 **Start Date:** 2026
 
-**Policy Description:** Taxation of Social Security benefits is permanently repealed beginning in 2026. The bonus senior deduction expires at the end of 2028, as per current law.
+**Policy Description:** Taxation of Social Security benefits is permanently repealed beginning in 2026.
 
 **Revenue Allocation Impact:** The effect on revenues to the OASDI and HI trust funds will be allocated as per current law. In other words, the revenue that would have been earned by the respective trust funds under current law is the revenue that they will lose under this option.
 
@@ -44,11 +44,11 @@ def get_option1_reform():
 
 **Reform Explanation:** This reform sets both the base and additional Social Security taxability rates to 0%, effectively eliminating all federal income taxation of Social Security benefits starting in 2026. The policy parameters `taxability.rate.base` and `taxability.rate.additional` control the percentage of benefits subject to taxation under the current two-tier system.
 
-## Option 2: Taxation of 85% of Social Security Benefits (No Bonus Senior Deduction After 2028)
+## Option 2: Taxation of 85% of Social Security Benefits
 
 **Start Date:** 2026
 
-**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction expires at the end of 2028, as per current law.
+**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income.
 
 **Revenue Allocation:** The additional revenue from taxation of benefits (TOB) will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of TOB revenue earned by the OASI, DI, and HI trust funds.
 
@@ -188,7 +188,7 @@ def get_option4_reform():
 
 **Start Date:** 2026
 
-**Policy Description:** Beginning in 2026, all employer payroll contributions are included in taxable income and all Social Security benefits are excluded from taxable income. The bonus senior deduction is allowed to expire at the end of 2028, as per current law.
+**Policy Description:** Beginning in 2026, all employer payroll contributions are included in taxable income and all Social Security benefits are excluded from taxable income.
 
 **Revenue Allocation:** Revenue from income taxation of employer Social Security contributions are allocated to the OASDI trust funds. Revenue from income taxation of Medicare contributions are allocated to the HI trust fund. The revenue that would've been earned by the OASDI and HI trust fund from TOB is the revenue that they will lose from the end of TOB.
 
@@ -221,8 +221,6 @@ def get_option5_reform():
 **Policy Description:** Beginning in 2026, all employer payroll contributions are phased into taxable income by 1 percentage point per year until the full 7.65 percent employer contribution is taxable.
 
 Starting in 2029, the current formula for income taxation of Social Security benefits is phased down by 5 percentage points per year (e.g., 2028: 50/85; 2029: 45/80; 2030: 40/75…, 2038: 0/35; 2039: 0/30…, 2045: 0/0)
-
-The bonus senior deduction is allowed to expire at the end of 2028, as per current law.
 
 **Revenue Allocation During Phase-In:** During the phase-in, the revenue raised from income taxation of employer contributions is allocated to the OASDI trust funds until the contributions included in taxable income exceed the amount contributed to Social Security (6.2%). So, for example, when just 1pp of employer contributions are taxable, the full amount of revenue raised is directed to the OASDI trust fund. When 7pp are included 6.2/7 percent of the revenue is directed to the OASDI trust funds and 0.8/7 percent are directed to the HI trust fund.
 
