@@ -38,7 +38,8 @@ jobs:
 
     - name: Generate data
       run: |
-        python generate_policy_impacts.py
+        # Use mock data for CI until PolicyEngine dependency issues are resolved
+        python generate_mock_data.py
 
     - name: Build the book
       run: |
