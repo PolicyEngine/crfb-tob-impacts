@@ -10,7 +10,7 @@ Several organizations have analyzed the budgetary impact of completely eliminati
 
 ### Committee for a Responsible Federal Budget Analysis (July 2024)
 
-CRFB analyzed the proposal to end taxation of Social Security benefits using estimates from both CBO and the Social Security Trustees {cite}`crfb2024trump`.
+CRFB analyzed the proposal to end taxation of Social Security benefits using data from both CBO and the Social Security Trustees {cite}`crfb2024trump`.
 
 #### CBO-Based Estimates
 
