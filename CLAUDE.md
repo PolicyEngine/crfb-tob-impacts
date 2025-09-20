@@ -111,3 +111,73 @@ npm test -- --coverage  # With coverage report
 ```
 
 Tests use React Testing Library and focus on component rendering and data handling.
+
+## Common Issues and Solutions
+
+### Jupyter Book Tables Not Displaying
+**Problem**: Tables or charts appear blank in the built Jupyter Book even though the code is correct.
+
+**Root Cause**: Jupyter Book uses pre-computed outputs from notebook cells. If a notebook hasn't been executed, there are no outputs to display.
+
+**Solution**: Execute the notebook before building:
+```bash
+source .venv/bin/activate
+cd jupyterbook
+jupyter nbconvert --to notebook --execute --inplace your-notebook.ipynb
+jupyter-book build .
+```
+
+**Prevention**: Always execute notebooks after making changes to ensure outputs are saved:
+- Use `jupyter nbconvert --execute` for batch execution
+- Or run cells manually in Jupyter Lab/Notebook and save
+
+### Test-Driven Debugging for Tables
+When tables aren't displaying correctly:
+1. Create a standalone Python script to test the table generation
+2. Verify the output HTML is correct
+3. Check that notebook cells have saved outputs
+4. Rebuild the Jupyter Book after executing notebooks
+
+### PolicyEngine Data Links
+For PolicyEngine US data documentation, use: https://policyengine.github.io/policyengine-us-data
+
+### Table Formatting Best Practices
+When creating pivot tables for display:
+- Use `reset_index()` to convert index to columns
+- Rename columns to remove technical names (e.g., `rename(columns={'reform_display': ''})`)
+- Set `columns.name = None` to remove multi-level column labels
+- Use `to_html(escape=False)` to allow HTML formatting like `<b>` tags
+
+## CRITICAL: Option 4 Tax Credit Amount
+**⚠️ IMPORTANT**: Option 4 (Social Security Tax Credit System) uses a **$500** credit amount, NOT $900 or any other value. This is hardcoded throughout the analysis:
+- The reforms.py file has `credit_amount=500` as the default
+- All notebooks reference "$500 Tax Credit"
+- The entire book and documentation analyze a $500 credit
+- If you see $900 in any data files, they are INCORRECT and need regeneration
+- **NEVER** change this to $900 unless explicitly instructed - the entire analysis is based on $500
+
+## Household Impact Calculation Performance
+The household impact calculations are **vectorized**, not iterative:
+- Each reform-year combination processes ALL employment income levels simultaneously using numpy arrays
+- Total: 7 reforms × 10 years = 70 vectorized calculations (not thousands)
+- The calculation time is from complex tax simulations, not from iteration count
+- Add status logging when generating household impacts since each calculation can take several minutes
+
+### Chapter Ordering and Naming
+- Place comparison chapters (like external estimates) after presenting your own results
+- Use descriptive filenames that match the content (e.g., `external-estimates.md` not `prior-research.md` for comparisons)
+- Update both the filename and `_toc.yml` when renaming chapters
+
+### Enhanced Hovercards in Plotly
+When showing only impact charts, include baseline and reform values in hover data:
+```python
+customdata=df[['baseline_value', 'reform_value']],
+hovertemplate='<b>Impact:</b> %{y}<br>' +
+             '<b>Baseline:</b> %{customdata[0]}<br>' +
+             '<b>Reform:</b> %{customdata[1]}<br>'
+```
+
+### Jupyter Book Build Issues
+- **Multiple file warnings**: Delete duplicate files (e.g., both `.md` and `.ipynb` versions)
+- **Missing bibtex references**: Check `references.bib` for all cited keys
+- **Slow builds**: Use `jupyter-book build .` without `--all` for incremental builds
