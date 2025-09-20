@@ -5,6 +5,7 @@ Impact calculation functions for policy reforms.
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Tuple
+from pathlib import Path
 from policyengine_us import Microsimulation, Simulation
 
 
@@ -23,7 +24,8 @@ def calculate_fiscal_impact(
         dataset: Dataset path for microsimulation (optional)
 
     Returns:
-        Impact in billions (negative = cost, positive = savings)
+        Revenue impact in dollars (positive = revenue gain, negative = revenue loss)
+        Following JCT convention: reformed - baseline
     """
     try:
         if reform is not None:
@@ -39,12 +41,12 @@ def calculate_fiscal_impact(
                 reformed = Microsimulation(reform=reform)
 
             reformed_income_tax = reformed.calculate("income_tax", map_to="household", period=year)
-            difference_income_tax = baseline_income_tax - reformed_income_tax
-            impact_billions = difference_income_tax.sum() / 1e9
+            # JCT convention: reformed - baseline (positive = more revenue)
+            revenue_impact = reformed_income_tax.sum() - baseline_income_tax.sum()
         else:
-            impact_billions = 0.0
+            revenue_impact = 0.0
 
-        return round(impact_billions, 1)
+        return revenue_impact
     except Exception as e:
         print(f"Error calculating impact for year {year}: {e}")
         return 0.0
@@ -182,7 +184,8 @@ def calculate_multi_year_impacts(
     reform_configs: Dict,
     years: List[int],
     dataset: Optional[str] = None,
-    sample_fraction: Optional[float] = None
+    sample_fraction: Optional[float] = None,
+    checkpoint_file: Optional[str] = None
 ) -> pd.DataFrame:
     """Calculate impacts for all reforms across multiple years.
 
@@ -199,40 +202,43 @@ def calculate_multi_year_impacts(
 
     all_results = []
 
+    # Load existing checkpoint if it exists
+    completed = set()
+    if checkpoint_file and Path(checkpoint_file).exists():
+        print(f"Loading checkpoint from {checkpoint_file}")
+        existing_df = pd.read_csv(checkpoint_file)
+        all_results = existing_df.to_dict('records')
+        # Track what's already done
+        for row in all_results:
+            completed.add((row['reform_id'], row.get('variant_value'), row['year']))
+        print(f"  Loaded {len(all_results)} existing results")
+
     for reform_id, config in reform_configs.items():
         print(f"\nProcessing {config['name']}...")
 
-        if config.get('has_variants', False):
-            # Handle reforms with variants
-            for variant in config['variants']:
-                print(f"  Variant: ${variant}")
-                reform = config['func'](variant)
+        # All reforms now handled the same way
+        reform = config['func']()
 
-                for year in years:
-                    print(f"    Year {year}: Computing...")
-                    impact = calculate_fiscal_impact(reform, year, baselines[year], dataset)
+        for year in years:
+            # Skip if already computed
+            if (reform_id, None, year) in completed:
+                print(f"  Year {year}: Already computed, skipping")
+                continue
 
-                    all_results.append({
-                        'reform_id': reform_id,
-                        'reform_name': config['name'],
-                        'variant_value': variant,
-                        'year': year,
-                        'impact_billions': impact
-                    })
-        else:
-            # Handle standard reforms
-            reform = config['func']()
+            print(f"  Year {year}: Computing...")
+            revenue_impact = calculate_fiscal_impact(reform, year, baselines[year], dataset)
 
-            for year in years:
-                print(f"  Year {year}: Computing...")
-                impact = calculate_fiscal_impact(reform, year, baselines[year], dataset)
+            all_results.append({
+                'reform_id': reform_id,
+                'reform_name': config['name'],
+                'variant_value': None,
+                'year': year,
+                'revenue_impact': revenue_impact
+            })
 
-                all_results.append({
-                    'reform_id': reform_id,
-                    'reform_name': config['name'],
-                    'variant_value': None,
-                    'year': year,
-                    'impact_billions': impact
-                })
+            # Save checkpoint after each calculation
+            if checkpoint_file:
+                pd.DataFrame(all_results).to_csv(checkpoint_file, index=False)
+                print(f"    Saved checkpoint ({len(all_results)} results)")
 
     return pd.DataFrame(all_results)

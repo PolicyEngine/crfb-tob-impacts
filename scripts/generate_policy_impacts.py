@@ -61,10 +61,12 @@ def main():
     print("CALCULATING FISCAL IMPACTS")
     print("=" * 60)
 
-    fiscal_impacts = calculate_multi_year_impacts(REFORMS, years)
-
-    # Save fiscal impacts
     fiscal_output = output_dir / 'policy_impacts.csv'
+    fiscal_impacts = calculate_multi_year_impacts(
+        REFORMS, years, checkpoint_file=str(fiscal_output)
+    )
+
+    # Final save (in case any last updates)
     fiscal_impacts.to_csv(fiscal_output, index=False)
     print(f"\nFiscal impacts saved to {fiscal_output}")
 

@@ -248,38 +248,29 @@ REFORMS = {
     "option1": {
         "name": "Full Repeal of Social Security Benefits Taxation",
         "func": get_option1_reform,
-        "has_variants": False,
     },
     "option2": {
         "name": "Taxation of 85% of Social Security Benefits",
         "func": get_option2_reform,
-        "has_variants": False,
     },
     "option3": {
         "name": "85% Taxation with Permanent Senior Deduction Extension",
         "func": get_option3_reform,
-        "has_variants": False,
     },
     "option4": {
-        "name": "Social Security Tax Credit System",
+        "name": "Social Security Tax Credit System ($500)",
         "func": get_option4_reform,
-        "has_variants": True,
-        "variants": [300, 500, 600, 900, 1200, 1500],
-        "default_variant": 500,
     },
     "option5": {
         "name": "Roth-Style Swap",
         "func": get_option5_reform,
-        "has_variants": False,
     },
     "option6": {
         "name": "Phased Roth-Style Swap",
         "func": get_option6_reform,
-        "has_variants": False,
     },
     "option7": {
         "name": "Eliminate Bonus Senior Deduction",
         "func": get_option7_reform,
-        "has_variants": False,
     },
 }
