@@ -8,21 +8,21 @@ Several organizations have analyzed the budgetary impact of completely eliminati
 
 **Important Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which, amoung several individual income tax provisions, includes a temporary \$6,000 bonus senior deduction (2025-2028). This new deduction reduces the baseline revenue from Social Security benefit taxation, which affects the cost estimates of full repeal.
 
-### Committee for a Responsible Federal Budget Analysis (July 2024)
+### Congressional Budget Office Estimates
 
-CRFB analyzed the proposal to end taxation of Social Security benefits using data from both CBO and the Social Security Trustees {cite}`crfb2024trump`.
-
-#### CBO-Based Estimates
+The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series {cite}`cbo2024options`.
 
 | Estimate | Impact |
 |----------|---------|
-| 10-Year Revenue Loss (2025-2034) | \$1.6 trillion |
+| 10-Year Revenue Loss from Full Repeal (2025-2034) | \$1.6 trillion |
 
-#### Social Security Trustees-Based Estimates
+### Social Security Trustees Estimates
+
+The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report {cite}`ssa2024trustees`.
 
 | Estimate | Impact |
 |----------|---------|
-| 10-Year Revenue Loss (2025-2034) | \$1.8 trillion |
+| 10-Year Revenue Loss from Full Repeal (2025-2034) | \$1.8 trillion |
 
 ### Tax Foundation Analysis (August 2024)
 
