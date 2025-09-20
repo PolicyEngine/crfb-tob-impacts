@@ -42,11 +42,16 @@ jobs:
         source .venv/bin/activate
         pytest tests/ -v
 
-    - name: Generate data
+    - name: Run integration test
       run: |
         source .venv/bin/activate
-        python generate_policy_impacts.py --start-year 2026 --end-year 2027 --skip-household
-      timeout-minutes: 10
+        python test_integration.py
+
+    - name: Generate sample data
+      run: |
+        source .venv/bin/activate
+        # Use sample data generator for CI (real data takes too long)
+        python generate_sample_data.py
 
     - name: Build the book
       run: |

@@ -181,7 +181,8 @@ def calculate_household_impact(
 def calculate_multi_year_impacts(
     reform_configs: Dict,
     years: List[int],
-    dataset: Optional[str] = None
+    dataset: Optional[str] = None,
+    sample_fraction: Optional[float] = None
 ) -> pd.DataFrame:
     """Calculate impacts for all reforms across multiple years.
 
