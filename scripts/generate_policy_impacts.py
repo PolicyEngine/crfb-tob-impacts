@@ -45,6 +45,11 @@ def main():
         action='store_true',
         help='Skip household impact calculations'
     )
+    parser.add_argument(
+        '--household-only',
+        action='store_true',
+        help='Only generate household impacts (skip fiscal impacts)'
+    )
 
     args = parser.parse_args()
 
@@ -56,36 +61,42 @@ def main():
     years = list(range(args.start_year, args.end_year + 1))
     print(f"Analyzing years {args.start_year} to {args.end_year}")
 
-    # Calculate fiscal impacts
-    print("\n" + "=" * 60)
-    print("CALCULATING FISCAL IMPACTS")
-    print("=" * 60)
+    # Calculate fiscal impacts (unless household-only mode)
+    fiscal_impacts = None
+    if not args.household_only:
+        print("\n" + "=" * 60)
+        print("CALCULATING FISCAL IMPACTS")
+        print("=" * 60)
 
-    fiscal_output = output_dir / 'policy_impacts.csv'
-    fiscal_impacts = calculate_multi_year_impacts(
-        REFORMS, years, checkpoint_file=str(fiscal_output)
-    )
+        fiscal_output = output_dir / 'policy_impacts.csv'
+        fiscal_impacts = calculate_multi_year_impacts(
+            REFORMS, years, checkpoint_file=str(fiscal_output)
+        )
 
-    # Final save (in case any last updates)
-    fiscal_impacts.to_csv(fiscal_output, index=False)
-    print(f"\nFiscal impacts saved to {fiscal_output}")
+        # Final save (in case any last updates)
+        fiscal_impacts.to_csv(fiscal_output, index=False)
+        print(f"\nFiscal impacts saved to {fiscal_output}")
 
-    # Also save to React dashboard location
-    dashboard_output = Path('policy-impact-dashboard/public/policy_impacts.csv')
-    if dashboard_output.parent.exists():
-        fiscal_impacts.to_csv(dashboard_output, index=False)
-        print(f"Also saved to {dashboard_output}")
+        # Also save to React dashboard location
+        dashboard_output = Path('policy-impact-dashboard/public/policy_impacts.csv')
+        if dashboard_output.parent.exists():
+            fiscal_impacts.to_csv(dashboard_output, index=False)
+            print(f"Also saved to {dashboard_output}")
 
     # Calculate household impacts if not skipped
     if not args.skip_household:
         print("\n" + "=" * 60)
         print("CALCULATING HOUSEHOLD IMPACTS")
         print("=" * 60)
+        print(f"Processing {len(REFORMS)} reforms × {len(years)} years = {len(REFORMS) * len(years)} vectorized calculations")
+        print("Note: Each calculation processes ALL income levels simultaneously")
 
         household_results = []
+        total_calculations = len(REFORMS) * len(years)
+        completed = 0
 
         for reform_id, config in REFORMS.items():
-            print(f"\nProcessing {config['name']}...")
+            print(f"\nReform: {config['name']}")
 
             if config.get('has_variants', False):
                 # Use middle variant for household analysis
@@ -97,8 +108,13 @@ def main():
                 reform_name = config['name']
 
             for year in years:
-                print(f"  Year {year}...")
+                completed += 1
+                print(f"  [{completed}/{total_calculations}] Year {year}... ", end='', flush=True)
+                import time
+                start_time = time.time()
                 df = calculate_household_impact(reform, year)
+                elapsed = time.time() - start_time
+                print(f"✓ ({elapsed:.1f}s)")
                 df['reform'] = reform_name
                 df['year'] = year
                 household_results.append(df)
@@ -111,17 +127,12 @@ def main():
         household_df.to_csv(household_output, index=False)
         print(f"\nHousehold impacts saved to {household_output}")
 
-        # Also save to Jupyter Book location
-        jupyterbook_output = Path('jupyterbook/household_impacts_all_years.csv')
-        if jupyterbook_output.parent.exists():
-            household_df.to_csv(jupyterbook_output, index=False)
-            print(f"Also saved to {jupyterbook_output}")
-
     # Print summary
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    print(f"✓ Fiscal impacts: {len(fiscal_impacts)} rows")
+    if not args.household_only and fiscal_impacts is not None:
+        print(f"✓ Fiscal impacts: {len(fiscal_impacts)} rows")
     if not args.skip_household:
         print(f"✓ Household impacts: {len(household_df)} rows")
     print(f"✓ Years analyzed: {args.start_year}-{args.end_year}")
