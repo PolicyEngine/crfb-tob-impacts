@@ -8,32 +8,18 @@ Several organizations have analyzed the budgetary impact of completely eliminati
 
 **Important Note:** These estimates were produced before the passage of the One Big Beautiful Bill, which, amoung several individual income tax provisions, includes a temporary \$6,000 bonus senior deduction (2025-2028). This new deduction reduces the baseline revenue from Social Security benefit taxation, which affects the cost estimates of full repeal.
 
-### Congressional Budget Office Estimates
+### Revenue Loss Estimates for Full Repeal
 
-The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series {cite}`cbo2024options`.
+The following table compares 10-year revenue loss estimates (2025-2034) from major analytical organizations for completely eliminating Social Security benefit taxation:
 
-| Estimate | Impact |
-|----------|---------|
-| 10-Year Revenue Loss from Full Repeal (2025-2034) | \$1.6 trillion |
+| Organization | Estimate Type | 10-Year Revenue Loss (2025-2034) | Source |
+|--------------|---------------|-----------------------------------|---------|
+| Congressional Budget Office | Conventional | \$1.6 trillion | {cite}`cbo2024options` |
+| Social Security Trustees | Conventional | \$1.8 trillion | {cite}`ssa2024trustees` |
+| Tax Foundation | Conventional | \$1.4 trillion | {cite}`taxfoundation2024trump` |
+| Tax Foundation | Dynamic | \$1.3 trillion | {cite}`taxfoundation2024trump` |
 
-### Social Security Trustees Estimates
-
-The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report {cite}`ssa2024trustees`.
-
-| Estimate | Impact |
-|----------|---------|
-| 10-Year Revenue Loss from Full Repeal (2025-2034) | \$1.8 trillion |
-
-### Tax Foundation Analysis (August 2024)
-
-The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model {cite}`taxfoundation2024trump`.
-
-| Estimate | Impact |
-|----------|---------|
-| 10-Year Revenue Loss (2025-2034) - Conventional | \$1.4 trillion |
-| 10-Year Revenue Loss (2025-2034) - Dynamic | \$1.3 trillion |
-
-The Tax Foundation notes that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
+The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series. The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report. The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model, noting that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
 
 ## Bonus Senior Deduction
 

@@ -6,7 +6,7 @@ copyright: "2024"
 
 # Force re-execution of notebooks on each build
 execute:
-  execute_notebooks: force
+  execute_notebooks: cache
   timeout: 600
   allow_errors: false
 
@@ -44,14 +44,14 @@ parse:
 
 # MyST-NB settings for hiding code cells
 mystnb:
-  execution_mode: off
+  execution_mode: cache
   execution_timeout: 600
   execution_allow_errors: false
-  execution_excludepatterns: ["methodology.ipynb"]
+  execution_excludepatterns: []
   remove_code_source: false
   remove_code_outputs: false
-  code_prompt_show: "Show implementation details"
-  code_prompt_hide: "Hide implementation details"
+  code_prompt_show: "Show code"
+  code_prompt_hide: "Hide code"
   render_plugin: "default"
   render_markdown_format: "commonmark"
   render_image_options:
