@@ -19,11 +19,11 @@ install-node:
 # Generate policy impact data
 data:
 	@echo "Generating policy impact data..."
-	. .venv/bin/activate && python generate_policy_impacts.py
+	. .venv/bin/activate && python scripts/generate_policy_impacts.py
 
 data-quick:
 	@echo "Generating fiscal data only (skipping household)..."
-	. .venv/bin/activate && python generate_policy_impacts.py --skip-household
+	. .venv/bin/activate && python scripts/generate_policy_impacts.py --skip-household
 
 # Build Jupyter Book documentation
 book:
@@ -60,7 +60,7 @@ lint: lint-python lint-react
 
 lint-python:
 	@echo "Linting Python code..."
-	black src/ tests/ generate_policy_impacts.py --check
+	black src/ tests/ scripts/ --check
 	pylint src/
 
 lint-react:
@@ -71,7 +71,7 @@ format: format-python format-react
 
 format-python:
 	@echo "Formatting Python code..."
-	black src/ tests/ generate_policy_impacts.py
+	black src/ tests/ scripts/
 
 format-react:
 	@echo "Formatting React code..."
@@ -90,9 +90,9 @@ clean:
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} +
 
-# CI/CD commands
-ci: install lint test data book dashboard
-	@echo "CI pipeline complete!"
+# CI/CD commands (note: data generation takes ~30 min)
+ci: install lint test book dashboard
+	@echo "CI pipeline complete (skipped data generation for speed)!"
 
 # Deployment preparation
 deploy-prep: clean install data book dashboard

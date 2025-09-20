@@ -99,7 +99,7 @@ def compute_baselines(
 def calculate_household_impact(
     reform,
     year: int,
-    employment_income_range: Tuple[int, int, int] = (0, 200000, 500),
+    employment_income_range: Tuple[int, int, int] = (0, 200000, 1000),
     social_security_benefits: float = 30000,
     age: int = 70,
     state: str = "FL"

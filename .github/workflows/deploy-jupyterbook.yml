@@ -45,13 +45,10 @@ jobs:
     - name: Run integration test
       run: |
         source .venv/bin/activate
-        python test_integration.py
+        python tests/test_integration.py
 
-    - name: Generate sample data
-      run: |
-        source .venv/bin/activate
-        # Use sample data generator for CI (real data takes too long)
-        python generate_sample_data.py
+    # Note: Data generation takes too long for CI (~30 minutes)
+    # Consider caching data or using pre-generated data for CI
 
     - name: Build the book
       run: |
