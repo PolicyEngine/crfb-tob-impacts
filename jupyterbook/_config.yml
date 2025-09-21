@@ -48,6 +48,7 @@ mystnb:
   execution_timeout: 600
   execution_allow_errors: false
   execution_excludepatterns: []
+  # Hide code cells with hide-input tag
   remove_code_source: false
   remove_code_outputs: false
   code_prompt_show: "Show code"
@@ -57,6 +58,19 @@ mystnb:
   render_image_options:
     width: "100%"
   render_figure_options: {}
+
+# Notebook cell tag settings
+notebook_interface: notebook
+nb_render_priority:
+  html:
+    - "application/vnd.jupyter.widget-view+json"
+    - "text/html"
+    - "image/svg+xml"
+    - "image/png"
+    - "image/jpeg"
+    - "text/markdown"
+    - "text/latex"
+    - "text/plain"
 
 # LaTeX settings
 latex:
@@ -86,3 +100,9 @@ sphinx:
       use_repository_button: true
       use_edit_page_button: false
       use_issues_button: false
+    nb_remove_code_source: true
+    nb_remove_code_outputs: false
+    nb_custom_formats:
+      ".ipynb":
+        - nbformat.reads
+        - as_version: 4
