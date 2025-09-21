@@ -27,6 +27,13 @@ The simulation was last run on **{metadata['simulation_date']}** using Python {m
 Analysis period: **{metadata['analysis_period']}**
 """
 
+    # Add dataset statistics if available
+    if 'dataset_statistics' in metadata:
+        stats = metadata['dataset_statistics']
+        version_content += f"""
+Dataset: **{stats['household_count']:,} households** and **{stats['individual_count']:,} individuals**
+"""
+
     # Write to Jupyter Book
     version_file = Path('jupyterbook/simulation-version.md')
     with open(version_file, 'w') as f:
