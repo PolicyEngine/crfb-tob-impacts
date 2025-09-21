@@ -34,3 +34,4 @@ The project uses PolicyEngine to simulate fiscal and household impacts:
 
 - **scripts/generate_policy_impacts.py** - Data generation using PolicyEngine simulations
 - Output saved to `data/` and dashboard `public/` directories
+- **PolicyEngine-US Version**: 1.398.0
