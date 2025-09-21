@@ -181,3 +181,29 @@ hovertemplate='<b>Impact:</b> %{y}<br>' +
 - **Multiple file warnings**: Delete duplicate files (e.g., both `.md` and `.ipynb` versions)
 - **Missing bibtex references**: Check `references.bib` for all cited keys
 - **Slow builds**: Use `jupyter-book build .` without `--all` for incremental builds
+
+## Important Development Lessons Learned
+
+### Always Check All Branches Before Assuming Work is Lost
+- Work may exist on unmerged branches (e.g., DTrim99/issue16 had critical fixes)
+- Use `git branch -r` to list all remote branches
+- Check unmerged commits with: `git log origin/branch-name --not origin/main`
+- Cherry-pick valuable commits from unmerged branches when needed
+
+### Jupyter Notebooks Must Have Executed Outputs for CI Tests
+- The test suite (test_charts.py) requires notebooks to have executed outputs with Plotly charts
+- Notebooks without outputs will fail CI even if code is correct
+- Execute notebooks before committing: `jupyter nbconvert --execute --to notebook --inplace notebook.ipynb`
+- This is especially important when cherry-picking or merging changes that strip outputs
+
+### GitHub Actions Deployment Debugging
+- Use `gh run list --workflow=workflow-name.yml` to check run status
+- Get failed step details: `gh api /repos/owner/repo/actions/runs/RUN_ID/jobs | jq '.jobs[] | select(.conclusion=="failure")'`
+- Open failed runs in browser: `gh run view RUN_ID --web`
+- Remember: Background monitoring in Claude doesn't persist after response - can't provide updates after sending message
+
+### Commit Frequently to Avoid Losing Work
+- Complex notebook edits should be committed after each major change
+- Don't rely on uncommitted local changes surviving across sessions
+- Use descriptive commit messages to track what was done
+- Always push branches even if not ready to merge - better to have unmerged work than lost work
