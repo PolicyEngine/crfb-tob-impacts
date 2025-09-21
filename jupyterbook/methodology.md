@@ -6,8 +6,8 @@
 ## Dataset
 
 This analysis uses the **Enhanced CPS (2024)**, PolicyEngine's enhanced version of the 2023 Current Population Survey with:
-- **100,827 households** representing the US population
-- **232,850 individuals** with detailed income and demographic data
+- **56,839 households** representing the US population
+- **146,133 individuals** with detailed income and demographic data
 - Statistical matching with IRS Statistics of Income
 - Reweighting to match national totals
 
