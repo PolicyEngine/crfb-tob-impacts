@@ -1,0 +1,42 @@
+[project]
+name = "crfb-tob-impacts"
+version = "0.1.0"
+description = "Social Security taxation reform impact analysis"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "policyengine-us>=1.398.0",
+    "policyengine-core>=3.19.0",
+    "pandas>=2.0.0",
+    "numpy>=2.1.0",
+    "plotly>=5.0.0",
+    "jupyter-book>=1.0.0",
+    "myst-nb>=1.0.0",
+    "notebook>=7.0.0",
+    "ipywidgets>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "pylint>=2.0.0",
+    "mypy>=1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.black]
+line-length = 79
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"

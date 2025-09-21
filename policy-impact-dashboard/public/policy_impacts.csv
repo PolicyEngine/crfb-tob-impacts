@@ -1,101 +1,71 @@
-policy_id,policy_name,credit_value,year,impact_billions
-1,Repeal Social Security Benefits Tax,,2026,81.0
-1,Repeal Social Security Benefits Tax,,2027,86.2
-1,Repeal Social Security Benefits Tax,,2028,91.2
-1,Repeal Social Security Benefits Tax,,2029,101.1
-1,Repeal Social Security Benefits Tax,,2030,107.3
-1,Repeal Social Security Benefits Tax,,2031,112.8
-1,Repeal Social Security Benefits Tax,,2032,118.5
-1,Repeal Social Security Benefits Tax,,2033,124.1
-1,Repeal Social Security Benefits Tax,,2034,130.4
-1,Repeal Social Security Benefits Tax,,2035,137.0
-2,Flat Social Security Tax,,2026,-21.4
-2,Flat Social Security Tax,,2027,-21.8
-2,Flat Social Security Tax,,2028,-21.9
-2,Flat Social Security Tax,,2029,-30.9
-2,Flat Social Security Tax,,2030,-31.0
-2,Flat Social Security Tax,,2031,-31.0
-2,Flat Social Security Tax,,2032,-30.9
-2,Flat Social Security Tax,,2033,-30.7
-2,Flat Social Security Tax,,2034,-30.8
-2,Flat Social Security Tax,,2035,-30.7
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2026,-21.4
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2027,-21.8
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2028,-21.9
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2029,-0.9
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2030,-0.6
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2031,-0.3
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2032,-0.1
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2033,-0.1
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2034,-0.3
-3,Flat Social Security Tax with Bonus Senior Deduction Extension,,2035,-0.5
-4,Social Security Credit,300.0,2026,-37.3
-4,Social Security Credit,300.0,2027,-37.9
-4,Social Security Credit,300.0,2028,-37.9
-4,Social Security Credit,300.0,2029,-16.9
-4,Social Security Credit,300.0,2030,-16.9
-4,Social Security Credit,300.0,2031,-16.7
-4,Social Security Credit,300.0,2032,-16.5
-4,Social Security Credit,300.0,2033,-16.3
-4,Social Security Credit,300.0,2034,-16.2
-4,Social Security Credit,300.0,2035,-16.0
-4,Social Security Credit,600.0,2026,-25.1
-4,Social Security Credit,600.0,2027,-25.5
-4,Social Security Credit,600.0,2028,-25.4
-4,Social Security Credit,600.0,2029,-4.1
-4,Social Security Credit,600.0,2030,-4.0
-4,Social Security Credit,600.0,2031,-3.6
-4,Social Security Credit,600.0,2032,-3.3
-4,Social Security Credit,600.0,2033,-3.0
-4,Social Security Credit,600.0,2034,-2.8
-4,Social Security Credit,600.0,2035,-2.5
-4,Social Security Credit,900.0,2026,-14.2
-4,Social Security Credit,900.0,2027,-14.4
-4,Social Security Credit,900.0,2028,-14.1
-4,Social Security Credit,900.0,2029,7.4
-4,Social Security Credit,900.0,2030,7.7
-4,Social Security Credit,900.0,2031,8.2
-4,Social Security Credit,900.0,2032,8.6
-4,Social Security Credit,900.0,2033,9.1
-4,Social Security Credit,900.0,2034,9.5
-4,Social Security Credit,900.0,2035,9.9
-4,Social Security Credit,1200.0,2026,-4.3
-4,Social Security Credit,1200.0,2027,-4.3
-4,Social Security Credit,1200.0,2028,-3.9
-4,Social Security Credit,1200.0,2029,17.8
-4,Social Security Credit,1200.0,2030,18.4
-4,Social Security Credit,1200.0,2031,19.1
-4,Social Security Credit,1200.0,2032,19.7
-4,Social Security Credit,1200.0,2033,20.4
-4,Social Security Credit,1200.0,2034,20.9
-4,Social Security Credit,1200.0,2035,0.0
-4,Social Security Credit,1500.0,2026,4.6
-4,Social Security Credit,1500.0,2027,4.9
-4,Social Security Credit,1500.0,2028,5.5
-4,Social Security Credit,1500.0,2029,27.5
-4,Social Security Credit,1500.0,2030,28.3
-4,Social Security Credit,1500.0,2031,29.2
-4,Social Security Credit,1500.0,2032,30.0
-4,Social Security Credit,1500.0,2033,30.8
-4,Social Security Credit,1500.0,2034,31.5
-4,Social Security Credit,1500.0,2035,32.2
-5,Roth Style Swap,,2026,-60.5
-5,Roth Style Swap,,2027,-63.7
-5,Roth Style Swap,,2028,-67.6
-5,Roth Style Swap,,2029,-68.3
-5,Roth Style Swap,,2030,-73.3
-5,Roth Style Swap,,2031,-77.9
-5,Roth Style Swap,,2032,-82.5
-5,Roth Style Swap,,2033,-87.0
-5,Roth Style Swap,,2034,-91.3
-5,Roth Style Swap,,2035,-95.7
-6,Roth Style Swap with Phase-In,,2026,-18.5
-6,Roth Style Swap with Phase-In,,2027,-39.5
-6,Roth Style Swap with Phase-In,,2028,-62.8
-6,Roth Style Swap with Phase-In,,2029,-80.3
-6,Roth Style Swap with Phase-In,,2030,-100.6
-6,Roth Style Swap with Phase-In,,2031,-122.7
-6,Roth Style Swap with Phase-In,,2032,-147.9
-6,Roth Style Swap with Phase-In,,2033,-165.3
-6,Roth Style Swap with Phase-In,,2034,-164.9
-6,Roth Style Swap with Phase-In,,2035,-164.4
+reform_id,reform_name,variant_value,year,revenue_impact
+option1,Full Repeal of Social Security Benefits Taxation,,2026,-86300000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2027,-91800000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2028,-96900000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2029,-105900000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2030,-112700000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2031,-118400000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2032,-124500000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2033,-130699999999.99998
+option1,Full Repeal of Social Security Benefits Taxation,,2034,-137500000000.0
+option1,Full Repeal of Social Security Benefits Taxation,,2035,-144300000000.0
+option2,Taxation of 85% of Social Security Benefits,,2026,18300000000.0
+option2,Taxation of 85% of Social Security Benefits,,2027,18300000000.0
+option2,Taxation of 85% of Social Security Benefits,,2028,18100000000.0
+option2,Taxation of 85% of Social Security Benefits,,2029,23800000000.0
+option2,Taxation of 85% of Social Security Benefits,,2030,24000000000.0
+option2,Taxation of 85% of Social Security Benefits,,2031,23900000000.0
+option2,Taxation of 85% of Social Security Benefits,,2032,23700000000.0
+option2,Taxation of 85% of Social Security Benefits,,2033,23300000000.0
+option2,Taxation of 85% of Social Security Benefits,,2034,23100000000.0
+option2,Taxation of 85% of Social Security Benefits,,2035,22800000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2026,18300000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2027,18300000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2028,18100000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2029,-3500000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2030,-3500000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2031,-3600000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2032,-3700000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2033,-3900000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2034,-4200000000.0
+option3,85% Taxation with Permanent Senior Deduction Extension,,2035,-4400000000.0
+option4,Social Security Tax Credit System ($500),500.0,2026,24400000000.0
+option4,Social Security Tax Credit System ($500),500.0,2027,24600000000.0
+option4,Social Security Tax Credit System ($500),500.0,2028,24500000000.0
+option4,Social Security Tax Credit System ($500),500.0,2029,2900000000.0
+option4,Social Security Tax Credit System ($500),500.0,2030,2800000000.0
+option4,Social Security Tax Credit System ($500),500.0,2031,2400000000.0
+option4,Social Security Tax Credit System ($500),500.0,2032,2000000000.0
+option4,Social Security Tax Credit System ($500),500.0,2033,1500000000.0
+option4,Social Security Tax Credit System ($500),500.0,2034,1000000000.0
+option4,Social Security Tax Credit System ($500),500.0,2035,600000000.0
+option5,Roth-Style Swap,,2026,58200000000.0
+option5,Roth-Style Swap,,2027,61400000000.0
+option5,Roth-Style Swap,,2028,65599999999.99999
+option5,Roth-Style Swap,,2029,67599999999.99999
+option5,Roth-Style Swap,,2030,73500000000.0
+option5,Roth-Style Swap,,2031,77800000000.0
+option5,Roth-Style Swap,,2032,82000000000.0
+option5,Roth-Style Swap,,2033,86100000000.0
+option5,Roth-Style Swap,,2034,90100000000.0
+option5,Roth-Style Swap,,2035,93900000000.0
+option6,Phased Roth-Style Swap,,2026,18700000000.0
+option6,Phased Roth-Style Swap,,2027,39900000000.0
+option6,Phased Roth-Style Swap,,2028,63700000000.0
+option6,Phased Roth-Style Swap,,2029,83300000000.0
+option6,Phased Roth-Style Swap,,2030,106700000000.0
+option6,Phased Roth-Style Swap,,2031,130699999999.99998
+option6,Phased Roth-Style Swap,,2032,156900000000.0
+option6,Phased Roth-Style Swap,,2033,174900000000.0
+option6,Phased Roth-Style Swap,,2034,174800000000.0
+option6,Phased Roth-Style Swap,,2035,173900000000.0
+option7,Eliminate Bonus Senior Deduction,,2026,21000000000.0
+option7,Eliminate Bonus Senior Deduction,,2027,21500000000.0
+option7,Eliminate Bonus Senior Deduction,,2028,21800000000.0
+option7,Eliminate Bonus Senior Deduction,,2029,-0.0
+option7,Eliminate Bonus Senior Deduction,,2030,-0.0
+option7,Eliminate Bonus Senior Deduction,,2031,-0.0
+option7,Eliminate Bonus Senior Deduction,,2032,-0.0
+option7,Eliminate Bonus Senior Deduction,,2033,-0.0
+option7,Eliminate Bonus Senior Deduction,,2034,-0.0
+option7,Eliminate Bonus Senior Deduction,,2035,-0.0
