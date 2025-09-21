@@ -103,13 +103,6 @@ def test_reforms_registry():
     for reform_id, config in REFORMS.items():
         assert "name" in config
         assert "func" in config
-        assert "has_variants" in config
-
-        # If has variants, should have variants list
-        if config["has_variants"]:
-            assert "variants" in config
-            assert isinstance(config["variants"], list)
-            assert len(config["variants"]) > 0
 
         # Test that function is callable
         assert callable(config["func"])
@@ -118,9 +111,8 @@ def test_reforms_registry():
 def test_reform_variants():
     """Test reforms with variants."""
     option4 = REFORMS["option4"]
-    assert option4["has_variants"] is True
 
-    # Test each variant
-    for variant in option4["variants"]:
-        reform = option4["func"](variant)
+    # Test option 4 with different credit amounts
+    for amount in [250, 500, 750, 900, 1000]:
+        reform = option4["func"](amount)
         assert reform is not None

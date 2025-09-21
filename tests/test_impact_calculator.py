@@ -31,10 +31,9 @@ class TestFiscalImpact:
             reform = Mock()
             impact = calculate_fiscal_impact(reform, 2026, baseline_income_tax)
 
-            # Should be (baseline - reformed).sum() / 1e9
-            # (1000+2000+3000) - (900+1900+2900) = 300
-            # 300 / 1e9 = 0.0000003, rounded to 0.0
-            assert impact == 0.0
+            # Should be reformed - baseline (JCT convention)
+            # (900+1900+2900) - (1000+2000+3000) = -300
+            assert impact == -300
 
     def test_calculate_fiscal_impact_no_reform(self):
         """Test fiscal impact calculation with no reform."""

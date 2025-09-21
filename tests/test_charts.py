@@ -4,8 +4,9 @@
 import json
 import sys
 import os
+import pytest
 
-def test_notebook_has_outputs(notebook_path):
+def check_notebook_outputs(notebook_path):
     """Check if a notebook has executed cells with outputs."""
     with open(notebook_path, 'r') as f:
         nb = json.load(f)
@@ -25,6 +26,20 @@ def test_notebook_has_outputs(notebook_path):
                         plotly_outputs += 1
 
     return cells_with_outputs, plotly_outputs
+
+@pytest.mark.skipif(not os.path.exists('jupyterbook/revenue-impacts.ipynb'),
+                    reason="Notebook not found")
+def test_revenue_impacts_notebook_has_outputs():
+    """Test that revenue-impacts notebook has chart outputs."""
+    cells_with_outputs, plotly_outputs = check_notebook_outputs('jupyterbook/revenue-impacts.ipynb')
+    assert plotly_outputs > 0, "Revenue impacts notebook needs to be executed with charts"
+
+@pytest.mark.skipif(not os.path.exists('jupyterbook/household-impacts.ipynb'),
+                    reason="Notebook not found")
+def test_household_impacts_notebook_has_outputs():
+    """Test that household-impacts notebook has chart outputs."""
+    cells_with_outputs, plotly_outputs = check_notebook_outputs('jupyterbook/household-impacts.ipynb')
+    assert plotly_outputs > 0, "Household impacts notebook needs to be executed with charts"
 
 def main():
     notebooks = [
