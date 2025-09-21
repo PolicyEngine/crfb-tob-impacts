@@ -8,7 +8,9 @@ and saves the results to CSV files for use in the dashboard and documentation.
 
 import argparse
 import sys
+import json
 from pathlib import Path
+from datetime import datetime
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -16,6 +18,32 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.reforms import REFORMS
 from src.impact_calculator import calculate_multi_year_impacts, calculate_household_impact
 import pandas as pd
+
+
+def write_simulation_metadata(output_dir, start_year, end_year):
+    """Write simulation metadata including PolicyEngine version."""
+    try:
+        import policyengine_us
+        pe_version = policyengine_us.__version__
+    except:
+        pe_version = "unknown"
+
+    metadata = {
+        "policyengine_us_version": pe_version,
+        "simulation_date": datetime.now().strftime("%Y-%m-%d"),
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "analysis_period": f"{start_year}-{end_year}",
+        "data_sources": {
+            "enhanced_cps": "PolicyEngine enhanced CPS microdata",
+            "base_year": "2024"
+        }
+    }
+
+    metadata_file = output_dir / 'simulation_metadata.json'
+    with open(metadata_file, 'w') as f:
+        json.dump(metadata, f, indent=2)
+    print(f"Simulation metadata saved to {metadata_file}")
+    return metadata
 
 
 def main():
@@ -56,6 +84,10 @@ def main():
     # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(exist_ok=True)
+
+    # Write simulation metadata
+    metadata = write_simulation_metadata(output_dir, args.start_year, args.end_year)
+    print(f"Using PolicyEngine-US version: {metadata['policyengine_us_version']}")
 
     # Generate years list
     years = list(range(args.start_year, args.end_year + 1))
