@@ -65,6 +65,8 @@ jobs:
       run: |
         source .venv/bin/activate
         cd jupyterbook
+        echo "Building with BASE_URL=/crfb-tob-impacts"
+        export BASE_URL=/crfb-tob-impacts
         myst build --html
         # Add .nojekyll file to prevent GitHub Pages from processing with Jekyll
         touch _build/html/.nojekyll
