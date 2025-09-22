@@ -8,6 +8,39 @@ This repository contains a Social Security taxation reform analysis project with
 1. **Jupyter Book documentation** - Research report and analysis using MyST-NB (Jupyter Book 2.0)
 2. **React dashboard** - Interactive policy impact visualization tool
 
+## Development Workflow
+
+**⚠️ IMPORTANT: Always work in pull requests to avoid breaking the main branch!**
+
+### Creating a PR for changes:
+```bash
+# Create a new branch for your changes
+git checkout -b fix/description-of-change
+
+# Make your changes
+# ... edit files ...
+
+# For Jupyter notebooks, ALWAYS execute them before committing
+cd jupyterbook
+jupyter nbconvert --to notebook --execute --inplace *.ipynb
+
+# Commit and push
+git add -A
+git commit -m "Description of changes"
+git push origin fix/description-of-change
+
+# Create PR using GitHub CLI
+gh pr create --title "Fix: Description" --body "Details of what was fixed"
+```
+
+### PR Checks
+The CI will automatically check:
+1. **Notebook execution**: All notebooks must have outputs and execute without errors
+2. **Python tests**: All tests must pass
+3. **Build validation**: The Jupyter Book must build successfully
+
+Never merge a PR with failing checks!
+
 ## Build and Development Commands
 
 ### Setup with uv (Python 3.13)

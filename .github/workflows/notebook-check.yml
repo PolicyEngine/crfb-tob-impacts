@@ -1,0 +1,84 @@
+name: Notebook Execution Check
+
+on:
+  pull_request:
+    paths:
+      - 'jupyterbook/**/*.ipynb'
+      - 'jupyterbook/myst.yml'
+      - '.github/workflows/notebook-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'jupyterbook/**/*.ipynb'
+      - 'jupyterbook/myst.yml'
+
+jobs:
+  check-notebooks:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Create virtual environment and install dependencies
+      run: |
+        uv venv --python 3.13
+        source .venv/bin/activate
+        uv pip install -e .
+        uv pip install jupyter nbconvert
+
+    - name: Check notebook outputs exist
+      run: |
+        source .venv/bin/activate
+        cd jupyterbook
+
+        # Check that notebooks have outputs
+        for nb in *.ipynb; do
+          echo "Checking $nb..."
+          python -c "
+import json
+import sys
+
+with open('$nb', 'r') as f:
+    notebook = json.load(f)
+
+has_outputs = False
+for cell in notebook.get('cells', []):
+    if cell.get('cell_type') == 'code':
+        outputs = cell.get('outputs', [])
+        if outputs:
+            has_outputs = True
+            break
+
+if not has_outputs:
+    print(f'ERROR: $nb has no outputs. Notebooks must be executed before committing.')
+    sys.exit(1)
+else:
+    print(f'✓ $nb has outputs')
+"
+        done
+
+    - name: Execute notebooks and check for errors
+      run: |
+        source .venv/bin/activate
+        cd jupyterbook
+
+        # Execute each notebook and check for errors
+        for nb in *.ipynb; do
+          echo "Executing $nb..."
+          if ! jupyter nbconvert --to notebook --execute --inplace "$nb" --ExecutePreprocessor.timeout=600; then
+            echo "ERROR: Failed to execute $nb"
+            exit 1
+          fi
+        done
+
+        echo "All notebooks executed successfully!"
