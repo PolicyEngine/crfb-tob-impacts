@@ -20,6 +20,32 @@ The following table compares 10-year revenue loss estimates from major analytica
 
 The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series. The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report. The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model, noting that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
 
+## Taxation of 85% of Social Security Benefits (Option 2)
+
+CBO and JCT have provided estimates for taxing Social Security benefits at the same rate as private pensions, which would treat 85% of benefits as taxable income regardless of income level:
+
+| Organization | Estimate Type | 10-Year Revenue Gain | Period | Source |
+|--------------|---------------|----------------------|---------|--------|
+| **PolicyEngine (Our Analysis)** | **Static** | **\$227.5 billion** | **2026-2035** | **This study** |
+| Congressional Budget Office | Conventional | \$950 billion | 2025-2034 | {cite}`cbo2024pension` |
+| Joint Committee on Taxation | Tax Expenditure | ~\$1.0 trillion | 2024-2033 | JCT Tax Expenditure estimate |
+
+### Analysis of Differences
+
+Our estimate of \$227.5 billion is substantially lower than CBO's \$950 billion estimate. Several factors may explain this difference:
+
+1. **Baseline Differences**: The One Big Beautiful Bill's temporary \$6,000 bonus senior deduction (2025-2028) reduces the baseline revenue from Social Security benefit taxation. This deduction was not included in CBO's analysis, which predates the legislation.
+
+2. **Reform Specification**: Our Option 2 taxes 85% of benefits for all recipients but maintains the existing tax structure. CBO's estimate for "treating Social Security like a private pension" may include additional changes beyond just the 85% inclusion rate.
+
+3. **Interaction Effects**: The presence of the bonus senior deduction creates interaction effects that reduce the revenue gain from taxing 85% of benefits, particularly in the years 2026-2028.
+
+4. **Methodological Considerations**: While both analyses use microsimulation, differences in datasets, imputation methods, and modeling assumptions can lead to variations in estimates.
+
+5. **Income Distribution**: Our analysis may capture different distributional effects, particularly for lower-income beneficiaries who would newly face taxation under the 85% rule.
+
+These differences highlight the importance of clearly specifying reform parameters and baseline assumptions when comparing estimates across organizations.
+
 ## Bonus Senior Deduction
 
 The following table compares estimates for the bonus senior deduction's fiscal impact:
@@ -42,4 +68,4 @@ Our estimate of \$1.149 trillion for full repeal falls below the range of prior 
 - **Methodological Alignment**: Our use of PolicyEngine's microsimulation model follows similar approaches to CBO and JCT
 - **Trust Fund Impacts**: While we focus on general revenue impacts, CRFB's analysis highlights the significant effects on Social Security and Medicare trust fund solvency
 
-These external estimates serve as useful validation points, demonstrating that our microsimulation results are consistent with established analytical organizations' findings.
+These external estimates serve as useful validation points. While our estimates for some reforms (like full repeal) align closely with other organizations, differences in other areas (like the 85% taxation option) highlight the importance of understanding baseline assumptions and reform specifications when comparing analyses.
