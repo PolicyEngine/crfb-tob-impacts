@@ -12,6 +12,7 @@ dependencies = [
     "plotly>=5.0.0",
     "jupyter-book>=1.0.0",
     "myst-nb>=1.0.0",
+    "mystmd>=1.0.0",
     "notebook>=7.0.0",
     "ipywidgets>=8.0.0",
 ]
