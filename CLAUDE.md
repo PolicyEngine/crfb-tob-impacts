@@ -23,13 +23,20 @@ uv pip install -e .[dev]  # For development dependencies
 ```
 
 ### Jupyter Book Documentation
+
+**⚠️ IMPORTANT: Always deploy using CI/CD, never manually!**
+- DO NOT manually copy files to the `docs/` directory
+- DO NOT manually run deployment commands
+- Let GitHub Actions handle all deployments to ensure consistency
+
+For local development only:
 ```bash
 # Build the Jupyter Book (uses MyST-NB)
 source .venv/bin/activate
 cd jupyterbook
-jupyter-book build .
+myst build --html  # For local preview
 
-# The built documentation will be in jupyterbook/_build/html/
+# The built documentation will be in jupyterbook/_build/site/public/
 ```
 
 ### React Dashboard
@@ -196,7 +203,14 @@ hovertemplate='<b>Impact:</b> %{y}<br>' +
 - Execute notebooks before committing: `jupyter nbconvert --execute --to notebook --inplace notebook.ipynb`
 - This is especially important when cherry-picking or merging changes that strip outputs
 
-### GitHub Actions Deployment Debugging
+### GitHub Actions Deployment
+**⚠️ CRITICAL: All deployments must happen through CI/CD**
+- The GitHub Actions workflow automatically builds and deploys the Jupyter Book
+- NEVER manually build and commit files to the `docs/` directory
+- NEVER run `myst build` and then commit the output
+- The CI/CD pipeline ensures proper base URLs and consistent builds
+
+**Debugging deployment issues:**
 - Use `gh run list --workflow=workflow-name.yml` to check run status
 - Get failed step details: `gh api /repos/owner/repo/actions/runs/RUN_ID/jobs | jq '.jobs[] | select(.conclusion=="failure")'`
 - Open failed runs in browser: `gh run view RUN_ID --web`
