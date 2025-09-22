@@ -210,7 +210,7 @@ def calculate_multi_year_impacts(
         all_results = existing_df.to_dict('records')
         # Track what's already done
         for row in all_results:
-            completed.add((row['reform_id'], row.get('variant_value'), row['year']))
+            completed.add((row['reform_id'], row['year']))
         print(f"  Loaded {len(all_results)} existing results")
 
     for reform_id, config in reform_configs.items():
@@ -221,7 +221,7 @@ def calculate_multi_year_impacts(
 
         for year in years:
             # Skip if already computed
-            if (reform_id, None, year) in completed:
+            if (reform_id, year) in completed:
                 print(f"  Year {year}: Already computed, skipping")
                 continue
 
@@ -231,7 +231,6 @@ def calculate_multi_year_impacts(
             all_results.append({
                 'reform_id': reform_id,
                 'reform_name': config['name'],
-                'variant_value': None,
                 'year': year,
                 'revenue_impact': revenue_impact
             })
