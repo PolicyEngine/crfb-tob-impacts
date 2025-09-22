@@ -54,7 +54,7 @@ jobs:
       run: |
         source .venv/bin/activate
         cd jupyterbook
-        jupyter-book build .
+        myst build --html
         # Add .nojekyll file to prevent GitHub Pages from processing with Jekyll
         touch _build/html/.nojekyll
 
