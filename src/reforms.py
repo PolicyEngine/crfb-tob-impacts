@@ -6,6 +6,7 @@ Social Security taxation policy options.
 """
 
 from policyengine_core.reforms import Reform
+from policyengine_us.model_api import *
 
 
 # Common reform components as modular functions
@@ -44,12 +45,50 @@ def eliminate_ss_taxation():
 
 
 def tax_85_percent_ss():
-    """Tax 85% of Social Security benefits."""
+    """Tax 85% of Social Security benefits for all recipients.
+
+    This reform makes 85% of Social Security benefits taxable regardless
+    of income level. Uses the PR #6562 parametric approach by setting
+    combined_income_ss_fraction to 1.0 and all thresholds to 0.
+    """
     return {
-        "gov.irs.social_security.taxability.rate.base": {
-            "2026-01-01.2100-12-31": 0.85
+        # Set combined income fraction to 1.0 (instead of 0.5)
+        # This ensures combined income includes full SS amount
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
         },
-        **zero_ss_tax_thresholds()
+        # Set all base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all adjusted base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        }
     }
 
 
@@ -138,6 +177,7 @@ def get_option3_reform():
     Combines taxation of 85% of benefits with a permanent extension
     of the senior deduction that would otherwise expire in 2028.
     """
+    # Combine parametric SS reform with senior deduction extension
     return Reform.from_dict({
         **tax_85_percent_ss(),
         **extend_senior_deduction()
@@ -153,6 +193,7 @@ def get_option4_reform(credit_amount=500):
     Args:
         credit_amount: The credit amount in dollars (default: 500)
     """
+    # Combine parametric SS reform with credit and deduction changes
     return Reform.from_dict({
         **tax_85_percent_ss(),
         **add_ss_tax_credit(credit_amount),

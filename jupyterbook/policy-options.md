@@ -4,7 +4,7 @@ This chapter describes the seven Social Security benefit taxation reform options
 
 ## Current Law Baseline
 
-Under current law, the taxation of Social Security benefits follows a two-tier system based on "combined income," which equals adjusted gross income plus nontaxable interest plus half of Social Security benefits {cite}`taxfoundation2024trump`.
+Under current law, the taxation of Social Security benefits follows a two-tier system based on "combined income," which equals adjusted gross income plus nontaxable interest plus half of Social Security benefits {cite}`irs2024pub915`.
 
 **Current Taxation Structure:**
 
@@ -12,7 +12,7 @@ Taxpayers who earn less than \$25,000 (single filers) or \$32,000 (joint filers)
 
 **Revenue Allocation:**
 
-Income tax revenue collected from Social Security benefits is allocated to the Social Security and Medicare trust funds. The revenue from taxation of up to 50 percent of benefits is dedicated to the Social Security Old-Age, Survivors, and Disability Insurance (OASDI) trust fund, while the remainder goes to the Medicare Hospital Insurance trust fund {cite}`ssa2023trustees`.
+Income tax revenue collected from Social Security benefits is allocated to the Social Security and Medicare trust funds. The revenue from taxation of up to 50 percent of benefits is dedicated to the Social Security Old-Age, Survivors, and Disability Insurance (OASDI) trust fund, while the remainder goes to the Medicare Hospital Insurance trust fund {cite}`ssa2024trustees`.
 
 Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of \$6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law.
 

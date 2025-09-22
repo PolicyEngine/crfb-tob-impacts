@@ -1,14 +1,14 @@
 {
-  "policyengine_us_version": "1.398.0",
-  "simulation_date": "2025-09-21",
-  "python_version": "3.13.0",
+  "policyengine_us_version": "unknown",
+  "simulation_date": "2025-09-22",
+  "python_version": "3.13.3",
   "analysis_period": "2026-2035",
   "data_sources": {
     "enhanced_cps": "PolicyEngine enhanced CPS microdata",
     "base_year": "2024"
   },
   "dataset_statistics": {
-    "household_count": 56839,
-    "individual_count": 146133
+    "household_count": 21108,
+    "individual_count": 53430
   }
 }

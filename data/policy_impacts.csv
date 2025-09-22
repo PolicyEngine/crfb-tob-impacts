@@ -1,71 +1,52 @@
-reform_id,reform_name,year,revenue_impact
-option1,Full Repeal of Social Security Benefits Taxation,2026,-86300000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2027,-91800000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2028,-96900000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2029,-105900000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2030,-112700000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2031,-118400000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2032,-124500000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2033,-130699999999.99998
-option1,Full Repeal of Social Security Benefits Taxation,2034,-137500000000.0
-option1,Full Repeal of Social Security Benefits Taxation,2035,-144300000000.0
-option2,Taxation of 85% of Social Security Benefits,2026,18300000000.0
-option2,Taxation of 85% of Social Security Benefits,2027,18300000000.0
-option2,Taxation of 85% of Social Security Benefits,2028,18100000000.0
-option2,Taxation of 85% of Social Security Benefits,2029,23800000000.0
-option2,Taxation of 85% of Social Security Benefits,2030,24000000000.0
-option2,Taxation of 85% of Social Security Benefits,2031,23900000000.0
-option2,Taxation of 85% of Social Security Benefits,2032,23700000000.0
-option2,Taxation of 85% of Social Security Benefits,2033,23300000000.0
-option2,Taxation of 85% of Social Security Benefits,2034,23100000000.0
-option2,Taxation of 85% of Social Security Benefits,2035,22800000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2026,18300000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2027,18300000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2028,18100000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2029,-3500000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2030,-3500000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2031,-3600000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2032,-3700000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2033,-3900000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2034,-4200000000.0
-option3,85% Taxation with Permanent Senior Deduction Extension,2035,-4400000000.0
-option4,Social Security Tax Credit System ($500),2026,24400000000.0
-option4,Social Security Tax Credit System ($500),2027,24600000000.0
-option4,Social Security Tax Credit System ($500),2028,24500000000.0
-option4,Social Security Tax Credit System ($500),2029,2900000000.0
-option4,Social Security Tax Credit System ($500),2030,2800000000.0
-option4,Social Security Tax Credit System ($500),2031,2400000000.0
-option4,Social Security Tax Credit System ($500),2032,2000000000.0
-option4,Social Security Tax Credit System ($500),2033,1500000000.0
-option4,Social Security Tax Credit System ($500),2034,1000000000.0
-option4,Social Security Tax Credit System ($500),2035,600000000.0
-option5,Roth-Style Swap,2026,58200000000.0
-option5,Roth-Style Swap,2027,61400000000.0
-option5,Roth-Style Swap,2028,65599999999.99999
-option5,Roth-Style Swap,2029,67599999999.99999
-option5,Roth-Style Swap,2030,73500000000.0
-option5,Roth-Style Swap,2031,77800000000.0
-option5,Roth-Style Swap,2032,82000000000.0
-option5,Roth-Style Swap,2033,86100000000.0
-option5,Roth-Style Swap,2034,90100000000.0
-option5,Roth-Style Swap,2035,93900000000.0
-option6,Phased Roth-Style Swap,2026,18700000000.0
-option6,Phased Roth-Style Swap,2027,39900000000.0
-option6,Phased Roth-Style Swap,2028,63700000000.0
-option6,Phased Roth-Style Swap,2029,83300000000.0
-option6,Phased Roth-Style Swap,2030,106700000000.0
-option6,Phased Roth-Style Swap,2031,130699999999.99998
-option6,Phased Roth-Style Swap,2032,156900000000.0
-option6,Phased Roth-Style Swap,2033,174900000000.0
-option6,Phased Roth-Style Swap,2034,174800000000.0
-option6,Phased Roth-Style Swap,2035,173900000000.0
-option7,Eliminate Bonus Senior Deduction,2026,21000000000.0
-option7,Eliminate Bonus Senior Deduction,2027,21500000000.0
-option7,Eliminate Bonus Senior Deduction,2028,21800000000.0
-option7,Eliminate Bonus Senior Deduction,2029,-0.0
-option7,Eliminate Bonus Senior Deduction,2030,-0.0
-option7,Eliminate Bonus Senior Deduction,2031,-0.0
-option7,Eliminate Bonus Senior Deduction,2032,-0.0
-option7,Eliminate Bonus Senior Deduction,2033,-0.0
-option7,Eliminate Bonus Senior Deduction,2034,-0.0
-option7,Eliminate Bonus Senior Deduction,2035,-0.0
+reform_id,reform_name,variant_value,year,revenue_impact
+option1,Full Repeal of Social Security Benefits Taxation,,2026,-86281086873.85132
+option1,Full Repeal of Social Security Benefits Taxation,,2027,-91837465132.4834
+option1,Full Repeal of Social Security Benefits Taxation,,2028,-96884979298.49756
+option1,Full Repeal of Social Security Benefits Taxation,,2029,-105912682607.2622
+option1,Full Repeal of Social Security Benefits Taxation,,2030,-112737789418.94873
+option1,Full Repeal of Social Security Benefits Taxation,,2031,-118445765906.97803
+option1,Full Repeal of Social Security Benefits Taxation,,2032,-124527101970.13086
+option1,Full Repeal of Social Security Benefits Taxation,,2033,-130705399360.70703
+option1,Full Repeal of Social Security Benefits Taxation,,2034,-137526237322.79736
+option1,Full Repeal of Social Security Benefits Taxation,,2035,-144273728286.62695
+option2,Taxation of 85% of Social Security Benefits,,2026,24093368640.283203
+option2,Taxation of 85% of Social Security Benefits,,2027,24325946788.830566
+option2,Taxation of 85% of Social Security Benefits,,2028,24269369609.297363
+option2,Taxation of 85% of Social Security Benefits,,2029,32731659364.336426
+option2,Taxation of 85% of Social Security Benefits,,2030,33247583066.05957
+option2,Taxation of 85% of Social Security Benefits,,2031,33353121241.515137
+option2,Taxation of 85% of Social Security Benefits,,2032,33370580303.486816
+option2,Taxation of 85% of Social Security Benefits,,2033,33263274371.928223
+option2,Taxation of 85% of Social Security Benefits,,2034,33289054160.43457
+option2,Taxation of 85% of Social Security Benefits,,2035,33293153872.8916
+option3,85% Taxation with Permanent Senior Deduction Extension,,2026,24093368640.283203
+option3,85% Taxation with Permanent Senior Deduction Extension,,2027,24325946788.830566
+option3,85% Taxation with Permanent Senior Deduction Extension,,2028,24269369609.297363
+option3,85% Taxation with Permanent Senior Deduction Extension,,2029,2969340690.083008
+option3,85% Taxation with Permanent Senior Deduction Extension,,2030,3302440933.3310547
+option3,85% Taxation with Permanent Senior Deduction Extension,,2031,3502856323.0268555
+option3,85% Taxation with Permanent Senior Deduction Extension,,2032,3642990990.857422
+option3,85% Taxation with Permanent Senior Deduction Extension,,2033,3602565676.8242188
+option3,85% Taxation with Permanent Senior Deduction Extension,,2034,3584125822.398926
+option3,85% Taxation with Permanent Senior Deduction Extension,,2035,3628102140.1679688
+option4,Social Security Tax Credit System ($500),,2026,30079993190.33008
+option4,Social Security Tax Credit System ($500),,2027,30536688398.151367
+option4,Social Security Tax Credit System ($500),,2028,30554543992.188477
+option4,Social Security Tax Credit System ($500),,2029,9155557894.733887
+option4,Social Security Tax Credit System ($500),,2030,9384243441.964844
+option4,Social Security Tax Credit System ($500),,2031,9283473169.484375
+option4,Social Security Tax Credit System ($500),,2032,9084793120.617188
+option4,Social Security Tax Credit System ($500),,2033,8782500760.875
+option4,Social Security Tax Credit System ($500),,2034,8591643900.015625
+option4,Social Security Tax Credit System ($500),,2035,8427760845.674805
+option5,Roth-Style Swap,,2026,58189674944.09668
+option5,Roth-Style Swap,,2027,61437697556.04053
+option5,Roth-Style Swap,,2028,65628613121.55127
+option5,Roth-Style Swap,,2029,67639354694.50391
+option5,Roth-Style Swap,,2030,73508657061.87402
+option5,Roth-Style Swap,,2031,77779017280.15869
+option5,Roth-Style Swap,,2032,81987493438.23633
+option5,Roth-Style Swap,,2033,86052433507.78711
+option5,Roth-Style Swap,,2034,90138804297.74365
+option5,Roth-Style Swap,,2035,93893802161.77832
+option6,Phased Roth-Style Swap,,2026,18738532127.684082
