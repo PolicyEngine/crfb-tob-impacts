@@ -55,6 +55,8 @@ jobs:
         source .venv/bin/activate
         cd jupyterbook
         jupyter-book build .
+        # Add .nojekyll file to prevent GitHub Pages from processing with Jekyll
+        touch _build/html/.nojekyll
 
     - name: Setup Pages
       if: github.ref == 'refs/heads/main'
