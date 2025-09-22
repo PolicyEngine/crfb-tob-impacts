@@ -7,9 +7,6 @@ project:
   github: PolicyEngine/crfb-tob-impacts
   bibliography:
     - references.bib
-  execute:
-    execute_notebooks: cache
-    timeout: 600
   toc:
     - file: intro.md
     - file: policy-options.md
