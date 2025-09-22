@@ -1,0 +1,26 @@
+version: 1
+project:
+  title: 'Social Security Taxation Reform: Policy Analysis and Impact Assessment'
+  authors:
+    - name: PolicyEngine
+  copyright: '2024'
+  github: PolicyEngine/crfb-tob-impacts
+  bibliography:
+    - references.bib
+  toc:
+    - file: intro.md
+    - file: policy-options.md
+    - file: methodology.md
+    - file: household-impacts.ipynb
+    - file: revenue-impacts.ipynb
+    - file: external-estimates.md
+    - file: bibliography.md
+site:
+  template: book-theme
+  options:
+    logo: policyengine.png
+    favicon: policyengine.png
+    repository_url: https://github.com/PolicyEngine/crfb-tob-impacts
+    nav_links:
+      - title: GitHub
+        url: https://github.com/PolicyEngine/crfb-tob-impacts

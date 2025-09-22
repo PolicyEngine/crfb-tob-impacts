@@ -20,29 +20,18 @@ The following table compares 10-year revenue loss estimates from major analytica
 
 The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series. The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report. The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model, noting that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
 
-## Taxation of 85% of Social Security Benefits (Option 2)
+## Related CBO Analysis
 
-CBO and JCT have provided estimates for taxing Social Security benefits at the same rate as private pensions, which would treat 85% of benefits as taxable income regardless of income level:
+CBO has analyzed a different proposal to "Tax Social Security and Railroad Retirement Benefits in the Same Way That Distributions From Defined Benefit Pensions Are Taxed." Unlike our Option 2 which taxes 85% uniformly, the CBO proposal would establish a basis recovery system where beneficiaries could exclude from taxation the portion representing their past payroll tax contributions:
 
-| Organization | Estimate Type | 10-Year Revenue Gain | Period | Source |
-|--------------|---------------|----------------------|---------|--------|
-| **PolicyEngine (Our Analysis)** | **Static** | **\$227.5 billion** | **2026-2035** | **This study** |
-| Congressional Budget Office | Conventional | \$950 billion | 2025-2034 | {cite}`cbo2024pension` |
-| Joint Committee on Taxation | Tax Expenditure | ~\$1.0 trillion | 2024-2033 | JCT Tax Expenditure estimate |
+| Organization | Proposal | Estimate Type | 10-Year Revenue Gain | Period | Source |
+|--------------|----------|---------------|----------------------|---------|--------|
+| **PolicyEngine (Our Analysis)** | **Tax 85% uniformly** | **Static** | **\$227.5 billion** | **2026-2035** | **This study (Option 2)** |
+| Congressional Budget Office | Basis recovery system | Conventional | \$458.7 billion | 2021-2030 | {cite}`cbo2024pension` |
 
-### Analysis of Differences
+**Note**: These are different proposals. Our Option 2 taxes 85% of benefits uniformly for all recipients. The CBO proposal establishes a basis recovery system where beneficiaries exclude from taxation the portion representing their past payroll tax contributions (similar to private pension treatment).
 
-Our estimate of \$227.5 billion is substantially lower than CBO's \$950 billion estimate. Several factors may explain this difference:
-
-1. **Baseline Differences**: The One Big Beautiful Bill's temporary \$6,000 bonus senior deduction (2025-2028) reduces the baseline revenue from Social Security benefit taxation. This deduction was not included in CBO's analysis, which predates the legislation.
-
-2. **Reform Specification**: Our Option 2 taxes 85% of benefits for all recipients but maintains the existing tax structure. CBO's estimate for "treating Social Security like a private pension" may include additional changes beyond just the 85% inclusion rate.
-
-3. **Interaction Effects**: The presence of the bonus senior deduction creates interaction effects that reduce the revenue gain from taxing 85% of benefits, particularly in the years 2026-2028.
-
-4. **Methodological Considerations**: While both analyses use microsimulation, differences in datasets, imputation methods, and modeling assumptions can lead to variations in estimates.
-
-5. **Income Distribution**: Our analysis may capture different distributional effects, particularly for lower-income beneficiaries who would newly face taxation under the 85% rule.
+The Joint Committee on Taxation estimates the current tax expenditure from Social Security benefit exclusions at \$318.4 billion over 2024-2028 ({cite}`jct2024expenditures`, approximately \$63.7 billion annually).
 
 These differences highlight the importance of clearly specifying reform parameters and baseline assumptions when comparing estimates across organizations.
 

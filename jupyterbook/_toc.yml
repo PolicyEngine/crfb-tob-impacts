@@ -1,9 +1,0 @@
-format: jb-book
-root: intro
-chapters:
-- file: policy-options
-- file: methodology
-- file: household-impacts
-- file: revenue-impacts
-- file: external-estimates
-- file: bibliography
