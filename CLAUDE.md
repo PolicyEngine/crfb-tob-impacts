@@ -37,9 +37,35 @@ gh pr create --title "Fix: Description" --body "Details of what was fixed"
 The CI will automatically check:
 1. **Notebook execution**: All notebooks must have outputs and execute without errors
 2. **Python tests**: All tests must pass
-3. **Build validation**: The Jupyter Book must build successfully
+3. **Build validation**: The Jupyter Book must build successfully and generate HTML correctly
 
 Never merge a PR with failing checks!
+
+### Testing Locally Before Pushing
+
+**Always test the build locally before pushing changes!**
+
+```bash
+# Quick test - run the test script
+./scripts/test-build.sh
+
+# Manual test - build and preview
+cd jupyterbook
+myst build --html
+myst start  # Opens preview at http://localhost:3004
+```
+
+**What to check in the preview:**
+1. ✅ All pages load without "Source" or "Loading..." errors
+2. ✅ Charts and tables display correctly
+3. ✅ Navigation works between pages
+4. ✅ Code cells are hidden (only outputs show)
+5. ✅ Formatting looks correct (no broken layouts)
+
+If you see issues like:
+- Pages showing raw "Source" dropdowns → Notebooks need execution
+- Broken layouts → Check myst.yml configuration
+- Missing content → Ensure notebooks have been executed with outputs
 
 ## Build and Development Commands
 

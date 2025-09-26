@@ -1,0 +1,46 @@
+⚠️  myst.yml 'config.project' extra key ignored: execute (at myst.yml)
+⚠️  myst.yml 'authors.0' No given name for name 'PolicyEngine' - if this is intended, you may define 'name' explicitly as an object (at myst.yml#config.project)
+🌎 Building MyST site
+Building the base site.
+To set a baseurl (e.g. GitHub pages) use "BASE_URL" environment variable.
+📖 Built methodology.md in 45 ms.
+📖 Built intro.md in 76 ms.
+📖 Built bibliography.md in 38 ms.
+📖 Built revenue-impacts.ipynb in 54 ms.
+⚠️  household-impacts.ipynb:3 commentAtEnd, % comment has no terminating newline; LaTeX would fail because of commenting the end of math mode (e.g. $)
+   6,000 bonus senior deduction from the One Big Beautiful Bill that includes a 6% phase-out beginning at 
+📖 Built household-impacts.ipynb in 89 ms.
+📖 Built external-estimates.md in 152 ms.
+📖 Built policy-options.md in 177 ms.
+📚 Built 7 pages for project in 259 ms.
+
+
+	✨✨✨  Starting Book Theme  ✨✨✨
+
+
+
+🔌 Server started on port 3004!  🥳 🎉
+
+
+	👉  http://localhost:3004  👈
+
+
+(node:81385) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+
+💌 GET  / 200 - - 31.023 ms
+GET /methodology 200 - - 31.811 ms
+GET /policy-options 200 - - 30.777 ms
+GET /household-impacts 200 - - 36.235 ms
+GET /revenue-impacts 200 - - 39.250 ms
+💌 GET  /external-estimates 200 - - 9.982 ms
+GET /bibliography 200 - - 11.010 ms
+GET /index.json 200 - - 10.934 ms
+GET /methodology.json 200 - - 10.648 ms
+GET /policy-options.json 200 - - 11.083 ms
+💌 GET  /robots.txt 200 - - 0.419 ms
+💌 GET  /household-impacts.json 200 - - 3.864 ms
+💌 GET  /bibliography.json 200 - - 3.225 ms
+GET /revenue-impacts.json 200 - - 4.009 ms
+GET /external-estimates.json 200 - - 4.515 ms
+💌 GET  /favicon.ico 200 - - 1.740 ms
+💌 GET  /myst-theme.css 200 - - 2.315 ms

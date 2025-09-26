@@ -31,8 +31,7 @@ def calculate_fiscal_impact(
         if reform is not None:
             # Handle empty baseline (computation failed)
             if len(baseline_income_tax) == 0:
-                print(f"  Warning: Empty baseline for year {year}, skipping")
-                return 0.0
+                raise ValueError(f"Empty baseline for year {year} - cannot compute impact")
 
             # Create reformed simulation
             if dataset:
@@ -44,12 +43,12 @@ def calculate_fiscal_impact(
             # JCT convention: reformed - baseline (positive = more revenue)
             revenue_impact = reformed_income_tax.sum() - baseline_income_tax.sum()
         else:
-            revenue_impact = 0.0
+            raise ValueError("Reform is None - cannot calculate impact")
 
         return revenue_impact
     except Exception as e:
         print(f"Error calculating impact for year {year}: {e}")
-        return 0.0
+        raise  # Re-raise the exception instead of returning 0
 
 
 def compute_baselines(
@@ -91,8 +90,7 @@ def compute_baselines(
                 print(f"  Successfully computed baseline for {year}")
             except Exception as e2:
                 print(f"  Failed to compute baseline for {year}: {e2}")
-                # Return empty array as fallback
-                baselines[year] = np.array([])
+                raise ValueError(f"Cannot compute baseline for {year}: {e2}") from e2
 
     print("Baseline computation complete!\n")
     return baselines

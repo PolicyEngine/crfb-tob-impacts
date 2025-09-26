@@ -54,7 +54,6 @@ option6,Phased Roth-Style Swap,2027,39886535420.467285
 option6,Phased Roth-Style Swap,2028,63666906933.85156
 option6,Phased Roth-Style Swap,2029,83306993738.92383
 option6,Phased Roth-Style Swap,2030,106667317458.6338
-option6,Phased Roth-Style Swap,2031,0.0
 option6,Phased Roth-Style Swap,2032,156868267889.0537
 option6,Phased Roth-Style Swap,2033,174899536051.29883
 option6,Phased Roth-Style Swap,2034,174827502622.92334
@@ -69,3 +68,4 @@ option7,Eliminate Bonus Senior Deduction,2032,0.0
 option7,Eliminate Bonus Senior Deduction,2033,0.0
 option7,Eliminate Bonus Senior Deduction,2034,0.0
 option7,Eliminate Bonus Senior Deduction,2035,0.0
+option6,Phased Roth-Style Swap,2031,130706952685.61572
