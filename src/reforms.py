@@ -92,6 +92,70 @@ def tax_85_percent_ss():
     }
 
 
+def tax_100_percent_ss():
+    """Tax 100% of Social Security benefits for all recipients.
+
+    This reform makes 100% of Social Security benefits taxable regardless
+    of income level, extending beyond the current 85% maximum.
+
+    Sets all rate parameters to 1.0 with all thresholds at zero.
+    """
+    return {
+        # Set combined income fraction to 1.0
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        # Set all base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all adjusted base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all rate parameters to 1.0 for 100% taxation
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.base.excess": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.excess": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.bracket": {
+            "2026-01-01.2100-12-31": 1.0
+        }
+    }
+
+
 def eliminate_senior_deduction():
     """Eliminate the bonus senior deduction."""
     return {
@@ -284,6 +348,16 @@ def get_option7_reform():
     return Reform.from_dict(eliminate_senior_deduction(), country_id="us")
 
 
+def get_option8_reform():
+    """Option 8: Full Taxation of Social Security Benefits.
+
+    Makes 100% of Social Security benefits taxable for all recipients,
+    regardless of income level. This is more comprehensive than Option 2
+    which taxes only 85% of benefits.
+    """
+    return Reform.from_dict(tax_100_percent_ss(), country_id="us")
+
+
 # Dictionary mapping reform IDs to configurations
 REFORMS = {
     "option1": {
@@ -313,5 +387,9 @@ REFORMS = {
     "option7": {
         "name": "Eliminate Bonus Senior Deduction",
         "func": get_option7_reform,
+    },
+    "option8": {
+        "name": "Full Taxation of Social Security Benefits",
+        "func": get_option8_reform,
     },
 }

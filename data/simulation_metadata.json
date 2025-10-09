@@ -1,7 +1,7 @@
 {
   "policyengine_us_version": "unknown",
-  "simulation_date": "2025-09-26",
-  "python_version": "3.13.3",
+  "simulation_date": "2025-10-09",
+  "python_version": "3.11.5",
   "analysis_period": "2026-2035",
   "data_sources": {
     "enhanced_cps": "PolicyEngine enhanced CPS microdata",

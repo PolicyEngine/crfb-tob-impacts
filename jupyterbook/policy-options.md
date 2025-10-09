@@ -304,3 +304,57 @@ def get_option7_reform():
 ```
 
 **Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the \$6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.
+
+## Option 8: Full Taxation of Social Security Benefits
+
+**Start Date:** 2026
+
+**Policy Description:** Beginning in 2026, 100% of all Social Security benefits are included in taxable income, regardless of income level. This represents the most comprehensive expansion of Social Security benefit taxation, treating benefits identically to other forms of income such as wages or pensions.
+
+**Revenue Allocation:** The additional revenue from taxation of benefits (TOB) will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of TOB revenue earned by the OASI, DI, and HI trust funds.
+
+```{dropdown} Option 8 Reform Code
+```python
+def get_option8_reform():
+    """Option 8: Full Taxation of Social Security Benefits"""
+    return Reform.from_dict({
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        }
+    }, country_id="us")
+```
+
+**Reform Explanation:** This reform makes 100% of Social Security benefits taxable by setting `combined_income_ss_fraction` to 1.0 (ensuring full SS benefits are included in combined income calculations), `taxability.rate.additional` to 1.0 (100% taxation rate instead of the default 85%), and all income thresholds (both base and adjusted_base) to \$0 for all filing statuses. Unlike Option 2 which taxes 85% of benefits (the current maximum under law), Option 8 taxes the full 100%, treating Social Security benefits identically to wages, pensions, and other ordinary income. This eliminates both the current two-tier threshold system and the 15% exclusion that exists even for high-income beneficiaries under current law.

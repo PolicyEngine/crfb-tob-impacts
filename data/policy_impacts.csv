@@ -31,7 +31,7 @@ option3,85% Taxation with Permanent Senior Deduction Extension,2034,3584125822.3
 option3,85% Taxation with Permanent Senior Deduction Extension,2035,3628102140.1679688
 option4,Social Security Tax Credit System ($500),2026,30079993190.33008
 option4,Social Security Tax Credit System ($500),2027,30536688398.151367
-option4,Social Security Tax Credit System ($500),2028,30554543992.188477
+option4,Social Security Tax Credit System ($500),2028,30554543992.18848
 option4,Social Security Tax Credit System ($500),2029,9155557894.733889
 option4,Social Security Tax Credit System ($500),2030,9384243441.964844
 option4,Social Security Tax Credit System ($500),2031,9283473169.484377
@@ -58,8 +58,8 @@ option6,Phased Roth-Style Swap,2032,156868267889.0537
 option6,Phased Roth-Style Swap,2033,174899536051.29883
 option6,Phased Roth-Style Swap,2034,174827502622.92334
 option6,Phased Roth-Style Swap,2035,173926162047.95312
-option7,Eliminate Bonus Senior Deduction,2026,21004132783.433594
-option7,Eliminate Bonus Senior Deduction,2027,21471316558.266113
+option7,Eliminate Bonus Senior Deduction,2026,21004132783.433598
+option7,Eliminate Bonus Senior Deduction,2027,21471316558.266117
 option7,Eliminate Bonus Senior Deduction,2028,21751607091.23584
 option7,Eliminate Bonus Senior Deduction,2029,0.0
 option7,Eliminate Bonus Senior Deduction,2030,0.0
@@ -69,3 +69,13 @@ option7,Eliminate Bonus Senior Deduction,2033,0.0
 option7,Eliminate Bonus Senior Deduction,2034,0.0
 option7,Eliminate Bonus Senior Deduction,2035,0.0
 option6,Phased Roth-Style Swap,2031,130706952685.61572
+option8,Full Taxation of Social Security Benefits,2026,50664281797.9353
+option8,Full Taxation of Social Security Benefits,2027,52429573679.36279
+option8,Full Taxation of Social Security Benefits,2028,53726788356.01123
+option8,Full Taxation of Social Security Benefits,2029,65557793795.71289
+option8,Full Taxation of Social Security Benefits,2030,67474353702.32959
+option8,Full Taxation of Social Security Benefits,2031,69048757158.60938
+option8,Full Taxation of Social Security Benefits,2032,70616358084.1792
+option8,Full Taxation of Social Security Benefits,2033,72009624233.55469
+option8,Full Taxation of Social Security Benefits,2034,73593026391.81006
+option8,Full Taxation of Social Security Benefits,2035,75181878973.63672
