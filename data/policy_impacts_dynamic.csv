@@ -1,0 +1,9 @@
+reform_id,reform_name,year,revenue_impact,scoring_type
+option1,Full Repeal of Social Security Benefits Taxation,2026,-85006806342.93262,dynamic
+option2,Taxation of 85% of Social Security Benefits,2026,24534142650.274414,dynamic
+option3,85% Taxation with Permanent Senior Deduction Extension,2026,24534142650.274414,dynamic
+option4,Social Security Tax Credit System ($500),2026,30044837962.302246,dynamic
+option5,Roth-Style Swap,2026,41984266422.59326,dynamic
+option6,Phased Roth-Style Swap,2026,17851234092.715088,dynamic
+option7,Eliminate Bonus Senior Deduction,2026,20561942665.46582,dynamic
+option8,Full Taxation of Social Security Benefits,2026,50654322150.10791,dynamic
