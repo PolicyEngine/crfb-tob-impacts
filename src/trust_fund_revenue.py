@@ -16,12 +16,12 @@ def calculate_trust_fund_revenue(
     dataset: Optional[str] = None
 ) -> float:
     """
-    Calculate trust fund revenue from SS benefit taxation.
+    Calculate TOTAL trust fund revenue from SS benefit taxation under a reform.
 
-    Uses PolicyEngine's branching mechanism to isolate the revenue component
+    Uses PolicyEngine's branching and neutralization to isolate the revenue component
     attributable to taxation of Social Security benefits by comparing:
     1. Income tax with the reform (including taxable SS benefits)
-    2. Income tax with same reform but taxable_social_security neutralized
+    2. Income tax with same conditions but tax_unit_taxable_social_security neutralized
 
     Args:
         reform: PolicyEngine Reform object
@@ -30,6 +30,7 @@ def calculate_trust_fund_revenue(
 
     Returns:
         Trust fund revenue in dollars (positive = revenue to trust funds)
+        This is the TOTAL revenue, not the change from baseline.
     """
     # Create simulation with the reform
     if dataset:
@@ -41,27 +42,33 @@ def calculate_trust_fund_revenue(
     income_tax_with_ss = sim.calculate("income_tax", map_to="household", period=year)
 
     # Verify we have taxable SS
-    taxable_ss = sim.calculate("taxable_social_security", period=year)
-    if taxable_ss.sum() == 0:
+    taxable_ss_unit = sim.calculate("tax_unit_taxable_social_security", period=year)
+    if taxable_ss_unit.sum() == 0:
         return 0.0  # No taxable SS means no trust fund revenue
 
-    # Compare against baseline (current law) to get CHANGE in trust fund revenue
-    # Create baseline simulation (no reform)
-    if dataset:
-        baseline = Microsimulation(dataset=dataset)
-    else:
-        baseline = Microsimulation()
+    # Create branch and neutralize tax_unit_taxable_social_security
+    branch = sim.get_branch("trust_fund_calc", clone_system=True)
+    branch.tax_benefit_system.neutralize_variable("tax_unit_taxable_social_security")
 
-    income_tax_baseline = baseline.calculate("income_tax", map_to="household", period=year)
+    # Delete ALL calculated variables to force complete recalculation
+    # (keeping only input variables)
+    for var_name in list(branch.tax_benefit_system.variables.keys()):
+        if var_name not in branch.input_variables:
+            try:
+                branch.delete_arrays(var_name)
+            except:
+                pass
 
-    # Trust fund revenue = CHANGE from baseline
-    # This is the additional trust fund revenue from the reform
-    trust_fund_revenue_change = income_tax_with_ss.sum() - income_tax_baseline.sum()
+    # Calculate income tax WITHOUT taxable SS
+    income_tax_without_ss = branch.calculate("income_tax", map_to="household", period=year)
 
-    # Note: This returns the CHANGE in trust fund revenue, not absolute amount
-    # To get absolute trust fund revenue under the reform, would need to also
-    # calculate baseline trust fund revenue and add it
-    return float(trust_fund_revenue_change)
+    # Clean up branch
+    del sim.branches["trust_fund_calc"]
+
+    # Trust fund revenue = difference (TOTAL revenue, not change from baseline)
+    trust_fund_revenue = income_tax_with_ss.sum() - income_tax_without_ss.sum()
+
+    return float(trust_fund_revenue)
 
 
 def calculate_trust_fund_revenue_dynamic(
@@ -96,40 +103,38 @@ def calculate_trust_fund_revenue_dynamic(
     # Calculate income tax WITH SS taxation and behavioral responses
     income_tax_with_ss = sim.calculate("income_tax", map_to="household", period=year)
 
-    # Extract behaviorally-adjusted employment income
+    # Verify we have taxable SS
+    taxable_ss_unit = sim.calculate("tax_unit_taxable_social_security", period=year)
+    if taxable_ss_unit.sum() == 0:
+        return 0.0  # No taxable SS means no trust fund revenue
+
+    # Extract behaviorally-adjusted employment income (already includes LSR)
     employment_income = sim.calculate("employment_income", map_to="person", period=year)
     self_employment_income = sim.calculate("self_employment_income", map_to="person", period=year)
 
-    # Create branch and apply Option 1 (eliminate SS taxation)
+    # Create branch and neutralize BOTH tax_unit_taxable_social_security AND LSR variables
     branch = sim.get_branch("trust_fund_calc", clone_system=True)
+    branch.tax_benefit_system.neutralize_variable("tax_unit_taxable_social_security")
 
-    # Apply Option 1 reform to eliminate SS taxation
-    from reforms import eliminate_ss_taxation
-    from policyengine_core.reforms import Reform
+    # Neutralize all LSR variables so they return 0 (disables behavioral responses in branch)
+    branch.tax_benefit_system.neutralize_variable("labor_supply_behavioral_response")
+    branch.tax_benefit_system.neutralize_variable("employment_income_behavioral_response")
+    branch.tax_benefit_system.neutralize_variable("self_employment_income_behavioral_response")
+    branch.tax_benefit_system.neutralize_variable("income_elasticity_lsr")
+    branch.tax_benefit_system.neutralize_variable("substitution_elasticity_lsr")
 
-    eliminate_reform = Reform.from_dict(eliminate_ss_taxation(), country_id="us")
-    eliminate_reform.apply(branch.tax_benefit_system)
+    # Set the total employment income (with behavioral adjustments) as the base input
+    # Since LSR is neutralized, employment_income will just use employment_income_before_lsr
+    branch.set_input("employment_income_before_lsr", year, employment_income)
+    branch.set_input("self_employment_income_before_lsr", year, self_employment_income)
 
-    # Override incomes with behaviorally-adjusted values
-    branch.set_input("employment_income", year, employment_income)
-    branch.set_input("self_employment_income", year, self_employment_income)
-
-    # Delete dependent variables to force recalculation
-    dependent_vars = [
-        "income_tax",
-        "adjusted_gross_income",
-        "adjusted_gross_income_person",
-        "taxable_income",
-        "taxable_income_deductions",
-        "income_tax_before_credits",
-        "taxable_social_security"
-    ]
-
-    for var in dependent_vars:
-        try:
-            branch.delete_arrays(var)
-        except:
-            pass
+    # Delete ALL calculated variables to force complete recalculation
+    for var_name in list(branch.tax_benefit_system.variables.keys()):
+        if var_name not in branch.input_variables:
+            try:
+                branch.delete_arrays(var_name)
+            except:
+                pass
 
     # Calculate income tax with fixed incomes but no taxable SS
     income_tax_without_ss = branch.calculate("income_tax", map_to="household", period=year)
@@ -137,7 +142,7 @@ def calculate_trust_fund_revenue_dynamic(
     # Clean up
     del sim.branches["trust_fund_calc"]
 
-    # Trust fund revenue = difference
+    # Trust fund revenue = difference (TOTAL revenue, not change from baseline)
     trust_fund_revenue = income_tax_with_ss.sum() - income_tax_without_ss.sum()
 
     return float(trust_fund_revenue)

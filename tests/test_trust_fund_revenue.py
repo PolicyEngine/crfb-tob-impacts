@@ -10,23 +10,23 @@ from src.reforms import get_option2_reform
 class TestTrustFundRevenue:
     """Test trust fund revenue calculations."""
 
-    def test_trust_fund_revenue_change_is_positive_for_option2(self):
-        """Trust fund revenue change should be positive for Option 2 vs baseline."""
-        revenue_change = calculate_trust_fund_revenue(
+    def test_trust_fund_revenue_is_positive_for_option2(self):
+        """Trust fund revenue should be positive for Option 2."""
+        revenue = calculate_trust_fund_revenue(
             reform=get_option2_reform(),
             year=2026
         )
-        assert revenue_change > 0, "Trust fund revenue change should be positive for Option 2"
+        assert revenue > 0, "Trust fund revenue should be positive for Option 2"
 
-    def test_trust_fund_revenue_change_is_substantial(self):
-        """Trust fund revenue change should be in reasonable range (billions)."""
-        revenue_change = calculate_trust_fund_revenue(
+    def test_trust_fund_revenue_is_substantial(self):
+        """Trust fund revenue should be in reasonable range (billions)."""
+        revenue = calculate_trust_fund_revenue(
             reform=get_option2_reform(),
             year=2026
         )
-        # Based on revenue impacts data, Option 2 generates ~$24B additional revenue
-        assert revenue_change > 10e9, f"Revenue change should be > $10B, got ${revenue_change/1e9:.1f}B"
-        assert revenue_change < 100e9, f"Revenue change should be < $100B, got ${revenue_change/1e9:.1f}B"
+        # This is TOTAL trust fund revenue, should be ~$100-150B
+        assert revenue > 50e9, f"Revenue should be > $50B, got ${revenue/1e9:.1f}B"
+        assert revenue < 200e9, f"Revenue should be < $200B, got ${revenue/1e9:.1f}B"
 
     def test_option2_vs_baseline_differ(self):
         """Income tax should differ between Option 2 and baseline."""
