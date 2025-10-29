@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+jupyterbook/_build/
+jupyterbook/.jupyter_cache/
+
+# Node
+node_modules/
+policy-impact-dashboard/node_modules/
+policy-impact-dashboard/build/
+
+# Data files
+data/*.csv
+*.h5
+*.hdf5
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation builds
+docs/
+_build/
+site/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Only include what we need
+!src/
+!batch/

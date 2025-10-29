@@ -1,0 +1,11 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/policyengine-api/ss-calculator:latest'
+      - '-f'
+      - 'batch/Dockerfile'
+      - '.'
+images:
+  - 'gcr.io/policyengine-api/ss-calculator:latest'
