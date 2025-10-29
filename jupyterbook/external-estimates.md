@@ -25,6 +25,9 @@ Having presented our microsimulation results, we can now compare them with estim
 ### Option 7: Eliminate Bonus Senior Deduction
 **10-Year Impact (2026-2035):** \$64.3 billion
 
+### Option 8: 100% Taxation of Social Security Benefits
+**10-Year Impact (2026-2035):** \$650.3 billion
+
 ## Full Repeal of Social Security Benefit Taxation (Option 1)
 
 Several organizations have analyzed the budgetary impact of completely eliminating the taxation of Social Security benefits. These estimates vary based on methodology, data sources, and projection periods.
@@ -43,16 +46,17 @@ The following table compares 10-year revenue loss estimates from major analytica
 
 The Congressional Budget Office regularly provides estimates for changes to Social Security benefit taxation as part of their Options for Reducing the Deficit series. The Social Security Board of Trustees provides detailed projections of the impact of benefit taxation on trust fund solvency in their annual report. The Tax Foundation analyzed Trump's proposal to eliminate Social Security benefit taxation using their Taxes and Growth model, noting that their estimate uses Congressional Budget Office (CBO) forecasts for taxable Social Security benefits, which may differ from the assumptions used by the Social Security trustees.
 
-## Uniform Benefit Taxation (Option 2)
+## Expanded Benefit Taxation (Options 2 and 8)
 
-The Joint Committee on Taxation provides relevant context for understanding the revenue potential of taxing Social Security benefits more uniformly:
+The Joint Committee on Taxation provides relevant context for understanding the revenue potential of taxing Social Security benefits more comprehensively:
 
-| Organization | Proposal/Measure | Estimate Type | Revenue Impact | Period | Source |
-|--------------|------------------|---------------|----------------|---------|--------|
-| **PolicyEngine (Our Analysis)** | **Tax 85% uniformly** | **Static** | **\$227.5 billion gain** | **2026-2035** | **This study (Option 2)** |
-| Joint Committee on Taxation | Current SS benefit tax expenditure | Conventional | \$318.4 billion forgone | 2024-2028 | {cite}`jct2024expenditures` |
+| Organization | Proposal/Measure | Estimate Type | Revenue Impact | Period | Years | Source |
+|--------------|------------------|---------------|----------------|---------|--------|--------|
+| **PolicyEngine (Our Analysis)** | **Tax 85% uniformly (Option 2)** | **Static** | **\$227.5 billion gain** | **2026-2035** | **10 years** | **This study** |
+| **PolicyEngine (Our Analysis)** | **Tax 100% of benefits (Option 8)** | **Static** | **\$650.3 billion gain** | **2026-2035** | **10 years** | **This study** |
+| Joint Committee on Taxation | Current SS benefit tax expenditure | Conventional | \$318.4 billion forgone | 2024-2028 | 5 years | {cite}`jct2024expenditures` |
 
-**Note**: The JCT estimates that the current partial exclusion of Social Security benefits from taxation costs \$318.4 billion in forgone revenue over 2024-2028 (approximately \$63.7 billion annually). This represents the revenue loss from not taxing benefits fully under current law, where many recipients pay no tax on benefits and others pay tax on only 50% or 85% based on income thresholds.
+The JCT estimate of \$318.4 billion represents forgone revenue over a **5-year period (2024-2028)**, while our estimates are over a **10-year period (2026-2035)**. The JCT figure represents approximately \$63.7 billion annually in revenue loss from the current partial exclusion of Social Security benefits from taxation.
 
 CBO has also analyzed a different proposal to "Tax Social Security and Railroad Retirement Benefits in the Same Way That Distributions From Defined Benefit Pensions Are Taxed," which would establish a basis recovery system and generated an estimated \$458.7 billion over 2021-2030 ({cite}`cbo2024pension`).
 

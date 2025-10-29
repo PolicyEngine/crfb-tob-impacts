@@ -33,12 +33,27 @@ def zero_ss_tax_thresholds():
 
 
 def eliminate_ss_taxation():
-    """Eliminate Social Security benefit taxation."""
+    """Eliminate Social Security benefit taxation.
+
+    Sets all SS taxation rate parameters to 0 to completely eliminate
+    federal income taxation of Social Security benefits.
+    """
     return {
-        "gov.irs.social_security.taxability.rate.base": {
+        # Base rate parameters (0-50% bracket)
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {
             "2026-01-01.2100-12-31": 0
         },
-        "gov.irs.social_security.taxability.rate.additional": {
+        "gov.irs.social_security.taxability.rate.base.excess": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Additional rate parameters (50-85% bracket)
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.rate.additional.bracket": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.rate.additional.excess": {
             "2026-01-01.2100-12-31": 0
         }
     }
@@ -88,6 +103,70 @@ def tax_85_percent_ss():
         },
         "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
             "2026-01-01.2100-12-31": 0
+        }
+    }
+
+
+def tax_100_percent_ss():
+    """Tax 100% of Social Security benefits for all recipients.
+
+    This reform makes 100% of Social Security benefits taxable regardless
+    of income level, extending beyond the current 85% maximum.
+
+    Sets all rate parameters to 1.0 with all thresholds at zero.
+    """
+    return {
+        # Set combined income fraction to 1.0
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        # Set all base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all adjusted base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all rate parameters to 1.0 for 100% taxation
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.base.excess": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.excess": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        "gov.irs.social_security.taxability.rate.additional.bracket": {
+            "2026-01-01.2100-12-31": 1.0
         }
     }
 
@@ -218,58 +297,51 @@ def get_option6_reform():
 
     Implements a gradual transition to the Roth-style system over multiple years,
     phasing in employer contribution taxation while phasing out benefit taxation.
+
+    Note: This reform is complex and may need further refinement for the SS taxation
+    phase-down to work properly with PolicyEngine's parameter structure.
     """
     reform_dict = {
         # Enable employer payroll tax inclusion
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
             "2026-01-01.2100-12-31": True
         },
-        # Phase in employer payroll tax (1% per year from 2026 to 2033)
+        # Phase in employer payroll tax (year by year from 2026 to 2033)
         "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
-            "2026-01-01.2026-12-31": 0.1307,  # 1/7.65
-            "2027-01-01.2027-12-31": 0.2614,  # 2/7.65
-            "2028-01-01.2028-12-31": 0.3922,  # 3/7.65
-            "2029-01-01.2029-12-31": 0.5229,  # 4/7.65
-            "2030-01-01.2030-12-31": 0.6536,  # 5/7.65
-            "2031-01-01.2031-12-31": 0.7843,  # 6/7.65
-            "2032-01-01.2032-12-31": 0.9150,  # 7/7.65
-            "2033-01-01.2100-12-31": 1.0      # Full amount
+            "2026": 0.1307,  # 1/7.65
+            "2027": 0.2614,  # 2/7.65
+            "2028": 0.3922,  # 3/7.65
+            "2029": 0.5229,  # 4/7.65
+            "2030": 0.6536,  # 5/7.65
+            "2031": 0.7843,  # 6/7.65
+            "2032": 0.9150,  # 7/7.65
+            "2033-01-01.2100-12-31": 1.0      # Full amount from 2033 onward
         },
-        # Phase down Social Security benefits taxation starting 2029
-        # Base rate starts at 50%, decreases by 5% per year
-        "gov.irs.social_security.taxability.rate.base": {
-            "2029-01-01.2029-12-31": 0.45,
-            "2030-01-01.2030-12-31": 0.40,
-            "2031-01-01.2031-12-31": 0.35,
-            "2032-01-01.2032-12-31": 0.30,
-            "2033-01-01.2033-12-31": 0.25,
-            "2034-01-01.2034-12-31": 0.20,
-            "2035-01-01.2035-12-31": 0.15,
-            "2036-01-01.2036-12-31": 0.10,
-            "2037-01-01.2037-12-31": 0.05,
-            "2038-01-01.2100-12-31": 0
-        },
-        # Additional rate starts at 85%, decreases by 5% per year until 35%
-        "gov.irs.social_security.taxability.rate.additional": {
-            "2029-01-01.2029-12-31": 0.80,
-            "2030-01-01.2030-12-31": 0.75,
-            "2031-01-01.2031-12-31": 0.70,
-            "2032-01-01.2032-12-31": 0.65,
-            "2033-01-01.2033-12-31": 0.60,
-            "2034-01-01.2034-12-31": 0.55,
-            "2035-01-01.2035-12-31": 0.50,
-            "2036-01-01.2036-12-31": 0.45,
-            "2037-01-01.2037-12-31": 0.40,
-            "2038-01-01.2038-12-31": 0.35,
-            "2039-01-01.2039-12-31": 0.30,
-            "2040-01-01.2040-12-31": 0.25,
-            "2041-01-01.2041-12-31": 0.20,
-            "2042-01-01.2042-12-31": 0.15,
-            "2043-01-01.2043-12-31": 0.10,
-            "2044-01-01.2044-12-31": 0.05,
-            "2045-01-01.2100-12-31": 0
-        }
     }
+
+    # For the SS taxation phase-down, we need to set each leaf parameter
+    # Phase down base rate parameters (benefit_cap and excess)
+    base_years = [2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037]
+    base_values = [0.45, 0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    for param_name in ["benefit_cap", "excess"]:
+        param_path = f"gov.irs.social_security.taxability.rate.base.{param_name}"
+        reform_dict[param_path] = {}
+        for year, value in zip(base_years, base_values):
+            reform_dict[param_path][str(year)] = value
+        reform_dict[param_path]["2038-01-01.2100-12-31"] = 0
+
+    # Phase down additional rate parameters (benefit_cap, bracket, excess)
+    add_years = list(range(2029, 2045))
+    add_values = [0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40,
+                  0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    for param_name in ["benefit_cap", "bracket", "excess"]:
+        param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
+        reform_dict[param_path] = {}
+        for year, value in zip(add_years, add_values):
+            reform_dict[param_path][str(year)] = value
+        reform_dict[param_path]["2045-01-01.2100-12-31"] = 0
 
     return Reform.from_dict(reform_dict, country_id="us")
 
@@ -282,6 +354,16 @@ def get_option7_reform():
     The deduction expires in 2029, so there's only impact from 2026-2028.
     """
     return Reform.from_dict(eliminate_senior_deduction(), country_id="us")
+
+
+def get_option8_reform():
+    """Option 8: Full Taxation of Social Security Benefits.
+
+    Makes 100% of Social Security benefits taxable for all recipients,
+    regardless of income level. This is more comprehensive than Option 2
+    which taxes only 85% of benefits.
+    """
+    return Reform.from_dict(tax_100_percent_ss(), country_id="us")
 
 
 # Dictionary mapping reform IDs to configurations
@@ -313,5 +395,9 @@ REFORMS = {
     "option7": {
         "name": "Eliminate Bonus Senior Deduction",
         "func": get_option7_reform,
+    },
+    "option8": {
+        "name": "Full Taxation of Social Security Benefits",
+        "func": get_option8_reform,
     },
 }
