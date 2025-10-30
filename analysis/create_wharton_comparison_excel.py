@@ -83,66 +83,74 @@ revenue_summary = pd.DataFrame({
     'Households (Weighted M)': [141.8, 146.4, 150.1]
 })
 
-# Create summary statistics
-print("Creating Excel file...")
+# Create single sheet with all three years
+print("Creating Excel file with single sheet...")
 
-# Write to Excel with multiple sheets
 output_file = '../data/wharton_comparison_enhanced_cps_2024.xlsx'
 
+# Build combined sheet with all three tables
+rows = []
+
+# Add revenue summary at top
+rows.append(['AGGREGATE REVENUE IMPACT (Billions)', '', '', '', ''])
+rows.append(['Year', 'PolicyEngine (Enhanced CPS 2024)', 'Dataset Info', '', ''])
+rows.append([2026, -85.4, '20,863 households, 141.8M weighted', '', ''])
+rows.append([2034, -131.7, '20,874 households, 146.4M weighted', '', ''])
+rows.append([2054, -176.3, '20,892 households, 150.1M weighted', '', ''])
+rows.append(['', '', '', '', ''])
+
+# Year 2026 table
+rows.append(['YEAR 2026 COMPARISON', '', '', '', ''])
+rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
+for i in range(len(df_2026)):
+    rows.append([
+        df_2026.iloc[i]['Income Group'],
+        df_2026.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
+        df_2026.iloc[i]['Wharton - Avg Tax Change ($)'],
+        df_2026.iloc[i]['Difference ($)'],
+        df_2026.iloc[i]['PolicyEngine - % Change Income']
+    ])
+rows.append(['', '', '', '', ''])
+
+# Year 2034 table
+rows.append(['YEAR 2034 COMPARISON', '', '', '', ''])
+rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
+for i in range(len(df_2034)):
+    rows.append([
+        df_2034.iloc[i]['Income Group'],
+        df_2034.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
+        df_2034.iloc[i]['Wharton - Avg Tax Change ($)'],
+        df_2034.iloc[i]['Difference ($)'],
+        df_2034.iloc[i]['PolicyEngine - % Change Income']
+    ])
+rows.append(['', '', '', '', ''])
+
+# Year 2054 table
+rows.append(['YEAR 2054 COMPARISON', '', '', '', ''])
+rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
+for i in range(len(df_2054)):
+    rows.append([
+        df_2054.iloc[i]['Income Group'],
+        df_2054.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
+        df_2054.iloc[i]['Wharton - Avg Tax Change ($)'],
+        df_2054.iloc[i]['Difference ($)'],
+        df_2054.iloc[i]['PolicyEngine - % Change Income']
+    ])
+
+# Create single DataFrame
+final_df = pd.DataFrame(rows)
+
+# Write to Excel
 with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-    # Revenue summary sheet
-    revenue_summary.to_excel(writer, sheet_name='Revenue Summary', index=False)
-
-    # Year-specific comparison sheets
-    df_2026.to_excel(writer, sheet_name='2026 Comparison', index=False)
-    df_2034.to_excel(writer, sheet_name='2034 Comparison', index=False)
-    df_2054.to_excel(writer, sheet_name='2054 Comparison', index=False)
-
-    # Create combined view for easy comparison
-    combined = pd.DataFrame({
-        'Income Group': pe_2026['Income Group'],
-
-        'PE 2026 ($)': pe_2026['Avg Tax Change'],
-        'WH 2026 ($)': wharton_2026['Avg Tax Change'],
-        'Diff 2026': [pe - wh for pe, wh in zip(pe_2026['Avg Tax Change'], wharton_2026['Avg Tax Change'])],
-
-        'PE 2034 ($)': pe_2034['Avg Tax Change'],
-        'WH 2034 ($)': wharton_2034['Avg Tax Change'],
-        'Diff 2034': [pe - wh for pe, wh in zip(pe_2034['Avg Tax Change'], wharton_2034['Avg Tax Change'])],
-
-        'PE 2054 ($)': pe_2054['Avg Tax Change'],
-        'WH 2054 ($)': wharton_2054['Avg Tax Change'],
-        'Diff 2054': [pe - wh for pe, wh in zip(pe_2054['Avg Tax Change'], wharton_2054['Avg Tax Change'])],
-    })
-    combined.to_excel(writer, sheet_name='All Years - Tax Change', index=False)
-
-    # Percent change combined view
-    combined_pct = pd.DataFrame({
-        'Income Group': pe_2026['Income Group'],
-
-        'PE 2026 (%)': pe_2026['Pct Change Income'],
-        'WH 2026 (%)': wharton_2026['Pct Change Income'],
-        'Diff 2026 (pp)': [round(pe - wh, 1) for pe, wh in zip(pe_2026['Pct Change Income'], wharton_2026['Pct Change Income'])],
-
-        'PE 2034 (%)': pe_2034['Pct Change Income'],
-        'WH 2034 (%)': wharton_2034['Pct Change Income'],
-        'Diff 2034 (pp)': [round(pe - wh, 1) for pe, wh in zip(pe_2034['Pct Change Income'], wharton_2034['Pct Change Income'])],
-
-        'PE 2054 (%)': pe_2054['Pct Change Income'],
-        'WH 2054 (%)': wharton_2054['Pct Change Income'],
-        'Diff 2054 (pp)': [round(pe - wh, 1) for pe, wh in zip(pe_2054['Pct Change Income'], wharton_2054['Pct Change Income'])],
-    })
-    combined_pct.to_excel(writer, sheet_name='All Years - Pct Change', index=False)
+    final_df.to_excel(writer, sheet_name='Wharton Comparison', index=False, header=False)
 
 print(f"✓ Excel file created: {output_file}")
 print()
-print("Sheets included:")
-print("  1. Revenue Summary - Aggregate impacts for all years")
-print("  2. 2026 Comparison - Detailed 2026 analysis")
-print("  3. 2034 Comparison - Detailed 2034 analysis")
-print("  4. 2054 Comparison - Detailed 2054 analysis")
-print("  5. All Years - Tax Change - Side-by-side tax change comparison")
-print("  6. All Years - Pct Change - Side-by-side percent change comparison")
+print("Single sheet with:")
+print("  - Revenue summary table (2026, 2034, 2054)")
+print("  - 2026 comparison table")
+print("  - 2034 comparison table")
+print("  - 2054 comparison table")
 print()
 print("Dataset used: Enhanced CPS 2024 (reweighted to each target year)")
 print()
