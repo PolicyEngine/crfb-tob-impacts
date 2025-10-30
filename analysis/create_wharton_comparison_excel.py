@@ -37,6 +37,15 @@ data_2054 = {
     '% Diff': ['0% ✓', '-12%', '-56%', '-56%', '-14%', '16%', '14%', '-33%', '-100%']
 }
 
+data_2054_local = {
+    'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
+                     '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
+    'PolicyEngine': [-312, -1119, -2982, -4342, -9064, -13974, -6113, -6406, -280],
+    'Wharton': [-5, -275, -1730, -3560, -4075, -4385, -4565, -4820, -5080],
+    'Difference': [-307, -844, -1252, -782, -4989, -9589, -1548, -1586, 4800],
+    '% Diff': ['6240%', '307%', '72%', '22%', '122%', '219%', '34%', '33%', '-94%']
+}
+
 # Create workbook
 wb = Workbook()
 ws = wb.active
@@ -151,13 +160,16 @@ current_row += 1
 
 # Revenue data
 revenue_data = [
-    ['Year 2026:', '-$85.4B'],
-    ['Year 2034:', '-$131.7B'],
-    ['Year 2054:', '-$176.3B'],
+    ['Year 2026:', '-$85.4B', '(Enhanced CPS 2024)'],
+    ['Year 2034:', '-$131.7B', '(Enhanced CPS 2024)'],
+    ['Year 2054:', '-$176.3B', '(Enhanced CPS 2024)'],
+    ['Year 2054 (Local):', '-$588.1B', '(Local enhanced dataset)'],
 ]
-for year_label, amount in revenue_data:
-    ws.cell(row=current_row, column=1, value=year_label).font = Font(bold=True, size=11)
-    ws.cell(row=current_row, column=2, value=amount).font = Font(size=11)
+for row_data in revenue_data:
+    ws.cell(row=current_row, column=1, value=row_data[0]).font = Font(bold=True, size=11)
+    ws.cell(row=current_row, column=2, value=row_data[1]).font = Font(size=11)
+    if len(row_data) > 2:
+        ws.cell(row=current_row, column=3, value=row_data[2]).font = Font(italic=True, size=10)
     current_row += 1
 
 current_row += 2  # Add spacing
@@ -168,8 +180,11 @@ current_row = add_table(ws, current_row, 2026, data_2026, "Average Tax Change pe
 # Add 2034 table
 current_row = add_table(ws, current_row, 2034, data_2034, "Average Tax Change per Household (Dollars) - Year 2034")
 
-# Add 2054 table
-current_row = add_table(ws, current_row, 2054, data_2054, "Average Tax Change per Household (Dollars) - Year 2054")
+# Add 2054 table (Enhanced CPS)
+current_row = add_table(ws, current_row, 2054, data_2054, "Average Tax Change per Household (Dollars) - Year 2054 (Enhanced CPS 2024)")
+
+# Add 2054 local table
+current_row = add_table(ws, current_row, 2054, data_2054_local, "Average Tax Change per Household (Dollars) - Year 2054 (Local Enhanced Dataset)")
 
 # Add dataset note at bottom
 ws.cell(row=current_row, column=1, value="Dataset: Enhanced CPS 2024 (reweighted to target years)")
@@ -183,10 +198,11 @@ wb.save(output_file)
 print(f"✓ Excel file created: {output_file}")
 print()
 print("Single sheet with formatted tables:")
-print("  - Revenue summary (2026, 2034, 2054)")
+print("  - Revenue summary (2026, 2034, 2054, 2054 local)")
 print("  - 2026 comparison table (formatted)")
 print("  - 2034 comparison table (formatted)")
-print("  - 2054 comparison table (formatted)")
+print("  - 2054 comparison table - Enhanced CPS 2024 (formatted)")
+print("  - 2054 comparison table - Local dataset (formatted)")
 print()
 print("Formatting includes:")
 print("  - Bold headers with gray background")
