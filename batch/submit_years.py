@@ -88,8 +88,9 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     # Resource allocation based on local testing:
     # Local test: 2 reforms used 4.76GB peak memory
     # For 8 reforms: need ~16GB to be safe (includes OS/container overhead)
+    # Using 2 CPUs to match e2-highmem-2 machine type (2 vCPU, 16GB RAM)
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 4000  # 4 CPUs per task
+    resources.cpu_milli = 2000  # 2 CPUs per task (matches e2-highmem-2)
     resources.memory_mib = 16384  # 16GB RAM per task (tested requirement)
     task_spec.compute_resource = resources
 
