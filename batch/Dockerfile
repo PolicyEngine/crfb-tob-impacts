@@ -17,10 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ /app/src/
 
 # Copy batch worker scripts
-COPY batch/compute_baseline.py batch/compute_reform.py /app/
+COPY batch/compute_baseline.py /app/
+COPY batch/compute_reform.py /app/
+COPY batch/compute_year.py /app/batch/
 
 # Make scripts executable
-RUN chmod +x /app/compute_baseline.py /app/compute_reform.py
+RUN chmod +x /app/compute_baseline.py /app/compute_reform.py /app/batch/compute_year.py
 
 # Set PYTHONPATH for imports
 ENV PYTHONPATH=/app/src
