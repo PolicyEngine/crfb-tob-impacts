@@ -131,20 +131,22 @@ def create_reform_job(project_id, region, reforms, years, scoring_types, workers
     task_spec.max_retry_count = 2
     task_spec.max_run_duration = "7200s"  # 2 hour timeout per task (conservative)
 
-    # Resource allocation (2 CPUs, 12GB RAM per task)
-    # e2-highmem-2 has 2 vCPUs and 16GB RAM total, leave headroom for OS
+    # Resource allocation (4 CPUs, 28GB RAM per task)
+    # PolicyEngine requires substantial memory - 12GB wasn't enough, going to 28GB
+    # e2-highmem-4 has 4 vCPUs and 32GB RAM total, leave 4GB headroom for OS
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 2000  # 2 CPUs (full machine)
-    resources.memory_mib = 12288  # 12GB RAM (PolicyEngine needs significant memory)
+    resources.cpu_milli = 4000  # 4 CPUs (full machine)
+    resources.memory_mib = 28672  # 28GB RAM (PolicyEngine is very memory-intensive!)
     task_spec.compute_resource = resources
 
     task_group.task_spec = task_spec
 
-    # Configure allocation policy (use spot instances for cost savings)
+    # Configure allocation policy (use regular instances for reliability)
+    # Note: Spot instances were being preempted, causing task failures
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
-    instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.SPOT
-    instance_policy.machine_type = "e2-highmem-2"  # 2 vCPU, 16GB RAM
+    instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
+    instance_policy.machine_type = "e2-highmem-4"  # 4 vCPU, 32GB RAM
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instance_policy_or_template.policy = instance_policy
