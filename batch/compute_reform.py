@@ -193,10 +193,11 @@ def compute_reform(reform_id, year, scoring_type, bucket_name, job_id):
         else:
             raise ValueError(f"Unknown scoring_type: {scoring_type}. Must be 'static' or 'dynamic'")
 
-        # Calculate reform impact
+        # Calculate reform impact with HuggingFace dataset
         print(f"[5/6] Running PolicyEngine simulation...")
-        print(f"      (Using {year} dataset)")
-        reform_sim = Microsimulation(reform=reform)
+        dataset_name = f"hf://policyengine/test/{year}.h5"
+        print(f"      Using dataset: {dataset_name}")
+        reform_sim = Microsimulation(reform=reform, dataset=dataset_name)
         reform_income_tax = reform_sim.calculate(
             "income_tax",
             map_to="household",

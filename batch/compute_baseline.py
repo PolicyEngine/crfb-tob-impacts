@@ -30,10 +30,11 @@ def compute_baseline(year, bucket_name):
         from policyengine_us import Microsimulation
         from google.cloud import storage
 
-        # Create baseline simulation
+        # Create baseline simulation with HuggingFace dataset
         print(f"[2/4] Creating baseline simulation for {year}...")
-        print(f"      (PolicyEngine will automatically use {year} dataset)")
-        baseline_sim = Microsimulation()
+        dataset_name = f"hf://policyengine/test/{year}.h5"
+        print(f"      Using dataset: {dataset_name}")
+        baseline_sim = Microsimulation(dataset=dataset_name)
 
         # Calculate baseline income tax
         print(f"[3/4] Calculating income tax...")
