@@ -131,22 +131,23 @@ def create_reform_job(project_id, region, reforms, years, scoring_types, workers
     task_spec.max_retry_count = 2
     task_spec.max_run_duration = "7200s"  # 2 hour timeout per task (conservative)
 
-    # Resource allocation (4 CPUs, 28GB RAM per task)
-    # PolicyEngine requires substantial memory - 12GB wasn't enough, going to 28GB
-    # e2-highmem-4 has 4 vCPUs and 32GB RAM total, leave 4GB headroom for OS
+    # Resource allocation (2 CPUs, 8GB RAM per task)
+    # Now that dataset caching is removed, memory should match local (0.9GB observed)
+    # Using conservative 8GB to allow for some overhead during HuggingFace dataset downloads
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 4000  # 4 CPUs (full machine)
-    resources.memory_mib = 28672  # 28GB RAM (PolicyEngine is very memory-intensive!)
+    resources.cpu_milli = 2000  # 2 CPUs
+    resources.memory_mib = 8192  # 8GB RAM (conservative - local only uses ~1GB)
     task_spec.compute_resource = resources
 
     task_group.task_spec = task_spec
 
     # Configure allocation policy (use regular instances for reliability)
     # Note: Spot instances were being preempted, causing task failures
+    # Using e2-standard-4 (4 vCPU, 16GB RAM) - sufficient now without dataset caching
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
     instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
-    instance_policy.machine_type = "e2-highmem-4"  # 4 vCPU, 32GB RAM
+    instance_policy.machine_type = "e2-standard-4"  # 4 vCPU, 16GB RAM
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instance_policy_or_template.policy = instance_policy
