@@ -12,8 +12,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.reforms import REFORMS
 from src.impact_calculator import calculate_multi_year_impacts, calculate_household_impact
@@ -96,6 +96,12 @@ def main():
         action='store_true',
         help='Only generate household impacts (skip fiscal impacts)'
     )
+    parser.add_argument(
+        '--only-reform',
+        type=str,
+        default=None,
+        help='Only process this specific reform (e.g., option8)'
+    )
 
     args = parser.parse_args()
 
@@ -111,6 +117,17 @@ def main():
     years = list(range(args.start_year, args.end_year + 1))
     print(f"Analyzing years {args.start_year} to {args.end_year}")
 
+    # Filter reforms if --only-reform is specified
+    reforms_to_process = REFORMS
+    if args.only_reform:
+        if args.only_reform not in REFORMS:
+            print(f"Error: Reform '{args.only_reform}' not found. Available reforms:")
+            for reform_id in REFORMS.keys():
+                print(f"  - {reform_id}")
+            sys.exit(1)
+        reforms_to_process = {args.only_reform: REFORMS[args.only_reform]}
+        print(f"Processing only reform: {args.only_reform}")
+
     # Calculate fiscal impacts (unless household-only mode)
     fiscal_impacts = None
     if not args.household_only:
@@ -120,10 +137,26 @@ def main():
 
         fiscal_output = output_dir / 'policy_impacts.csv'
         fiscal_impacts = calculate_multi_year_impacts(
-            REFORMS, years, checkpoint_file=str(fiscal_output)
+            reforms_to_process, years, checkpoint_file=str(fiscal_output)
         )
 
-        # Final save (in case any last updates)
+        # If --only-reform is specified and file exists, append to existing data
+        if args.only_reform and fiscal_output.exists():
+            print(f"\nAppending to existing policy impacts file...")
+            existing_df = pd.read_csv(fiscal_output)
+
+            # Get the reform ID(s) we're adding
+            new_reform_ids = fiscal_impacts['reform_id'].unique()
+
+            # Remove any existing data for these reforms
+            print(f"  Removing existing data for: {', '.join(new_reform_ids)}")
+            existing_df = existing_df[~existing_df['reform_id'].isin(new_reform_ids)]
+
+            # Append new data
+            fiscal_impacts = pd.concat([existing_df, fiscal_impacts], ignore_index=True)
+            print(f"  Combined {len(existing_df)} existing rows + new data")
+
+        # Final save
         fiscal_impacts.to_csv(fiscal_output, index=False)
         print(f"\nFiscal impacts saved to {fiscal_output}")
 
@@ -138,14 +171,14 @@ def main():
         print("\n" + "=" * 60)
         print("CALCULATING HOUSEHOLD IMPACTS")
         print("=" * 60)
-        print(f"Processing {len(REFORMS)} reforms × {len(years)} years = {len(REFORMS) * len(years)} vectorized calculations")
+        print(f"Processing {len(reforms_to_process)} reforms × {len(years)} years = {len(reforms_to_process) * len(years)} vectorized calculations")
         print("Note: Each calculation processes ALL income levels simultaneously")
 
         household_results = []
-        total_calculations = len(REFORMS) * len(years)
+        total_calculations = len(reforms_to_process) * len(years)
         completed = 0
 
-        for reform_id, config in REFORMS.items():
+        for reform_id, config in reforms_to_process.items():
             print(f"\nReform: {config['name']}")
 
             if config.get('has_variants', False):
@@ -174,6 +207,23 @@ def main():
 
         # Save household impacts
         household_output = output_dir / 'household_impacts.csv'
+
+        # If --only-reform is specified and file exists, append to existing data
+        if args.only_reform and household_output.exists():
+            print(f"\nAppending to existing household impacts file...")
+            existing_df = pd.read_csv(household_output)
+
+            # Get the reform name(s) we're adding
+            new_reform_names = household_df['reform'].unique()
+
+            # Remove any existing data for these reforms
+            print(f"  Removing existing data for: {', '.join(new_reform_names)}")
+            existing_df = existing_df[~existing_df['reform'].isin(new_reform_names)]
+
+            # Append new data
+            household_df = pd.concat([existing_df, household_df], ignore_index=True)
+            print(f"  Combined {len(existing_df)} existing rows + {len(household_results)} new calculations")
+
         household_df.to_csv(household_output, index=False)
         print(f"\nHousehold impacts saved to {household_output}")
 
@@ -186,7 +236,9 @@ def main():
     if not args.skip_household:
         print(f"✓ Household impacts: {len(household_df)} rows")
     print(f"✓ Years analyzed: {args.start_year}-{args.end_year}")
-    print(f"✓ Reforms processed: {len(REFORMS)}")
+    print(f"✓ Reforms processed: {len(reforms_to_process)}")
+    if args.only_reform:
+        print(f"  (filtered to: {args.only_reform})")
     print("\nData generation complete!")
 
 

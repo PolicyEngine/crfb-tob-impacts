@@ -9,6 +9,7 @@ from src.reforms import (
     get_option5_reform,
     get_option6_reform,
     get_option7_reform,
+    get_option8_reform,
     REFORMS
 )
 
@@ -95,9 +96,23 @@ def test_option7_reform():
     assert any("senior_deduction.amount" in str(k) for k in params.keys())
 
 
+def test_option8_reform():
+    """Test Option 8 full taxation of Social Security benefits."""
+    reform = get_option8_reform()
+    assert reform is not None
+    params = reform.parameter_values
+    # Should have combined income SS fraction set to 1.0
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
+    # Should have taxability additional rate set to 1.0 (100%)
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+    # Should have all thresholds set to 0
+    assert any("threshold.base.main" in str(k) for k in params.keys())
+    assert any("threshold.adjusted_base.main" in str(k) for k in params.keys())
+
+
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 7
+    assert len(REFORMS) == 8
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():
