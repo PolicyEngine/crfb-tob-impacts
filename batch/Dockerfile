@@ -22,6 +22,11 @@ COPY batch/compute_baseline.py batch/compute_reform.py /app/
 # Make scripts executable
 RUN chmod +x /app/compute_baseline.py /app/compute_reform.py
 
+# Pre-download and cache datasets for 2026-2027 to eliminate runtime downloads
+# This makes containers start INSTANTLY instead of downloading at runtime
+ENV PYTHONPATH=/app/src
+RUN python3 -c "import os; os.environ['POLICYENGINE_GITHUB_MICRODATA_AUTH_TOKEN']=''; from policyengine_us import Microsimulation; print('Caching datasets...'); [Microsimulation(dataset=f'hf://policyengine/test/{year}.h5') for year in [2026, 2027]]; print('Datasets cached!')"
+
 # Set Python to run in unbuffered mode (see output in real-time)
 ENV PYTHONUNBUFFERED=1
 
