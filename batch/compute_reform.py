@@ -179,16 +179,17 @@ def compute_reform(reform_id, year, scoring_type, bucket_name, job_id):
 
         # Create reform (static or dynamic)
         print(f"[4/6] Creating reform...")
-        reform_dict = get_reform_dict(reform_func)
 
-        if scoring_type == 'dynamic':
-            # Add CBO labor elasticities
+        if scoring_type == 'static':
+            # Use the reform function directly (returns Reform object)
+            reform = reform_func()
+            print(f"      ✓ Static reform (no behavioral responses)")
+        elif scoring_type == 'dynamic':
+            # For dynamic scoring, we need to combine reform dict with CBO parameters
+            reform_dict = get_reform_dict(reform_func)
             combined_dict = {**reform_dict, **CBO_LABOR_PARAMS}
             reform = Reform.from_dict(combined_dict, country_id="us")
             print(f"      ✓ Dynamic reform with CBO elasticities")
-        elif scoring_type == 'static':
-            reform = Reform.from_dict(reform_dict, country_id="us")
-            print(f"      ✓ Static reform (no behavioral responses)")
         else:
             raise ValueError(f"Unknown scoring_type: {scoring_type}. Must be 'static' or 'dynamic'")
 
