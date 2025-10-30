@@ -1,157 +1,198 @@
 """
 Create Excel spreadsheet with Wharton Budget Model comparison
-for all three years (2026, 2034, 2054) using enhanced_cps_2024 dataset
+in the clean table format requested - one sheet with three tables
 """
 
 import pandas as pd
 import os
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils.dataframe import dataframe_to_rows
 
-# Wharton benchmark data
-wharton_2026 = {
+# PolicyEngine and Wharton data
+data_2026 = {
     'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
                      '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [0, -15, -340, -1135, -1625, -1590, -2020, -2205, -2450],
-    'Pct Change Income': [0.0, 0.0, 0.5, 1.1, 1.0, 0.7, 0.5, 0.2, 0.0]
+    'PolicyEngine': [-24, -65, -417, -763, -2148, -2907, -1972, -1608, 0],
+    'Wharton': [0, -15, -340, -1135, -1625, -1590, -2020, -2205, -2450],
+    'Difference': [-24, -50, -77, 372, -523, -1317, 48, 597, 2450],
+    '% Diff': ['N/A', '333%', '23%', '-33%', '32%', '83%', '-2%', '-27%', '-100%']
 }
 
-wharton_2034 = {
+data_2034 = {
     'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
                      '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [0, -45, -615, -1630, -2160, -2160, -2605, -2715, -2970],
-    'Pct Change Income': [0.0, 0.1, 0.8, 1.2, 1.1, 0.7, 0.6, 0.2, 0.0]
+    'PolicyEngine': [-39, -195, -769, -1291, -3053, -3388, -2325, -2250, 0],
+    'Wharton': [0, -45, -615, -1630, -2160, -2160, -2605, -2715, -2970],
+    'Difference': [-39, -150, -154, 339, -893, -1228, 280, 465, 2970],
+    '% Diff': ['N/A', '333%', '25%', '-21%', '41%', '57%', '-11%', '-17%', '-100%']
 }
 
-wharton_2054 = {
+data_2054 = {
     'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
                      '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [-5, -275, -1730, -3560, -4075, -4385, -4565, -4820, -5080],
-    'Pct Change Income': [0.0, 0.3, 1.3, 1.6, 1.2, 0.9, 0.6, 0.2, 0.0]
+    'PolicyEngine': [-5, -242, -757, -1558, -3518, -5094, -5183, -3231, 0],
+    'Wharton': [-5, -275, -1730, -3560, -4075, -4385, -4565, -4820, -5080],
+    'Difference': [0, 33, 973, 2002, 557, -709, -618, 1589, 5080],
+    '% Diff': ['0% ✓', '-12%', '-56%', '-56%', '-14%', '16%', '14%', '-33%', '-100%']
 }
 
-# PolicyEngine results
-pe_2026 = {
-    'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
-                     '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [-24, -65, -417, -763, -2148, -2907, -1972, -1608, 0],
-    'Pct Change Income': [0.1, 0.1, 0.4, 0.5, 1.1, 1.0, 0.5, 0.1, 0.0]
-}
+# Create workbook
+wb = Workbook()
+ws = wb.active
+ws.title = "Wharton Comparison"
 
-pe_2034 = {
-    'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
-                     '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [-39, -195, -769, -1291, -3053, -3388, -2325, -2250, 0],
-    'Pct Change Income': [0.1, 0.2, 0.7, 0.7, 1.2, 0.9, 0.4, 0.1, 0.0]
-}
+# Define styles
+header_font = Font(bold=True, size=14)
+table_header_font = Font(bold=True, size=11)
+regular_font = Font(size=11)
+centered = Alignment(horizontal='center', vertical='center')
+left_aligned = Alignment(horizontal='left', vertical='center')
+right_aligned = Alignment(horizontal='right', vertical='center')
 
-pe_2054 = {
-    'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
-                     '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
-    'Avg Tax Change': [-5, -242, -757, -1558, -3518, -5094, -5183, -3231, 0],
-    'Pct Change Income': [0.0, 0.3, 0.5, 0.7, 1.2, 1.2, 0.9, 0.2, 0.0]
-}
+# Border style
+thin_border = Border(
+    left=Side(style='thin'),
+    right=Side(style='thin'),
+    top=Side(style='thin'),
+    bottom=Side(style='thin')
+)
 
-# Create comparison DataFrames
-def create_comparison_sheet(pe_data, wharton_data, year):
-    """Create comparison sheet for a given year"""
-    df = pd.DataFrame({
-        'Income Group': pe_data['Income Group'],
+# Fill styles
+gray_fill = PatternFill(start_color='F0F0F0', end_color='F0F0F0', fill_type='solid')
+header_fill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')
 
-        'PolicyEngine - Avg Tax Change ($)': pe_data['Avg Tax Change'],
-        'Wharton - Avg Tax Change ($)': wharton_data['Avg Tax Change'],
-        'Difference ($)': [pe - wh for pe, wh in zip(pe_data['Avg Tax Change'], wharton_data['Avg Tax Change'])],
-        '% Difference': [round((pe - wh) / wh * 100, 1) if wh != 0 else None
-                        for pe, wh in zip(pe_data['Avg Tax Change'], wharton_data['Avg Tax Change'])],
+current_row = 1
 
-        'PolicyEngine - % Change Income': pe_data['Pct Change Income'],
-        'Wharton - % Change Income': wharton_data['Pct Change Income'],
-        'Difference (pp)': [round(pe - wh, 1) for pe, wh in zip(pe_data['Pct Change Income'], wharton_data['Pct Change Income'])]
-    })
+# Helper function to add a table
+def add_table(ws, start_row, year, data, title):
+    """Add a formatted table to the worksheet"""
+    row = start_row
 
-    return df
+    # Add title
+    ws.cell(row=row, column=1, value=title)
+    ws.cell(row=row, column=1).font = header_font
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
+    row += 1
 
-# Create comparison sheets
-df_2026 = create_comparison_sheet(pe_2026, wharton_2026, 2026)
-df_2034 = create_comparison_sheet(pe_2034, wharton_2034, 2034)
-df_2054 = create_comparison_sheet(pe_2054, wharton_2054, 2054)
+    # Add header row
+    headers = ['Income Group', 'PolicyEngine', 'Wharton', 'Difference', '% Diff']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col, value=header)
+        cell.font = table_header_font
+        cell.alignment = centered
+        cell.fill = header_fill
+        cell.border = thin_border
+    row += 1
 
-# Create revenue impact summary
-revenue_summary = pd.DataFrame({
-    'Year': [2026, 2034, 2054],
-    'PolicyEngine Revenue Impact ($B)': [-85.4, -131.7, -176.3],
-    'Dataset': ['Enhanced CPS 2024 → 2026', 'Enhanced CPS 2024 → 2034', 'Enhanced CPS 2024 → 2054'],
-    'Households (Sample)': [20863, 20874, 20892],
-    'Households (Weighted M)': [141.8, 146.4, 150.1]
-})
+    # Add data rows
+    for i, group in enumerate(data['Income Group']):
+        # Determine if this row should be gray
+        is_gray = i % 2 == 1
 
-# Create single sheet with all three years
-print("Creating Excel file with single sheet...")
+        # Income Group
+        cell = ws.cell(row=row, column=1, value=group)
+        cell.font = regular_font
+        cell.alignment = left_aligned
+        cell.border = thin_border
+        if is_gray:
+            cell.fill = gray_fill
 
-output_file = '../data/wharton_comparison_enhanced_cps_2024.xlsx'
+        # PolicyEngine
+        cell = ws.cell(row=row, column=2, value=f"-${abs(data['PolicyEngine'][i]):,}" if data['PolicyEngine'][i] != 0 else "$0")
+        cell.font = regular_font
+        cell.alignment = right_aligned
+        cell.border = thin_border
+        if is_gray:
+            cell.fill = gray_fill
 
-# Build combined sheet with all three tables
-rows = []
+        # Wharton
+        wh_val = data['Wharton'][i]
+        cell = ws.cell(row=row, column=3, value=f"-${abs(wh_val):,}" if wh_val < 0 else f"${wh_val:,}" if wh_val > 0 else "$0")
+        cell.font = regular_font
+        cell.alignment = right_aligned
+        cell.border = thin_border
+        if is_gray:
+            cell.fill = gray_fill
+
+        # Difference
+        diff_val = data['Difference'][i]
+        cell = ws.cell(row=row, column=4, value=f"+${abs(diff_val):,}" if diff_val > 0 else f"-${abs(diff_val):,}" if diff_val < 0 else "$0")
+        cell.font = regular_font
+        cell.alignment = right_aligned
+        cell.border = thin_border
+        if is_gray:
+            cell.fill = gray_fill
+
+        # % Diff
+        cell = ws.cell(row=row, column=5, value=data['% Diff'][i])
+        cell.font = regular_font
+        cell.alignment = centered
+        cell.border = thin_border
+        if is_gray:
+            cell.fill = gray_fill
+
+        row += 1
+
+    return row + 1  # Return next available row with spacing
+
+# Set column widths
+ws.column_dimensions['A'].width = 20
+ws.column_dimensions['B'].width = 18
+ws.column_dimensions['C'].width = 18
+ws.column_dimensions['D'].width = 18
+ws.column_dimensions['E'].width = 12
 
 # Add revenue summary at top
-rows.append(['AGGREGATE REVENUE IMPACT (Billions)', '', '', '', ''])
-rows.append(['Year', 'PolicyEngine (Enhanced CPS 2024)', 'Dataset Info', '', ''])
-rows.append([2026, -85.4, '20,863 households, 141.8M weighted', '', ''])
-rows.append([2034, -131.7, '20,874 households, 146.4M weighted', '', ''])
-rows.append([2054, -176.3, '20,892 households, 150.1M weighted', '', ''])
-rows.append(['', '', '', '', ''])
+ws.cell(row=current_row, column=1, value="AGGREGATE REVENUE IMPACT (Billions)")
+ws.cell(row=current_row, column=1).font = header_font
+ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=5)
+current_row += 1
 
-# Year 2026 table
-rows.append(['YEAR 2026 COMPARISON', '', '', '', ''])
-rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
-for i in range(len(df_2026)):
-    rows.append([
-        df_2026.iloc[i]['Income Group'],
-        df_2026.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
-        df_2026.iloc[i]['Wharton - Avg Tax Change ($)'],
-        df_2026.iloc[i]['Difference ($)'],
-        df_2026.iloc[i]['PolicyEngine - % Change Income']
-    ])
-rows.append(['', '', '', '', ''])
+# Revenue data
+revenue_data = [
+    ['Year 2026:', '-$85.4B'],
+    ['Year 2034:', '-$131.7B'],
+    ['Year 2054:', '-$176.3B'],
+]
+for year_label, amount in revenue_data:
+    ws.cell(row=current_row, column=1, value=year_label).font = Font(bold=True, size=11)
+    ws.cell(row=current_row, column=2, value=amount).font = Font(size=11)
+    current_row += 1
 
-# Year 2034 table
-rows.append(['YEAR 2034 COMPARISON', '', '', '', ''])
-rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
-for i in range(len(df_2034)):
-    rows.append([
-        df_2034.iloc[i]['Income Group'],
-        df_2034.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
-        df_2034.iloc[i]['Wharton - Avg Tax Change ($)'],
-        df_2034.iloc[i]['Difference ($)'],
-        df_2034.iloc[i]['PolicyEngine - % Change Income']
-    ])
-rows.append(['', '', '', '', ''])
+current_row += 2  # Add spacing
 
-# Year 2054 table
-rows.append(['YEAR 2054 COMPARISON', '', '', '', ''])
-rows.append(['Income Group', 'PolicyEngine ($)', 'Wharton ($)', 'Difference ($)', 'PE % Change'])
-for i in range(len(df_2054)):
-    rows.append([
-        df_2054.iloc[i]['Income Group'],
-        df_2054.iloc[i]['PolicyEngine - Avg Tax Change ($)'],
-        df_2054.iloc[i]['Wharton - Avg Tax Change ($)'],
-        df_2054.iloc[i]['Difference ($)'],
-        df_2054.iloc[i]['PolicyEngine - % Change Income']
-    ])
+# Add 2026 table
+current_row = add_table(ws, current_row, 2026, data_2026, "Average Tax Change per Household (Dollars) - Year 2026")
 
-# Create single DataFrame
-final_df = pd.DataFrame(rows)
+# Add 2034 table
+current_row = add_table(ws, current_row, 2034, data_2034, "Average Tax Change per Household (Dollars) - Year 2034")
 
-# Write to Excel
-with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
-    final_df.to_excel(writer, sheet_name='Wharton Comparison', index=False, header=False)
+# Add 2054 table
+current_row = add_table(ws, current_row, 2054, data_2054, "Average Tax Change per Household (Dollars) - Year 2054")
+
+# Add dataset note at bottom
+ws.cell(row=current_row, column=1, value="Dataset: Enhanced CPS 2024 (reweighted to target years)")
+ws.cell(row=current_row, column=1).font = Font(italic=True, size=10)
+ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=5)
+
+# Save workbook
+output_file = '../data/wharton_comparison_enhanced_cps_2024.xlsx'
+wb.save(output_file)
 
 print(f"✓ Excel file created: {output_file}")
 print()
-print("Single sheet with:")
-print("  - Revenue summary table (2026, 2034, 2054)")
-print("  - 2026 comparison table")
-print("  - 2034 comparison table")
-print("  - 2054 comparison table")
+print("Single sheet with formatted tables:")
+print("  - Revenue summary (2026, 2034, 2054)")
+print("  - 2026 comparison table (formatted)")
+print("  - 2034 comparison table (formatted)")
+print("  - 2054 comparison table (formatted)")
 print()
-print("Dataset used: Enhanced CPS 2024 (reweighted to each target year)")
+print("Formatting includes:")
+print("  - Bold headers with gray background")
+print("  - Alternating row colors (white/light gray)")
+print("  - Borders on all cells")
+print("  - Proper currency formatting")
+print("  - Centered/aligned text")
 print()
 print("✓ Complete!")
