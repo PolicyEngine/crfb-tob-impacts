@@ -131,10 +131,11 @@ def create_reform_job(project_id, region, reforms, years, scoring_types, workers
     task_spec.max_retry_count = 2
     task_spec.max_run_duration = "7200s"  # 2 hour timeout per task (conservative)
 
-    # Resource allocation (1 CPU, 4GB RAM per task)
+    # Resource allocation (2 CPUs, 12GB RAM per task)
+    # e2-highmem-2 has 2 vCPUs and 16GB RAM total, leave headroom for OS
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 1000  # 1 CPU
-    resources.memory_mib = 4096  # 4GB RAM
+    resources.cpu_milli = 2000  # 2 CPUs (full machine)
+    resources.memory_mib = 12288  # 12GB RAM (PolicyEngine needs significant memory)
     task_spec.compute_resource = resources
 
     task_group.task_spec = task_spec
@@ -143,7 +144,7 @@ def create_reform_job(project_id, region, reforms, years, scoring_types, workers
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
     instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.SPOT
-    instance_policy.machine_type = "e2-standard-2"
+    instance_policy.machine_type = "e2-highmem-2"  # 2 vCPU, 16GB RAM
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instance_policy_or_template.policy = instance_policy
