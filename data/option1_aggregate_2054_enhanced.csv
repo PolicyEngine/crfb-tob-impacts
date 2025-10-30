@@ -1,0 +1,2 @@
+reform_id,reform_name,year,revenue_impact,revenue_impact_billions,scoring_type,dataset
+option1,Full Repeal of Social Security Benefits Taxation,2054,-176340917437.51514,-176.34091743751515,static,enhanced_cps_2024_reweighted_to_2054
