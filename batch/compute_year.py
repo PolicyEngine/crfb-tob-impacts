@@ -219,7 +219,13 @@ def main():
     results = []
     client = storage.Client()
     bucket = client.bucket(bucket_name)
-    csv_path = f"results/{job_id}/{year}_{scoring_type}_results.csv"
+
+    # If only one reform, include reform name in filename (for parallelized jobs)
+    # If multiple reforms, use year-based filename (for year-based jobs)
+    if len(reform_ids) == 1:
+        csv_path = f"results/{job_id}/{year}_{reform_ids[0]}_{scoring_type}_results.csv"
+    else:
+        csv_path = f"results/{job_id}/{year}_{scoring_type}_results.csv"
 
     for i, reform_id in enumerate(reform_ids, start=1):
         print(f"\n[{2+i}/{3+len(reform_ids)}] Computing {reform_id} for {year}...")
@@ -310,16 +316,19 @@ def main():
             gc.collect()
             print(f"      ✓ Memory cleaned up")
 
-            # Save incrementally to Cloud Storage
-            try:
-                df = pd.DataFrame(results)
-                blob = bucket.blob(csv_path)
-                blob.upload_from_string(df.to_csv(index=False), content_type='text/csv')
-                print(f"      ✓ Saved to gs://{bucket_name}/{csv_path} ({len(results)} reforms)")
-            except Exception as save_error:
-                print(f"      ⚠ Warning: Failed to save intermediate results: {save_error}")
-                # Don't fail the whole job if intermediate save fails
-                pass
+            # Save incrementally to Cloud Storage (only for multi-reform jobs)
+            if len(reform_ids) > 1:
+                try:
+                    df = pd.DataFrame(results)
+                    blob = bucket.blob(csv_path)
+                    blob.upload_from_string(df.to_csv(index=False), content_type='text/csv')
+                    print(f"      ✓ Incremental save to gs://{bucket_name}/{csv_path} ({len(results)}/{len(reform_ids)} reforms)")
+                except Exception as save_error:
+                    print(f"      ⚠ Warning: Failed to save intermediate results: {save_error}")
+                    # Don't fail the whole job if intermediate save fails
+                    pass
+            else:
+                print(f"      (Skipping incremental save - single reform job)")
 
         except Exception as e:
             print(f"      ✗ Reform calculation failed: {e}")

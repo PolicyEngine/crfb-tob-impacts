@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '-f', 'batch/Dockerfile',
+    '-t', 'gcr.io/policyengine-api/ss-calculator:latest',
+    '.'
+  ]
+images:
+- 'gcr.io/policyengine-api/ss-calculator:latest'
+timeout: 1200s

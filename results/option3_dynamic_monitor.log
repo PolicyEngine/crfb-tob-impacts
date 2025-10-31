@@ -1,0 +1,546 @@
+================================================================================
+MONITORING OPTION3 DYNAMIC - 75 YEARS (2026-2100)
+================================================================================
+Job ID: years-20251031-211048-dschkz
+Region: us-central1
+Reform: option3
+Scoring: DYNAMIC (with CBO labor supply elasticities)
+================================================================================
+
+=== CHECK #1 - 21:11:01 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=75 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #2 - 21:12:06 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=75 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #3 - 21:13:11 ===
+Job State: RUNNING (0m 44s)
+Tasks: RUNNING=67, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=8 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #4 - 21:14:16 ===
+Job State: RUNNING (1m 49s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #5 - 21:15:21 ===
+Job State: RUNNING (2m 54s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #6 - 21:16:26 ===
+Job State: RUNNING (3m 59s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #7 - 21:17:31 ===
+Job State: RUNNING (5m 4s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #8 - 21:18:36 ===
+Job State: RUNNING (6m 10s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #9 - 21:19:42 ===
+Job State: RUNNING (7m 16s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #10 - 21:20:49 ===
+Job State: RUNNING (8m 22s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #11 - 21:21:54 ===
+Job State: RUNNING (9m 26s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #12 - 21:22:58 ===
+Job State: RUNNING (10m 31s)
+Tasks: RUNNING=74, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #13 - 21:24:04 ===
+Job State: RUNNING (11m 37s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #14 - 21:25:09 ===
+Job State: RUNNING (12m 42s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #15 - 21:26:14 ===
+Job State: RUNNING (13m 46s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #16 - 21:27:18 ===
+Job State: RUNNING (14m 51s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #17 - 21:28:24 ===
+Job State: RUNNING (15m 56s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #18 - 21:29:29 ===
+Job State: RUNNING (17m 1s)
+Tasks: RUNNING=56, SUCCEEDED=19, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 38/75 years completed
+Years: 2030-2100
+Cumulative 10-year impact (2026-2035): $+3.55B
+Total impact so far: $+4492.28B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #19 - 21:30:36 ===
+Job State: RUNNING (18m 9s)
+Tasks: RUNNING=3, SUCCEEDED=72, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #20 - 21:31:47 ===
+Job State: RUNNING (19m 20s)
+Tasks: RUNNING=2, SUCCEEDED=73, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #21 - 21:32:56 ===
+Job State: RUNNING (20m 29s)
+Tasks: RUNNING=2, SUCCEEDED=73, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #22 - 21:34:07 ===
+Job State: DELETION_IN_PROGRESS (21m 40s)
+Tasks: RUNNING=2, SUCCEEDED=73, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #23 - 21:35:21 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #24 - 21:36:31 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #25 - 21:37:42 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #26 - 21:38:51 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #27 - 21:40:01 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #28 - 21:41:13 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #29 - 21:42:24 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #30 - 21:43:34 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #31 - 21:44:45 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #32 - 21:45:55 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #33 - 21:47:05 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #34 - 21:48:15 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #35 - 21:49:25 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #36 - 21:50:35 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #37 - 21:51:45 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #38 - 21:52:56 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #39 - 21:54:07 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #40 - 21:55:16 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #41 - 21:56:26 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #42 - 21:57:38 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #43 - 21:58:49 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #44 - 21:59:59 ===
+Job State: 
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+59.52B
+Total impact so far: $+7023.94B
+./monitor_option3_dynamic.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #45 - 22:01:11 ===

@@ -1,0 +1,224 @@
+================================================================================
+MONITORING OPTION7 STATIC - 75 YEARS (2026-2100)
+================================================================================
+Job ID: years-20251031-220502-qv296n
+Region: us-central1
+Reform: option7
+Scoring: STATIC
+================================================================================
+
+=== CHECK #1 - 22:05:12 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=75 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #2 - 22:06:17 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=75 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #3 - 22:07:23 ===
+Job State: RUNNING (0m 50s)
+Tasks: RUNNING=74, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #4 - 22:08:28 ===
+Job State: RUNNING (1m 55s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #5 - 22:09:33 ===
+Job State: RUNNING (3m 0s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #6 - 22:10:38 ===
+Job State: RUNNING (4m 5s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #7 - 22:11:43 ===
+Job State: RUNNING (5m 10s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #8 - 22:12:49 ===
+Job State: RUNNING (6m 15s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #9 - 22:13:53 ===
+Job State: RUNNING (7m 20s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #10 - 22:14:58 ===
+Job State: RUNNING (8m 25s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #11 - 22:16:03 ===
+Job State: RUNNING (9m 30s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #12 - 22:17:08 ===
+Job State: RUNNING (10m 35s)
+Tasks: RUNNING=74, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #13 - 22:18:13 ===
+Job State: RUNNING (11m 40s)
+Tasks: RUNNING=74, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #14 - 22:19:18 ===
+Job State: RUNNING (12m 45s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #15 - 22:20:24 ===
+Job State: RUNNING (13m 50s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #16 - 22:21:29 ===
+Job State: RUNNING (14m 55s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #17 - 22:22:34 ===
+Job State: RUNNING (16m 1s)
+Tasks: RUNNING=75, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: None yet
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #18 - 22:23:39 ===
+Job State: RUNNING (17m 5s)
+Tasks: RUNNING=54, SUCCEEDED=21, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 37/75 years completed
+Years: 2029-2100
+Cumulative 10-year impact (2026-2035): $+0.00B
+Total impact so far: $+0.00B
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #19 - 22:24:46 ===
+Job State: RUNNING (18m 13s)
+Tasks: RUNNING=5, SUCCEEDED=70, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 72/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+24.49B
+Total impact so far: $+24.49B
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #20 - 22:25:56 ===
+Job State: RUNNING (19m 23s)
+Tasks: RUNNING=2, SUCCEEDED=73, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+24.49B
+Total impact so far: $+24.49B
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
+=== CHECK #21 - 22:27:07 ===
+Job State: RUNNING (20m 33s)
+Tasks: RUNNING=2, SUCCEEDED=73, FAILED=0
+0, PENDING=0
+0 (Total: 75)
+Results: 73/75 years completed
+Years: 2028-2100
+Cumulative 10-year impact (2026-2035): $+24.49B
+Total impact so far: $+24.49B
+./monitor_option7_static.sh: line 84: [: 0
+0: integer expression expected
+
