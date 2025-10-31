@@ -232,7 +232,7 @@ def enable_employer_payroll_tax(percentage=1.0):
 
 # CBO labor supply elasticities (for dynamic scoring)
 CBO_ELASTICITIES = {
-    "gov.simulation.labor_supply_responses.elasticities.income": {
+    "gov.simulation.labor_supply_responses.elasticities.income.all": {
         "2024-01-01.2100-12-31": -0.05
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.1": {
