@@ -141,6 +141,12 @@ def get_reform_dict(reform_func):
 
 
 def main():
+    print("\n" + "="*80)
+    print("DIAGNOSTIC LOGGING: Script started")
+    print(f"System time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Python version: {sys.version}")
+    print("="*80 + "\n")
+
     if len(sys.argv) < 5:
         print("Usage: python compute_year.py YEAR SCORING_TYPE BUCKET_NAME JOB_ID [REFORMS...]")
         sys.exit(1)
@@ -156,43 +162,55 @@ def main():
     print(f"{'='*80}")
     print(f"Reforms to compute: {', '.join(reform_ids)}")
     print(f"Total reforms: {len(reform_ids)}")
+    print(f"Job ID: {job_id}")
+    print(f"Bucket: {bucket_name}")
     print()
 
     # Step 1: Download dataset ONCE
     print(f"[1/{3+len(reform_ids)}] Downloading dataset for {year}...")
+    print(f"      DIAGNOSTIC: About to create dataset reference...")
     dataset_start = time.time()
     dataset_name = f"hf://policyengine/test/{year}.h5"
     print(f"      Dataset: {dataset_name}")
     dataset_time = time.time() - dataset_start
     print(f"      ✓ Dataset reference prepared ({dataset_time:.1f}s)")
+    print(f"      DIAGNOSTIC: Dataset reference created successfully")
     print()
 
     # Step 2: Calculate baseline ONCE (with detailed timing)
     print(f"[2/{3+len(reform_ids)}] Creating baseline simulation for {year}...")
+    print(f"      DIAGNOSTIC: About to create Microsimulation object...")
     baseline_start = time.time()
     try:
         create_start = time.time()
+        print(f"      DIAGNOSTIC: Calling Microsimulation(dataset='{dataset_name}')...")
         baseline_sim = Microsimulation(dataset=dataset_name)
         create_time = time.time() - create_start
         print(f"      - Microsimulation created: {create_time:.1f}s")
+        print(f"      DIAGNOSTIC: Microsimulation object created successfully")
 
         calc_start = time.time()
+        print(f"      DIAGNOSTIC: About to calculate income_tax...")
         baseline_income_tax = baseline_sim.calculate("income_tax", map_to="household", period=year)
         calc_time = time.time() - calc_start
         print(f"      - Income tax calculated: {calc_time:.1f}s")
+        print(f"      DIAGNOSTIC: Income tax calculation complete")
 
+        print(f"      DIAGNOSTIC: About to sum income tax...")
         baseline_revenue = float(baseline_income_tax.sum())
         baseline_time = time.time() - baseline_start
         print(f"      ✓ Baseline calculated: ${baseline_revenue/1e9:.2f}B (total: {baseline_time:.1f}s)")
 
         # Clean up baseline objects immediately after extracting the value
+        print(f"      DIAGNOSTIC: Cleaning up baseline objects...")
         del baseline_sim
         del baseline_income_tax
         gc.collect()
         print(f"      ✓ Baseline objects cleaned up")
     except Exception as e:
-        print(f"      ✗ Baseline calculation failed: {e}")
+        print(f"      ✗ BASELINE CALCULATION FAILED: {e}")
         import traceback
+        print("      DIAGNOSTIC: Full traceback:")
         traceback.print_exc()
         sys.exit(1)
     print()
@@ -204,11 +222,13 @@ def main():
     csv_path = f"results/{job_id}/{year}_{scoring_type}_results.csv"
 
     for i, reform_id in enumerate(reform_ids, start=1):
-        print(f"[{2+i}/{3+len(reform_ids)}] Computing {reform_id} for {year}...")
+        print(f"\n[{2+i}/{3+len(reform_ids)}] Computing {reform_id} for {year}...")
+        print(f"      DIAGNOSTIC: Starting reform {reform_id} at {time.strftime('%H:%M:%S')}")
         reform_start = time.time()
 
         try:
             # Get reform function
+            print(f"      DIAGNOSTIC: Looking up reform function for '{reform_id}'...")
             reform_func = REFORM_FUNCTIONS.get(reform_id)
             if not reform_func:
                 print(f"      ✗ Unknown reform: {reform_id}")
@@ -216,38 +236,51 @@ def main():
 
             # Create reform based on scoring type
             if scoring_type == 'static':
+                print(f"      DIAGNOSTIC: Creating static reform...")
                 reform = reform_func()
                 print(f"      ✓ Static reform created")
             elif scoring_type == 'dynamic':
+                print(f"      DIAGNOSTIC: Starting dynamic reform creation...")
                 # Get the complete dynamic dict function (with CBO elasticities pre-merged)
+                print(f"      DIAGNOSTIC: Looking up dynamic dict function for '{reform_id}'...")
                 dynamic_dict_func = REFORM_DYNAMIC_DICT_FUNCTIONS.get(reform_id)
                 if not dynamic_dict_func:
                     print(f"      ✗ No dynamic dict function for {reform_id}")
                     continue
 
+                print(f"      DIAGNOSTIC: Found dynamic dict function: {dynamic_dict_func.__name__}")
                 # Get the complete parameter dictionary
+                print(f"      DIAGNOSTIC: Calling {dynamic_dict_func.__name__}()...")
                 reform_params = dynamic_dict_func()
+                print(f"      DIAGNOSTIC: Got reform parameters dictionary with {len(reform_params)} keys")
 
                 # Create single reform from complete parameters
+                print(f"      DIAGNOSTIC: Creating Reform.from_dict() with {len(reform_params)} parameters...")
                 reform = Reform.from_dict(reform_params, country_id="us")
                 print(f"      ✓ Dynamic reform with CBO elasticities (pre-merged)")
+                print(f"      DIAGNOSTIC: Reform object created successfully")
             else:
                 print(f"      ✗ Invalid scoring type: {scoring_type}")
                 continue
 
             # Run simulation with detailed timing
             print(f"      Running PolicyEngine simulation...")
+            print(f"      DIAGNOSTIC: About to create reform Microsimulation...")
             sim_start = time.time()
 
             create_start = time.time()
+            print(f"      DIAGNOSTIC: Calling Microsimulation(reform=<reform>, dataset='{dataset_name}')...")
             reform_sim = Microsimulation(reform=reform, dataset=dataset_name)
             create_time = time.time() - create_start
             print(f"        - Microsimulation object created: {create_time:.1f}s")
+            print(f"      DIAGNOSTIC: Reform Microsimulation created successfully")
 
             calc_start = time.time()
+            print(f"      DIAGNOSTIC: About to calculate reform income_tax...")
             reform_income_tax = reform_sim.calculate("income_tax", map_to="household", period=year)
             calc_time = time.time() - calc_start
             print(f"        - Income tax calculated: {calc_time:.1f}s")
+            print(f"      DIAGNOSTIC: Reform income_tax calculated successfully")
 
             reform_revenue = float(reform_income_tax.sum())
             sim_time = time.time() - sim_start
