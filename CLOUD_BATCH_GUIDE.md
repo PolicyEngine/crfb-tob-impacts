@@ -46,6 +46,123 @@ This guide documents the complete process of running comprehensive 75-year fisca
 - Results: One CSV per year per reform
 - Format: reform_name, year, baseline_revenue, reform_revenue, revenue_impact, scoring_type
 
+### Complete Technical Workflow
+
+**Understanding What Actually Runs:**
+
+When you submit a job, here's the complete execution flow:
+
+```
+1. Local Machine: ./submit_option5_dynamic.sh
+   ↓
+2. Python Script: batch/submit_years.py
+   - Creates Cloud Batch job definition
+   - Specifies 75 parallel tasks (one per year)
+   - Submits to Google Cloud Batch API
+   ↓
+3. Google Cloud Batch: Provisions Resources
+   - Creates 75 e2-highmem-4 VMs
+   - Pulls Docker container: gcr.io/policyengine-api/ss-calculator:latest
+   - Starts one task per VM
+   ↓
+4. Each VM Executes: batch/compute_year.py
+   - Command: python compute_year.py --year 2028 --reform option5 --scoring dynamic --bucket crfb-ss-analysis-results
+   - Loads reform definition from src/reforms.py
+   - Uses PolicyEngine microsimulation to calculate impacts
+   - Compares baseline vs reform revenue
+   - Saves results to Cloud Storage
+   ↓
+5. Cloud Storage: gs://crfb-ss-analysis-results/results/<JOB_ID>/
+   - Each VM writes: 2028_option5_dynamic_results.csv
+   - 75 CSV files total (one per year)
+   ↓
+6. Monitoring Script: ./monitor_option5_dynamic.sh
+   - Downloads CSVs incrementally from Cloud Storage
+   - Merges all year files into one dataset
+   - Converts values to billions
+   - Displays progress and cumulative impacts
+   ↓
+7. Final Results: results/option5_75years_dynamic/all_results.csv
+   - Combined dataset with all 73-75 years
+   - Ready for analysis
+```
+
+**Key Files in This Repository:**
+
+| File | Purpose | When It Runs |
+|------|---------|--------------|
+| `batch/submit_years.py` | Creates and submits Cloud Batch jobs | Local machine when you run `./submit_option5_dynamic.sh` |
+| `batch/compute_year.py` | **Core execution file** - runs the actual policy simulation | Inside Docker container on each Cloud Batch VM |
+| `src/reforms.py` | Defines all reform parameters (tax rates, thresholds, etc.) | Imported by `compute_year.py` on each VM |
+| `batch/cloudbuild.yaml` | Builds Docker container with PolicyEngine + dependencies | When container is built (already done) |
+| `submit_option5_dynamic.sh` | Wrapper script to submit a specific job | Local machine, manually executed |
+| `monitor_option5_dynamic.sh` | Downloads results and shows progress | Local machine, runs in background |
+
+**What Happens Inside compute_year.py:**
+
+This is the most important file - it's what actually runs on each VM. Here's what it does:
+
+```python
+# 1. Parse arguments
+year = 2028
+reform = "option5"
+scoring = "dynamic"
+
+# 2. Load reform definition from reforms.py
+reform_params = get_reform(reform)  # e.g., {"tax_rate": 0.065, "threshold": 250000}
+
+# 3. Create PolicyEngine simulation
+baseline_sim = Microsimulation(year=year)
+reform_sim = Microsimulation(year=year, reform=reform_params)
+
+# 4. Calculate revenues (runs microsimulation on population data)
+baseline_revenue = baseline_sim.calculate_revenue()  # e.g., $2,449,700,000,000
+reform_revenue = reform_sim.calculate_revenue()      # e.g., $2,857,510,000,000
+
+# 5. Compute impact
+revenue_impact = reform_revenue - baseline_revenue   # e.g., $407,810,000,000
+
+# 6. Save results to Cloud Storage
+save_to_csv(
+    reform_name=reform,
+    year=year,
+    baseline_revenue=baseline_revenue,
+    reform_revenue=reform_revenue,
+    revenue_impact=revenue_impact,
+    scoring_type=scoring,
+    bucket="crfb-ss-analysis-results"
+)
+```
+
+**How to Modify Reforms:**
+
+If you want to analyze a different policy, edit `src/reforms.py`:
+
+```python
+# Example: Add a new reform "option9"
+def get_reform(option):
+    if option == "option9":
+        return {
+            "parameter_name": new_value,
+            "threshold": 300000,
+            # ... other parameters
+        }
+```
+
+Then create submission scripts:
+```bash
+cp submit_option8_dynamic.sh submit_option9_dynamic.sh
+# Edit to change option8 → option9
+```
+
+**Where Results Come From:**
+
+- PolicyEngine uses IRS Public Use File (PUF) microdata
+- Projects population forward using CBO demographic projections
+- Applies tax rules to each household in the sample
+- Aggregates to get total revenue
+- Difference between baseline and reform = fiscal impact
+
 ## Step-by-Step Workflow
 
 ### 1. Setup and Prerequisites
