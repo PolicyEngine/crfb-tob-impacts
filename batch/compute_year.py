@@ -99,8 +99,9 @@ def get_reform_dict(reform_func):
     reform_obj = reform_func()
     if isinstance(reform_obj, dict):
         return reform_obj
-    elif isinstance(reform_obj, Reform):
-        return reform_obj.data
+    elif isinstance(reform_obj, type) and issubclass(reform_obj, Reform):
+        # Reform class - need to get parameter_values
+        return reform_obj.parameter_values
     else:
         raise ValueError(f"Unexpected reform type: {type(reform_obj)}")
 
