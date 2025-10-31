@@ -30,10 +30,15 @@ This guide documents the complete process of running comprehensive 75-year fisca
 
 ### Infrastructure Details
 
-**VM Configuration:**
-- Machine type: `e2-highmem-4` (4 vCPUs, 32GB RAM)
-- Pricing: Spot VMs at ~$0.08/hour (80% discount vs on-demand)
-- Memory: 32GB required due to incremental checkpoint saves
+**VM Configuration (Automatic Sizing):**
+- **Years 2026-2027:** `e2-highmem-8` (8 vCPUs, 64GB RAM) at ~$0.16/hour
+  - These years have larger PolicyEngine datasets requiring more memory
+  - Exit code 137 (OOM) occurs with 32GB RAM
+- **Years 2028-2100:** `e2-highmem-4` (4 vCPUs, 32GB RAM) at ~$0.08/hour
+  - Standard configuration works fine for these years
+- **Cost Optimization:** Jobs automatically split by year to minimize cost
+  - Only 2 of 75 years use expensive VMs (~3% overhead vs 100%)
+  - Pricing: Spot VMs at 80% discount vs on-demand
 - Region: `us-central1`
 
 **Container:**
@@ -91,7 +96,7 @@ When you submit a job, here's the complete execution flow:
 
 | File | Purpose | When It Runs |
 |------|---------|--------------|
-| `batch/submit_years.py` | Creates and submits Cloud Batch jobs | Local machine when you run `./submit_option5_dynamic.sh` |
+| `batch/submit_years.py` | Creates and submits Cloud Batch jobs with **automatic VM sizing** - splits into 2 jobs if years 2026-2027 are included (64GB VMs for those years, 32GB for others) | Local machine when you run `./submit_option5_dynamic.sh` |
 | `batch/compute_year.py` | **Core execution file** - runs the actual policy simulation | Inside Docker container on each Cloud Batch VM |
 | `src/reforms.py` | Defines all reform parameters (tax rates, thresholds, etc.) | Imported by `compute_year.py` on each VM |
 | `batch/cloudbuild.yaml` | Builds Docker container with PolicyEngine + dependencies | When container is built (already done) |

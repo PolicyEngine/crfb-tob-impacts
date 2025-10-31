@@ -24,10 +24,12 @@ def generate_job_id(prefix="years"):
     random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
     return f"{prefix}-{timestamp}-{random_suffix}"
 
-def submit_job(years, reforms, scoring_type, bucket_name):
-    """Submit a Cloud Batch job with year-based parallelization."""
+def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, memory_mib, cpu_milli, memory_label, job_id=None):
+    """Submit a single Cloud Batch job with specified VM configuration."""
 
-    job_id = generate_job_id()
+    if job_id is None:
+        job_id = generate_job_id()
+
     project_id = "policyengine-api"
     region = "us-central1"
 
@@ -38,7 +40,8 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     print("SUBMITTING YEAR-BASED JOB")
     print("="*80)
     print(f"Job ID: {job_id}")
-    print(f"Years: {len(years)} ({', '.join(map(str, years))})")
+    print(f"Years: {len(years)} ({min(years)}-{max(years) if len(years) > 1 else min(years)})")
+    print(f"Machine: {machine_type} ({memory_label} RAM)")
     print(f"Reforms per year: {len(reforms)} ({', '.join(reforms)})")
     print(f"Scoring: {scoring_type}")
     print(f"Total tasks: {num_tasks} (one per year)")
@@ -82,12 +85,10 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     task_spec.max_retry_count = 1  # Allow one retry per task
     task_spec.max_run_duration = "3600s"  # 1 hour timeout per year
 
-    # Resource allocation based on cloud testing:
-    # Cloud test showed 16GB was insufficient for 8 reforms (OOM exit code 137)
-    # Increasing to 32GB with e2-highmem-4 (4 vCPU, 32GB RAM)
+    # Resource allocation - adaptive based on years
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 4000  # 4 CPUs per task (matches e2-highmem-4)
-    resources.memory_mib = 32768  # 32GB RAM per task (16GB was insufficient)
+    resources.cpu_milli = cpu_milli
+    resources.memory_mib = memory_mib
     task_spec.compute_resource = resources
 
     # Create task group
@@ -97,11 +98,10 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     task_group.task_spec = task_spec
 
     # Configure allocation policy
-    # Using e2-highmem-4: 4 vCPU, 32GB RAM (16GB was too small, got OOM)
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
     instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
-    instance_policy.machine_type = "e2-highmem-4"  # 4 vCPU, 32GB RAM
+    instance_policy.machine_type = machine_type
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instance_policy_or_template.policy = instance_policy
@@ -154,6 +154,83 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     print("="*80)
 
     return job_id
+
+def submit_job(years, reforms, scoring_type, bucket_name):
+    """
+    Submit Cloud Batch jobs with automatic VM sizing.
+
+    Automatically splits into two jobs if 2026/2027 are included:
+    - Job 1: Years 2026-2027 with e2-highmem-8 (64GB RAM)
+    - Job 2: Other years with e2-highmem-4 (32GB RAM)
+
+    This saves ~97% of the extra cost vs using 64GB for all years.
+    """
+
+    # Split years by memory requirements
+    high_memory_years = sorted([y for y in years if y in [2026, 2027]])
+    standard_memory_years = sorted([y for y in years if y not in [2026, 2027]])
+
+    job_ids = []
+
+    # Submit high-memory job if needed (2026-2027)
+    if high_memory_years:
+        print("\n" + "="*80)
+        print("COST OPTIMIZATION: Submitting separate job for high-memory years (2026-2027)")
+        print("="*80)
+        print(f"Years requiring 64GB RAM: {', '.join(map(str, high_memory_years))}")
+        print("="*80 + "\n")
+
+        job_id = submit_single_job(
+            years=high_memory_years,
+            reforms=reforms,
+            scoring_type=scoring_type,
+            bucket_name=bucket_name,
+            machine_type="e2-highmem-8",  # 8 vCPU, 64GB RAM
+            memory_mib=65536,  # 64GB
+            cpu_milli=8000,    # 8 CPUs
+            memory_label="64GB"
+        )
+        job_ids.append((job_id, high_memory_years))
+        print()
+
+    # Submit standard-memory job if needed (all other years)
+    if standard_memory_years:
+        if high_memory_years:
+            print("\n" + "="*80)
+            print("COST OPTIMIZATION: Submitting separate job for standard-memory years")
+            print("="*80)
+            print(f"Years using 32GB RAM: {min(standard_memory_years)}-{max(standard_memory_years)}")
+            print("="*80 + "\n")
+
+        job_id = submit_single_job(
+            years=standard_memory_years,
+            reforms=reforms,
+            scoring_type=scoring_type,
+            bucket_name=bucket_name,
+            machine_type="e2-highmem-4",  # 4 vCPU, 32GB RAM
+            memory_mib=32768,  # 32GB
+            cpu_milli=4000,    # 4 CPUs
+            memory_label="32GB"
+        )
+        job_ids.append((job_id, standard_memory_years))
+        print()
+
+    # Print summary if multiple jobs
+    if len(job_ids) > 1:
+        print("\n" + "="*80)
+        print("✓ SUBMITTED 2 JOBS (COST-OPTIMIZED)")
+        print("="*80)
+        for i, (job_id, job_years) in enumerate(job_ids, 1):
+            year_range = f"{min(job_years)}-{max(job_years)}" if len(job_years) > 1 else str(job_years[0])
+            print(f"Job {i}: {job_id}")
+            print(f"  Years: {year_range} ({len(job_years)} years)")
+        print()
+        print("Monitor both jobs:")
+        for job_id, job_years in job_ids:
+            print(f"  ./monitor_job.sh {job_id} {reforms[0]} {scoring_type}")
+        print("="*80 + "\n")
+
+    return job_ids[0][0] if len(job_ids) == 1 else [jid for jid, _ in job_ids]
 
 def main():
     parser = argparse.ArgumentParser(description="Submit year-based parallel jobs")
