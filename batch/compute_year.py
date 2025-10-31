@@ -216,17 +216,24 @@ def main():
                     print(f"      ✗ No dict function for {reform_id}")
                     continue
 
-                # Get raw parameter dictionary and combine with CBO elasticities
-                # Cannot use dict unpacking {**a, **b} as it causes ParameterNode.update() error
-                # Must manually copy keys to avoid PolicyEngine internal issues
-                reform_dict = dict_func()
-                combined_dict = {}
-                for key, value in reform_dict.items():
-                    combined_dict[key] = value
-                for key, value in CBO_LABOR_PARAMS.items():
-                    combined_dict[key] = value
-                reform = Reform.from_dict(combined_dict, country_id="us")
-                print(f"      ✓ Dynamic reform with CBO elasticities")
+                # For dynamic scoring, create two separate reforms and chain them
+                # This avoids dict merging issues that cause ParameterNode.update() errors
+                reform_params = dict_func()
+
+                # Create reform from reform parameters
+                reform_reform = Reform.from_dict(reform_params, country_id="us")
+
+                # Create reform from CBO elasticities
+                elasticity_reform = Reform.from_dict(CBO_LABOR_PARAMS, country_id="us")
+
+                # Chain the reforms: apply reform first, then elasticities
+                def combined_reform(parameters):
+                    parameters = reform_reform(parameters)
+                    parameters = elasticity_reform(parameters)
+                    return parameters
+
+                reform = combined_reform
+                print(f"      ✓ Dynamic reform with CBO elasticities (chained)")
             else:
                 print(f"      ✗ Invalid scoring type: {scoring_type}")
                 continue
