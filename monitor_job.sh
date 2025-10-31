@@ -1,24 +1,27 @@
 #!/bin/bash
-# Monitor option4 dynamic 75-year run
+# General-purpose monitoring script for any Cloud Batch job
 JOB_ID="$1"
-REGION="${2:-us-central1}"
-RESULTS_DIR="results/option4_75years_dynamic"
+REFORM="$2"
+SCORING="$3"
+REGION="${4:-us-central1}"
 
-if [ -z "$JOB_ID" ]; then
-    echo "Usage: $0 <job_id> [region]"
-    echo "Example: $0 years-20251031-123456-abc123 us-central1"
+if [ -z "$JOB_ID" ] || [ -z "$REFORM" ] || [ -z "$SCORING" ]; then
+    echo "Usage: $0 <job_id> <reform> <scoring> [region]"
+    echo "Example: $0 years-20251031-123456-abc123 option5 dynamic us-central1"
     exit 1
 fi
 
+RESULTS_DIR="results/${REFORM}_75years_${SCORING}"
 mkdir -p "$RESULTS_DIR"
 
 echo "================================================================================"
-echo "MONITORING OPTION4 DYNAMIC - 75 YEARS (2026-2100)"
+echo "MONITORING CLOUD BATCH JOB"
 echo "================================================================================"
 echo "Job ID: $JOB_ID"
 echo "Region: $REGION"
-echo "Reform: option4 ($500 SS tax credit)"
-echo "Scoring: DYNAMIC (with CBO labor supply elasticities)"
+echo "Reform: $REFORM"
+echo "Scoring: $SCORING"
+echo "Results: $RESULTS_DIR"
 echo "================================================================================"
 echo ""
 
@@ -42,17 +45,17 @@ for i in {1..120}; do
     SUCCEEDED=$(echo "$TASK_STATES" | grep -c "SUCCEEDED" || echo 0)
     FAILED=$(echo "$TASK_STATES" | grep -c "FAILED" || echo 0)
 
-    echo "Tasks: RUNNING=$RUNNING, SUCCEEDED=$SUCCEEDED, FAILED=$FAILED, PENDING=$PENDING (Total: 75)"
+    echo "Tasks: RUNNING=$RUNNING, SUCCEEDED=$SUCCEEDED, FAILED=$FAILED, PENDING=$PENDING"
 
     TEMP_DIR="$RESULTS_DIR/.temp"
     mkdir -p "$TEMP_DIR"
     gsutil -m cp -n "gs://crfb-ss-analysis-results/results/${JOB_ID}/*.csv" "$TEMP_DIR/" 2>/dev/null
 
-    RESULT_FILES=$(ls "$TEMP_DIR"/*_option4_dynamic_results.csv 2>/dev/null | wc -l | tr -d ' ')
+    RESULT_FILES=$(ls "$TEMP_DIR"/*_${REFORM}_${SCORING}_results.csv 2>/dev/null | wc -l | tr -d ' ')
 
     if [ "$RESULT_FILES" -gt 0 ]; then
         echo "reform_name,year,baseline_revenue,reform_revenue,revenue_impact,scoring_type" > "$TEMP_DIR/merged.csv"
-        tail -n +2 -q "$TEMP_DIR"/*_option4_dynamic_results.csv 2>/dev/null | sort -t',' -k2 -n >> "$TEMP_DIR/merged.csv"
+        tail -n +2 -q "$TEMP_DIR"/*_${REFORM}_${SCORING}_results.csv 2>/dev/null | sort -t',' -k2 -n >> "$TEMP_DIR/merged.csv"
 
         python3 << PYEOF
 import pandas as pd
@@ -68,10 +71,11 @@ try:
         total_impact = df['revenue_impact'].sum()
         df.to_csv('$RESULTS_DIR/all_results.csv', index=False)
 
-        print(f"Results: {len(df)}/75 years completed")
+        print(f"Results: {len(df)} years completed")
         print(f"Years: {df['year'].min()}-{df['year'].max()}")
-        print(f"Cumulative 10-year impact (2026-2035): \${df[df['year'] <= 2035]['revenue_impact'].sum():+.2f}B")
-        print(f"Total impact so far: \${total_impact:+.2f}B")
+        if len(df[df['year'] <= 2035]) > 0:
+            print(f"10-year impact (2026-2035): \${df[df['year'] <= 2035]['revenue_impact'].sum():+.2f}B")
+        print(f"Total impact: \${total_impact:+.2f}B")
 except Exception as e:
     print(f"Results: {RESULT_FILES} files downloaded")
 PYEOF
@@ -88,7 +92,7 @@ PYEOF
     echo ""
 
     if [ "$STATE" = "SUCCEEDED" ]; then
-        echo "✅ OPTION4 DYNAMIC COMPLETED! ($SUCCEEDED/75 succeeded, $FAILED failed)"
+        echo "✅ JOB COMPLETED! ($SUCCEEDED succeeded, $FAILED failed)"
         break
     fi
 

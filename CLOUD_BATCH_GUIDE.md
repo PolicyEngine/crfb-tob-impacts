@@ -76,7 +76,7 @@ When you submit a job, here's the complete execution flow:
    - Each VM writes: 2028_option5_dynamic_results.csv
    - 75 CSV files total (one per year)
    ↓
-6. Monitoring Script: ./monitor_option5_dynamic.sh
+6. Monitoring Script: ./monitor_job.sh <JOB_ID> option5 dynamic
    - Downloads CSVs incrementally from Cloud Storage
    - Merges all year files into one dataset
    - Converts values to billions
@@ -96,7 +96,7 @@ When you submit a job, here's the complete execution flow:
 | `src/reforms.py` | Defines all reform parameters (tax rates, thresholds, etc.) | Imported by `compute_year.py` on each VM |
 | `batch/cloudbuild.yaml` | Builds Docker container with PolicyEngine + dependencies | When container is built (already done) |
 | `submit_option5_dynamic.sh` | Wrapper script to submit a specific job | Local machine, manually executed |
-| `monitor_option5_dynamic.sh` | Downloads results and shows progress | Local machine, runs in background |
+| `monitor_job.sh` | General monitoring script (works for any option/scoring) | Local machine, runs in background |
 
 **What Happens Inside compute_year.py:**
 
@@ -203,9 +203,9 @@ YEARS=$(python3 -c "print(','.join(map(str, range(2026, 2101))))")
 - Simple to run jobs sequentially or in parallel
 - Clean log files per job
 
-### 3. Create Monitoring Scripts
+### 3. Use the General Monitoring Script
 
-Each job needs a monitoring script that:
+The repository includes `monitor_job.sh` - a general-purpose monitoring script that:
 - Polls job status every 60 seconds
 - Downloads results incrementally from Cloud Storage
 - Merges CSVs and converts to billions
@@ -213,10 +213,9 @@ Each job needs a monitoring script that:
 - Runs in background with log file
 
 ```bash
-# Example: monitor_option5_dynamic.sh
-#!/bin/bash
-JOB_ID="$1"
-RESULTS_DIR="results/option5_75years_dynamic"
+# General monitoring script usage:
+# ./monitor_job.sh <JOB_ID> <reform> <scoring> [region]
+# Example: ./monitor_job.sh years-20251031-123456-abc123 option5 dynamic us-central1
 
 for i in {1..120}; do
     # Check job state
@@ -279,10 +278,10 @@ OUTPUT=$(./submit_option5_dynamic.sh)
 JOB_ID=$(echo "$OUTPUT" | grep "Job ID:" | head -1 | awk '{print $3}')
 
 # Start monitoring in background
-./monitor_option5_dynamic.sh $JOB_ID 2>&1 | tee results/option5_dynamic_monitor.log &
+./monitor_job.sh $JOB_ID option5 dynamic 2>&1 | tee results/option5_monitor.log &
 
 # Watch live progress
-tail -f results/option5_dynamic_monitor.log
+tail -f results/option5_monitor.log
 ```
 
 ### 6. Job Cleanup
@@ -558,7 +557,7 @@ gcloud batch tasks list --location=us-central1 --job=<JOB_ID>
 gcloud batch jobs delete <JOB_ID> --location=us-central1 --quiet
 
 # Kill all monitoring processes (if needed)
-pkill -f "monitor_option"
+pkill -f "monitor_job.sh"
 ```
 
 ### Results Management
@@ -595,18 +594,14 @@ gcloud batch jobs list --location=us-central1 \
    # Edit to change option8 → option9
    ```
 
-2. **Create monitoring script:**
-   ```bash
-   cp monitor_option8_dynamic.sh monitor_option9_dynamic.sh
-   # Edit to change option8 → option9, update RESULTS_DIR
-   ```
-
-3. **Submit and monitor:**
+2. **Submit and monitor:**
    ```bash
    ./submit_option9_dynamic.sh
    JOB_ID="<from output>"
-   ./monitor_option9_dynamic.sh $JOB_ID 2>&1 | tee results/option9_monitor.log &
+   ./monitor_job.sh $JOB_ID option9 dynamic 2>&1 | tee results/option9_monitor.log &
    ```
+
+The general `monitor_job.sh` script works for any option without modification!
 
 ### Running Different Year Ranges
 
