@@ -230,31 +230,79 @@ def enable_employer_payroll_tax(percentage=1.0):
     }
 
 
+# CBO labor supply elasticities (for dynamic scoring)
+CBO_ELASTICITIES = {
+    "gov.simulation.labor_supply_responses.elasticities.income": {
+        "2024-01-01.2100-12-31": -0.05
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.1": {
+        "2024-01-01.2100-12-31": 0.31
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.2": {
+        "2024-01-01.2100-12-31": 0.28
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.3": {
+        "2024-01-01.2100-12-31": 0.27
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.4": {
+        "2024-01-01.2100-12-31": 0.27
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.5": {
+        "2024-01-01.2100-12-31": 0.25
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.6": {
+        "2024-01-01.2100-12-31": 0.25
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.7": {
+        "2024-01-01.2100-12-31": 0.22
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.8": {
+        "2024-01-01.2100-12-31": 0.19
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.9": {
+        "2024-01-01.2100-12-31": 0.15
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.10": {
+        "2024-01-01.2100-12-31": 0.10
+    }
+}
+
+
 # Dict-returning functions for each option (used for dynamic scoring)
-# These return the combined parameter dictionaries without wrapping in Reform
+# These return complete parameter dictionaries with CBO elasticities pre-merged
 
 def get_option1_dict():
-    """Return parameter dict for Option 1."""
+    """Return parameter dict for Option 1 (static scoring only - no elasticities)."""
     return eliminate_ss_taxation()
 
 def get_option2_dict():
-    """Return parameter dict for Option 2."""
+    """Return parameter dict for Option 2 (static scoring only - no elasticities)."""
     return tax_85_percent_ss()
 
 def get_option3_dict():
-    """Return parameter dict for Option 3."""
-    return {**tax_85_percent_ss(), **extend_senior_deduction()}
+    """Return parameter dict for Option 3 (static scoring only - no elasticities)."""
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(extend_senior_deduction())
+    return result
 
 def get_option4_dict(credit_amount=500):
-    """Return parameter dict for Option 4."""
-    return {**tax_85_percent_ss(), **add_ss_tax_credit(credit_amount), **eliminate_senior_deduction()}
+    """Return parameter dict for Option 4 (static scoring only - no elasticities)."""
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(add_ss_tax_credit(credit_amount))
+    result.update(eliminate_senior_deduction())
+    return result
 
 def get_option5_dict():
-    """Return parameter dict for Option 5."""
-    return {**eliminate_ss_taxation(), **enable_employer_payroll_tax(1.0)}
+    """Return parameter dict for Option 5 (static scoring only - no elasticities)."""
+    result = {}
+    result.update(eliminate_ss_taxation())
+    result.update(enable_employer_payroll_tax(1.0))
+    return result
 
 def get_option6_dict():
-    """Return parameter dict for Option 6."""
+    """Return parameter dict for Option 6 (static scoring only - no elasticities)."""
     reform_dict = {
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
             "2026-01-01.2100-12-31": True
@@ -297,12 +345,112 @@ def get_option6_dict():
     return reform_dict
 
 def get_option7_dict():
-    """Return parameter dict for Option 7."""
+    """Return parameter dict for Option 7 (static scoring only - no elasticities)."""
     return eliminate_senior_deduction()
 
 def get_option8_dict():
-    """Return parameter dict for Option 8."""
+    """Return parameter dict for Option 8 (static scoring only - no elasticities)."""
     return tax_100_percent_ss()
+
+
+# Complete dynamic scoring dictionaries with CBO elasticities pre-merged
+def get_option1_dynamic_dict():
+    """Return complete parameter dict for Option 1 with CBO elasticities."""
+    result = {}
+    result.update(eliminate_ss_taxation())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option2_dynamic_dict():
+    """Return complete parameter dict for Option 2 with CBO elasticities."""
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option3_dynamic_dict():
+    """Return complete parameter dict for Option 3 with CBO elasticities."""
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(extend_senior_deduction())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option4_dynamic_dict(credit_amount=500):
+    """Return complete parameter dict for Option 4 with CBO elasticities."""
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(add_ss_tax_credit(credit_amount))
+    result.update(eliminate_senior_deduction())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option5_dynamic_dict():
+    """Return complete parameter dict for Option 5 with CBO elasticities."""
+    result = {}
+    result.update(eliminate_ss_taxation())
+    result.update(enable_employer_payroll_tax(1.0))
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option6_dynamic_dict():
+    """Return complete parameter dict for Option 6 with CBO elasticities."""
+    reform_dict = {
+        "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
+            "2026-01-01.2100-12-31": True
+        },
+        "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
+            "2026": 0.1307,
+            "2027": 0.2614,
+            "2028": 0.3922,
+            "2029": 0.5229,
+            "2030": 0.6536,
+            "2031": 0.7843,
+            "2032": 0.9150,
+            "2033-01-01.2100-12-31": 1.0
+        },
+    }
+
+    # Phase down base rate parameters
+    base_years = [2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037]
+    base_values = [0.45, 0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    for param_name in ["benefit_cap", "excess"]:
+        param_path = f"gov.irs.social_security.taxability.rate.base.{param_name}"
+        reform_dict[param_path] = {}
+        for year, value in zip(base_years, base_values):
+            reform_dict[param_path][str(year)] = value
+        reform_dict[param_path]["2038-01-01.2100-12-31"] = 0
+
+    # Phase down additional rate parameters
+    add_years = list(range(2029, 2045))
+    add_values = [0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40,
+                  0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    for param_name in ["benefit_cap", "bracket", "excess"]:
+        param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
+        reform_dict[param_path] = {}
+        for year, value in zip(add_years, add_values):
+            reform_dict[param_path][str(year)] = value
+        reform_dict[param_path]["2045-01-01.2100-12-31"] = 0
+
+    # Add CBO elasticities
+    reform_dict.update(CBO_ELASTICITIES)
+    return reform_dict
+
+def get_option7_dynamic_dict():
+    """Return complete parameter dict for Option 7 with CBO elasticities."""
+    result = {}
+    result.update(eliminate_senior_deduction())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option8_dynamic_dict():
+    """Return complete parameter dict for Option 8 with CBO elasticities."""
+    result = {}
+    result.update(tax_100_percent_ss())
+    result.update(CBO_ELASTICITIES)
+    return result
 
 
 # Policy reform functions using modular components

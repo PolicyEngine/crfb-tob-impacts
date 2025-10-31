@@ -54,7 +54,16 @@ from reforms import (
     get_option5_dict,
     get_option6_dict,
     get_option7_dict,
-    get_option8_dict
+    get_option8_dict,
+    # Complete dynamic dicts with CBO elasticities pre-merged
+    get_option1_dynamic_dict,
+    get_option2_dynamic_dict,
+    get_option3_dynamic_dict,
+    get_option4_dynamic_dict,
+    get_option5_dynamic_dict,
+    get_option6_dynamic_dict,
+    get_option7_dynamic_dict,
+    get_option8_dynamic_dict,
 )
 
 # Reform functions for static scoring (return Reform classes)
@@ -69,16 +78,16 @@ REFORM_FUNCTIONS = {
     'option8': get_option8_reform,
 }
 
-# Dict-returning functions for dynamic scoring (use functions from reforms.py)
-REFORM_DICT_FUNCTIONS = {
-    'option1': get_option1_dict,
-    'option2': get_option2_dict,
-    'option3': get_option3_dict,
-    'option4': get_option4_dict,
-    'option5': get_option5_dict,
-    'option6': get_option6_dict,
-    'option7': get_option7_dict,
-    'option8': get_option8_dict,
+# Dict-returning functions for dynamic scoring with CBO elasticities
+REFORM_DYNAMIC_DICT_FUNCTIONS = {
+    'option1': get_option1_dynamic_dict,
+    'option2': get_option2_dynamic_dict,
+    'option3': get_option3_dynamic_dict,
+    'option4': get_option4_dynamic_dict,
+    'option5': get_option5_dynamic_dict,
+    'option6': get_option6_dynamic_dict,
+    'option7': get_option7_dynamic_dict,
+    'option8': get_option8_dynamic_dict,
 }
 
 # CBO labor supply elasticities for dynamic scoring
@@ -210,30 +219,18 @@ def main():
                 reform = reform_func()
                 print(f"      ✓ Static reform created")
             elif scoring_type == 'dynamic':
-                # Get the dict-returning function for this reform
-                dict_func = REFORM_DICT_FUNCTIONS.get(reform_id)
-                if not dict_func:
-                    print(f"      ✗ No dict function for {reform_id}")
+                # Get the complete dynamic dict function (with CBO elasticities pre-merged)
+                dynamic_dict_func = REFORM_DYNAMIC_DICT_FUNCTIONS.get(reform_id)
+                if not dynamic_dict_func:
+                    print(f"      ✗ No dynamic dict function for {reform_id}")
                     continue
 
-                # For dynamic scoring, create two separate reforms and chain them
-                # This avoids dict merging issues that cause ParameterNode.update() errors
-                reform_params = dict_func()
+                # Get the complete parameter dictionary
+                reform_params = dynamic_dict_func()
 
-                # Create reform from reform parameters
-                reform_reform = Reform.from_dict(reform_params, country_id="us")
-
-                # Create reform from CBO elasticities
-                elasticity_reform = Reform.from_dict(CBO_LABOR_PARAMS, country_id="us")
-
-                # Chain the reforms: apply reform first, then elasticities
-                def combined_reform(parameters):
-                    parameters = reform_reform(parameters)
-                    parameters = elasticity_reform(parameters)
-                    return parameters
-
-                reform = combined_reform
-                print(f"      ✓ Dynamic reform with CBO elasticities (chained)")
+                # Create single reform from complete parameters
+                reform = Reform.from_dict(reform_params, country_id="us")
+                print(f"      ✓ Dynamic reform with CBO elasticities (pre-merged)")
             else:
                 print(f"      ✗ Invalid scoring type: {scoring_type}")
                 continue
