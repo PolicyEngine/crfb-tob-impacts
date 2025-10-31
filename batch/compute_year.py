@@ -217,8 +217,14 @@ def main():
                     continue
 
                 # Get raw parameter dictionary and combine with CBO elasticities
+                # Cannot use dict unpacking {**a, **b} as it causes ParameterNode.update() error
+                # Must manually copy keys to avoid PolicyEngine internal issues
                 reform_dict = dict_func()
-                combined_dict = {**reform_dict, **CBO_LABOR_PARAMS}
+                combined_dict = {}
+                for key, value in reform_dict.items():
+                    combined_dict[key] = value
+                for key, value in CBO_LABOR_PARAMS.items():
+                    combined_dict[key] = value
                 reform = Reform.from_dict(combined_dict, country_id="us")
                 print(f"      ✓ Dynamic reform with CBO elasticities")
             else:
