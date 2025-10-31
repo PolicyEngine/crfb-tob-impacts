@@ -230,97 +230,48 @@ def enable_employer_payroll_tax(percentage=1.0):
     }
 
 
-# Policy reform functions using modular components
+# Dict-returning functions for each option (used for dynamic scoring)
+# These return the combined parameter dictionaries without wrapping in Reform
 
-def get_option1_reform():
-    """Option 1: Full Repeal of Social Security Benefits Taxation.
+def get_option1_dict():
+    """Return parameter dict for Option 1."""
+    return eliminate_ss_taxation()
 
-    Completely eliminates federal income taxation of Social Security benefits,
-    returning to the pre-1984 policy where benefits were not subject to income tax.
-    """
-    return Reform.from_dict(eliminate_ss_taxation(), country_id="us")
+def get_option2_dict():
+    """Return parameter dict for Option 2."""
+    return tax_85_percent_ss()
 
+def get_option3_dict():
+    """Return parameter dict for Option 3."""
+    return {**tax_85_percent_ss(), **extend_senior_deduction()}
 
-def get_option2_reform():
-    """Option 2: Taxation of 85% of Social Security Benefits.
+def get_option4_dict(credit_amount=500):
+    """Return parameter dict for Option 4."""
+    return {**tax_85_percent_ss(), **add_ss_tax_credit(credit_amount), **eliminate_senior_deduction()}
 
-    Taxes 85% of Social Security benefits for all recipients,
-    regardless of income level, eliminating the current threshold system.
-    """
-    return Reform.from_dict(tax_85_percent_ss(), country_id="us")
+def get_option5_dict():
+    """Return parameter dict for Option 5."""
+    return {**eliminate_ss_taxation(), **enable_employer_payroll_tax(1.0)}
 
-
-def get_option3_reform():
-    """Option 3: 85% Taxation with Permanent Senior Deduction Extension.
-
-    Combines taxation of 85% of benefits with a permanent extension
-    of the senior deduction that would otherwise expire in 2028.
-    """
-    # Combine parametric SS reform with senior deduction extension
-    return Reform.from_dict({
-        **tax_85_percent_ss(),
-        **extend_senior_deduction()
-    }, country_id="us")
-
-
-def get_option4_reform(credit_amount=500):
-    """Option 4: Social Security Tax Credit System.
-
-    Replaces the senior deduction with a nonrefundable tax credit
-    while taxing 85% of benefits.
-
-    Args:
-        credit_amount: The credit amount in dollars (default: 500)
-    """
-    # Combine parametric SS reform with credit and deduction changes
-    return Reform.from_dict({
-        **tax_85_percent_ss(),
-        **add_ss_tax_credit(credit_amount),
-        **eliminate_senior_deduction()
-    }, country_id="us")
-
-
-def get_option5_reform():
-    """Option 5: Roth-Style Swap.
-
-    Eliminates Social Security benefit taxation while making
-    employer payroll contributions taxable income.
-    """
-    return Reform.from_dict({
-        **eliminate_ss_taxation(),
-        **enable_employer_payroll_tax(1.0)
-    }, country_id="us")
-
-
-def get_option6_reform():
-    """Option 6: Phased Roth-Style Swap.
-
-    Implements a gradual transition to the Roth-style system over multiple years,
-    phasing in employer contribution taxation while phasing out benefit taxation.
-
-    Note: This reform is complex and may need further refinement for the SS taxation
-    phase-down to work properly with PolicyEngine's parameter structure.
-    """
+def get_option6_dict():
+    """Return parameter dict for Option 6."""
     reform_dict = {
-        # Enable employer payroll tax inclusion
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
             "2026-01-01.2100-12-31": True
         },
-        # Phase in employer payroll tax (year by year from 2026 to 2033)
         "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
-            "2026": 0.1307,  # 1/7.65
-            "2027": 0.2614,  # 2/7.65
-            "2028": 0.3922,  # 3/7.65
-            "2029": 0.5229,  # 4/7.65
-            "2030": 0.6536,  # 5/7.65
-            "2031": 0.7843,  # 6/7.65
-            "2032": 0.9150,  # 7/7.65
-            "2033-01-01.2100-12-31": 1.0      # Full amount from 2033 onward
+            "2026": 0.1307,
+            "2027": 0.2614,
+            "2028": 0.3922,
+            "2029": 0.5229,
+            "2030": 0.6536,
+            "2031": 0.7843,
+            "2032": 0.9150,
+            "2033-01-01.2100-12-31": 1.0
         },
     }
 
-    # For the SS taxation phase-down, we need to set each leaf parameter
-    # Phase down base rate parameters (benefit_cap and excess)
+    # Phase down base rate parameters
     base_years = [2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037]
     base_values = [0.45, 0.40, 0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
 
@@ -331,7 +282,7 @@ def get_option6_reform():
             reform_dict[param_path][str(year)] = value
         reform_dict[param_path]["2038-01-01.2100-12-31"] = 0
 
-    # Phase down additional rate parameters (benefit_cap, bracket, excess)
+    # Phase down additional rate parameters
     add_years = list(range(2029, 2045))
     add_values = [0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40,
                   0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
@@ -343,7 +294,77 @@ def get_option6_reform():
             reform_dict[param_path][str(year)] = value
         reform_dict[param_path]["2045-01-01.2100-12-31"] = 0
 
-    return Reform.from_dict(reform_dict, country_id="us")
+    return reform_dict
+
+def get_option7_dict():
+    """Return parameter dict for Option 7."""
+    return eliminate_senior_deduction()
+
+def get_option8_dict():
+    """Return parameter dict for Option 8."""
+    return tax_100_percent_ss()
+
+
+# Policy reform functions using modular components
+
+def get_option1_reform():
+    """Option 1: Full Repeal of Social Security Benefits Taxation.
+
+    Completely eliminates federal income taxation of Social Security benefits,
+    returning to the pre-1984 policy where benefits were not subject to income tax.
+    """
+    return Reform.from_dict(get_option1_dict(), country_id="us")
+
+
+def get_option2_reform():
+    """Option 2: Taxation of 85% of Social Security Benefits.
+
+    Taxes 85% of Social Security benefits for all recipients,
+    regardless of income level, eliminating the current threshold system.
+    """
+    return Reform.from_dict(get_option2_dict(), country_id="us")
+
+
+def get_option3_reform():
+    """Option 3: 85% Taxation with Permanent Senior Deduction Extension.
+
+    Combines taxation of 85% of benefits with a permanent extension
+    of the senior deduction that would otherwise expire in 2028.
+    """
+    return Reform.from_dict(get_option3_dict(), country_id="us")
+
+
+def get_option4_reform(credit_amount=500):
+    """Option 4: Social Security Tax Credit System.
+
+    Replaces the senior deduction with a nonrefundable tax credit
+    while taxing 85% of benefits.
+
+    Args:
+        credit_amount: The credit amount in dollars (default: 500)
+    """
+    return Reform.from_dict(get_option4_dict(credit_amount), country_id="us")
+
+
+def get_option5_reform():
+    """Option 5: Roth-Style Swap.
+
+    Eliminates Social Security benefit taxation while making
+    employer payroll contributions taxable income.
+    """
+    return Reform.from_dict(get_option5_dict(), country_id="us")
+
+
+def get_option6_reform():
+    """Option 6: Phased Roth-Style Swap.
+
+    Implements a gradual transition to the Roth-style system over multiple years,
+    phasing in employer contribution taxation while phasing out benefit taxation.
+
+    Note: This reform is complex and may need further refinement for the SS taxation
+    phase-down to work properly with PolicyEngine's parameter structure.
+    """
+    return Reform.from_dict(get_option6_dict(), country_id="us")
 
 
 def get_option7_reform():
@@ -353,7 +374,7 @@ def get_option7_reform():
     that has a 6% phase-out beginning at $75k/$150k for single/joint filers.
     The deduction expires in 2029, so there's only impact from 2026-2028.
     """
-    return Reform.from_dict(eliminate_senior_deduction(), country_id="us")
+    return Reform.from_dict(get_option7_dict(), country_id="us")
 
 
 def get_option8_reform():
@@ -363,7 +384,7 @@ def get_option8_reform():
     regardless of income level. This is more comprehensive than Option 2
     which taxes only 85% of benefits.
     """
-    return Reform.from_dict(tax_100_percent_ss(), country_id="us")
+    return Reform.from_dict(get_option8_dict(), country_id="us")
 
 
 # Dictionary mapping reform IDs to configurations

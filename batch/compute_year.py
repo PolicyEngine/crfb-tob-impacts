@@ -33,7 +33,7 @@ from policyengine_core.reforms import Reform
 from google.cloud import storage
 import pandas as pd
 
-# Import reform functions
+# Import reform functions (for static scoring - return Reform classes)
 from reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -45,6 +45,19 @@ from reforms import (
     get_option8_reform
 )
 
+# Import dict-returning functions (for dynamic scoring) from reforms.py
+from reforms import (
+    get_option1_dict,
+    get_option2_dict,
+    get_option3_dict,
+    get_option4_dict,
+    get_option5_dict,
+    get_option6_dict,
+    get_option7_dict,
+    get_option8_dict
+)
+
+# Reform functions for static scoring (return Reform classes)
 REFORM_FUNCTIONS = {
     'option1': get_option1_reform,
     'option2': get_option2_reform,
@@ -54,6 +67,18 @@ REFORM_FUNCTIONS = {
     'option6': get_option6_reform,
     'option7': get_option7_reform,
     'option8': get_option8_reform,
+}
+
+# Dict-returning functions for dynamic scoring (use functions from reforms.py)
+REFORM_DICT_FUNCTIONS = {
+    'option1': get_option1_dict,
+    'option2': get_option2_dict,
+    'option3': get_option3_dict,
+    'option4': get_option4_dict,
+    'option5': get_option5_dict,
+    'option6': get_option6_dict,
+    'option7': get_option7_dict,
+    'option8': get_option8_dict,
 }
 
 # CBO labor supply elasticities for dynamic scoring
@@ -185,7 +210,14 @@ def main():
                 reform = reform_func()
                 print(f"      ✓ Static reform created")
             elif scoring_type == 'dynamic':
-                reform_dict = get_reform_dict(reform_func)
+                # Get the dict-returning function for this reform
+                dict_func = REFORM_DICT_FUNCTIONS.get(reform_id)
+                if not dict_func:
+                    print(f"      ✗ No dict function for {reform_id}")
+                    continue
+
+                # Get raw parameter dictionary and combine with CBO elasticities
+                reform_dict = dict_func()
                 combined_dict = {**reform_dict, **CBO_LABOR_PARAMS}
                 reform = Reform.from_dict(combined_dict, country_id="us")
                 print(f"      ✓ Dynamic reform with CBO elasticities")
