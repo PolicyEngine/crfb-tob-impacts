@@ -21,6 +21,7 @@ Arguments:
 
 import sys
 import time
+import gc
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -131,15 +132,29 @@ def main():
     print(f"      ✓ Dataset reference prepared ({dataset_time:.1f}s)")
     print()
 
-    # Step 2: Calculate baseline ONCE
+    # Step 2: Calculate baseline ONCE (with detailed timing)
     print(f"[2/{3+len(reform_ids)}] Creating baseline simulation for {year}...")
     baseline_start = time.time()
     try:
+        create_start = time.time()
         baseline_sim = Microsimulation(dataset=dataset_name)
+        create_time = time.time() - create_start
+        print(f"      - Microsimulation created: {create_time:.1f}s")
+
+        calc_start = time.time()
         baseline_income_tax = baseline_sim.calculate("income_tax", map_to="household", period=year)
+        calc_time = time.time() - calc_start
+        print(f"      - Income tax calculated: {calc_time:.1f}s")
+
         baseline_revenue = float(baseline_income_tax.sum())
         baseline_time = time.time() - baseline_start
-        print(f"      ✓ Baseline calculated: ${baseline_revenue/1e9:.2f}B ({baseline_time:.1f}s)")
+        print(f"      ✓ Baseline calculated: ${baseline_revenue/1e9:.2f}B (total: {baseline_time:.1f}s)")
+
+        # Clean up baseline objects immediately after extracting the value
+        del baseline_sim
+        del baseline_income_tax
+        gc.collect()
+        print(f"      ✓ Baseline objects cleaned up")
     except Exception as e:
         print(f"      ✗ Baseline calculation failed: {e}")
         import traceback
@@ -177,11 +192,20 @@ def main():
                 print(f"      ✗ Invalid scoring type: {scoring_type}")
                 continue
 
-            # Run simulation
+            # Run simulation with detailed timing
             print(f"      Running PolicyEngine simulation...")
             sim_start = time.time()
+
+            create_start = time.time()
             reform_sim = Microsimulation(reform=reform, dataset=dataset_name)
+            create_time = time.time() - create_start
+            print(f"        - Microsimulation object created: {create_time:.1f}s")
+
+            calc_start = time.time()
             reform_income_tax = reform_sim.calculate("income_tax", map_to="household", period=year)
+            calc_time = time.time() - calc_start
+            print(f"        - Income tax calculated: {calc_time:.1f}s")
+
             reform_revenue = float(reform_income_tax.sum())
             sim_time = time.time() - sim_start
 
@@ -192,15 +216,23 @@ def main():
             print(f"      ✓ Reform revenue: ${reform_revenue/1e9:.2f}B")
             print(f"      ✓ Impact: ${impact/1e9:+.2f}B ({reform_time:.1f}s total, {sim_time:.1f}s simulation)")
 
-            # Store result
+            # Store result (include baseline for reference)
             result = {
                 'reform_name': reform_id,
                 'year': year,
-                'income_tax': reform_revenue,
-                'change_from_baseline': impact,
+                'baseline_revenue': baseline_revenue,
+                'reform_revenue': reform_revenue,
+                'revenue_impact': impact,
                 'scoring_type': scoring_type
             }
             results.append(result)
+
+            # CRITICAL: Clean up reform objects immediately to prevent memory accumulation
+            del reform_sim
+            del reform_income_tax
+            del reform
+            gc.collect()
+            print(f"      ✓ Memory cleaned up")
 
             # Save incrementally to Cloud Storage
             try:
