@@ -311,8 +311,6 @@ def main():
     print(f"✓ YEAR {year} COMPLETE")
     print(f"{'='*80}")
     print(f"Total reforms computed: {len(results)}")
-    print(f"Total time: {sum(r['total_time'] for r in results):.1f}s")
-    print(f"Average time per reform: {sum(r['total_time'] for r in results)/len(results):.1f}s")
     print(f"{'='*80}")
 
 
