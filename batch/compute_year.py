@@ -20,8 +20,6 @@ Arguments:
 """
 
 import sys
-import os
-import json
 import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -149,8 +147,12 @@ def main():
         sys.exit(1)
     print()
 
-    # Step 3: Run ALL reforms for this year
+    # Step 3: Run ALL reforms for this year (save each result incrementally)
     results = []
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    csv_path = f"results/{job_id}/{year}_{scoring_type}_results.csv"
+
     for i, reform_id in enumerate(reform_ids, start=1):
         print(f"[{2+i}/{3+len(reform_ids)}] Computing {reform_id} for {year}...")
         reform_start = time.time()
@@ -191,16 +193,25 @@ def main():
             print(f"      ✓ Impact: ${impact/1e9:+.2f}B ({reform_time:.1f}s total, {sim_time:.1f}s simulation)")
 
             # Store result
-            results.append({
-                'reform': reform_id,
+            result = {
+                'reform_name': reform_id,
                 'year': year,
-                'scoring_type': scoring_type,
-                'baseline_revenue': baseline_revenue,
-                'reform_revenue': reform_revenue,
-                'revenue_impact': impact,
-                'simulation_time': sim_time,
-                'total_time': reform_time
-            })
+                'income_tax': reform_revenue,
+                'change_from_baseline': impact,
+                'scoring_type': scoring_type
+            }
+            results.append(result)
+
+            # Save incrementally to Cloud Storage
+            try:
+                df = pd.DataFrame(results)
+                blob = bucket.blob(csv_path)
+                blob.upload_from_string(df.to_csv(index=False), content_type='text/csv')
+                print(f"      ✓ Saved to gs://{bucket_name}/{csv_path} ({len(results)} reforms)")
+            except Exception as save_error:
+                print(f"      ⚠ Warning: Failed to save intermediate results: {save_error}")
+                # Don't fail the whole job if intermediate save fails
+                pass
 
         except Exception as e:
             print(f"      ✗ Reform calculation failed: {e}")
@@ -209,36 +220,26 @@ def main():
 
         print()
 
-    # Step 4: Save all results
-    print(f"[{3+len(reform_ids)}/{3+len(reform_ids)}] Saving results to Cloud Storage...")
+    # Step 4: Final verification
+    print(f"[{3+len(reform_ids)}/{3+len(reform_ids)}] Verifying final results...")
 
     if not results:
-        print("      ✗ No results to save!")
+        print("      ✗ No results computed!")
         sys.exit(1)
 
-    # Create results DataFrame
-    df = pd.DataFrame(results)
-
-    # Save to Cloud Storage
+    # Final save to Cloud Storage (already saved incrementally, but do one final write)
     try:
-        client = storage.Client()
-        bucket = client.bucket(bucket_name)
-
-        # Save as CSV
-        csv_path = f"results/{job_id}/{year}_{scoring_type}_results.csv"
+        df = pd.DataFrame(results)
         blob = bucket.blob(csv_path)
         blob.upload_from_string(df.to_csv(index=False), content_type='text/csv')
-        print(f"      ✓ Results saved to gs://{bucket_name}/{csv_path}")
-
-        # Save as JSON for easy reading
-        json_path = f"results/{job_id}/{year}_{scoring_type}_results.json"
-        blob = bucket.blob(json_path)
-        blob.upload_from_string(json.dumps(results, indent=2), content_type='application/json')
-        print(f"      ✓ Results saved to gs://{bucket_name}/{json_path}")
+        print(f"      ✓ Final results saved to gs://{bucket_name}/{csv_path}")
+        print(f"      ✓ Total reforms: {len(results)}")
 
     except Exception as e:
-        print(f"      ✗ Failed to save results: {e}")
-        sys.exit(1)
+        print(f"      ✗ Failed to save final results: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)  # Exit with error so Cloud Batch marks task as FAILED
 
     print()
     print(f"{'='*80}")

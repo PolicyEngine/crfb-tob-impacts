@@ -59,19 +59,16 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     reforms_args = ' '.join(reforms)
 
     script = f"""
+    set -e  # Exit immediately if any command fails
+
     YEARS=({years_array})
     YEAR=${{YEARS[$BATCH_TASK_INDEX]}}
     echo "Task $BATCH_TASK_INDEX processing year $YEAR with {len(reforms)} reforms"
-
-    # Add detailed timing and memory monitoring
     echo "=== Starting computation at $(date) ==="
-    echo "=== Memory before start ==="
-    free -h
 
     python /app/batch/compute_year.py $YEAR {scoring_type} {bucket_name} {job_id} {reforms_args}
 
-    echo "=== Memory after completion ==="
-    free -h
+    # Only reach here if python succeeded
     echo "=== Finished at $(date) ==="
     """
 
@@ -85,13 +82,12 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     task_spec.max_retry_count = 1  # Allow one retry per task
     task_spec.max_run_duration = "3600s"  # 1 hour timeout per year
 
-    # Resource allocation based on local testing:
-    # Local test: 2 reforms used 4.76GB peak memory
-    # For 8 reforms: need ~16GB to be safe (includes OS/container overhead)
-    # Using 2 CPUs to match e2-highmem-2 machine type (2 vCPU, 16GB RAM)
+    # Resource allocation based on cloud testing:
+    # Cloud test showed 16GB was insufficient for 8 reforms (OOM exit code 137)
+    # Increasing to 32GB with e2-highmem-4 (4 vCPU, 32GB RAM)
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 2000  # 2 CPUs per task (matches e2-highmem-2)
-    resources.memory_mib = 16384  # 16GB RAM per task (tested requirement)
+    resources.cpu_milli = 4000  # 4 CPUs per task (matches e2-highmem-4)
+    resources.memory_mib = 32768  # 32GB RAM per task (16GB was insufficient)
     task_spec.compute_resource = resources
 
     # Create task group
@@ -101,11 +97,11 @@ def submit_job(years, reforms, scoring_type, bucket_name):
     task_group.task_spec = task_spec
 
     # Configure allocation policy
-    # Using e2-highmem-2: 2 vCPU, 16GB RAM (sufficient for our 16GB requirement)
+    # Using e2-highmem-4: 4 vCPU, 32GB RAM (16GB was too small, got OOM)
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
     instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
-    instance_policy.machine_type = "e2-highmem-2"  # 2 vCPU, 16GB RAM
+    instance_policy.machine_type = "e2-highmem-4"  # 4 vCPU, 32GB RAM
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
     instance_policy_or_template.policy = instance_policy
