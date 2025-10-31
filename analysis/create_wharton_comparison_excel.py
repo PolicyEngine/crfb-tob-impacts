@@ -46,6 +46,15 @@ data_2054_local = {
     '% Diff': ['6240%', '307%', '72%', '22%', '122%', '219%', '34%', '33%', '-94%']
 }
 
+data_2054_new = {
+    'Income Group': ['First quintile', 'Second quintile', 'Middle quintile', 'Fourth quintile',
+                     '80-90%', '90-95%', '95-99%', '99-99.9%', 'Top 0.1%'],
+    'PolicyEngine': [-134, -868, -1946, -2644, -4067, -6741, -3097, -4098, -188],
+    'Wharton': [-5, -275, -1730, -3560, -4075, -4385, -4565, -4820, -5080],
+    'Difference': [-129, -593, -216, 916, 8, -2356, 1468, 722, 4892],
+    '% Diff': ['2580%', '216%', '12% ✓', '-26%', '~0% ✓✓', '54%', '-32%', '-15%', '-96%']
+}
+
 # Create workbook
 wb = Workbook()
 ws = wb.active
@@ -163,7 +172,8 @@ revenue_data = [
     ['Year 2026:', '-$85.4B', '(Enhanced CPS 2024)'],
     ['Year 2034:', '-$131.7B', '(Enhanced CPS 2024)'],
     ['Year 2054:', '-$176.3B', '(Enhanced CPS 2024)'],
-    ['Year 2054 (Local):', '-$588.1B', '(Local enhanced dataset)'],
+    ['Year 2054 (Old Local):', '-$588.1B', '(2054.h5 - old local)'],
+    ['Year 2054 (New):', '-$284.3B', '(2054 (1).h5 - best Wharton match)'],
 ]
 for row_data in revenue_data:
     ws.cell(row=current_row, column=1, value=row_data[0]).font = Font(bold=True, size=11)
@@ -183,8 +193,11 @@ current_row = add_table(ws, current_row, 2034, data_2034, "Average Tax Change pe
 # Add 2054 table (Enhanced CPS)
 current_row = add_table(ws, current_row, 2054, data_2054, "Average Tax Change per Household (Dollars) - Year 2054 (Enhanced CPS 2024)")
 
-# Add 2054 local table
-current_row = add_table(ws, current_row, 2054, data_2054_local, "Average Tax Change per Household (Dollars) - Year 2054 (Local Enhanced Dataset)")
+# Add 2054 old local table
+current_row = add_table(ws, current_row, 2054, data_2054_local, "Average Tax Change per Household (Dollars) - Year 2054 (Old Local Dataset: 2054.h5)")
+
+# Add 2054 new table
+current_row = add_table(ws, current_row, 2054, data_2054_new, "Average Tax Change per Household (Dollars) - Year 2054 (New Dataset: 2054 (1).h5 - BEST MATCH)")
 
 # Add dataset note at bottom
 ws.cell(row=current_row, column=1, value="Dataset: Enhanced CPS 2024 (reweighted to target years)")
@@ -198,11 +211,11 @@ wb.save(output_file)
 print(f"✓ Excel file created: {output_file}")
 print()
 print("Single sheet with formatted tables:")
-print("  - Revenue summary (2026, 2034, 2054, 2054 local)")
+print("  - Revenue summary (2026, 2034, 2054, 2054 new)")
 print("  - 2026 comparison table (formatted)")
 print("  - 2034 comparison table (formatted)")
 print("  - 2054 comparison table - Enhanced CPS 2024 (formatted)")
-print("  - 2054 comparison table - Local dataset (formatted)")
+print("  - 2054 comparison table - New dataset 2054 (1).h5 (formatted)")
 print()
 print("Formatting includes:")
 print("  - Bold headers with gray background")
