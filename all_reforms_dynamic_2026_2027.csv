@@ -1,0 +1,17 @@
+reform_name,year,baseline_revenue,reform_revenue,revenue_impact,scoring_type
+option1,2026,2178.0,2088.47,-89.53,dynamic
+option1,2027,2293.8,2197.06,-96.74,dynamic
+option2,2026,2178.0,2204.2,26.2,dynamic
+option2,2027,2293.8,2320.62,26.82,dynamic
+option3,2026,2178.0,2204.2,26.2,dynamic
+option3,2027,2293.8,2320.62,26.82,dynamic
+option4,2026,2178.0,2211.29,33.29,dynamic
+option4,2027,2293.8,2327.75,33.95,dynamic
+option5,2026,2178.0,2221.31,43.31,dynamic
+option5,2027,2293.8,2338.62,44.82,dynamic
+option6,2026,2178.0,2195.1,17.1,dynamic
+option6,2027,2293.8,2329.7,35.9,dynamic
+option7,2026,2178.0,2200.97,22.96,dynamic
+option7,2027,2293.8,2317.38,23.58,dynamic
+option8,2026,2178.0,2232.59,54.59,dynamic
+option8,2027,2293.8,2350.33,56.53,dynamic
