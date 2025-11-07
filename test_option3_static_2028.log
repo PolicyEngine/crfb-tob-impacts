@@ -1,0 +1,46 @@
+================================================================================
+MONITORING CLOUD BATCH JOB
+================================================================================
+Job ID: years-20251101-010118-sxyrk4
+Region: us-central1
+Reform: option3
+Scoring: static
+Results: results/option3_75years_static
+================================================================================
+
+=== CHECK #1 - 01:01:47 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #2 - 01:02:52 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=1
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #3 - 01:03:58 ===
+Job State: RUNNING (0m 52s)
+Tasks: RUNNING=1, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #4 - 01:05:03 ===
+Job State: RUNNING (1m 57s)
+Tasks: RUNNING=1, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
