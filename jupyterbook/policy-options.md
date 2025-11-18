@@ -115,7 +115,7 @@ def get_option3_reform():
 
 **Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the \$6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
 
-## Option 4: Replace the Bonus Senior Deduction with a $500 Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
+## Option 4: Replace the Bonus Senior Deduction with a \$500 Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
 
 **Start Date:** 2026
 
@@ -292,8 +292,8 @@ def get_option6_reform():
 def get_option7_reform():
     """Option 7: Eliminate Bonus Senior Deduction
 
-    Eliminates the $6,000 bonus senior deduction from the One Big Beautiful Bill
-    that has a 6% phase-out beginning at $75k/$150k for single/joint filers.
+    Eliminates the \$6,000 bonus senior deduction from the One Big Beautiful Bill
+    that has a 6% phase-out beginning at \$75k/\$150k for single/joint filers.
     The deduction expires in 2029, so there's only impact from 2026-2028.
     """
     return Reform.from_dict({
