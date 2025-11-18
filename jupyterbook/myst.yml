@@ -2,8 +2,15 @@ version: 1
 project:
   title: 'Social Security Taxation Reform: Policy Analysis and Impact Assessment'
   authors:
-    - name: PolicyEngine
-  copyright: '2024'
+    - name: Max Ghenis
+      email: max@policyengine.org
+    - name: Ben Ogorek
+      email: ben.ogorek@policyengine.org
+    - name: Pavel Makarchuk
+      email: pavel@policyengine.org
+    - name: David Trimmer
+      email: david@policyengine.org
+  copyright: '2025'
   github: PolicyEngine/crfb-tob-impacts
   bibliography:
     - references.bib
