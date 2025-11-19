@@ -1,0 +1,146 @@
+================================================================================
+MONITORING CLOUD BATCH JOB
+================================================================================
+Job ID: years-20251101-010128-ct30ns
+Region: us-central1
+Reform: option3
+Scoring: dynamic
+Results: results/option3_75years_dynamic
+================================================================================
+
+=== CHECK #1 - 01:01:47 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=2
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #2 - 01:02:52 ===
+Job State: SCHEDULED (0m 0s)
+Tasks: RUNNING=0
+0, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=2
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #3 - 01:03:58 ===
+Job State: RUNNING (0m 44s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #4 - 01:05:03 ===
+Job State: RUNNING (1m 49s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #5 - 01:06:07 ===
+Job State: RUNNING (2m 54s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #6 - 01:07:12 ===
+Job State: RUNNING (3m 59s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #7 - 01:08:17 ===
+Job State: RUNNING (5m 4s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #8 - 01:09:22 ===
+Job State: RUNNING (6m 9s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #9 - 01:10:27 ===
+Job State: RUNNING (7m 14s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #10 - 01:11:32 ===
+Job State: RUNNING (8m 18s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #11 - 01:12:37 ===
+Job State: RUNNING (9m 24s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #12 - 01:13:42 ===
+Job State: RUNNING (10m 28s)
+Tasks: RUNNING=2, SUCCEEDED=0
+0, FAILED=0
+0, PENDING=0
+0
+Results: None yet
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+=== CHECK #13 - 01:14:46 ===
+Job State: SUCCEEDED (11m 19s)
+Tasks: RUNNING=0
+0, SUCCEEDED=2, FAILED=0
+0, PENDING=0
+0
+Results: 2 years completed
+Years: 2026-2027
+10-year impact (2026-2035): $+53.02B
+Total impact: $+53.02B
+./monitor_job.sh: line 88: [: 0
+0: integer expression expected
+
+✅ JOB COMPLETED! (2 succeeded, 0
+0 failed)
+Final results: results/option3_75years_dynamic/all_results.csv
