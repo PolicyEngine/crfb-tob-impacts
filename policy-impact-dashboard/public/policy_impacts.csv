@@ -1,81 +1,601 @@
-reform_id,reform_name,year,revenue_impact
-option1,Full Repeal of Social Security Benefits Taxation,2026,-86281086873.85132
-option1,Full Repeal of Social Security Benefits Taxation,2027,-91837465132.4834
-option1,Full Repeal of Social Security Benefits Taxation,2028,-96884979298.49756
-option1,Full Repeal of Social Security Benefits Taxation,2029,-105912682607.2622
-option1,Full Repeal of Social Security Benefits Taxation,2030,-112737789418.94872
-option1,Full Repeal of Social Security Benefits Taxation,2031,-118445765906.97804
-option1,Full Repeal of Social Security Benefits Taxation,2032,-124527101970.13086
-option1,Full Repeal of Social Security Benefits Taxation,2033,-130705399360.70705
-option1,Full Repeal of Social Security Benefits Taxation,2034,-137526237322.79736
-option1,Full Repeal of Social Security Benefits Taxation,2035,-144273728286.62695
-option2,Taxation of 85% of Social Security Benefits,2026,24093368640.283203
-option2,Taxation of 85% of Social Security Benefits,2027,24325946788.830566
-option2,Taxation of 85% of Social Security Benefits,2028,24269369609.297363
-option2,Taxation of 85% of Social Security Benefits,2029,32731659364.336426
-option2,Taxation of 85% of Social Security Benefits,2030,33247583066.05957
-option2,Taxation of 85% of Social Security Benefits,2031,33353121241.515137
-option2,Taxation of 85% of Social Security Benefits,2032,33370580303.486816
-option2,Taxation of 85% of Social Security Benefits,2033,33263274371.928223
-option2,Taxation of 85% of Social Security Benefits,2034,33289054160.43457
-option2,Taxation of 85% of Social Security Benefits,2035,33293153872.8916
-option3,85% Taxation with Permanent Senior Deduction Extension,2026,24093368640.283203
-option3,85% Taxation with Permanent Senior Deduction Extension,2027,24325946788.830566
-option3,85% Taxation with Permanent Senior Deduction Extension,2028,24269369609.297363
-option3,85% Taxation with Permanent Senior Deduction Extension,2029,2969340690.083008
-option3,85% Taxation with Permanent Senior Deduction Extension,2030,3302440933.3310547
-option3,85% Taxation with Permanent Senior Deduction Extension,2031,3502856323.0268555
-option3,85% Taxation with Permanent Senior Deduction Extension,2032,3642990990.857422
-option3,85% Taxation with Permanent Senior Deduction Extension,2033,3602565676.8242188
-option3,85% Taxation with Permanent Senior Deduction Extension,2034,3584125822.398926
-option3,85% Taxation with Permanent Senior Deduction Extension,2035,3628102140.1679688
-option4,Social Security Tax Credit System ($500),2026,30079993190.33008
-option4,Social Security Tax Credit System ($500),2027,30536688398.151367
-option4,Social Security Tax Credit System ($500),2028,30554543992.18848
-option4,Social Security Tax Credit System ($500),2029,9155557894.733889
-option4,Social Security Tax Credit System ($500),2030,9384243441.964844
-option4,Social Security Tax Credit System ($500),2031,9283473169.484377
-option4,Social Security Tax Credit System ($500),2032,9084793120.617188
-option4,Social Security Tax Credit System ($500),2033,8782500760.875
-option4,Social Security Tax Credit System ($500),2034,8591643900.015625
-option4,Social Security Tax Credit System ($500),2035,8427760845.674805
-option5,Roth-Style Swap,2026,58189674944.09668
-option5,Roth-Style Swap,2027,61437697556.04053
-option5,Roth-Style Swap,2028,65628613121.55127
-option5,Roth-Style Swap,2029,67639354694.50391
-option5,Roth-Style Swap,2030,73508657061.87402
-option5,Roth-Style Swap,2031,77779017280.15869
-option5,Roth-Style Swap,2032,81987493438.23633
-option5,Roth-Style Swap,2033,86052433507.78711
-option5,Roth-Style Swap,2034,90138804297.74364
-option5,Roth-Style Swap,2035,93893802161.77832
-option6,Phased Roth-Style Swap,2026,18738532127.68408
-option6,Phased Roth-Style Swap,2027,39886535420.467285
-option6,Phased Roth-Style Swap,2028,63666906933.85156
-option6,Phased Roth-Style Swap,2029,83306993738.92383
-option6,Phased Roth-Style Swap,2030,106667317458.6338
-option6,Phased Roth-Style Swap,2032,156868267889.0537
-option6,Phased Roth-Style Swap,2033,174899536051.29883
-option6,Phased Roth-Style Swap,2034,174827502622.92334
-option6,Phased Roth-Style Swap,2035,173926162047.95312
-option7,Eliminate Bonus Senior Deduction,2026,21004132783.433598
-option7,Eliminate Bonus Senior Deduction,2027,21471316558.266117
-option7,Eliminate Bonus Senior Deduction,2028,21751607091.23584
-option7,Eliminate Bonus Senior Deduction,2029,0.0
-option7,Eliminate Bonus Senior Deduction,2030,0.0
-option7,Eliminate Bonus Senior Deduction,2031,0.0
-option7,Eliminate Bonus Senior Deduction,2032,0.0
-option7,Eliminate Bonus Senior Deduction,2033,0.0
-option7,Eliminate Bonus Senior Deduction,2034,0.0
-option7,Eliminate Bonus Senior Deduction,2035,0.0
-option6,Phased Roth-Style Swap,2031,130706952685.61572
-option8,Full Taxation of Social Security Benefits,2026,50664281797.9353
-option8,Full Taxation of Social Security Benefits,2027,52429573679.36279
-option8,Full Taxation of Social Security Benefits,2028,53726788356.01123
-option8,Full Taxation of Social Security Benefits,2029,65557793795.71289
-option8,Full Taxation of Social Security Benefits,2030,67474353702.32959
-option8,Full Taxation of Social Security Benefits,2031,69048757158.60938
-option8,Full Taxation of Social Security Benefits,2032,70616358084.1792
-option8,Full Taxation of Social Security Benefits,2033,72009624233.55469
-option8,Full Taxation of Social Security Benefits,2034,73593026391.81006
-option8,Full Taxation of Social Security Benefits,2035,75181878973.63672
+policy_id,policy_name,credit_value,year,impact_billions
+1,Full repeal of taxation of Social Security benefits,,2026,-100.34
+1,Full repeal of taxation of Social Security benefits,,2027,-108.41
+1,Full repeal of taxation of Social Security benefits,,2028,-118.69
+1,Full repeal of taxation of Social Security benefits,,2029,-130.5
+1,Full repeal of taxation of Social Security benefits,,2030,-141.83
+1,Full repeal of taxation of Social Security benefits,,2031,-150.91
+1,Full repeal of taxation of Social Security benefits,,2032,-162.37
+1,Full repeal of taxation of Social Security benefits,,2033,-174.57
+1,Full repeal of taxation of Social Security benefits,,2034,-187.12
+1,Full repeal of taxation of Social Security benefits,,2035,-199.72
+1,Full repeal of taxation of Social Security benefits,,2036,-212.12
+1,Full repeal of taxation of Social Security benefits,,2037,-224.44
+1,Full repeal of taxation of Social Security benefits,,2038,-238.25
+1,Full repeal of taxation of Social Security benefits,,2039,-252.29
+1,Full repeal of taxation of Social Security benefits,,2040,-266.46
+1,Full repeal of taxation of Social Security benefits,,2041,-280.85
+1,Full repeal of taxation of Social Security benefits,,2042,-298.6
+1,Full repeal of taxation of Social Security benefits,,2043,-315.12
+1,Full repeal of taxation of Social Security benefits,,2044,-332.85
+1,Full repeal of taxation of Social Security benefits,,2045,-352.56
+1,Full repeal of taxation of Social Security benefits,,2046,-372.45
+1,Full repeal of taxation of Social Security benefits,,2047,-394.43
+1,Full repeal of taxation of Social Security benefits,,2048,-416.93
+1,Full repeal of taxation of Social Security benefits,,2049,-442.58
+1,Full repeal of taxation of Social Security benefits,,2050,-465.97
+1,Full repeal of taxation of Social Security benefits,,2051,-490.98
+1,Full repeal of taxation of Social Security benefits,,2052,-518.88
+1,Full repeal of taxation of Social Security benefits,,2053,-546.3
+1,Full repeal of taxation of Social Security benefits,,2054,-576.07
+1,Full repeal of taxation of Social Security benefits,,2055,-607.88
+1,Full repeal of taxation of Social Security benefits,,2056,-641.3
+1,Full repeal of taxation of Social Security benefits,,2057,-674.87
+1,Full repeal of taxation of Social Security benefits,,2058,-714.48
+1,Full repeal of taxation of Social Security benefits,,2059,-751.8
+1,Full repeal of taxation of Social Security benefits,,2060,-793.13
+1,Full repeal of taxation of Social Security benefits,,2061,-833.74
+1,Full repeal of taxation of Social Security benefits,,2062,-877.54
+1,Full repeal of taxation of Social Security benefits,,2063,-926.07
+1,Full repeal of taxation of Social Security benefits,,2064,-976.58
+1,Full repeal of taxation of Social Security benefits,,2065,-1026.06
+1,Full repeal of taxation of Social Security benefits,,2066,-1080.19
+1,Full repeal of taxation of Social Security benefits,,2067,-1135.49
+1,Full repeal of taxation of Social Security benefits,,2068,-1192.82
+1,Full repeal of taxation of Social Security benefits,,2069,-1252.47
+1,Full repeal of taxation of Social Security benefits,,2070,-1316.99
+1,Full repeal of taxation of Social Security benefits,,2071,-1382.87
+1,Full repeal of taxation of Social Security benefits,,2072,-1449.17
+1,Full repeal of taxation of Social Security benefits,,2073,-1515.94
+1,Full repeal of taxation of Social Security benefits,,2074,-1586.45
+1,Full repeal of taxation of Social Security benefits,,2075,-1664.21
+1,Full repeal of taxation of Social Security benefits,,2076,-1745.44
+1,Full repeal of taxation of Social Security benefits,,2077,-1828.85
+1,Full repeal of taxation of Social Security benefits,,2078,-1921.55
+1,Full repeal of taxation of Social Security benefits,,2079,-2018.79
+1,Full repeal of taxation of Social Security benefits,,2080,-2116.22
+1,Full repeal of taxation of Social Security benefits,,2081,-2180.99
+1,Full repeal of taxation of Social Security benefits,,2082,-2267.3
+1,Full repeal of taxation of Social Security benefits,,2083,-2354.18
+1,Full repeal of taxation of Social Security benefits,,2084,-2437.13
+1,Full repeal of taxation of Social Security benefits,,2085,-2554.55
+1,Full repeal of taxation of Social Security benefits,,2086,-2683.93
+1,Full repeal of taxation of Social Security benefits,,2087,-2811.17
+1,Full repeal of taxation of Social Security benefits,,2088,-3095.29
+1,Full repeal of taxation of Social Security benefits,,2089,-3227.93
+1,Full repeal of taxation of Social Security benefits,,2090,-3371.37
+1,Full repeal of taxation of Social Security benefits,,2091,-3527.91
+1,Full repeal of taxation of Social Security benefits,,2092,-3669.03
+1,Full repeal of taxation of Social Security benefits,,2093,-3809.76
+1,Full repeal of taxation of Social Security benefits,,2094,-3967.44
+1,Full repeal of taxation of Social Security benefits,,2095,-4269.93
+1,Full repeal of taxation of Social Security benefits,,2096,-4478.48
+1,Full repeal of taxation of Social Security benefits,,2097,-4677.36
+1,Full repeal of taxation of Social Security benefits,,2098,-4924.64
+1,Full repeal of taxation of Social Security benefits,,2099,-4953.12
+1,Full repeal of taxation of Social Security benefits,,2100,-5187.73
+2,Taxation of 85% of Social Security benefits,,2026,30.07
+2,Taxation of 85% of Social Security benefits,,2027,31.3
+2,Taxation of 85% of Social Security benefits,,2028,32.6
+2,Taxation of 85% of Social Security benefits,,2029,44.11
+2,Taxation of 85% of Social Security benefits,,2030,45.99
+2,Taxation of 85% of Social Security benefits,,2031,47.47
+2,Taxation of 85% of Social Security benefits,,2032,49.48
+2,Taxation of 85% of Social Security benefits,,2033,51.5
+2,Taxation of 85% of Social Security benefits,,2034,52.81
+2,Taxation of 85% of Social Security benefits,,2035,54.44
+2,Taxation of 85% of Social Security benefits,,2036,55.72
+2,Taxation of 85% of Social Security benefits,,2037,57.63
+2,Taxation of 85% of Social Security benefits,,2038,59.47
+2,Taxation of 85% of Social Security benefits,,2039,61.34
+2,Taxation of 85% of Social Security benefits,,2040,63.81
+2,Taxation of 85% of Social Security benefits,,2041,65.79
+2,Taxation of 85% of Social Security benefits,,2042,67.37
+2,Taxation of 85% of Social Security benefits,,2043,69.16
+2,Taxation of 85% of Social Security benefits,,2044,70.92
+2,Taxation of 85% of Social Security benefits,,2045,72.56
+2,Taxation of 85% of Social Security benefits,,2046,74.16
+2,Taxation of 85% of Social Security benefits,,2047,76.17
+2,Taxation of 85% of Social Security benefits,,2048,77.46
+2,Taxation of 85% of Social Security benefits,,2049,78.53
+2,Taxation of 85% of Social Security benefits,,2050,80.34
+2,Taxation of 85% of Social Security benefits,,2051,82.24
+2,Taxation of 85% of Social Security benefits,,2052,83.71
+2,Taxation of 85% of Social Security benefits,,2053,86.46
+2,Taxation of 85% of Social Security benefits,,2054,88.67
+2,Taxation of 85% of Social Security benefits,,2055,92.8
+2,Taxation of 85% of Social Security benefits,,2056,96.4
+2,Taxation of 85% of Social Security benefits,,2057,99.8
+2,Taxation of 85% of Social Security benefits,,2058,103.14
+2,Taxation of 85% of Social Security benefits,,2059,106.94
+2,Taxation of 85% of Social Security benefits,,2060,110.39
+2,Taxation of 85% of Social Security benefits,,2061,114.04
+2,Taxation of 85% of Social Security benefits,,2062,116.82
+2,Taxation of 85% of Social Security benefits,,2063,120.89
+2,Taxation of 85% of Social Security benefits,,2064,124.52
+2,Taxation of 85% of Social Security benefits,,2065,129.24
+2,Taxation of 85% of Social Security benefits,,2066,133.98
+2,Taxation of 85% of Social Security benefits,,2067,138.89
+2,Taxation of 85% of Social Security benefits,,2068,143.96
+2,Taxation of 85% of Social Security benefits,,2069,149.83
+2,Taxation of 85% of Social Security benefits,,2070,155.3
+2,Taxation of 85% of Social Security benefits,,2071,161.35
+2,Taxation of 85% of Social Security benefits,,2072,167.55
+2,Taxation of 85% of Social Security benefits,,2073,174.17
+2,Taxation of 85% of Social Security benefits,,2074,181.51
+2,Taxation of 85% of Social Security benefits,,2075,188.33
+2,Taxation of 85% of Social Security benefits,,2076,195.7
+2,Taxation of 85% of Social Security benefits,,2077,203.41
+2,Taxation of 85% of Social Security benefits,,2078,210.75
+2,Taxation of 85% of Social Security benefits,,2079,218.59
+2,Taxation of 85% of Social Security benefits,,2080,226.68
+2,Taxation of 85% of Social Security benefits,,2081,234.95
+2,Taxation of 85% of Social Security benefits,,2082,243.34
+2,Taxation of 85% of Social Security benefits,,2083,252.11
+2,Taxation of 85% of Social Security benefits,,2084,261.27
+2,Taxation of 85% of Social Security benefits,,2085,269.89
+2,Taxation of 85% of Social Security benefits,,2086,279.32
+2,Taxation of 85% of Social Security benefits,,2087,288.75
+2,Taxation of 85% of Social Security benefits,,2088,295.37
+2,Taxation of 85% of Social Security benefits,,2089,306.02
+2,Taxation of 85% of Social Security benefits,,2090,317.09
+2,Taxation of 85% of Social Security benefits,,2091,328.58
+2,Taxation of 85% of Social Security benefits,,2092,340.55
+2,Taxation of 85% of Social Security benefits,,2093,352.81
+2,Taxation of 85% of Social Security benefits,,2094,365.11
+2,Taxation of 85% of Social Security benefits,,2095,378.3
+2,Taxation of 85% of Social Security benefits,,2096,391.55
+2,Taxation of 85% of Social Security benefits,,2097,405.65
+2,Taxation of 85% of Social Security benefits,,2098,420.2
+2,Taxation of 85% of Social Security benefits,,2099,435.72
+2,Taxation of 85% of Social Security benefits,,2100,452.49
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2026,30.07
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2027,31.3
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2028,32.6
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2029,8.96
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2030,10.22
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2031,11.44
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2032,13.08
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2033,15.3
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2034,16.82
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2035,18.66
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2036,20.12
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2037,22.32
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2038,24.43
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2039,26.92
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2040,30.52
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2041,31.3
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2042,33.1
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2043,35.54
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2044,37.63
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2045,39.78
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2046,41.8
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2047,44.05
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2048,46.02
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2049,47.75
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2050,50.26
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2051,53.09
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2052,54.74
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2053,57.87
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2054,60.72
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2055,65.46
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2056,69.87
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2057,73.67
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2058,77.81
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2059,82.28
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2060,86.48
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2061,90.69
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2062,94.37
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2063,99.08
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2064,103.0
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2065,109.01
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2066,114.44
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2067,120.16
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2068,126.02
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2069,132.66
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2070,138.74
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2071,145.36
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2072,152.0
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2073,159.01
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2074,166.78
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2075,174.03
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2076,181.86
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2077,190.01
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2078,197.8
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2079,206.08
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2080,214.59
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2081,223.28
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2082,232.04
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2083,241.16
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2084,250.78
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2085,259.83
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2086,269.75
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2087,279.62
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2088,286.57
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2089,297.61
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2090,309.05
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2091,320.8
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2092,333.2
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2093,345.68
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2094,358.39
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2095,371.93
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2096,385.65
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2097,399.96
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2098,414.98
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2099,430.82
+3,Taxation of 85% of Social Security benefits and permanent extension of the bonus senior deduction,,2100,452.49
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2026,38.41
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2027,39.37
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2028,40.49
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2029,16.84
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2030,17.91
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2031,18.54
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2032,19.51
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2033,20.76
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2034,21.37
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2035,22.17
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2036,55.72
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2037,57.63
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2038,59.47
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2039,61.34
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2040,63.81
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2041,65.79
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2042,67.37
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2043,69.16
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2044,70.92
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2045,72.56
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2046,74.16
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2047,76.17
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2048,77.46
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2049,78.53
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2050,80.34
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2051,82.24
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2052,83.71
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2053,86.46
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2054,88.67
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2055,92.8
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2056,96.4
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2057,99.8
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2058,103.14
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2059,106.94
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2060,110.39
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2061,114.04
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2062,116.82
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2063,120.89
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2064,124.52
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2065,129.24
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2066,133.98
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2067,138.89
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2068,143.96
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2069,149.83
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2070,155.3
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2071,161.35
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2072,167.55
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2073,174.17
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2074,181.51
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2075,188.33
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2076,195.7
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2077,203.41
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2078,210.75
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2079,218.59
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2080,226.68
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2081,234.95
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2082,243.34
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2083,252.11
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2084,261.27
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2085,269.89
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2086,279.32
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2087,288.75
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2088,295.37
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2089,306.02
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2090,317.09
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2091,328.58
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2092,340.55
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2093,352.81
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2094,365.11
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2095,378.3
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2096,391.55
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2097,405.65
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2098,420.2
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2099,435.72
+4,Replace the bonus senior deduction with a nonrefundable tax credit and tax 85% of all Social Security benefits,,2100,452.49
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2026,60.61
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2027,62.32
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2028,64.06
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2029,59.49
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2030,62.08
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2031,65.22
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2032,65.79
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2033,67.33
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2034,64.87
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2035,64.32
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2036,60.03
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2037,58.37
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2038,56.55
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2039,57.87
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2040,51.37
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2041,47.66
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2042,41.76
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2043,40.46
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2044,34.5
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2045,28.26
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2046,21.75
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2047,10.95
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2048,-7.03
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2049,-9.56
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2050,-15.29
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2051,-22.15
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2052,-36.68
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2053,-48.79
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2054,-59.85
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2055,-76.57
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2056,-93.82
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2057,-109.81
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2058,-130.69
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2059,-151.24
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2060,-170.06
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2061,-193.45
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2062,-215.07
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2063,-256.96
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2064,-291.87
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2065,-325.83
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2066,-357.69
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2067,-393.82
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2068,-430.8
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2069,-470.38
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2070,-509.05
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2071,-553.77
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2072,-598.65
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2073,-631.7
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2074,-687.09
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2075,-745.1
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2076,-806.82
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2077,-866.71
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2078,-937.38
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2079,-1012.42
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2080,-1092.12
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2081,-1134.49
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2082,-1181.95
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2083,-1263.69
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2084,-1260.79
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2085,-1366.65
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2086,-1469.52
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2087,-1565.04
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2088,-1820.09
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2089,-1920.19
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2090,-2040.34
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2091,-2147.42
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2092,-2246.14
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2093,-2342.91
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2094,-2467.57
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2095,-2733.42
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2096,-2881.41
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2097,-3052.21
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2098,-3238.17
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2099,-3246.32
+5,Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits,,2100,-3419.39
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2026,21.15
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2027,42.72
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2028,71.6
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2029,96.71
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2030,116.04
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2031,143.48
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2032,170.33
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2033,189.81
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2034,184.07
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2035,178.9
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2036,168.33
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2037,158.06
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2038,146.11
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2039,138.88
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2040,122.59
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2041,106.62
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2042,89.41
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2043,73.41
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2044,51.65
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2045,28.26
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2046,21.75
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2047,10.95
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2048,-7.03
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2049,-9.56
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2050,-15.29
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2051,-22.15
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2052,-36.68
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2053,-48.79
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2054,-59.85
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2055,-76.57
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2056,-93.82
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2057,-109.81
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2058,-130.69
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2059,-151.24
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2060,-170.06
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2061,-193.45
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2062,-215.07
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2063,-256.96
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2064,-291.87
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2065,-325.83
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2066,-357.69
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2067,-393.82
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2068,-430.8
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2069,-470.38
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2070,-509.05
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2071,-553.77
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2072,-598.65
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2073,-631.7
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2074,-687.09
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2075,-745.1
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2076,-806.82
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2077,-866.71
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2078,-937.38
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2079,-1012.42
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2080,-1092.12
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2081,-1134.49
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2082,-1181.95
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2083,-1263.69
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2084,-1260.79
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2085,-1366.65
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2086,-1469.52
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2087,-1565.04
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2088,-1820.09
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2089,-1920.19
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2090,-2040.34
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2091,-2147.42
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2092,-2246.14
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2093,-2342.91
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2094,-2467.57
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2095,-2733.42
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2096,-2881.41
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2097,-3052.21
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2098,-3238.17
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2099,-3246.32
+6,"Substitute income taxation of employer payroll contributions for income taxation of Social Security benefits, phased-in over time",,2100,-3419.39
+7,Eliminate bonus senior deduction,,2026,23.91
+7,Eliminate bonus senior deduction,,2027,24.24
+7,Eliminate bonus senior deduction,,2028,24.63
+7,Eliminate bonus senior deduction,,2029,0.0
+7,Eliminate bonus senior deduction,,2030,0.0
+7,Eliminate bonus senior deduction,,2031,0.0
+7,Eliminate bonus senior deduction,,2032,0.0
+7,Eliminate bonus senior deduction,,2033,0.0
+7,Eliminate bonus senior deduction,,2034,0.0
+7,Eliminate bonus senior deduction,,2035,0.0
+7,Eliminate bonus senior deduction,,2036,0.0
+7,Eliminate bonus senior deduction,,2037,0.0
+7,Eliminate bonus senior deduction,,2038,0.0
+7,Eliminate bonus senior deduction,,2039,0.0
+7,Eliminate bonus senior deduction,,2040,0.0
+7,Eliminate bonus senior deduction,,2041,0.0
+7,Eliminate bonus senior deduction,,2042,0.0
+7,Eliminate bonus senior deduction,,2043,0.0
+7,Eliminate bonus senior deduction,,2044,0.0
+7,Eliminate bonus senior deduction,,2045,0.0
+7,Eliminate bonus senior deduction,,2046,0.0
+7,Eliminate bonus senior deduction,,2047,0.0
+7,Eliminate bonus senior deduction,,2048,0.0
+7,Eliminate bonus senior deduction,,2049,0.0
+7,Eliminate bonus senior deduction,,2050,0.0
+7,Eliminate bonus senior deduction,,2051,0.0
+7,Eliminate bonus senior deduction,,2052,0.0
+7,Eliminate bonus senior deduction,,2053,0.0
+7,Eliminate bonus senior deduction,,2054,0.0
+7,Eliminate bonus senior deduction,,2055,0.0
+7,Eliminate bonus senior deduction,,2056,0.0
+7,Eliminate bonus senior deduction,,2057,0.0
+7,Eliminate bonus senior deduction,,2058,0.0
+7,Eliminate bonus senior deduction,,2059,0.0
+7,Eliminate bonus senior deduction,,2060,0.0
+7,Eliminate bonus senior deduction,,2061,0.0
+7,Eliminate bonus senior deduction,,2062,0.0
+7,Eliminate bonus senior deduction,,2063,0.0
+7,Eliminate bonus senior deduction,,2064,0.0
+7,Eliminate bonus senior deduction,,2065,0.0
+7,Eliminate bonus senior deduction,,2066,0.0
+7,Eliminate bonus senior deduction,,2067,0.0
+7,Eliminate bonus senior deduction,,2068,0.0
+7,Eliminate bonus senior deduction,,2069,0.0
+7,Eliminate bonus senior deduction,,2070,0.0
+7,Eliminate bonus senior deduction,,2071,0.0
+7,Eliminate bonus senior deduction,,2072,0.0
+7,Eliminate bonus senior deduction,,2073,0.0
+7,Eliminate bonus senior deduction,,2074,0.0
+7,Eliminate bonus senior deduction,,2075,0.0
+7,Eliminate bonus senior deduction,,2076,0.0
+7,Eliminate bonus senior deduction,,2077,0.0
+7,Eliminate bonus senior deduction,,2078,0.0
+7,Eliminate bonus senior deduction,,2079,0.0
+7,Eliminate bonus senior deduction,,2080,0.0
+7,Eliminate bonus senior deduction,,2081,0.0
+7,Eliminate bonus senior deduction,,2082,0.0
+7,Eliminate bonus senior deduction,,2083,0.0
+7,Eliminate bonus senior deduction,,2084,0.0
+7,Eliminate bonus senior deduction,,2085,0.0
+7,Eliminate bonus senior deduction,,2086,0.0
+7,Eliminate bonus senior deduction,,2087,0.0
+7,Eliminate bonus senior deduction,,2088,0.0
+7,Eliminate bonus senior deduction,,2089,0.0
+7,Eliminate bonus senior deduction,,2090,0.0
+7,Eliminate bonus senior deduction,,2091,0.0
+7,Eliminate bonus senior deduction,,2092,0.0
+7,Eliminate bonus senior deduction,,2093,0.0
+7,Eliminate bonus senior deduction,,2094,0.0
+7,Eliminate bonus senior deduction,,2095,0.0
+7,Eliminate bonus senior deduction,,2096,0.0
+7,Eliminate bonus senior deduction,,2097,0.0
+7,Eliminate bonus senior deduction,,2098,0.0
+7,Eliminate bonus senior deduction,,2099,0.0
+7,Eliminate bonus senior deduction,,2100,0.0
+8,100% taxation of Social Security benefits,,2026,61.94
+8,100% taxation of Social Security benefits,,2027,65.27
+8,100% taxation of Social Security benefits,,2028,68.84
+8,100% taxation of Social Security benefits,,2029,85.57
+8,100% taxation of Social Security benefits,,2030,90.45
+8,100% taxation of Social Security benefits,,2031,94.48
+8,100% taxation of Social Security benefits,,2032,99.54
+8,100% taxation of Social Security benefits,,2033,104.28
+8,100% taxation of Social Security benefits,,2034,108.56
+8,100% taxation of Social Security benefits,,2035,112.9
+8,100% taxation of Social Security benefits,,2036,117.69
+8,100% taxation of Social Security benefits,,2037,122.19
+8,100% taxation of Social Security benefits,,2038,127.11
+8,100% taxation of Social Security benefits,,2039,132.45
+8,100% taxation of Social Security benefits,,2040,139.38
+8,100% taxation of Social Security benefits,,2041,146.57
+8,100% taxation of Social Security benefits,,2042,151.01
+8,100% taxation of Social Security benefits,,2043,156.88
+8,100% taxation of Social Security benefits,,2044,163.1
+8,100% taxation of Social Security benefits,,2045,168.9
+8,100% taxation of Social Security benefits,,2046,174.58
+8,100% taxation of Social Security benefits,,2047,180.67
+8,100% taxation of Social Security benefits,,2048,187.52
+8,100% taxation of Social Security benefits,,2049,193.77
+8,100% taxation of Social Security benefits,,2050,201.66
+8,100% taxation of Social Security benefits,,2051,210.35
+8,100% taxation of Social Security benefits,,2052,218.63
+8,100% taxation of Social Security benefits,,2053,227.86
+8,100% taxation of Social Security benefits,,2054,237.6
+8,100% taxation of Social Security benefits,,2055,249.14
+8,100% taxation of Social Security benefits,,2056,260.63
+8,100% taxation of Social Security benefits,,2057,270.76
+8,100% taxation of Social Security benefits,,2058,282.68
+8,100% taxation of Social Security benefits,,2059,298.48
+8,100% taxation of Social Security benefits,,2060,310.53
+8,100% taxation of Social Security benefits,,2061,324.15
+8,100% taxation of Social Security benefits,,2062,337.32
+8,100% taxation of Social Security benefits,,2063,352.31
+8,100% taxation of Social Security benefits,,2064,366.42
+8,100% taxation of Social Security benefits,,2065,381.56
+8,100% taxation of Social Security benefits,,2066,399.8
+8,100% taxation of Social Security benefits,,2067,416.98
+8,100% taxation of Social Security benefits,,2068,435.82
+8,100% taxation of Social Security benefits,,2069,455.11
+8,100% taxation of Social Security benefits,,2070,472.79
+8,100% taxation of Social Security benefits,,2071,493.62
+8,100% taxation of Social Security benefits,,2072,517.49
+8,100% taxation of Social Security benefits,,2073,538.75
+8,100% taxation of Social Security benefits,,2074,564.6
+8,100% taxation of Social Security benefits,,2075,590.66
+8,100% taxation of Social Security benefits,,2076,616.22
+8,100% taxation of Social Security benefits,,2077,648.63
+8,100% taxation of Social Security benefits,,2078,657.42
+8,100% taxation of Social Security benefits,,2079,684.89
+8,100% taxation of Social Security benefits,,2080,710.94
+8,100% taxation of Social Security benefits,,2081,763.88
+8,100% taxation of Social Security benefits,,2082,804.4
+8,100% taxation of Social Security benefits,,2083,782.44
+8,100% taxation of Social Security benefits,,2084,802.23
+8,100% taxation of Social Security benefits,,2085,889.22
+8,100% taxation of Social Security benefits,,2086,1065.97
+8,100% taxation of Social Security benefits,,2087,1097.89
+8,100% taxation of Social Security benefits,,2088,999.66
+8,100% taxation of Social Security benefits,,2089,1038.66
+8,100% taxation of Social Security benefits,,2090,1079.15
+8,100% taxation of Social Security benefits,,2091,1119.74
+8,100% taxation of Social Security benefits,,2092,1161.04
+8,100% taxation of Social Security benefits,,2093,1215.46
+8,100% taxation of Social Security benefits,,2094,1267.57
+8,100% taxation of Social Security benefits,,2095,1311.98
+8,100% taxation of Social Security benefits,,2096,1355.37
+8,100% taxation of Social Security benefits,,2097,1436.56
+8,100% taxation of Social Security benefits,,2098,1492.08
+8,100% taxation of Social Security benefits,,2099,1545.85
+8,100% taxation of Social Security benefits,,2100,1609.74
