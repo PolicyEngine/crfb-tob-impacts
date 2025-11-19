@@ -1,3 +1,3 @@
-year,taxable_payroll
-2060,30645201582168.414
-2100,47854606735235.38
+year,policyengine_taxable_payroll_billions,ssa_taxable_payroll_billions
+2060,30645.201582168414,41836
+2100,47854.606735235386,191588
