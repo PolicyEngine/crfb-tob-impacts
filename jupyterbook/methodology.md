@@ -15,7 +15,7 @@ The Enhanced CPS is constructed by PolicyEngine to address known limitations in 
 3.  **Imputation**: Missing or underreported variables are imputed using machine learning techniques (quantile regression forests) trained on administrative data. This includes:
     *   Imputation of capital gains and other capital income from the IRS Public Use File (PUF).
     *   Imputation of itemized deductions and other tax-specific fields.
-4.  **Reweighting**: The dataset is reweighted to match over (TODO: number from docs) administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
+4.  **Reweighting**: The dataset is reweighted to match 2,813 administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
 
 ### Long-Term Projections: Economic Uprating and Demographic Calibration
 
@@ -80,25 +80,25 @@ The GREG method can enforce up to three types of constraints simultaneously:
 
    The two-variable calculation prevents double-counting and correctly handles the cap at the individual level:
 
-   - `taxable_earnings_for_social_security` = min(wage_base_cap, total_W2_wages)
+   - `taxable_earnings_for_social_security = min(wage_base_cap, total_W2_wages)`
      - Caps each person's W-2 wages at the annual wage base ($168,600 in 2024)
      - Sums across all employers for that person
 
-   - `social_security_taxable_self_employment_income` = min(SE_income, wage_base_cap - taxable_W2_earnings)
+   - `social_security_taxable_self_employment_income = min(SE_income, wage_base_cap - taxable_W2_earnings)`
      - Self-employment income can only fill remaining room under the cap
      - Explicitly subtracts W-2 taxable amount from the cap before applying to SE income
 
    **Examples:**
 
-   *Person with two $100k W-2 jobs + $20k SE income:*
-   - W-2 taxable = min($168.6k, $200k) = $168.6k
-   - SE taxable = min($20k, $168.6k - $168.6k) = $0
-   - Total taxable payroll = $168.6k (cap enforced, no excess)
+   *Person with two \$100k W-2 jobs + \$20k SE income:*
+   - W-2 taxable = min(\$168.6k, \$200k) = \$168.6k
+   - SE taxable = min(\$20k, \$168.6k - \$168.6k) = \$0
+   - Total taxable payroll = \$168.6k (cap enforced, no excess)
 
-   *Person with $150k W-2 + $30k SE income:*
-   - W-2 taxable = min($168.6k, $150k) = $150k
-   - SE taxable = min($30k, $168.6k - $150k) = $18.6k
-   - Total taxable payroll = $168.6k (SE income fills remaining cap room)
+   *Person with \$150k W-2 + \$30k SE income:*
+   - W-2 taxable = min(\$168.6k, \$150k) = \$150k
+   - SE taxable = min(\$30k, \$168.6k - $150k) = \$18.6k
+   - Total taxable payroll = \$168.6k (SE income fills remaining cap room)
 
    This ensures the national aggregate correctly reflects total taxable earnings with no double-counting of wages above the cap.
 
