@@ -264,7 +264,38 @@ For Social Security taxation reforms, this matters significantly: policies prima
 
 The infrastructure for time-varying projections exists in PolicyEngine's calibration framework, but the granularity for cohort-specific structural changes to income composition is currently absent.
 
-These limitations are inherent to the microsimulation approach used here, which focuses on mechanical tax calculations with standard labor supply responses rather than full dynamic behavioral modeling. Future enhancements incorporating these behavioral margins could provide additional insights into long-term fiscal and distributional effects.
+These limitations are inherent to the microsimulation approach used here, which focuses on mechanical tax calculations with standard labor supply responses rather than full dynamic behavioral modeling. However, the PolicyEngine architecture provides pathways for addressing several of these limitations:
+
+#### Potential Enhancements
+
+**Cohort-Specific Elasticity Parameters**
+
+The existing labor supply elasticity framework (substitution and income elasticity by earnings decile) could be extended to vary by birth cohort. PolicyEngine already tracks birth year and has time-varying parameter infrastructure through 2100. The elasticity parameters could be stratified:
+- Modify `parameters/.../labor_supply_responses/elasticities/substitution.yaml` to include birth-decade breakdowns
+- Implement cohort-specific rates in `substitution_elasticity.py` (e.g., higher elasticities for 1950s cohorts with traditional pensions, lower for 1990s cohorts)
+
+**Birth-Cohort Income Composition Targets**
+
+PolicyEngine already has Rhode Island's Social Security taxability model that varies by birth year, demonstrating the technical feasibility of cohort-specific parameters. The income-by-source calibration targets could be extended:
+- Current: `income_by_source.yaml` targets national aggregates by time period
+- Enhancement: Stratify targets by age groups and birth cohorts (e.g., "Capital gains for 1960s-born 65-year-olds in 2025")
+- Create cohort-specific pension coverage parameters (`pension_coverage_by_cohort.yaml`) declining from 45% (1950s) to 20% (1980s)
+
+**Claiming Age Optimization Module**
+
+The current binary retirement indicator (`is_retired.py`) could be enhanced to:
+- Introduce `claiming_age` as a variable (62-70) with SSA actuarial reduction/credit formulas
+- Implement optimization logic comparing current marginal tax rates to expected future rates
+- Allow individuals to delay claiming when facing high current taxation
+
+**Employer Behavior Linkages**
+
+Currently employer contributions are exogenous inputs. A "total compensation" framework could:
+- Create a `total_compensation` variable that remains fixed
+- Make employer health/retirement contributions endogenous (responsive to tax policy changes)
+- Implement shifting rules based on the tax advantage of different compensation forms
+
+The infrastructure for time-varying, cohort-specific projections largely exists in PolicyEngine's parameter system and microsimulation architecture. Implementing these enhancements would require expanding calibration targets and adding birth-cohort dimensions to existing behavioral parameters rather than fundamental architectural changes.
 
 
 
