@@ -294,8 +294,8 @@ def get_option6_reform():
 def get_option7_reform():
     """Option 7: Eliminate Bonus Senior Deduction
 
-    Eliminates the $6,000 bonus senior deduction from the One Big Beautiful Bill
-    that has a 6% phase-out beginning at $75k/$150k for single/joint filers.
+    Eliminates the \$6,000 bonus senior deduction from the One Big Beautiful Bill
+    that has a 6% phase-out beginning at \$75k/\$150k for single/joint filers.
     The deduction expires in 2029, so there's only impact from 2026-2028.
     """
     return Reform.from_dict({
@@ -305,7 +305,7 @@ def get_option7_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the $6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.
+**Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the \$6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.
 
 ## Option 8: Full Taxation of Social Security Benefits
 
