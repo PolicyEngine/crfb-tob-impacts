@@ -10,7 +10,7 @@ This analysis uses the **PolicyEngine US** microsimulation model, which relies o
 ### Microdata Construction
 The Enhanced CPS is constructed by PolicyEngine to address known limitations in the raw Current Population Survey (CPS), such as underreporting of income and lack of tax-specific variables. The construction process involves:
 
-1.  **Base Data**: The 2023 Current Population Survey (CPS) Annual Social and Economic Supplement (ASEC).
+1.  **Base Data**: The 2024 Current Population Survey (CPS) Annual Social and Economic Supplement (ASEC).
 2.  **Tax Unit Construction**: PolicyEngine groups CPS households into tax units (filing units) to accurately model the tax system.
 3.  **Imputation**: Missing or underreported variables are imputed using machine learning techniques (quantile regression forests) trained on administrative data. This includes:
     *   Imputation of capital gains and other capital income from the IRS Public Use File (PUF).
@@ -35,7 +35,7 @@ Household weights are adjusted to match Social Security Administration demograph
 
 #### Economic Uprating Details
 
-The model uses intermediate assumptions from the **2024 Social Security Trustees Report** for key macroeconomic variables:
+The model uses intermediate assumptions from the **2025 Social Security Trustees Report** for key macroeconomic variables:
 
 *   Average wage index (AWI) growth
 *   Consumer Price Index (CPI-W and CPI-U)
@@ -66,17 +66,17 @@ The GREG method can enforce up to three types of constraints simultaneously:
 
 1. **Age Distribution** (always active)
    - 86 categories: ages 0-84 individually, 85+ aggregated
-   - Source: SSA population projections through 2100
+   - Source: SSA Single Year Age demographic projections (2024 publication, latest available)
 
 2. **Social Security Benefits** (optional, GREG only)
    - Total OASDI (Old-Age, Survivors, and Disability Insurance) benefit payments in nominal dollars
    - Ensures aggregate Social Security income matches SSA fiscal projections
-   - Source: SSA Trustees Report 2024
+   - Source: SSA Trustees Report 2025
 
 3. **Taxable Payroll** (optional, GREG only)
    - Total earnings subject to Social Security taxation, properly accounting for the annual wage base cap
    - Calculated as: `taxable_earnings_for_social_security` + `social_security_taxable_self_employment_income`
-   - Source: SSA Trustees Report 2024
+   - Source: SSA Trustees Report 2025
 
    **How the wage base cap is enforced:**
 
@@ -108,15 +108,16 @@ When using all three constraints, GREG calibration achieves **less than 0.1% err
 
 #### Data Sources for Long-Term Projections
 
-All demographic and fiscal targets come from the **SSA 2024 Trustees Report**:
+Demographic and fiscal targets come from official SSA publications:
 
 *   **`SSPopJul_TR2024.csv`** - Population projections 2025-2100 by single year of age
-    *   Source: [SSA Single Year Age Demographic Projections](https://www.ssa.gov/oact/HistEst/Population/2024/Population2024.html)
+    *   Source: [SSA Single Year Age Demographic Projections 2024](https://www.ssa.gov/oact/HistEst/Population/2024/Population2024.html) (latest available)
     *   Provides mid-year population counts for each age (0 to 85+)
+    *   Note: 2025 demographic projections not yet published; using 2024 publication
 
 *   **`social_security_aux.csv`** - OASDI benefit costs and taxable payroll projections 2025-2100
-    *   Source: Extracted from [SSA Trustees Report Table VI.G9](https://www.ssa.gov/oact/TR/2024/index.html)
-    *   Contains nominal dollar projections for benefit payments and taxable payroll
+    *   Source: Extracted from [SSA 2025 Trustees Report, Single Year supplementary tables](https://www.ssa.gov/oact/tr/2025/lrIndex.html)
+    *   Contains nominal dollar projections for benefit payments (Table VI.G10) and taxable payroll (Table VI.G6)
     *   CPI indices enable conversion between nominal and real (2025-dollar) values
 
 #### Validation of Long-Term Projections
@@ -207,9 +208,9 @@ print(f"✓ Age 6 population 2100: {total_age6_est:,.0f} (target: {ss_age6_pop:,
 ```
 
 **Data Sources for Validation Targets:**
-*   Social Security benefits: SSA Trustees Report 2025, Table VI.G10 (nominal dollars)
-*   Taxable payroll: SSA Trustees Report 2025, Table VI.G6 (nominal dollars)
-*   Population demographics: [SSA Single Year Age Demographic Projections 2024](https://www.ssa.gov/oact/HistEst/Population/2024/Population2024.html)
+*   Social Security benefits: [SSA 2025 Trustees Report, Table VI.G10](https://www.ssa.gov/oact/tr/2025/lrIndex.html) (nominal dollars)
+*   Taxable payroll: [SSA 2025 Trustees Report, Table VI.G6](https://www.ssa.gov/oact/tr/2025/lrIndex.html) (nominal dollars)
+*   Population demographics: [SSA Single Year Age Demographic Projections 2024](https://www.ssa.gov/oact/HistEst/Population/2024/Population2024.html) (latest available)
 
 This validation ensures that policy impact estimates are grounded in official demographic and economic projections, providing a realistic foundation for 75-year fiscal analysis.
 
