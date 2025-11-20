@@ -15,7 +15,7 @@ The Enhanced CPS is constructed by PolicyEngine to address known limitations in 
 3.  **Imputation**: Missing or underreported variables are imputed using machine learning techniques (quantile regression forests) trained on administrative data. This includes:
     *   Imputation of capital gains and other capital income from the IRS Public Use File (PUF).
     *   Imputation of itemized deductions and other tax-specific fields.
-4.  **Reweighting**: The dataset is reweighted to match over (TODO: number from docs) administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
+4.  **Reweighting**: The dataset is reweighted to match 2,813 administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
 
 ### Long-Term Projections: Economic Uprating and Demographic Calibration
 
@@ -80,25 +80,25 @@ The GREG method can enforce up to three types of constraints simultaneously:
 
    The two-variable calculation prevents double-counting and correctly handles the cap at the individual level:
 
-   - `taxable_earnings_for_social_security` = min(wage_base_cap, total_W2_wages)
+   - `taxable_earnings_for_social_security = min(wage_base_cap, total_W2_wages)`
      - Caps each person's W-2 wages at the annual wage base ($168,600 in 2024)
      - Sums across all employers for that person
 
-   - `social_security_taxable_self_employment_income` = min(SE_income, wage_base_cap - taxable_W2_earnings)
+   - `social_security_taxable_self_employment_income = min(SE_income, wage_base_cap - taxable_W2_earnings)`
      - Self-employment income can only fill remaining room under the cap
      - Explicitly subtracts W-2 taxable amount from the cap before applying to SE income
 
    **Examples:**
 
-   *Person with two $100k W-2 jobs + $20k SE income:*
-   - W-2 taxable = min($168.6k, $200k) = $168.6k
-   - SE taxable = min($20k, $168.6k - $168.6k) = $0
-   - Total taxable payroll = $168.6k (cap enforced, no excess)
+   *Person with two \$100k W-2 jobs + \$20k SE income:*
+   - W-2 taxable = min(\$168.6k, \$200k) = \$168.6k
+   - SE taxable = min(\$20k, \$168.6k - \$168.6k) = \$0
+   - Total taxable payroll = \$168.6k (cap enforced, no excess)
 
-   *Person with $150k W-2 + $30k SE income:*
-   - W-2 taxable = min($168.6k, $150k) = $150k
-   - SE taxable = min($30k, $168.6k - $150k) = $18.6k
-   - Total taxable payroll = $168.6k (SE income fills remaining cap room)
+   *Person with \$150k W-2 + \$30k SE income:*
+   - W-2 taxable = min(\$168.6k, \$150k) = \$150k
+   - SE taxable = min(\$30k, \$168.6k - $150k) = \$18.6k
+   - Total taxable payroll = \$168.6k (SE income fills remaining cap room)
 
    This ensures the national aggregate correctly reflects total taxable earnings with no double-counting of wages above the cap.
 
@@ -268,32 +268,32 @@ These limitations are inherent to the microsimulation approach used here, which 
 
 #### Potential Enhancements
 
-**Cohort-Specific Elasticity Parameters**
-
-The existing labor supply elasticity framework (substitution and income elasticity by earnings decile) could be extended to vary by birth cohort. PolicyEngine already tracks birth year and has time-varying parameter infrastructure through 2100. The elasticity parameters could be stratified:
-- Modify `parameters/.../labor_supply_responses/elasticities/substitution.yaml` to include birth-decade breakdowns
-- Implement cohort-specific rates in `substitution_elasticity.py` (e.g., higher elasticities for 1950s cohorts with traditional pensions, lower for 1990s cohorts)
-
-**Birth-Cohort Income Composition Targets**
-
-PolicyEngine already has Rhode Island's Social Security taxability model that varies by birth year, demonstrating the technical feasibility of cohort-specific parameters. The income-by-source calibration targets could be extended:
-- Current: `income_by_source.yaml` targets national aggregates by time period
-- Enhancement: Stratify targets by age groups and birth cohorts (e.g., "Capital gains for 1960s-born 65-year-olds in 2025")
-- Create cohort-specific pension coverage parameters (`pension_coverage_by_cohort.yaml`) declining from 45% (1950s) to 20% (1980s)
-
-**Claiming Age Optimization Module**
+**1. Claiming Age Optimization Module**
 
 The current binary retirement indicator (`is_retired.py`) could be enhanced to:
 - Introduce `claiming_age` as a variable (62-70) with SSA actuarial reduction/credit formulas
 - Implement optimization logic comparing current marginal tax rates to expected future rates
 - Allow individuals to delay claiming when facing high current taxation
 
-**Employer Behavior Linkages**
+**2. Employer Behavior Linkages**
 
 Currently employer contributions are exogenous inputs. A "total compensation" framework could:
 - Create a `total_compensation` variable that remains fixed
 - Make employer health/retirement contributions endogenous (responsive to tax policy changes)
 - Implement shifting rules based on the tax advantage of different compensation forms
+
+**3. Cohort-Specific Elasticity Parameters**
+
+The existing labor supply elasticity framework (substitution and income elasticity by earnings decile) could be extended to vary by birth cohort. PolicyEngine already tracks birth year and has time-varying parameter infrastructure through 2100. The elasticity parameters could be stratified:
+- Modify `parameters/.../labor_supply_responses/elasticities/substitution.yaml` to include birth-decade breakdowns
+- Implement cohort-specific rates in `substitution_elasticity.py` (e.g., higher elasticities for 1950s cohorts with traditional pensions, lower for 1990s cohorts)
+
+**4. Birth-Cohort Income Composition Targets**
+
+PolicyEngine already has Rhode Island's Social Security taxability model that varies by birth year, demonstrating the technical feasibility of cohort-specific parameters. The income-by-source calibration targets could be extended:
+- Current: `income_by_source.yaml` targets national aggregates by time period
+- Enhancement: Stratify targets by age groups and birth cohorts (e.g., "Capital gains for 1960s-born 65-year-olds in 2025")
+- Create cohort-specific pension coverage parameters (`pension_coverage_by_cohort.yaml`) declining from 45% (1950s) to 20% (1980s)
 
 The infrastructure for time-varying, cohort-specific projections largely exists in PolicyEngine's parameter system and microsimulation architecture. Implementing these enhancements would require expanding calibration targets and adding birth-cohort dimensions to existing behavioral parameters rather than fundamental architectural changes.
 

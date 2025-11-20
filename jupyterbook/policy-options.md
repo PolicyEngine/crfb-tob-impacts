@@ -8,13 +8,13 @@ Under current law, the taxation of Social Security benefits follows a two-tier s
 
 **Current Taxation Structure:**
 
-Taxpayers who earn less than $25,000 (single filers) or $32,000 (joint filers) in combined income pay no tax on their benefits. Households earning between those thresholds and up to $34,000 (single filers) or $44,000 (joint filers) pay tax on up to 50 percent of their benefits. Above those levels, up to 85 percent of benefits are taxed.
+Taxpayers who earn less than \$25,000 (single filers) or \$32,000 (joint filers) in combined income pay no tax on their benefits. Households earning between those thresholds and up to \$34,000 (single filers) or \$44,000 (joint filers) pay tax on up to 50 percent of their benefits. Above those levels, up to 85 percent of benefits are taxed.
 
 **Revenue Allocation:**
 
 Income tax revenue collected from Social Security benefits is allocated to the Social Security and Medicare trust funds. The revenue from taxation of up to 50 percent of benefits is dedicated to the Social Security Old-Age, Survivors, and Disability Insurance (OASDI) trust fund, while the remainder goes to the Medicare Hospital Insurance trust fund {cite}`ssa2024trustees`.
 
-Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of $6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law. This expiration creates a significant change in the baseline tax burden for seniors starting in 2029, which influences the comparative impacts of reforms that extend beyond this date. The baseline used in this analysis is "Current Law" (which assumes expiration), not "Current Policy" (which might assume extension).
+Additionally, the One Big Beautiful Bill Act included a "bonus senior deduction" of \$6,000 for taxpayers aged 65 and older, which expires at the end of 2028 under current law. This expiration creates a significant change in the baseline tax burden for seniors starting in 2029, which influences the comparative impacts of reforms that extend beyond this date. The baseline used in this analysis is "Current Law" (which assumes expiration), not "Current Policy" (which might assume extension).
 
 ## Option 1: Full Repeal of Taxation of Social Security Benefits
 
@@ -74,7 +74,7 @@ def get_option2_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform sets the base taxability rate to 85% and eliminates all income thresholds by setting them to $0 for all filing statuses. This means 85% of all Social Security benefits become taxable income regardless of the recipient's income level, effectively eliminating the current two-tier threshold system.
+**Reform Explanation:** This reform sets the base taxability rate to 85% and eliminates all income thresholds by setting them to \$0 for all filing statuses. This means 85% of all Social Security benefits become taxable income regardless of the recipient's income level, effectively eliminating the current two-tier threshold system.
 
 ## Option 3: Taxation of 85% of Social Security Benefits and Permanent Extension of the Bonus Senior Deduction
 
@@ -113,28 +113,28 @@ def get_option3_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the $6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
+**Reform Explanation:** This reform combines the 85% taxation approach from Option 2 with a permanent extension of the bonus senior deduction. The parameter `senior_deduction_extension.applies` ensures the \$6,000 senior deduction continues beyond its scheduled 2028 expiration, partially offsetting the expanded taxation for older taxpayers.
 
-## Option 4: Replace the Bonus Senior Deduction with a $500 Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
+## Option 4: Replace the Bonus Senior Deduction with a \$500 Nonrefundable Tax Credit and Tax 85% of All Social Security Benefits
 
 **Start Date:** 2026
 
-**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a $500 nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
+**Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a \$500 nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
 
-**Illustrative Example:** An individual with $5,000 in Social Security income and $10,000 in other income facing a 5% tax on income below $10k, a 10% tax on income above that amount, and a $500 nonrefundable credit.
+**Illustrative Example:** An individual with \$5,000 in Social Security income and \$10,000 in other income facing a 5% tax on income below \$10k, a 10% tax on income above that amount, and a \$500 nonrefundable credit.
 
 | Taxable Social Security Income | Other Income | Taxes for Determining Credit | Maximum Credit Amount | Credit Received | Taxes Before Credit | Taxes After Credit |
 |-------------------------------|--------------|----------------------------|---------------------|-----------------|--------------------|--------------------|
-| $5,000 × 85% = $4,250 | $10,000 | $4,250 × 10% = $425 | $500 | MIN(425, 500) = $425 | $925 | $500 |
+| \$5,000 × 85% = \$4,250 | \$10,000 | \$4,250 × 10% = \$425 | \$500 | MIN(425, 500) = \$425 | \$925 | \$500 |
 
-**Credit Amount:** The credit is set at $500 per beneficiary. This amount serves as an illustrative benchmark to evaluate the structural shift from a deduction (which favors higher-income beneficiaries) to a flat credit (which is progressive), rather than a specific revenue-neutral target.
+**Credit Amount:** The credit is set at \$500 per beneficiary. This amount serves as an illustrative benchmark to evaluate the structural shift from a deduction (which favors higher-income beneficiaries) to a flat credit (which is progressive), rather than a specific revenue-neutral target.
 
 **Revenue Allocation:** The additional revenue raised will be allocated to the OASDI and HI trust funds in a way that maintains the current projected shares of contributions from TOB revenue to the OASI, DI, and HI trust funds.
 
 ```{dropdown} Option 4 Reform Code
 ```python
 def get_option4_reform():
-    """Option 4: Social Security Tax Credit System ($500 Credit)"""
+    """Option 4: Social Security Tax Credit System (\$500 Credit)"""
     return Reform.from_dict({
         "gov.irs.social_security.taxability.rate.base": {
             "2026-01-01.2100-12-31": 0.85
@@ -178,7 +178,7 @@ def get_option4_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform implements 85% taxation like Options 2-3 but replaces the bonus senior deduction with a $500 nonrefundable tax credit. The `ss_credit.in_effect` parameter activates the credit system, `ss_credit.amount` sets the credit value for each filing status, and `senior_deduction.amount: 0` eliminates the bonus senior deduction. The credit can only offset taxes owed on Social Security benefits.
+**Reform Explanation:** This reform implements 85% taxation like Options 2-3 but replaces the bonus senior deduction with a \$500 nonrefundable tax credit. The `ss_credit.in_effect` parameter activates the credit system, `ss_credit.amount` sets the credit value for each filing status, and `senior_deduction.amount: 0` eliminates the bonus senior deduction. The credit can only offset taxes owed on Social Security benefits.
 
 ## Option 5: Roth-Style Swap: Substitute Income Taxation of Employer Payroll Contributions for Income Taxation of Social Security Benefits
 
@@ -294,8 +294,8 @@ def get_option6_reform():
 def get_option7_reform():
     """Option 7: Eliminate Bonus Senior Deduction
 
-    Eliminates the $6,000 bonus senior deduction from the One Big Beautiful Bill
-    that has a 6% phase-out beginning at $75k/$150k for single/joint filers.
+    Eliminates the \$6,000 bonus senior deduction from the One Big Beautiful Bill
+    that has a 6% phase-out beginning at \$75k/\$150k for single/joint filers.
     The deduction expires in 2029, so there's only impact from 2026-2028.
     """
     return Reform.from_dict({
@@ -305,7 +305,7 @@ def get_option7_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the $6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.
+**Reform Explanation:** This reform eliminates the bonus senior deduction by setting `senior_deduction.amount` to 0 starting in 2026. This affects elderly taxpayers who would otherwise receive the \$6,000 deduction (subject to phase-out), increasing their taxable income. Since the deduction is already scheduled to expire in 2029 under current law, there is only a revenue impact for 2026-2028.
 
 ## Option 8: Full Taxation of Social Security Benefits
 
@@ -359,4 +359,4 @@ def get_option8_reform():
     }, country_id="us")
 ```
 
-**Reform Explanation:** This reform makes 100% of Social Security benefits taxable by setting `combined_income_ss_fraction` to 1.0 (ensuring full SS benefits are included in combined income calculations), `taxability.rate.additional` to 1.0 (100% taxation rate instead of the default 85%), and all income thresholds (both base and adjusted_base) to $0 for all filing statuses. Unlike Option 2 which taxes 85% of benefits (the current maximum under law), Option 8 taxes the full 100%, treating Social Security benefits identically to wages, pensions, and other ordinary income. This eliminates both the current two-tier threshold system and the 15% exclusion that exists even for high-income beneficiaries under current law.
+**Reform Explanation:** This reform makes 100% of Social Security benefits taxable by setting `combined_income_ss_fraction` to 1.0 (ensuring full SS benefits are included in combined income calculations), `taxability.rate.additional` to 1.0 (100% taxation rate instead of the default 85%), and all income thresholds (both base and adjusted_base) to \$0 for all filing statuses. Unlike Option 2 which taxes 85% of benefits (the current maximum under law), Option 8 taxes the full 100%, treating Social Security benefits identically to wages, pensions, and other ordinary income. This eliminates both the current two-tier threshold system and the 15% exclusion that exists even for high-income beneficiaries under current law.
