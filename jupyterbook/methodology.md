@@ -15,7 +15,7 @@ The Enhanced CPS is constructed by PolicyEngine to address known limitations in 
 3.  **Imputation**: Missing or underreported variables are imputed using machine learning techniques (quantile regression forests) trained on administrative data. This includes:
     *   Imputation of capital gains and other capital income from the IRS Public Use File (PUF).
     *   Imputation of itemized deductions and other tax-specific fields.
-4.  **Reweighting**: The dataset is reweighted to match over 7,000 administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
+4.  **Reweighting**: The dataset is reweighted to match over (TODO: number from docs) administrative targets from IRS and SSA data, ensuring that aggregate estimates for income, taxes, and benefits align with official benchmarks.
 
 ### Long-Term Projections: Economic Uprating and Demographic Calibration
 
@@ -38,9 +38,8 @@ Household weights are adjusted to match Social Security Administration demograph
 The model uses intermediate assumptions from the **2025 Social Security Trustees Report** for key macroeconomic variables:
 
 *   Average wage index (AWI) growth
-*   Consumer Price Index (CPI-W and CPI-U)
-*   Interest rates
-*   Labor force participation trends
+*   Consumer Price Index for adjusting Social Security (CPI-W)
+*   Gross Domestic Product 
 
 Different income categories are uprated using category-specific growth rates:
 *   **Employment income** - Follows wage growth projections
@@ -54,8 +53,7 @@ Tax parameters (brackets, standard deductions, credits) are uprated according to
 
 After economic uprating, household weights are recalibrated using Generalized Regression (GREG) calibration:
 
-*   Uses chi-squared distance minimization to adjust weights
-*   Enables simultaneous calibration to both categorical (age distribution) AND continuous (fiscal totals) targets from the SSA Trustees Report
+*   Enables simultaneous calibration to both categorical (projected age distribution) AND continuous (projected OADSI costs and taxible payroll for Social Security) targets from the SSA Trustees Report
 *   One-shot solution via matrix operations using the `samplics` package
 *   Enforces both demographic and fiscal consistency with official SSA projections
 *   Can match age distribution, Social Security benefit totals, and taxable payroll totals simultaneously
@@ -64,16 +62,16 @@ After economic uprating, household weights are recalibrated using Generalized Re
 
 The GREG method can enforce up to three types of constraints simultaneously:
 
-1. **Age Distribution** (always active)
+1. **Age Distribution**
    - 86 categories: ages 0-84 individually, 85+ aggregated
    - Source: SSA Single Year Age demographic projections (2024 publication, latest available)
 
-2. **Social Security Benefits** (optional, GREG only)
+2. **Social Security Benefits** 
    - Total OASDI (Old-Age, Survivors, and Disability Insurance) benefit payments in nominal dollars
    - Ensures aggregate Social Security income matches SSA fiscal projections
    - Source: SSA Trustees Report 2025
 
-3. **Taxable Payroll** (optional, GREG only)
+3. **Taxable Payroll**
    - Total earnings subject to Social Security taxation, properly accounting for the annual wage base cap
    - Calculated as: `taxable_earnings_for_social_security` + `social_security_taxable_self_employment_income`
    - Source: SSA Trustees Report 2025
@@ -214,10 +212,62 @@ print(f"✓ Age 6 population 2100: {total_age6_est:,.0f} (target: {ss_age6_pop:,
 
 This validation ensures that policy impact estimates are grounded in official demographic and economic projections, providing a realistic foundation for 75-year fiscal analysis.
 
-### Limitations
-While the Enhanced CPS improves upon raw survey data through tax record integration and machine learning imputation, estimates for very high-income households and capital gains realizations remain subject to sampling error and imputation uncertainty inherent in survey-based microsimulation. The distribution of high incomes in the CPS, even after enhancement, may not fully capture the extreme upper tail of the income distribution as accurately as full administrative tax microdata.
+### Limitations and Data Caveats
 
-Full data documentation: [policyengine.github.io/policyengine-us-data](https://policyengine.github.io/policyengine-us-data)
+While the Enhanced CPS improves upon raw survey data through tax record integration and machine learning imputation, estimates remain subject to sampling error and imputation uncertainty inherent in survey-based microsimulation.
+
+#### Behavioral Modeling Limitations
+
+The current analysis incorporates labor supply elasticities but does not model several additional behavioral responses that could affect long-term fiscal estimates:
+
+**1. Social Security Claiming Age Optimization**
+
+The model treats retirement claiming decisions as static, without optimizing claiming age (62-70) in response to tax policy changes. In reality, individuals facing higher marginal tax rates on Social Security benefits may strategically delay claiming to take advantage of actuarial adjustments and potentially lower future tax rates. This optimization behavior could amplify or dampen the revenue effects of Social Security taxation reforms.
+
+**2. Employer Compensation Structure Responses**
+
+The analysis treats employer-provided compensation components (wages, health insurance, retirement contributions) as exogenous inputs. It does not model how employers might restructure total compensation packages in response to differential tax treatment. For example, policies that increase the tax advantage of certain benefits could lead firms to shift compensation from wages to tax-preferred benefits, affecting both revenue estimates and distributional outcomes.
+
+**3. Generational Differences in Labor Supply Elasticities**
+
+While the model incorporates labor supply responses using elasticity estimates, it applies uniform elasticities across time periods and age groups (with a blanket doubling for workers 65+). This approach faces two limitations:
+
+*Age variation within current population:* Empirical evidence suggests labor supply elasticities vary substantially across the lifecycle, with older workers and those near retirement potentially showing different behavioral responses than younger workers.
+
+*Cohort variation across the 75-year horizon:* More critically, the model assumes that labor supply elasticities estimated from today's older workers will apply to future cohorts over the entire 2025-2100 projection period. In reality, workers reaching age 65 in 2050 or 2080 will have fundamentally different financial characteristics than today's 65-year-olds:
+- **Pension coverage:** Defined benefit pension coverage has declined from 45% for workers born in the 1950s to an estimated 20% for those born in the 1980s
+- **Homeownership and wealth:** Future cohorts may accumulate assets differently due to housing market changes and student debt burdens
+- **Social Security reliance:** The relative importance of Social Security in total retirement income varies across generations
+
+These generational shifts affect labor supply decisions: workers with lower pension wealth and home equity may exhibit different work-retirement tradeoffs than current retirees, potentially making them more (or less) sensitive to tax policy changes. The current model's elasticity parameters are calibrated to contemporary populations and held constant across the projection horizon, which may not accurately capture behavioral responses of future cohorts.
+
+**4. Cohort-Specific Income Composition Changes**
+
+The model projects aggregate income by source through 2100 using time-varying targets based on CBO projections (2025-2035) and SSA Trustees Report extensions (2036-2100). These projections account for economy-wide growth in employment income, pensions, Social Security benefits, capital gains, and other sources. However, the model assumes the age profile of income sources remains relatively constant over time.
+
+The critical limitation is that **future cohorts reaching retirement age will have fundamentally different income compositions** than today's retirees:
+
+*What the model currently assumes:*
+- A 65-year-old in 2025 has income mix: 60% Social Security, 30% pensions, 10% wages
+- A 65-year-old in 2055 has the same proportional income mix, scaled by inflation and aggregate growth
+
+*What cohort-specific modeling would capture:*
+- A 65-year-old in 2025 (born 1960): 60% Social Security, 30% pensions, 10% wages
+- A 65-year-old in 2055 (born 1990): 70% Social Security, 15% pensions, 15% wages
+
+This shift reflects structural changes already underway:
+- Defined benefit pension coverage declining from 45% for 1950s-born workers to 20% for 1980s-born workers
+- Greater reliance on Social Security as primary retirement income for younger cohorts
+- Different asset accumulation and homeownership patterns affecting capital income
+
+For Social Security taxation reforms, this matters significantly: policies primarily affecting benefit recipients will have increasing budgetary and distributional impacts as Social Security becomes a larger share of retirement income for future cohorts. The current model's constant age-income profile may underestimate the long-term fiscal and distributional effects of reforms targeting Social Security benefits or other retirement income sources.
+
+The infrastructure for time-varying projections exists in PolicyEngine's calibration framework, but the granularity for cohort-specific structural changes to income composition is currently absent.
+
+These limitations are inherent to the microsimulation approach used here, which focuses on mechanical tax calculations with standard labor supply responses rather than full dynamic behavioral modeling. Future enhancements incorporating these behavioral margins could provide additional insights into long-term fiscal and distributional effects.
+
+
+
 
 ## Implementation
 
