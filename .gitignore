@@ -1,28 +1,19 @@
-# Jupyter Book build outputs
-jupyterbook/_build/
-_build/
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-
-# Python cache
 __pycache__/
+_build/
+.DS_Store
+.env
+.idea/
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+.vscode/
+*.log
 *.pyc
 *.pyo
-
-# Environment files
-.env
-.venv/
-
-# IDE files
-.vscode/
-.idea/
-settings.local.json
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Temporary files
+*.tempresults/
 *.tmp
-*.temp
+jupyterbook/_build/
+results/
+settings.local.json
+Thumbs.db
+venv/
