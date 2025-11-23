@@ -8,6 +8,21 @@ This repository contains a Social Security taxation reform analysis project with
 1. **Jupyter Book documentation** - Research report and analysis using MyST-NB (Jupyter Book 2.0)
 2. **React dashboard** - Interactive policy impact visualization tool
 
+## Markdown Templating System
+
+**IMPORTANT**: This project uses a Jinja2-based templating system to keep markdown files synchronized with data.
+
+- **Never manually edit** generated markdown files (e.g., `jupyterbook/external-estimates.md`)
+- **Always edit templates** in `jupyterbook/templates/*.md.tpl` instead
+- **Run `uv run python generate_markdown.py`** after updating data or templates
+- See **[TEMPLATING.md](TEMPLATING.md)** for complete documentation
+
+**Quick reference**:
+```bash
+# When data/revenue_impacts.csv changes:
+uv run python generate_markdown.py  # Regenerate markdown from templates
+```
+
 ## Development Workflow
 
 **⚠️ IMPORTANT: Always work in pull requests to avoid breaking the main branch!**
