@@ -121,11 +121,11 @@ def get_option3_reform():
 
 **Policy Description:** Beginning in 2026, 85% of all Social Security benefits are included in taxable income. The bonus senior deduction is repealed in 2026 and replaced in the same year by a $500 nonrefundable tax credit made available to all Social Security beneficiaries. The credit can only be applied against taxes owed on Social Security benefits. For the credit's purpose, taxes owed on Social Security will be determined by considering Social Security benefits as a person's "last" income. So if their marginal tax rate is 37%, their last dollar of taxable Social Security income will increase taxes owed by 37 cents.
 
-**Illustrative Example:** An individual with $5,000 in Social Security income and $10,000 in other income facing a 5% tax on income below $10k, a 10% tax on income above that amount, and a $500 nonrefundable credit.
+**Illustrative Example:** An individual with \$5,000 in Social Security income and \$10,000 in other income facing a 5% tax on income below \$10k, a 10% tax on income above that amount, and a \$500 nonrefundable credit.
 
 | Taxable Social Security Income | Other Income | Taxes for Determining Credit | Maximum Credit Amount | Credit Received | Taxes Before Credit | Taxes After Credit |
 |-------------------------------|--------------|----------------------------|---------------------|-----------------|--------------------|--------------------|
-| $5,000 × 85% = $4,250 | $10,000 | $4,250 × 10% = $425 | $500 | MIN(425, 500) = $425 | $925 | $500 |
+| \$5,000 × 85% = \$4,250 | \$10,000 | \$4,250 × 10% = \$425 | \$500 | MIN(425, 500) = \$425 | \$925 | \$500 |
 
 **Credit Amount:** The credit is set at $500 per beneficiary. This amount serves as an illustrative benchmark to evaluate the structural shift from a deduction (which favors higher-income beneficiaries) to a flat credit (which is progressive), rather than a specific revenue-neutral target.
 
