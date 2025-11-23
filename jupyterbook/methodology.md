@@ -5,7 +5,7 @@
 
 ## Dataset and Microsimulation Methodology
 
-This analysis uses the **PolicyEngine US** microsimulation model, which relies on the **Enhanced CPS (2024)** dataset.
+This analysis uses the **PolicyEngine US** microsimulation model, which relies on the **Enhanced CPS (2024)** dataset. For complete documentation of the Enhanced CPS methodology, see the [PolicyEngine US Data documentation](https://policyengine.github.io/policyengine-us-data).
 
 ### Microdata Construction
 The Enhanced CPS is constructed by PolicyEngine to address known limitations in the raw Current Population Survey (CPS), such as underreporting of income and lack of tax-specific variables. The construction process involves:
