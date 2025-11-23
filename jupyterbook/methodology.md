@@ -49,4 +49,4 @@ This analysis presents two sets of conventional scoring estimates:
 For most Social Security taxation reforms, estimates with and without labor supply responses are very similar (typically within 5%), with the main exceptions being the Roth-style swap options (Options 5 and 6) which show larger differences due to the behavioral effects of taxing employer payroll contributions.
 
 ### Projection Period
-All estimates cover a 75-year projection window from 2026 through 2100, providing both near-term (10-year) and long-term fiscal impact assessments.
+All estimates cover a 75-year projection window from 2026 through 2100, providing both near-term (10-year) and long-term fiscal impact assessments.\\$

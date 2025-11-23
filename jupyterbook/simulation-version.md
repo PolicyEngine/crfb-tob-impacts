@@ -6,4 +6,4 @@ The simulation was last run on **2025-09-21** using Python 3.13.0.
 
 Analysis period: **2026-2035**
 
-Dataset: **56,839 households** and **146,133 individuals**
+Dataset: **56,839 households** and **146,133 individuals**\\$

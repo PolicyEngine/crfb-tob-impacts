@@ -84,4 +84,4 @@ Our estimate of $1.491 trillion for full repeal falls within the range of prior 
 - **Methodological Alignment**: Our use of PolicyEngine's microsimulation model follows similar approaches to CBO and JCT
 - **Trust Fund Impacts**: While we focus on general revenue impacts, CRFB's analysis highlights the significant effects on Social Security and Medicare trust fund solvency
 
-These external estimates serve as useful validation points. While our estimates for some reforms (like full repeal) align closely with other organizations, differences in other areas (like the 85% taxation option) highlight the importance of understanding baseline assumptions and reform specifications when comparing analyses.
+These external estimates serve as useful validation points. While our estimates for some reforms (like full repeal) align closely with other organizations, differences in other areas (like the 85% taxation option) highlight the importance of understanding baseline assumptions and reform specifications when comparing analyses.\\$
