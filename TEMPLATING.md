@@ -47,13 +47,45 @@ Populated values:
 ```
 crfb-tob-impacts/
 ├── data/
-│   └── revenue_impacts.csv          # Source data (75 years × 8 options × 2 scoring types)
-├── generate_markdown.py             # Template population script
+│   └── revenue_impacts.csv              # Source data (75 years × 8 options × 2 scoring types)
+├── generate_markdown.py                 # Template population script
 └── jupyterbook/
     ├── templates/
     │   └── external-estimates.md.tpl   # Template with {{ placeholders }}
-    └── external-estimates.md           # Generated output (DO NOT EDIT MANUALLY)
+    ├── external-estimates.md            # Generated output (DO NOT EDIT MANUALLY)
+    └── revenue-impacts.ipynb            # Uses templated code cells (see below)
 ```
+
+## Templating in Jupyter Notebooks
+
+Some sections in notebooks use **templated code cells** instead of static markdown:
+
+### Example: Key Findings Section
+
+Instead of hardcoding values in markdown:
+```markdown
+## Key Findings
+- Option 5 raises $617-745 billion...  # ❌ Gets outdated
+```
+
+We use a code cell that calculates and displays markdown:
+```python
+# Calculate values from data
+opt5_10yr = df[...]['revenue_impact'].sum()
+
+# Generate markdown with f-strings
+markdown_text = f"""## Key Findings
+- Option 5 raises ${opt5_10yr:.0f} billion...  # ✅ Auto-updates
+"""
+
+display(Markdown(markdown_text))
+```
+
+**Benefits:**
+- Values auto-update when notebook is re-executed
+- Guaranteed to match the data
+- Maintains markdown formatting
+- No manual editing needed
 
 ## Template Syntax
 
