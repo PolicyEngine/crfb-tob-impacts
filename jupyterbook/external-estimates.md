@@ -72,7 +72,7 @@ The JCT estimate of $318.4 billion represents forgone revenue over a **5-year pe
 
 CBO has also analyzed a different proposal to "Tax Social Security and Railroad Retirement Benefits in the Same Way That Distributions From Defined Benefit Pensions Are Taxed," which would establish a basis recovery system and generated an estimated $458.7 billion over 2021-2030 ({cite}`cbo2024pension`).
 
-Our Option 2 (uniform 85% taxation) estimate of \$424 billion represents revenue from eliminating the current partial exclusion that creates gaps in Social Security benefit taxation. Our Option 8 (100% taxation) estimate of \$880 billion represents the upper bound of potential revenue from taxing all Social Security benefits.
+Our Option 2 (uniform 85% taxation) estimate of $424 billion represents revenue from eliminating the current partial exclusion that creates gaps in Social Security benefit taxation. Our Option 8 (100% taxation) estimate of $880 billion represents the upper bound of potential revenue from taxing all Social Security benefits.
 
 ## Option 7: Eliminate Bonus Senior Deduction
 

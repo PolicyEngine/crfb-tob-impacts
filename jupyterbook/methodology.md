@@ -163,8 +163,8 @@ print(f"✓ Age 6 population 2027: {total_age6_est:,.0f} (target: {ss_age6_pop:,
 
 **Output:**
 ```
-✓ Social Security 2027: $1800.0B (target: $1800B)
-✓ Taxable payroll 2027: $11627.0B (target: $11627B)
+✓ Social Security 2027: \$1800.0B (target: \$1800B)
+✓ Taxable payroll 2027: \$11627.0B (target: \$11627B)
 ✓ Age 6 population 2027: 3,730,632 (target: 3,730,632)
 ```
 
@@ -200,8 +200,8 @@ print(f"✓ Age 6 population 2100: {total_age6_est:,.0f} (target: {ss_age6_pop:,
 
 **Output:**
 ```
-✓ Social Security 2100: $34432.0B (target: $34432B)
-✓ Taxable payroll 2100: $187614.0B (target: $187614B)
+✓ Social Security 2100: \$34432.0B (target: \$34432B)
+✓ Taxable payroll 2100: \$187614.0B (target: \$187614B)
 ✓ Age 6 population 2100: 5,162,540 (target: 5,162,540)
 ```
 
