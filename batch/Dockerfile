@@ -13,16 +13,18 @@ WORKDIR /app
 COPY batch/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy local policyengine-us with TOB variables and install from source
+COPY policyengine-us/ /app/policyengine-us/
+RUN pip install --no-cache-dir /app/policyengine-us/
+
 # Copy source code (will be available when we build from parent directory)
 COPY src/ /app/src/
 
 # Copy batch worker scripts
-COPY batch/compute_baseline.py /app/
-COPY batch/compute_reform.py /app/
 COPY batch/compute_year.py /app/batch/
 
 # Make scripts executable
-RUN chmod +x /app/compute_baseline.py /app/compute_reform.py /app/batch/compute_year.py
+RUN chmod +x /app/batch/compute_year.py
 
 # Set PYTHONPATH for imports
 ENV PYTHONPATH=/app/src

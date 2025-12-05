@@ -196,15 +196,33 @@ def main():
         print(f"      - Income tax calculated: {calc_time:.1f}s")
         print(f"      DIAGNOSTIC: Income tax calculation complete")
 
-        print(f"      DIAGNOSTIC: About to sum income tax...")
+        # Calculate TOB revenue variables
+        print(f"      DIAGNOSTIC: About to calculate TOB revenue variables...")
+        tob_start = time.time()
+        baseline_tob_medicare = baseline_sim.calculate("tob_revenue_medicare_hi", map_to="household", period=year)
+        baseline_tob_oasdi = baseline_sim.calculate("tob_revenue_oasdi", map_to="household", period=year)
+        baseline_tob_total = baseline_sim.calculate("tob_revenue_total", map_to="household", period=year)
+        tob_time = time.time() - tob_start
+        print(f"      - TOB revenue variables calculated: {tob_time:.1f}s")
+
+        print(f"      DIAGNOSTIC: About to sum baseline values...")
         baseline_revenue = float(baseline_income_tax.sum())
+        baseline_tob_medicare_revenue = float(baseline_tob_medicare.sum())
+        baseline_tob_oasdi_revenue = float(baseline_tob_oasdi.sum())
+        baseline_tob_total_revenue = float(baseline_tob_total.sum())
         baseline_time = time.time() - baseline_start
         print(f"      ✓ Baseline calculated: ${baseline_revenue/1e9:.2f}B (total: {baseline_time:.1f}s)")
+        print(f"        - TOB Medicare HI: ${baseline_tob_medicare_revenue/1e9:.2f}B")
+        print(f"        - TOB OASDI: ${baseline_tob_oasdi_revenue/1e9:.2f}B")
+        print(f"        - TOB Total: ${baseline_tob_total_revenue/1e9:.2f}B")
 
         # Clean up baseline objects immediately after extracting the value
         print(f"      DIAGNOSTIC: Cleaning up baseline objects...")
         del baseline_sim
         del baseline_income_tax
+        del baseline_tob_medicare
+        del baseline_tob_oasdi
+        del baseline_tob_total
         gc.collect()
         print(f"      ✓ Baseline objects cleaned up")
     except Exception as e:
@@ -288,15 +306,33 @@ def main():
             print(f"        - Income tax calculated: {calc_time:.1f}s")
             print(f"      DIAGNOSTIC: Reform income_tax calculated successfully")
 
+            # Calculate TOB revenue variables for reform
+            print(f"      DIAGNOSTIC: About to calculate reform TOB revenue variables...")
+            tob_start = time.time()
+            reform_tob_medicare = reform_sim.calculate("tob_revenue_medicare_hi", map_to="household", period=year)
+            reform_tob_oasdi = reform_sim.calculate("tob_revenue_oasdi", map_to="household", period=year)
+            reform_tob_total = reform_sim.calculate("tob_revenue_total", map_to="household", period=year)
+            tob_time = time.time() - tob_start
+            print(f"        - TOB revenue variables calculated: {tob_time:.1f}s")
+
             reform_revenue = float(reform_income_tax.sum())
+            reform_tob_medicare_revenue = float(reform_tob_medicare.sum())
+            reform_tob_oasdi_revenue = float(reform_tob_oasdi.sum())
+            reform_tob_total_revenue = float(reform_tob_total.sum())
             sim_time = time.time() - sim_start
 
-            # Calculate impact
+            # Calculate impacts
             impact = reform_revenue - baseline_revenue
+            tob_medicare_impact = reform_tob_medicare_revenue - baseline_tob_medicare_revenue
+            tob_oasdi_impact = reform_tob_oasdi_revenue - baseline_tob_oasdi_revenue
+            tob_total_impact = reform_tob_total_revenue - baseline_tob_total_revenue
 
             reform_time = time.time() - reform_start
             print(f"      ✓ Reform revenue: ${reform_revenue/1e9:.2f}B")
             print(f"      ✓ Impact: ${impact/1e9:+.2f}B ({reform_time:.1f}s total, {sim_time:.1f}s simulation)")
+            print(f"        - TOB Medicare HI impact: ${tob_medicare_impact/1e9:+.2f}B")
+            print(f"        - TOB OASDI impact: ${tob_oasdi_impact/1e9:+.2f}B")
+            print(f"        - TOB Total impact: ${tob_total_impact/1e9:+.2f}B")
 
             # Store result (include baseline for reference)
             result = {
@@ -305,6 +341,15 @@ def main():
                 'baseline_revenue': baseline_revenue,
                 'reform_revenue': reform_revenue,
                 'revenue_impact': impact,
+                'baseline_tob_medicare_hi': baseline_tob_medicare_revenue,
+                'reform_tob_medicare_hi': reform_tob_medicare_revenue,
+                'tob_medicare_hi_impact': tob_medicare_impact,
+                'baseline_tob_oasdi': baseline_tob_oasdi_revenue,
+                'reform_tob_oasdi': reform_tob_oasdi_revenue,
+                'tob_oasdi_impact': tob_oasdi_impact,
+                'baseline_tob_total': baseline_tob_total_revenue,
+                'reform_tob_total': reform_tob_total_revenue,
+                'tob_total_impact': tob_total_impact,
                 'scoring_type': scoring_type
             }
             results.append(result)
@@ -312,6 +357,9 @@ def main():
             # CRITICAL: Clean up reform objects immediately to prevent memory accumulation
             del reform_sim
             del reform_income_tax
+            del reform_tob_medicare
+            del reform_tob_oasdi
+            del reform_tob_total
             del reform
             gc.collect()
             print(f"      ✓ Memory cleaned up")

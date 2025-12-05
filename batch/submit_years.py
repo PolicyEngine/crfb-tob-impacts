@@ -83,7 +83,7 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
 
     task_spec.runnables = [runnable]
     task_spec.max_retry_count = 1  # Allow one retry per task
-    task_spec.max_run_duration = "3600s"  # 1 hour timeout per year
+    task_spec.max_run_duration = "1200s"  # 20 min timeout per year
 
     # Resource allocation - adaptive based on years
     resources = batch_v1.ComputeResource()
@@ -194,12 +194,13 @@ def submit_job(years, reforms, scoring_type, bucket_name):
         print()
 
     # Submit standard-memory job if needed (all other years)
+    # NOTE: Using 64GB for all years due to TOB variable memory requirements
     if standard_memory_years:
         if high_memory_years:
             print("\n" + "="*80)
-            print("COST OPTIMIZATION: Submitting separate job for standard-memory years")
+            print("Submitting separate job for remaining years (2028-2100)")
             print("="*80)
-            print(f"Years using 32GB RAM: {min(standard_memory_years)}-{max(standard_memory_years)}")
+            print(f"Years using 64GB RAM: {min(standard_memory_years)}-{max(standard_memory_years)}")
             print("="*80 + "\n")
 
         job_id = submit_single_job(
@@ -207,10 +208,10 @@ def submit_job(years, reforms, scoring_type, bucket_name):
             reforms=reforms,
             scoring_type=scoring_type,
             bucket_name=bucket_name,
-            machine_type="e2-highmem-4",  # 4 vCPU, 32GB RAM
-            memory_mib=32768,  # 32GB
-            cpu_milli=4000,    # 4 CPUs
-            memory_label="32GB"
+            machine_type="e2-highmem-8",  # 8 vCPU, 64GB RAM (increased for TOB variables)
+            memory_mib=65536,  # 64GB
+            cpu_milli=8000,    # 8 CPUs
+            memory_label="64GB"
         )
         job_ids.append((job_id, standard_memory_years))
         print()
