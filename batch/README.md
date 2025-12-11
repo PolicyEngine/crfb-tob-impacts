@@ -11,29 +11,53 @@ This directory contains scripts for running parallel Social Security reform impa
 | PR | Title | Description |
 |----|-------|-------------|
 | [#6744](https://github.com/PolicyEngine/policyengine-us/pull/6744) | Extend Economic Uprating Parameters to 2100 | Extends economic parameters (CPI, wages, income) through 2100 using SSA Trustees Report data |
-| [#6750](https://github.com/PolicyEngine/policyengine-us/pull/6750) | Trust Fund Revenue Variables with LSR Recursion Fix | Adds `tob_revenue_total`, `tob_revenue_oasdi`, `tob_revenue_medicare_hi` variables for measuring trust fund revenue from Social Security benefit taxation |
+| [#6750](https://github.com/PolicyEngine/policyengine-us/pull/6750) | Trust Fund Revenue Variables with LSR Recursion Fix | Adds `tob_revenue_total`, `tob_revenue_oasdi`, `tob_revenue_medicare_hi` variables for measuring trust fund revenue from Social Security benefit taxation. **Also includes tier split variables (tier_1/tier_2) with critical bug fixes.** |
 | [#6830](https://github.com/PolicyEngine/policyengine-us/pull/6830) | Add Labor Supply Elasticity Age Heterogeneity | Adds age-based labor supply elasticity support (65+ threshold) for more accurate behavioral responses |
 
-To check out all PRs into a local policyengine-us directory:
+**⚠️ CRITICAL: PR #6744 and #6750 have overlapping changes (both touch tier split variables). Always use #6750 as the base and NEVER overwrite #6750's files with #6744's versions. PR #6750 contains critical bug fixes (e.g., commit `6a0a4fd` fixes tier_2 calculation) that #6744 does not have.**
+
+**Recommended approach:** Check out PR #6750 directly and merge #6830 into it:
 
 ```bash
 # Clone policyengine-us if not already present
 git clone https://github.com/PolicyEngine/policyengine-us.git
 
-# Fetch all PR branches and merge them
 cd policyengine-us
-git fetch origin pull/6744/head:pr-6744
-git fetch origin pull/6750/head:pr-6750
-git fetch origin pull/6830/head:pr-6830
 
-# Create a branch with all PRs merged
-git checkout main
-git checkout -b combined-tob-features
-git merge pr-6744 --no-edit
-git merge pr-6750 --no-edit
+# Fetch PR #6750 (the primary PR with all TOB features and fixes)
+git fetch origin pull/6750/head:pr-6750
+git checkout pr-6750
+
+# Merge PR #6830 (labor supply elasticity)
+git fetch origin pull/6830/head:pr-6830
 git merge pr-6830 --no-edit
 
 cd ..
+```
+
+**Alternative (if you need to update an existing checkout):**
+
+```bash
+cd policyengine-us
+
+# Fetch the latest from PR #6750
+git fetch origin pull/6750/head:pr-6750-latest
+
+# Checkout the updated branch
+git checkout pr-6750-latest
+
+# Merge PR #6830 if needed
+git fetch origin pull/6830/head:pr-6830
+git merge pr-6830 --no-edit
+
+cd ..
+```
+
+**DO NOT use this approach (it can overwrite #6750's fixes):**
+```bash
+# BAD - merging 6744 after 6750 can overwrite critical fixes!
+git merge pr-6744 --no-edit  # DON'T DO THIS
+git merge pr-6750 --no-edit
 ```
 
 ### 2. GCP Authentication
@@ -302,15 +326,12 @@ Based on our experience running all 8 options × 75 years, here's the most relia
 
 ```bash
 # 1. Clone and setup policyengine-us with required PRs
+# IMPORTANT: Use PR #6750 as base, then merge #6830. Do NOT merge #6744 separately.
 git clone https://github.com/PolicyEngine/policyengine-us.git
 cd policyengine-us
-git fetch origin pull/6744/head:pr-6744
 git fetch origin pull/6750/head:pr-6750
+git checkout pr-6750
 git fetch origin pull/6830/head:pr-6830
-git checkout main
-git checkout -b combined-tob-features
-git merge pr-6744 --no-edit
-git merge pr-6750 --no-edit
 git merge pr-6830 --no-edit
 cd ..
 
