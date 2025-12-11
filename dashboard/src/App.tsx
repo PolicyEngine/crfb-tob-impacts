@@ -4,7 +4,7 @@ import { ImpactChart } from './components/ImpactChart'
 import { ComparisonTable } from './components/ComparisonTable'
 import { SummaryCards } from './components/SummaryCards'
 import { MethodologySection } from './components/MethodologySection'
-import { loadData, calculateTotals } from './utils/dataLoader'
+import { loadData, calculateTotals, exportToCsv } from './utils/dataLoader'
 import type { YearlyImpact } from './types'
 import { REFORMS } from './types'
 import './App.css'
@@ -94,6 +94,12 @@ function App() {
               onClick={() => setViewMode('75year')}
             >
               75-Year (2026-2100)
+            </button>
+            <button
+              className="export-btn"
+              onClick={() => exportToCsv(selectedData, selectedReform, reform?.name || selectedReform)}
+            >
+              Export to CSV
             </button>
           </div>
 

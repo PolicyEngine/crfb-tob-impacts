@@ -8,8 +8,11 @@ interface EconomicProjection {
   gdp: number  // billions
 }
 
+// Get base URL from Vite's import.meta.env.BASE_URL
+const BASE_URL = import.meta.env.BASE_URL || '/'
+
 async function loadEconomicProjections(): Promise<Map<number, EconomicProjection>> {
-  const response = await fetch('/data/ssa_economic_projections.csv')
+  const response = await fetch(`${BASE_URL}data/ssa_economic_projections.csv`)
   const csvContent = await response.text()
   const lines = csvContent.trim().split('\n')
   const projections = new Map<number, EconomicProjection>()
@@ -102,7 +105,54 @@ export async function loadData(): Promise<Record<string, YearlyImpact[]>> {
   const economicProjections = await loadEconomicProjections()
 
   // Load and parse the 75-year data with economic context
-  const response = await fetch('/data/75_year_tf_splits.csv')
+  const response = await fetch(`${BASE_URL}data/75_year_tf_splits.csv`)
   const csvContent = await response.text()
   return parse75YearData(csvContent, economicProjections)
+}
+
+export function exportToCsv(data: YearlyImpact[], reformId: string, reformName: string): void {
+  // CSV header
+  const headers = [
+    'Reform',
+    'Year',
+    'Revenue Impact ($B)',
+    'OASDI Impact ($B)',
+    'Medicare HI Impact ($B)',
+    'Total TOB Impact ($B)',
+    'Baseline Revenue ($B)',
+    'Reform Revenue ($B)',
+    '% of OASDI Payroll',
+    '% of GDP'
+  ]
+
+  // CSV rows
+  const rows = data.map(d => [
+    reformName,
+    d.year,
+    d.revenueImpact.toFixed(2),
+    d.tobOasdiImpact.toFixed(2),
+    d.tobMedicareHiImpact.toFixed(2),
+    d.tobTotalImpact.toFixed(2),
+    d.baselineRevenue.toFixed(2),
+    d.reformRevenue.toFixed(2),
+    d.pctOfOasdiPayroll.toFixed(3),
+    d.pctOfGdp.toFixed(3)
+  ])
+
+  // Combine header and rows
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n')
+
+  // Create and trigger download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', `${reformId}_impact_data.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }

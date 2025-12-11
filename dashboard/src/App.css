@@ -324,6 +324,19 @@ body {
   color: white;
 }
 
+.view-toggle .export-btn {
+  margin-left: auto;
+  background: var(--gray-700);
+  border-color: var(--gray-700);
+  color: white;
+}
+
+.view-toggle .export-btn:hover {
+  background: var(--gray-800);
+  border-color: var(--gray-800);
+  color: white;
+}
+
 /* Charts Grid */
 .charts-grid {
   display: grid;
