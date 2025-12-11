@@ -46,13 +46,16 @@ export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactC
         },
       ]
 
+  // Show every 10 years for 75-year view, every year for 10-year view
+  const tickInterval = data.length > 20 ? 10 : 1
+
   const layout: Partial<Plotly.Layout> = {
     title: { text: title },
     font: { family: 'Inter, sans-serif', size: 14, color: '#344054' },
     xaxis: {
       title: { text: 'Year' },
       tickformat: 'd',
-      dtick: showTrustFundSplit ? 10 : 1,
+      dtick: tickInterval,
     },
     yaxis: {
       title: { text: 'Billions ($)' },
