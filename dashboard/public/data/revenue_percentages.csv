@@ -1,0 +1,1000 @@
+Reform,Year,Revenue impact (B),Type,Taxable payroll (B),GDP (B),% of payroll,% of GDP
+Option 1: Full Repeal,2026,-$103,static,"$11,129","$31,754",-0.92%,-0.32%
+Option 1: Full Repeal,2027,-$111,static,"$11,627","$33,058",-0.95%,-0.34%
+Option 1: Full Repeal,2028,-$121,static,"$12,159","$34,455",-1.00%,-0.35%
+Option 1: Full Repeal,2029,-$134,static,"$12,696","$35,907",-1.06%,-0.37%
+Option 1: Full Repeal,2030,-$145,static,"$13,239","$37,377",-1.09%,-0.39%
+Option 1: Full Repeal,2031,-$155,static,"$13,798","$38,903",-1.12%,-0.40%
+Option 1: Full Repeal,2032,-$167,static,"$14,380","$40,497",-1.16%,-0.41%
+Option 1: Full Repeal,2033,-$178,static,"$14,987","$42,145",-1.19%,-0.42%
+Option 1: Full Repeal,2034,-$191,static,"$15,594","$43,836",-1.23%,-0.44%
+Option 1: Full Repeal,2035,-$204,static,"$16,205","$45,586",-1.26%,-0.45%
+Option 1: Full Repeal,2036,-$218,static,"$16,825","$47,402",-1.29%,-0.46%
+Option 1: Full Repeal,2037,-$231,static,"$17,465","$49,277",-1.32%,-0.47%
+Option 1: Full Repeal,2038,-$246,static,"$18,132","$51,237",-1.36%,-0.48%
+Option 1: Full Repeal,2039,-$261,static,"$18,819","$53,261",-1.39%,-0.49%
+Option 1: Full Repeal,2040,-$277,static,"$19,532","$55,363",-1.42%,-0.50%
+Option 1: Full Repeal,2041,-$294,static,"$20,269","$57,541",-1.45%,-0.51%
+Option 1: Full Repeal,2042,-$312,static,"$21,035","$59,808",-1.48%,-0.52%
+Option 1: Full Repeal,2043,-$330,static,"$21,828","$62,157",-1.51%,-0.53%
+Option 1: Full Repeal,2044,-$348,static,"$22,653","$64,603",-1.54%,-0.54%
+Option 1: Full Repeal,2045,-$367,static,"$23,507","$67,136",-1.56%,-0.55%
+Option 1: Full Repeal,2046,-$383,static,"$24,391","$69,760",-1.57%,-0.55%
+Option 1: Full Repeal,2047,-$399,static,"$25,313","$72,499",-1.58%,-0.55%
+Option 1: Full Repeal,2048,-$418,static,"$26,270","$75,343",-1.59%,-0.56%
+Option 1: Full Repeal,2049,-$441,static,"$27,263","$78,296",-1.62%,-0.56%
+Option 1: Full Repeal,2050,-$463,static,"$28,300","$81,378",-1.63%,-0.57%
+Option 1: Full Repeal,2051,-$489,static,"$29,376","$84,581",-1.66%,-0.58%
+Option 1: Full Repeal,2052,-$517,static,"$30,494","$87,914",-1.70%,-0.59%
+Option 1: Full Repeal,2053,-$548,static,"$31,661","$91,390",-1.73%,-0.60%
+Option 1: Full Repeal,2054,-$529,static,"$32,869","$94,996",-1.61%,-0.56%
+Option 1: Full Repeal,2055,-$555,static,"$34,124","$98,744",-1.63%,-0.56%
+Option 1: Full Repeal,2056,-$576,static,"$35,432","$102,652",-1.62%,-0.56%
+Option 1: Full Repeal,2057,-$603,static,"$36,790","$106,711",-1.64%,-0.57%
+Option 1: Full Repeal,2058,-$633,static,"$38,201","$110,930",-1.66%,-0.57%
+Option 1: Full Repeal,2059,-$663,static,"$39,670","$115,324",-1.67%,-0.58%
+Option 1: Full Repeal,2060,-$687,static,"$41,196","$119,893",-1.67%,-0.57%
+Option 1: Full Repeal,2061,-$720,static,"$42,782","$124,643",-1.68%,-0.58%
+Option 1: Full Repeal,2062,-$755,static,"$44,429","$129,581",-1.70%,-0.58%
+Option 1: Full Repeal,2063,-$785,static,"$46,136","$134,700",-1.70%,-0.58%
+Option 1: Full Repeal,2064,-$823,static,"$47,902","$140,004",-1.72%,-0.59%
+Option 1: Full Repeal,2065,-$855,static,"$49,733","$145,507",-1.72%,-0.59%
+Option 1: Full Repeal,2066,-$898,static,"$51,631","$151,216",-1.74%,-0.59%
+Option 1: Full Repeal,2067,-$941,static,"$53,598","$157,138",-1.76%,-0.60%
+Option 1: Full Repeal,2068,-$978,static,"$55,637","$163,282",-1.76%,-0.60%
+Option 1: Full Repeal,2069,"-$1,025",static,"$57,746","$169,644",-1.77%,-0.60%
+Option 1: Full Repeal,2070,"-$1,063",static,"$59,930","$176,236",-1.77%,-0.60%
+Option 1: Full Repeal,2071,"-$1,114",static,"$62,196","$183,086",-1.79%,-0.61%
+Option 1: Full Repeal,2072,"-$1,167",static,"$64,543","$190,184",-1.81%,-0.61%
+Option 1: Full Repeal,2073,"-$1,208",static,"$66,975","$197,546",-1.80%,-0.61%
+Option 1: Full Repeal,2074,"-$1,264",static,"$69,501","$205,203",-1.82%,-0.62%
+Option 1: Full Repeal,2075,"-$1,310",static,"$72,131","$213,176",-1.82%,-0.61%
+Option 1: Full Repeal,2076,"-$1,371",static,"$74,862","$221,462",-1.83%,-0.62%
+Option 1: Full Repeal,2077,"-$1,420",static,"$77,698","$230,072",-1.83%,-0.62%
+Option 1: Full Repeal,2078,"-$1,472",static,"$80,650","$239,042",-1.83%,-0.62%
+Option 1: Full Repeal,2079,"-$1,541",static,"$83,727","$248,394",-1.84%,-0.62%
+Option 1: Full Repeal,2080,"-$1,600",static,"$86,933","$258,141",-1.84%,-0.62%
+Option 1: Full Repeal,2081,"-$1,660",static,"$90,268","$268,290",-1.84%,-0.62%
+Option 1: Full Repeal,2082,"-$1,723",static,"$93,749","$278,887",-1.84%,-0.62%
+Option 1: Full Repeal,2083,"-$1,789",static,"$97,381","$289,948",-1.84%,-0.62%
+Option 1: Full Repeal,2084,"-$1,858",static,"$101,163","$301,471",-1.84%,-0.62%
+Option 1: Full Repeal,2085,"-$1,932",static,"$105,104","$313,485",-1.84%,-0.62%
+Option 1: Full Repeal,2086,"-$1,993",static,"$109,217","$326,029",-1.82%,-0.61%
+Option 1: Full Repeal,2087,"-$2,072",static,"$113,504","$339,109",-1.83%,-0.61%
+Option 1: Full Repeal,2088,"-$2,155",static,"$117,973","$352,750",-1.83%,-0.61%
+Option 1: Full Repeal,2089,"-$2,223",static,"$122,629","$366,974",-1.81%,-0.61%
+Option 1: Full Repeal,2090,"-$2,317",static,"$127,477","$381,790",-1.82%,-0.61%
+Option 1: Full Repeal,2091,"-$2,420",static,"$132,518","$397,210",-1.83%,-0.61%
+Option 1: Full Repeal,2092,"-$2,502",static,"$137,764","$413,267",-1.82%,-0.61%
+Option 1: Full Repeal,2093,"-$2,596",static,"$143,215","$429,964",-1.81%,-0.60%
+Option 1: Full Repeal,2094,"-$2,691",static,"$148,876","$447,320",-1.81%,-0.60%
+Option 1: Full Repeal,2095,"-$2,795",static,"$154,754","$465,356",-1.81%,-0.60%
+Option 1: Full Repeal,2096,"-$2,911",static,"$160,855","$484,092",-1.81%,-0.60%
+Option 1: Full Repeal,2097,"-$3,003",static,"$167,185","$503,555",-1.80%,-0.60%
+Option 1: Full Repeal,2098,"-$3,120",static,"$173,750","$523,755",-1.80%,-0.60%
+Option 1: Full Repeal,2099,"-$3,267",static,"$180,557","$544,719",-1.81%,-0.60%
+Option 1: Full Repeal,2100,"-$3,395",static,"$187,614","$566,475",-1.81%,-0.60%
+Option 2: 85% Taxation,2026,$28,static,"$11,129","$31,754",0.25%,0.09%
+Option 2: 85% Taxation,2027,$30,static,"$11,627","$33,058",0.25%,0.09%
+Option 2: 85% Taxation,2028,$31,static,"$12,159","$34,455",0.25%,0.09%
+Option 2: 85% Taxation,2029,$43,static,"$12,696","$35,907",0.34%,0.12%
+Option 2: 85% Taxation,2030,$45,static,"$13,239","$37,377",0.34%,0.12%
+Option 2: 85% Taxation,2031,$46,static,"$13,798","$38,903",0.34%,0.12%
+Option 2: 85% Taxation,2032,$48,static,"$14,380","$40,497",0.34%,0.12%
+Option 2: 85% Taxation,2033,$50,static,"$14,987","$42,145",0.33%,0.12%
+Option 2: 85% Taxation,2034,$51,static,"$15,594","$43,836",0.33%,0.12%
+Option 2: 85% Taxation,2035,$52,static,"$16,205","$45,586",0.32%,0.11%
+Option 2: 85% Taxation,2036,$54,static,"$16,825","$47,402",0.32%,0.11%
+Option 2: 85% Taxation,2037,$55,static,"$17,465","$49,277",0.32%,0.11%
+Option 2: 85% Taxation,2038,$56,static,"$18,132","$51,237",0.31%,0.11%
+Option 2: 85% Taxation,2039,$58,static,"$18,819","$53,261",0.31%,0.11%
+Option 2: 85% Taxation,2040,$59,static,"$19,532","$55,363",0.30%,0.11%
+Option 2: 85% Taxation,2041,$61,static,"$20,269","$57,541",0.30%,0.11%
+Option 2: 85% Taxation,2042,$62,static,"$21,035","$59,808",0.29%,0.10%
+Option 2: 85% Taxation,2043,$63,static,"$21,828","$62,157",0.29%,0.10%
+Option 2: 85% Taxation,2044,$65,static,"$22,653","$64,603",0.29%,0.10%
+Option 2: 85% Taxation,2045,$67,static,"$23,507","$67,136",0.29%,0.10%
+Option 2: 85% Taxation,2046,$70,static,"$24,391","$69,760",0.29%,0.10%
+Option 2: 85% Taxation,2047,$74,static,"$25,313","$72,499",0.29%,0.10%
+Option 2: 85% Taxation,2048,$76,static,"$26,270","$75,343",0.29%,0.10%
+Option 2: 85% Taxation,2049,$76,static,"$27,263","$78,296",0.28%,0.10%
+Option 2: 85% Taxation,2050,$76,static,"$28,300","$81,378",0.27%,0.09%
+Option 2: 85% Taxation,2051,$76,static,"$29,376","$84,581",0.26%,0.09%
+Option 2: 85% Taxation,2052,$75,static,"$30,494","$87,914",0.25%,0.09%
+Option 2: 85% Taxation,2053,$75,static,"$31,661","$91,390",0.24%,0.08%
+Option 2: 85% Taxation,2054,$91,static,"$32,869","$94,996",0.28%,0.10%
+Option 2: 85% Taxation,2055,$95,static,"$34,124","$98,744",0.28%,0.10%
+Option 2: 85% Taxation,2056,$99,static,"$35,432","$102,652",0.28%,0.10%
+Option 2: 85% Taxation,2057,$103,static,"$36,790","$106,711",0.28%,0.10%
+Option 2: 85% Taxation,2058,$107,static,"$38,201","$110,930",0.28%,0.10%
+Option 2: 85% Taxation,2059,$112,static,"$39,670","$115,324",0.28%,0.10%
+Option 2: 85% Taxation,2060,$117,static,"$41,196","$119,893",0.28%,0.10%
+Option 2: 85% Taxation,2061,$122,static,"$42,782","$124,643",0.28%,0.10%
+Option 2: 85% Taxation,2062,$126,static,"$44,429","$129,581",0.28%,0.10%
+Option 2: 85% Taxation,2063,$132,static,"$46,136","$134,700",0.29%,0.10%
+Option 2: 85% Taxation,2064,$136,static,"$47,902","$140,004",0.28%,0.10%
+Option 2: 85% Taxation,2065,$143,static,"$49,733","$145,507",0.29%,0.10%
+Option 2: 85% Taxation,2066,$148,static,"$51,631","$151,216",0.29%,0.10%
+Option 2: 85% Taxation,2067,$153,static,"$53,598","$157,138",0.29%,0.10%
+Option 2: 85% Taxation,2068,$161,static,"$55,637","$163,282",0.29%,0.10%
+Option 2: 85% Taxation,2069,$167,static,"$57,746","$169,644",0.29%,0.10%
+Option 2: 85% Taxation,2070,$175,static,"$59,930","$176,236",0.29%,0.10%
+Option 2: 85% Taxation,2071,$181,static,"$62,196","$183,086",0.29%,0.10%
+Option 2: 85% Taxation,2072,$188,static,"$64,543","$190,184",0.29%,0.10%
+Option 2: 85% Taxation,2073,$198,static,"$66,975","$197,546",0.30%,0.10%
+Option 2: 85% Taxation,2074,$206,static,"$69,501","$205,203",0.30%,0.10%
+Option 2: 85% Taxation,2075,$217,static,"$72,131","$213,176",0.30%,0.10%
+Option 2: 85% Taxation,2076,$225,static,"$74,862","$221,462",0.30%,0.10%
+Option 2: 85% Taxation,2077,$237,static,"$77,698","$230,072",0.30%,0.10%
+Option 2: 85% Taxation,2078,$248,static,"$80,650","$239,042",0.31%,0.10%
+Option 2: 85% Taxation,2079,$259,static,"$83,727","$248,394",0.31%,0.10%
+Option 2: 85% Taxation,2080,$270,static,"$86,933","$258,141",0.31%,0.10%
+Option 2: 85% Taxation,2081,$283,static,"$90,268","$268,290",0.31%,0.11%
+Option 2: 85% Taxation,2082,$295,static,"$93,749","$278,887",0.31%,0.11%
+Option 2: 85% Taxation,2083,$308,static,"$97,381","$289,948",0.32%,0.11%
+Option 2: 85% Taxation,2084,$321,static,"$101,163","$301,471",0.32%,0.11%
+Option 2: 85% Taxation,2085,$334,static,"$105,104","$313,485",0.32%,0.11%
+Option 2: 85% Taxation,2086,$350,static,"$109,217","$326,029",0.32%,0.11%
+Option 2: 85% Taxation,2087,$365,static,"$113,504","$339,109",0.32%,0.11%
+Option 2: 85% Taxation,2088,$380,static,"$117,973","$352,750",0.32%,0.11%
+Option 2: 85% Taxation,2089,$398,static,"$122,629","$366,974",0.32%,0.11%
+Option 2: 85% Taxation,2090,$413,static,"$127,477","$381,790",0.32%,0.11%
+Option 2: 85% Taxation,2091,$427,static,"$132,518","$397,210",0.32%,0.11%
+Option 2: 85% Taxation,2092,$445,static,"$137,764","$413,267",0.32%,0.11%
+Option 2: 85% Taxation,2093,$463,static,"$143,215","$429,964",0.32%,0.11%
+Option 2: 85% Taxation,2094,$483,static,"$148,876","$447,320",0.32%,0.11%
+Option 2: 85% Taxation,2095,$504,static,"$154,754","$465,356",0.33%,0.11%
+Option 2: 85% Taxation,2096,$526,static,"$160,855","$484,092",0.33%,0.11%
+Option 2: 85% Taxation,2097,$552,static,"$167,185","$503,555",0.33%,0.11%
+Option 2: 85% Taxation,2098,$575,static,"$173,750","$523,755",0.33%,0.11%
+Option 2: 85% Taxation,2099,$597,static,"$180,557","$544,719",0.33%,0.11%
+Option 2: 85% Taxation,2100,$625,static,"$187,614","$566,475",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2026,$28,static,"$11,129","$31,754",0.25%,0.09%
+Option 3: 85% + Senior Deduction,2027,$30,static,"$11,627","$33,058",0.25%,0.09%
+Option 3: 85% + Senior Deduction,2028,$31,static,"$12,159","$34,455",0.25%,0.09%
+Option 3: 85% + Senior Deduction,2029,$7,static,"$12,696","$35,907",0.06%,0.02%
+Option 3: 85% + Senior Deduction,2030,$9,static,"$13,239","$37,377",0.06%,0.02%
+Option 3: 85% + Senior Deduction,2031,$10,static,"$13,798","$38,903",0.07%,0.03%
+Option 3: 85% + Senior Deduction,2032,$12,static,"$14,380","$40,497",0.08%,0.03%
+Option 3: 85% + Senior Deduction,2033,$14,static,"$14,987","$42,145",0.09%,0.03%
+Option 3: 85% + Senior Deduction,2034,$15,static,"$15,594","$43,836",0.09%,0.03%
+Option 3: 85% + Senior Deduction,2035,$16,static,"$16,205","$45,586",0.10%,0.03%
+Option 3: 85% + Senior Deduction,2036,$17,static,"$16,825","$47,402",0.10%,0.04%
+Option 3: 85% + Senior Deduction,2037,$19,static,"$17,465","$49,277",0.11%,0.04%
+Option 3: 85% + Senior Deduction,2038,$21,static,"$18,132","$51,237",0.11%,0.04%
+Option 3: 85% + Senior Deduction,2039,$23,static,"$18,819","$53,261",0.12%,0.04%
+Option 3: 85% + Senior Deduction,2040,$24,static,"$19,532","$55,363",0.12%,0.04%
+Option 3: 85% + Senior Deduction,2041,$26,static,"$20,269","$57,541",0.13%,0.04%
+Option 3: 85% + Senior Deduction,2042,$27,static,"$21,035","$59,808",0.13%,0.05%
+Option 3: 85% + Senior Deduction,2043,$30,static,"$21,828","$62,157",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2044,$32,static,"$22,653","$64,603",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2045,$34,static,"$23,507","$67,136",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2046,$37,static,"$24,391","$69,760",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2047,$40,static,"$25,313","$72,499",0.16%,0.05%
+Option 3: 85% + Senior Deduction,2048,$41,static,"$26,270","$75,343",0.16%,0.05%
+Option 3: 85% + Senior Deduction,2049,$41,static,"$27,263","$78,296",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2050,$41,static,"$28,300","$81,378",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2051,$41,static,"$29,376","$84,581",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2052,$41,static,"$30,494","$87,914",0.13%,0.05%
+Option 3: 85% + Senior Deduction,2053,$42,static,"$31,661","$91,390",0.13%,0.05%
+Option 3: 85% + Senior Deduction,2054,$62,static,"$32,869","$94,996",0.19%,0.07%
+Option 3: 85% + Senior Deduction,2055,$66,static,"$34,124","$98,744",0.19%,0.07%
+Option 3: 85% + Senior Deduction,2056,$71,static,"$35,432","$102,652",0.20%,0.07%
+Option 3: 85% + Senior Deduction,2057,$75,static,"$36,790","$106,711",0.20%,0.07%
+Option 3: 85% + Senior Deduction,2058,$80,static,"$38,201","$110,930",0.21%,0.07%
+Option 3: 85% + Senior Deduction,2059,$84,static,"$39,670","$115,324",0.21%,0.07%
+Option 3: 85% + Senior Deduction,2060,$90,static,"$41,196","$119,893",0.22%,0.07%
+Option 3: 85% + Senior Deduction,2061,$95,static,"$42,782","$124,643",0.22%,0.08%
+Option 3: 85% + Senior Deduction,2062,$99,static,"$44,429","$129,581",0.22%,0.08%
+Option 3: 85% + Senior Deduction,2063,$105,static,"$46,136","$134,700",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2064,$111,static,"$47,902","$140,004",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2065,$117,static,"$49,733","$145,507",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2066,$123,static,"$51,631","$151,216",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2067,$129,static,"$53,598","$157,138",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2068,$137,static,"$55,637","$163,282",0.25%,0.08%
+Option 3: 85% + Senior Deduction,2069,$144,static,"$57,746","$169,644",0.25%,0.08%
+Option 3: 85% + Senior Deduction,2070,$152,static,"$59,930","$176,236",0.25%,0.09%
+Option 3: 85% + Senior Deduction,2071,$159,static,"$62,196","$183,086",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2072,$167,static,"$64,543","$190,184",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2073,$176,static,"$66,975","$197,546",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2074,$185,static,"$69,501","$205,203",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2075,$196,static,"$72,131","$213,176",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2076,$205,static,"$74,862","$221,462",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2077,$216,static,"$77,698","$230,072",0.28%,0.09%
+Option 3: 85% + Senior Deduction,2078,$229,static,"$80,650","$239,042",0.28%,0.10%
+Option 3: 85% + Senior Deduction,2079,$239,static,"$83,727","$248,394",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2080,$252,static,"$86,933","$258,141",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2081,$264,static,"$90,268","$268,290",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2082,$277,static,"$93,749","$278,887",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2083,$290,static,"$97,381","$289,948",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2084,$304,static,"$101,163","$301,471",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2085,$318,static,"$105,104","$313,485",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2086,$334,static,"$109,217","$326,029",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2087,$350,static,"$113,504","$339,109",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2088,$365,static,"$117,973","$352,750",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2089,$383,static,"$122,629","$366,974",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2090,$399,static,"$127,477","$381,790",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2091,$414,static,"$132,518","$397,210",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2092,$432,static,"$137,764","$413,267",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2093,$451,static,"$143,215","$429,964",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2094,$471,static,"$148,876","$447,320",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2095,$492,static,"$154,754","$465,356",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2096,$514,static,"$160,855","$484,092",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2097,$541,static,"$167,185","$503,555",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2098,$565,static,"$173,750","$523,755",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2099,$587,static,"$180,557","$544,719",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2100,$625,static,"$187,614","$566,475",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2026,$36,static,"$11,129","$31,754",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2027,$37,static,"$11,627","$33,058",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2028,$38,static,"$12,159","$34,455",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2029,$14,static,"$12,696","$35,907",0.11%,0.04%
+Option 4: 85% + $500 Tax Credit,2030,$15,static,"$13,239","$37,377",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2031,$16,static,"$13,798","$38,903",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2032,$17,static,"$14,380","$40,497",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2033,$18,static,"$14,987","$42,145",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2034,$18,static,"$15,594","$43,836",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2035,$18,static,"$16,205","$45,586",0.11%,0.04%
+Option 4: 85% + $500 Tax Credit,2036,$54,static,"$16,825","$47,402",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2037,$55,static,"$17,465","$49,277",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2038,$56,static,"$18,132","$51,237",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2039,$58,static,"$18,819","$53,261",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2040,$59,static,"$19,532","$55,363",0.30%,0.11%
+Option 4: 85% + $500 Tax Credit,2041,$61,static,"$20,269","$57,541",0.30%,0.11%
+Option 4: 85% + $500 Tax Credit,2042,$62,static,"$21,035","$59,808",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2043,$63,static,"$21,828","$62,157",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2044,$65,static,"$22,653","$64,603",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2045,$67,static,"$23,507","$67,136",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2046,$70,static,"$24,391","$69,760",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2047,$74,static,"$25,313","$72,499",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2048,$76,static,"$26,270","$75,343",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2049,$76,static,"$27,263","$78,296",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2050,$76,static,"$28,300","$81,378",0.27%,0.09%
+Option 4: 85% + $500 Tax Credit,2051,$76,static,"$29,376","$84,581",0.26%,0.09%
+Option 4: 85% + $500 Tax Credit,2052,$75,static,"$30,494","$87,914",0.25%,0.09%
+Option 4: 85% + $500 Tax Credit,2053,$75,static,"$31,661","$91,390",0.24%,0.08%
+Option 4: 85% + $500 Tax Credit,2054,$91,static,"$32,869","$94,996",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2055,$95,static,"$34,124","$98,744",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2056,$99,static,"$35,432","$102,652",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2057,$103,static,"$36,790","$106,711",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2058,$107,static,"$38,201","$110,930",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2059,$112,static,"$39,670","$115,324",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2060,$117,static,"$41,196","$119,893",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2061,$122,static,"$42,782","$124,643",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2062,$126,static,"$44,429","$129,581",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2063,$132,static,"$46,136","$134,700",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2064,$136,static,"$47,902","$140,004",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2065,$143,static,"$49,733","$145,507",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2066,$148,static,"$51,631","$151,216",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2067,$153,static,"$53,598","$157,138",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2068,$161,static,"$55,637","$163,282",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2069,$167,static,"$57,746","$169,644",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2070,$175,static,"$59,930","$176,236",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2071,$181,static,"$62,196","$183,086",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2072,$188,static,"$64,543","$190,184",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2073,$198,static,"$66,975","$197,546",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2074,$206,static,"$69,501","$205,203",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2075,$217,static,"$72,131","$213,176",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2076,$225,static,"$74,862","$221,462",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2077,$237,static,"$77,698","$230,072",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2078,$248,static,"$80,650","$239,042",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2079,$259,static,"$83,727","$248,394",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2080,$270,static,"$86,933","$258,141",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2081,$283,static,"$90,268","$268,290",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2082,$295,static,"$93,749","$278,887",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2083,$308,static,"$97,381","$289,948",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2084,$321,static,"$101,163","$301,471",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2085,$334,static,"$105,104","$313,485",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2086,$350,static,"$109,217","$326,029",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2087,$365,static,"$113,504","$339,109",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2088,$380,static,"$117,973","$352,750",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2089,$398,static,"$122,629","$366,974",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2090,$413,static,"$127,477","$381,790",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2091,$427,static,"$132,518","$397,210",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2092,$445,static,"$137,764","$413,267",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2093,$463,static,"$143,215","$429,964",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2094,$483,static,"$148,876","$447,320",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2095,$504,static,"$154,754","$465,356",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2096,$526,static,"$160,855","$484,092",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2097,$552,static,"$167,185","$503,555",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2098,$575,static,"$173,750","$523,755",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2099,$597,static,"$180,557","$544,719",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2100,$625,static,"$187,614","$566,475",0.33%,0.11%
+Option 5: Roth-Style Swap,2026,$71,static,"$11,129","$31,754",0.64%,0.22%
+Option 5: Roth-Style Swap,2027,$73,static,"$11,627","$33,058",0.63%,0.22%
+Option 5: Roth-Style Swap,2028,$74,static,"$12,159","$34,455",0.61%,0.21%
+Option 5: Roth-Style Swap,2029,$72,static,"$12,696","$35,907",0.57%,0.20%
+Option 5: Roth-Style Swap,2030,$74,static,"$13,239","$37,377",0.56%,0.20%
+Option 5: Roth-Style Swap,2031,$76,static,"$13,798","$38,903",0.55%,0.19%
+Option 5: Roth-Style Swap,2032,$76,static,"$14,380","$40,497",0.53%,0.19%
+Option 5: Roth-Style Swap,2033,$77,static,"$14,987","$42,145",0.51%,0.18%
+Option 5: Roth-Style Swap,2034,$77,static,"$15,594","$43,836",0.49%,0.17%
+Option 5: Roth-Style Swap,2035,$76,static,"$16,205","$45,586",0.47%,0.17%
+Option 5: Roth-Style Swap,2036,$73,static,"$16,825","$47,402",0.44%,0.15%
+Option 5: Roth-Style Swap,2037,$70,static,"$17,465","$49,277",0.40%,0.14%
+Option 5: Roth-Style Swap,2038,$67,static,"$18,132","$51,237",0.37%,0.13%
+Option 5: Roth-Style Swap,2039,$64,static,"$18,819","$53,261",0.34%,0.12%
+Option 5: Roth-Style Swap,2040,$60,static,"$19,532","$55,363",0.31%,0.11%
+Option 5: Roth-Style Swap,2041,$55,static,"$20,269","$57,541",0.27%,0.10%
+Option 5: Roth-Style Swap,2042,$50,static,"$21,035","$59,808",0.24%,0.08%
+Option 5: Roth-Style Swap,2043,$46,static,"$21,828","$62,157",0.21%,0.07%
+Option 5: Roth-Style Swap,2044,$40,static,"$22,653","$64,603",0.18%,0.06%
+Option 5: Roth-Style Swap,2045,$34,static,"$23,507","$67,136",0.15%,0.05%
+Option 5: Roth-Style Swap,2046,$32,static,"$24,391","$69,760",0.13%,0.05%
+Option 5: Roth-Style Swap,2047,$31,static,"$25,313","$72,499",0.12%,0.04%
+Option 5: Roth-Style Swap,2048,$27,static,"$26,270","$75,343",0.10%,0.04%
+Option 5: Roth-Style Swap,2049,$20,static,"$27,263","$78,296",0.07%,0.03%
+Option 5: Roth-Style Swap,2050,$15,static,"$28,300","$81,378",0.05%,0.02%
+Option 5: Roth-Style Swap,2051,$4,static,"$29,376","$84,581",0.01%,0.00%
+Option 5: Roth-Style Swap,2052,-$9,static,"$30,494","$87,914",-0.03%,-0.01%
+Option 5: Roth-Style Swap,2053,-$24,static,"$31,661","$91,390",-0.08%,-0.03%
+Option 5: Roth-Style Swap,2054,$12,static,"$32,869","$94,996",0.04%,0.01%
+Option 5: Roth-Style Swap,2055,$3,static,"$34,124","$98,744",0.01%,0.00%
+Option 5: Roth-Style Swap,2056,$0,static,"$35,432","$102,652",0.00%,0.00%
+Option 5: Roth-Style Swap,2057,-$11,static,"$36,790","$106,711",-0.03%,-0.01%
+Option 5: Roth-Style Swap,2058,-$22,static,"$38,201","$110,930",-0.06%,-0.02%
+Option 5: Roth-Style Swap,2059,-$36,static,"$39,670","$115,324",-0.09%,-0.03%
+Option 5: Roth-Style Swap,2060,-$43,static,"$41,196","$119,893",-0.10%,-0.04%
+Option 5: Roth-Style Swap,2061,-$58,static,"$42,782","$124,643",-0.14%,-0.05%
+Option 5: Roth-Style Swap,2062,-$74,static,"$44,429","$129,581",-0.17%,-0.06%
+Option 5: Roth-Style Swap,2063,-$86,static,"$46,136","$134,700",-0.19%,-0.06%
+Option 5: Roth-Style Swap,2064,-$106,static,"$47,902","$140,004",-0.22%,-0.08%
+Option 5: Roth-Style Swap,2065,-$120,static,"$49,733","$145,507",-0.24%,-0.08%
+Option 5: Roth-Style Swap,2066,-$143,static,"$51,631","$151,216",-0.28%,-0.09%
+Option 5: Roth-Style Swap,2067,-$167,static,"$53,598","$157,138",-0.31%,-0.11%
+Option 5: Roth-Style Swap,2068,-$183,static,"$55,637","$163,282",-0.33%,-0.11%
+Option 5: Roth-Style Swap,2069,-$209,static,"$57,746","$169,644",-0.36%,-0.12%
+Option 5: Roth-Style Swap,2070,-$224,static,"$59,930","$176,236",-0.37%,-0.13%
+Option 5: Roth-Style Swap,2071,-$252,static,"$62,196","$183,086",-0.40%,-0.14%
+Option 5: Roth-Style Swap,2072,-$281,static,"$64,543","$190,184",-0.44%,-0.15%
+Option 5: Roth-Style Swap,2073,-$303,static,"$66,975","$197,546",-0.45%,-0.15%
+Option 5: Roth-Style Swap,2074,-$337,static,"$69,501","$205,203",-0.48%,-0.16%
+Option 5: Roth-Style Swap,2075,-$361,static,"$72,131","$213,176",-0.50%,-0.17%
+Option 5: Roth-Style Swap,2076,-$399,static,"$74,862","$221,462",-0.53%,-0.18%
+Option 5: Roth-Style Swap,2077,-$424,static,"$77,698","$230,072",-0.55%,-0.18%
+Option 5: Roth-Style Swap,2078,-$452,static,"$80,650","$239,042",-0.56%,-0.19%
+Option 5: Roth-Style Swap,2079,-$496,static,"$83,727","$248,394",-0.59%,-0.20%
+Option 5: Roth-Style Swap,2080,-$527,static,"$86,933","$258,141",-0.61%,-0.20%
+Option 5: Roth-Style Swap,2081,-$559,static,"$90,268","$268,290",-0.62%,-0.21%
+Option 5: Roth-Style Swap,2082,-$593,static,"$93,749","$278,887",-0.63%,-0.21%
+Option 5: Roth-Style Swap,2083,-$630,static,"$97,381","$289,948",-0.65%,-0.22%
+Option 5: Roth-Style Swap,2084,-$669,static,"$101,163","$301,471",-0.66%,-0.22%
+Option 5: Roth-Style Swap,2085,-$712,static,"$105,104","$313,485",-0.68%,-0.23%
+Option 5: Roth-Style Swap,2086,-$739,static,"$109,217","$326,029",-0.68%,-0.23%
+Option 5: Roth-Style Swap,2087,-$783,static,"$113,504","$339,109",-0.69%,-0.23%
+Option 5: Roth-Style Swap,2088,-$832,static,"$117,973","$352,750",-0.70%,-0.24%
+Option 5: Roth-Style Swap,2089,-$863,static,"$122,629","$366,974",-0.70%,-0.24%
+Option 5: Roth-Style Swap,2090,-$917,static,"$127,477","$381,790",-0.72%,-0.24%
+Option 5: Roth-Style Swap,2091,-$977,static,"$132,518","$397,210",-0.74%,-0.25%
+Option 5: Roth-Style Swap,2092,"-$1,018",static,"$137,764","$413,267",-0.74%,-0.25%
+Option 5: Roth-Style Swap,2093,"-$1,072",static,"$143,215","$429,964",-0.75%,-0.25%
+Option 5: Roth-Style Swap,2094,"-$1,126",static,"$148,876","$447,320",-0.76%,-0.25%
+Option 5: Roth-Style Swap,2095,"-$1,188",static,"$154,754","$465,356",-0.77%,-0.26%
+Option 5: Roth-Style Swap,2096,"-$1,257",static,"$160,855","$484,092",-0.78%,-0.26%
+Option 5: Roth-Style Swap,2097,"-$1,302",static,"$167,185","$503,555",-0.78%,-0.26%
+Option 5: Roth-Style Swap,2098,"-$1,369",static,"$173,750","$523,755",-0.79%,-0.26%
+Option 5: Roth-Style Swap,2099,"-$1,466",static,"$180,557","$544,719",-0.81%,-0.27%
+Option 5: Roth-Style Swap,2100,"-$1,546",static,"$187,614","$566,475",-0.82%,-0.27%
+Option 6: Phased Roth-Style,2026,$23,static,"$11,129","$31,754",0.20%,0.07%
+Option 6: Phased Roth-Style,2027,$48,static,"$11,627","$33,058",0.41%,0.15%
+Option 6: Phased Roth-Style,2028,$76,static,"$12,159","$34,455",0.63%,0.22%
+Option 6: Phased Roth-Style,2029,$103,static,"$12,696","$35,907",0.81%,0.29%
+Option 6: Phased Roth-Style,2030,$128,static,"$13,239","$37,377",0.96%,0.34%
+Option 6: Phased Roth-Style,2031,$155,static,"$13,798","$38,903",1.12%,0.40%
+Option 6: Phased Roth-Style,2032,$183,static,"$14,380","$40,497",1.28%,0.45%
+Option 6: Phased Roth-Style,2033,$202,static,"$14,987","$42,145",1.35%,0.48%
+Option 6: Phased Roth-Style,2034,$198,static,"$15,594","$43,836",1.27%,0.45%
+Option 6: Phased Roth-Style,2035,$193,static,"$16,205","$45,586",1.19%,0.42%
+Option 6: Phased Roth-Style,2036,$184,static,"$16,825","$47,402",1.09%,0.39%
+Option 6: Phased Roth-Style,2037,$173,static,"$17,465","$49,277",0.99%,0.35%
+Option 6: Phased Roth-Style,2038,$160,static,"$18,132","$51,237",0.88%,0.31%
+Option 6: Phased Roth-Style,2039,$147,static,"$18,819","$53,261",0.78%,0.28%
+Option 6: Phased Roth-Style,2040,$133,static,"$19,532","$55,363",0.68%,0.24%
+Option 6: Phased Roth-Style,2041,$117,static,"$20,269","$57,541",0.57%,0.20%
+Option 6: Phased Roth-Style,2042,$98,static,"$21,035","$59,808",0.47%,0.16%
+Option 6: Phased Roth-Style,2043,$79,static,"$21,828","$62,157",0.36%,0.13%
+Option 6: Phased Roth-Style,2044,$57,static,"$22,653","$64,603",0.25%,0.09%
+Option 6: Phased Roth-Style,2045,$34,static,"$23,507","$67,136",0.15%,0.05%
+Option 6: Phased Roth-Style,2046,$32,static,"$24,391","$69,760",0.13%,0.05%
+Option 6: Phased Roth-Style,2047,$31,static,"$25,313","$72,499",0.12%,0.04%
+Option 6: Phased Roth-Style,2048,$27,static,"$26,270","$75,343",0.10%,0.04%
+Option 6: Phased Roth-Style,2049,$20,static,"$27,263","$78,296",0.07%,0.03%
+Option 6: Phased Roth-Style,2050,$15,static,"$28,300","$81,378",0.05%,0.02%
+Option 6: Phased Roth-Style,2051,$4,static,"$29,376","$84,581",0.01%,0.00%
+Option 6: Phased Roth-Style,2052,-$9,static,"$30,494","$87,914",-0.03%,-0.01%
+Option 6: Phased Roth-Style,2053,-$24,static,"$31,661","$91,390",-0.08%,-0.03%
+Option 6: Phased Roth-Style,2054,$12,static,"$32,869","$94,996",0.04%,0.01%
+Option 6: Phased Roth-Style,2055,$3,static,"$34,124","$98,744",0.01%,0.00%
+Option 6: Phased Roth-Style,2056,$0,static,"$35,432","$102,652",0.00%,0.00%
+Option 6: Phased Roth-Style,2057,-$11,static,"$36,790","$106,711",-0.03%,-0.01%
+Option 6: Phased Roth-Style,2058,-$22,static,"$38,201","$110,930",-0.06%,-0.02%
+Option 6: Phased Roth-Style,2059,-$36,static,"$39,670","$115,324",-0.09%,-0.03%
+Option 6: Phased Roth-Style,2060,-$43,static,"$41,196","$119,893",-0.10%,-0.04%
+Option 6: Phased Roth-Style,2061,-$58,static,"$42,782","$124,643",-0.14%,-0.05%
+Option 6: Phased Roth-Style,2062,-$74,static,"$44,429","$129,581",-0.17%,-0.06%
+Option 6: Phased Roth-Style,2063,-$86,static,"$46,136","$134,700",-0.19%,-0.06%
+Option 6: Phased Roth-Style,2064,-$106,static,"$47,902","$140,004",-0.22%,-0.08%
+Option 6: Phased Roth-Style,2065,-$120,static,"$49,733","$145,507",-0.24%,-0.08%
+Option 6: Phased Roth-Style,2066,-$143,static,"$51,631","$151,216",-0.28%,-0.09%
+Option 6: Phased Roth-Style,2067,-$167,static,"$53,598","$157,138",-0.31%,-0.11%
+Option 6: Phased Roth-Style,2068,-$183,static,"$55,637","$163,282",-0.33%,-0.11%
+Option 6: Phased Roth-Style,2069,-$209,static,"$57,746","$169,644",-0.36%,-0.12%
+Option 6: Phased Roth-Style,2070,-$224,static,"$59,930","$176,236",-0.37%,-0.13%
+Option 6: Phased Roth-Style,2071,-$252,static,"$62,196","$183,086",-0.40%,-0.14%
+Option 6: Phased Roth-Style,2072,-$281,static,"$64,543","$190,184",-0.44%,-0.15%
+Option 6: Phased Roth-Style,2073,-$303,static,"$66,975","$197,546",-0.45%,-0.15%
+Option 6: Phased Roth-Style,2074,-$337,static,"$69,501","$205,203",-0.48%,-0.16%
+Option 6: Phased Roth-Style,2075,-$361,static,"$72,131","$213,176",-0.50%,-0.17%
+Option 6: Phased Roth-Style,2076,-$399,static,"$74,862","$221,462",-0.53%,-0.18%
+Option 6: Phased Roth-Style,2077,-$424,static,"$77,698","$230,072",-0.55%,-0.18%
+Option 6: Phased Roth-Style,2078,-$452,static,"$80,650","$239,042",-0.56%,-0.19%
+Option 6: Phased Roth-Style,2079,-$496,static,"$83,727","$248,394",-0.59%,-0.20%
+Option 6: Phased Roth-Style,2080,-$527,static,"$86,933","$258,141",-0.61%,-0.20%
+Option 6: Phased Roth-Style,2081,-$559,static,"$90,268","$268,290",-0.62%,-0.21%
+Option 6: Phased Roth-Style,2082,-$593,static,"$93,749","$278,887",-0.63%,-0.21%
+Option 6: Phased Roth-Style,2083,-$630,static,"$97,381","$289,948",-0.65%,-0.22%
+Option 6: Phased Roth-Style,2084,-$669,static,"$101,163","$301,471",-0.66%,-0.22%
+Option 6: Phased Roth-Style,2085,-$712,static,"$105,104","$313,485",-0.68%,-0.23%
+Option 6: Phased Roth-Style,2086,-$739,static,"$109,217","$326,029",-0.68%,-0.23%
+Option 6: Phased Roth-Style,2087,-$783,static,"$113,504","$339,109",-0.69%,-0.23%
+Option 6: Phased Roth-Style,2088,-$832,static,"$117,973","$352,750",-0.70%,-0.24%
+Option 6: Phased Roth-Style,2089,-$863,static,"$122,629","$366,974",-0.70%,-0.24%
+Option 6: Phased Roth-Style,2090,-$917,static,"$127,477","$381,790",-0.72%,-0.24%
+Option 6: Phased Roth-Style,2091,-$977,static,"$132,518","$397,210",-0.74%,-0.25%
+Option 6: Phased Roth-Style,2092,"-$1,018",static,"$137,764","$413,267",-0.74%,-0.25%
+Option 6: Phased Roth-Style,2093,"-$1,072",static,"$143,215","$429,964",-0.75%,-0.25%
+Option 6: Phased Roth-Style,2094,"-$1,126",static,"$148,876","$447,320",-0.76%,-0.25%
+Option 6: Phased Roth-Style,2095,"-$1,188",static,"$154,754","$465,356",-0.77%,-0.26%
+Option 6: Phased Roth-Style,2096,"-$1,257",static,"$160,855","$484,092",-0.78%,-0.26%
+Option 6: Phased Roth-Style,2097,"-$1,302",static,"$167,185","$503,555",-0.78%,-0.26%
+Option 6: Phased Roth-Style,2098,"-$1,369",static,"$173,750","$523,755",-0.79%,-0.26%
+Option 6: Phased Roth-Style,2099,"-$1,466",static,"$180,557","$544,719",-0.81%,-0.27%
+Option 6: Phased Roth-Style,2100,"-$1,546",static,"$187,614","$566,475",-0.82%,-0.27%
+Option 7: Eliminate Senior Deduction,2026,$24,static,"$11,129","$31,754",0.21%,0.08%
+Option 7: Eliminate Senior Deduction,2027,$24,static,"$11,627","$33,058",0.21%,0.07%
+Option 7: Eliminate Senior Deduction,2028,$25,static,"$12,159","$34,455",0.20%,0.07%
+Option 7: Eliminate Senior Deduction,2029,$0,static,"$12,696","$35,907",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2030,$0,static,"$13,239","$37,377",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2031,$0,static,"$13,798","$38,903",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2032,$0,static,"$14,380","$40,497",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2033,$0,static,"$14,987","$42,145",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2034,$0,static,"$15,594","$43,836",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2035,$0,static,"$16,205","$45,586",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2036,$0,static,"$16,825","$47,402",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2037,$0,static,"$17,465","$49,277",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2038,$0,static,"$18,132","$51,237",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2039,$0,static,"$18,819","$53,261",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2040,$0,static,"$19,532","$55,363",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2041,$0,static,"$20,269","$57,541",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2042,$0,static,"$21,035","$59,808",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2043,$0,static,"$21,828","$62,157",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2044,$0,static,"$22,653","$64,603",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2045,$0,static,"$23,507","$67,136",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2046,$0,static,"$24,391","$69,760",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2047,$0,static,"$25,313","$72,499",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2048,$0,static,"$26,270","$75,343",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2049,$0,static,"$27,263","$78,296",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2050,$0,static,"$28,300","$81,378",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2051,$0,static,"$29,376","$84,581",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2052,$0,static,"$30,494","$87,914",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2053,$0,static,"$31,661","$91,390",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2054,$0,static,"$32,869","$94,996",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2055,$0,static,"$34,124","$98,744",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2056,$0,static,"$35,432","$102,652",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2057,$0,static,"$36,790","$106,711",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2058,$0,static,"$38,201","$110,930",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2059,$0,static,"$39,670","$115,324",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2060,$0,static,"$41,196","$119,893",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2061,$0,static,"$42,782","$124,643",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2062,$0,static,"$44,429","$129,581",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2063,$0,static,"$46,136","$134,700",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2064,$0,static,"$47,902","$140,004",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2065,$0,static,"$49,733","$145,507",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2066,$0,static,"$51,631","$151,216",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2067,$0,static,"$53,598","$157,138",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2068,$0,static,"$55,637","$163,282",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2069,$0,static,"$57,746","$169,644",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2070,$0,static,"$59,930","$176,236",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2071,$0,static,"$62,196","$183,086",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2072,$0,static,"$64,543","$190,184",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2073,$0,static,"$66,975","$197,546",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2074,$0,static,"$69,501","$205,203",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2075,$0,static,"$72,131","$213,176",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2076,$0,static,"$74,862","$221,462",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2077,$0,static,"$77,698","$230,072",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2078,$0,static,"$80,650","$239,042",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2079,$0,static,"$83,727","$248,394",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2080,$0,static,"$86,933","$258,141",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2081,$0,static,"$90,268","$268,290",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2082,$0,static,"$93,749","$278,887",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2083,$0,static,"$97,381","$289,948",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2084,$0,static,"$101,163","$301,471",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2085,$0,static,"$105,104","$313,485",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2086,$0,static,"$109,217","$326,029",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2087,$0,static,"$113,504","$339,109",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2088,$0,static,"$117,973","$352,750",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2089,$0,static,"$122,629","$366,974",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2090,$0,static,"$127,477","$381,790",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2091,$0,static,"$132,518","$397,210",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2092,$0,static,"$137,764","$413,267",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2093,$0,static,"$143,215","$429,964",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2094,$0,static,"$148,876","$447,320",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2095,$0,static,"$154,754","$465,356",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2096,$0,static,"$160,855","$484,092",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2097,$0,static,"$167,185","$503,555",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2098,$0,static,"$173,750","$523,755",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2099,$0,static,"$180,557","$544,719",0.00%,0.00%
+Option 7: Eliminate Senior Deduction,2100,$0,static,"$187,614","$566,475",0.00%,0.00%
+Option 8: 100% Taxation,2026,$60,static,"$11,129","$31,754",0.54%,0.19%
+Option 8: 100% Taxation,2027,$64,static,"$11,627","$33,058",0.55%,0.19%
+Option 8: 100% Taxation,2028,$68,static,"$12,159","$34,455",0.56%,0.20%
+Option 8: 100% Taxation,2029,$84,static,"$12,696","$35,907",0.66%,0.23%
+Option 8: 100% Taxation,2030,$89,static,"$13,239","$37,377",0.68%,0.24%
+Option 8: 100% Taxation,2031,$94,static,"$13,798","$38,903",0.68%,0.24%
+Option 8: 100% Taxation,2032,$99,static,"$14,380","$40,497",0.69%,0.24%
+Option 8: 100% Taxation,2033,$103,static,"$14,987","$42,145",0.69%,0.25%
+Option 8: 100% Taxation,2034,$107,static,"$15,594","$43,836",0.69%,0.24%
+Option 8: 100% Taxation,2035,$111,static,"$16,205","$45,586",0.68%,0.24%
+Option 8: 100% Taxation,2036,$116,static,"$16,825","$47,402",0.69%,0.24%
+Option 8: 100% Taxation,2037,$120,static,"$17,465","$49,277",0.69%,0.24%
+Option 8: 100% Taxation,2038,$125,static,"$18,132","$51,237",0.69%,0.24%
+Option 8: 100% Taxation,2039,$131,static,"$18,819","$53,261",0.69%,0.25%
+Option 8: 100% Taxation,2040,$137,static,"$19,532","$55,363",0.70%,0.25%
+Option 8: 100% Taxation,2041,$142,static,"$20,269","$57,541",0.70%,0.25%
+Option 8: 100% Taxation,2042,$146,static,"$21,035","$59,808",0.70%,0.24%
+Option 8: 100% Taxation,2043,$152,static,"$21,828","$62,157",0.70%,0.24%
+Option 8: 100% Taxation,2044,$158,static,"$22,653","$64,603",0.70%,0.24%
+Option 8: 100% Taxation,2045,$164,static,"$23,507","$67,136",0.70%,0.24%
+Option 8: 100% Taxation,2046,$171,static,"$24,391","$69,760",0.70%,0.25%
+Option 8: 100% Taxation,2047,$178,static,"$25,313","$72,499",0.70%,0.25%
+Option 8: 100% Taxation,2048,$184,static,"$26,270","$75,343",0.70%,0.24%
+Option 8: 100% Taxation,2049,$189,static,"$27,263","$78,296",0.69%,0.24%
+Option 8: 100% Taxation,2050,$194,static,"$28,300","$81,378",0.68%,0.24%
+Option 8: 100% Taxation,2051,$199,static,"$29,376","$84,581",0.68%,0.24%
+Option 8: 100% Taxation,2052,$205,static,"$30,494","$87,914",0.67%,0.23%
+Option 8: 100% Taxation,2053,$213,static,"$31,661","$91,390",0.67%,0.23%
+Option 8: 100% Taxation,2054,$232,static,"$32,869","$94,996",0.71%,0.24%
+Option 8: 100% Taxation,2055,$242,static,"$34,124","$98,744",0.71%,0.24%
+Option 8: 100% Taxation,2056,$253,static,"$35,432","$102,652",0.71%,0.25%
+Option 8: 100% Taxation,2057,$264,static,"$36,790","$106,711",0.72%,0.25%
+Option 8: 100% Taxation,2058,$276,static,"$38,201","$110,930",0.72%,0.25%
+Option 8: 100% Taxation,2059,$288,static,"$39,670","$115,324",0.73%,0.25%
+Option 8: 100% Taxation,2060,$300,static,"$41,196","$119,893",0.73%,0.25%
+Option 8: 100% Taxation,2061,$313,static,"$42,782","$124,643",0.73%,0.25%
+Option 8: 100% Taxation,2062,$326,static,"$44,429","$129,581",0.73%,0.25%
+Option 8: 100% Taxation,2063,$340,static,"$46,136","$134,700",0.74%,0.25%
+Option 8: 100% Taxation,2064,$354,static,"$47,902","$140,004",0.74%,0.25%
+Option 8: 100% Taxation,2065,$369,static,"$49,733","$145,507",0.74%,0.25%
+Option 8: 100% Taxation,2066,$385,static,"$51,631","$151,216",0.75%,0.25%
+Option 8: 100% Taxation,2067,$402,static,"$53,598","$157,138",0.75%,0.26%
+Option 8: 100% Taxation,2068,$419,static,"$55,637","$163,282",0.75%,0.26%
+Option 8: 100% Taxation,2069,$438,static,"$57,746","$169,644",0.76%,0.26%
+Option 8: 100% Taxation,2070,$457,static,"$59,930","$176,236",0.76%,0.26%
+Option 8: 100% Taxation,2071,$477,static,"$62,196","$183,086",0.77%,0.26%
+Option 8: 100% Taxation,2072,$497,static,"$64,543","$190,184",0.77%,0.26%
+Option 8: 100% Taxation,2073,$517,static,"$66,975","$197,546",0.77%,0.26%
+Option 8: 100% Taxation,2074,$540,static,"$69,501","$205,203",0.78%,0.26%
+Option 8: 100% Taxation,2075,$564,static,"$72,131","$213,176",0.78%,0.26%
+Option 8: 100% Taxation,2076,$590,static,"$74,862","$221,462",0.79%,0.27%
+Option 8: 100% Taxation,2077,$618,static,"$77,698","$230,072",0.79%,0.27%
+Option 8: 100% Taxation,2078,$646,static,"$80,650","$239,042",0.80%,0.27%
+Option 8: 100% Taxation,2079,$675,static,"$83,727","$248,394",0.81%,0.27%
+Option 8: 100% Taxation,2080,$703,static,"$86,933","$258,141",0.81%,0.27%
+Option 8: 100% Taxation,2081,$732,static,"$90,268","$268,290",0.81%,0.27%
+Option 8: 100% Taxation,2082,$763,static,"$93,749","$278,887",0.81%,0.27%
+Option 8: 100% Taxation,2083,$795,static,"$97,381","$289,948",0.82%,0.27%
+Option 8: 100% Taxation,2084,$826,static,"$101,163","$301,471",0.82%,0.27%
+Option 8: 100% Taxation,2085,$858,static,"$105,104","$313,485",0.82%,0.27%
+Option 8: 100% Taxation,2086,$894,static,"$109,217","$326,029",0.82%,0.27%
+Option 8: 100% Taxation,2087,$929,static,"$113,504","$339,109",0.82%,0.27%
+Option 8: 100% Taxation,2088,$964,static,"$117,973","$352,750",0.82%,0.27%
+Option 8: 100% Taxation,2089,"$1,002",static,"$122,629","$366,974",0.82%,0.27%
+Option 8: 100% Taxation,2090,"$1,037",static,"$127,477","$381,790",0.81%,0.27%
+Option 8: 100% Taxation,2091,"$1,074",static,"$132,518","$397,210",0.81%,0.27%
+Option 8: 100% Taxation,2092,"$1,119",static,"$137,764","$413,267",0.81%,0.27%
+Option 8: 100% Taxation,2093,"$1,166",static,"$143,215","$429,964",0.81%,0.27%
+Option 8: 100% Taxation,2094,"$1,213",static,"$148,876","$447,320",0.81%,0.27%
+Option 8: 100% Taxation,2095,"$1,262",static,"$154,754","$465,356",0.82%,0.27%
+Option 8: 100% Taxation,2096,"$1,315",static,"$160,855","$484,092",0.82%,0.27%
+Option 8: 100% Taxation,2097,"$1,368",static,"$167,185","$503,555",0.82%,0.27%
+Option 8: 100% Taxation,2098,"$1,423",static,"$173,750","$523,755",0.82%,0.27%
+Option 8: 100% Taxation,2099,"$1,482",static,"$180,557","$544,719",0.82%,0.27%
+Option 8: 100% Taxation,2100,"$1,545",static,"$187,614","$566,475",0.82%,0.27%
+Option 1: Full Repeal,2026,-$101,conventional,"$11,129","$31,754",-0.91%,-0.32%
+Option 1: Full Repeal,2027,-$109,conventional,"$11,627","$33,058",-0.94%,-0.33%
+Option 1: Full Repeal,2028,-$119,conventional,"$12,159","$34,455",-0.98%,-0.35%
+Option 1: Full Repeal,2029,-$132,conventional,"$12,696","$35,907",-1.04%,-0.37%
+Option 1: Full Repeal,2030,-$143,conventional,"$13,239","$37,377",-1.08%,-0.38%
+Option 1: Full Repeal,2031,-$153,conventional,"$13,798","$38,903",-1.11%,-0.39%
+Option 1: Full Repeal,2032,-$165,conventional,"$14,380","$40,497",-1.14%,-0.41%
+Option 1: Full Repeal,2033,-$176,conventional,"$14,987","$42,145",-1.18%,-0.42%
+Option 1: Full Repeal,2034,-$189,conventional,"$15,594","$43,836",-1.21%,-0.43%
+Option 1: Full Repeal,2035,-$202,conventional,"$16,205","$45,586",-1.25%,-0.44%
+Option 1: Full Repeal,2036,-$215,conventional,"$16,825","$47,402",-1.28%,-0.45%
+Option 1: Full Repeal,2037,-$229,conventional,"$17,465","$49,277",-1.31%,-0.47%
+Option 1: Full Repeal,2038,-$243,conventional,"$18,132","$51,237",-1.34%,-0.47%
+Option 1: Full Repeal,2039,-$259,conventional,"$18,819","$53,261",-1.38%,-0.49%
+Option 1: Full Repeal,2040,-$273,conventional,"$19,532","$55,363",-1.40%,-0.49%
+Option 1: Full Repeal,2041,-$289,conventional,"$20,269","$57,541",-1.43%,-0.50%
+Option 1: Full Repeal,2042,-$309,conventional,"$21,035","$59,808",-1.47%,-0.52%
+Option 1: Full Repeal,2043,-$325,conventional,"$21,828","$62,157",-1.49%,-0.52%
+Option 1: Full Repeal,2044,-$344,conventional,"$22,653","$64,603",-1.52%,-0.53%
+Option 1: Full Repeal,2045,-$363,conventional,"$23,507","$67,136",-1.54%,-0.54%
+Option 1: Full Repeal,2046,-$379,conventional,"$24,391","$69,760",-1.55%,-0.54%
+Option 1: Full Repeal,2047,-$394,conventional,"$25,313","$72,499",-1.56%,-0.54%
+Option 1: Full Repeal,2048,-$413,conventional,"$26,270","$75,343",-1.57%,-0.55%
+Option 1: Full Repeal,2049,-$439,conventional,"$27,263","$78,296",-1.61%,-0.56%
+Option 1: Full Repeal,2050,-$459,conventional,"$28,300","$81,378",-1.62%,-0.56%
+Option 1: Full Repeal,2051,-$486,conventional,"$29,376","$84,581",-1.66%,-0.57%
+Option 1: Full Repeal,2052,-$516,conventional,"$30,494","$87,914",-1.69%,-0.59%
+Option 1: Full Repeal,2053,-$547,conventional,"$31,661","$91,390",-1.73%,-0.60%
+Option 1: Full Repeal,2054,-$527,conventional,"$32,869","$94,996",-1.60%,-0.55%
+Option 1: Full Repeal,2055,-$553,conventional,"$34,124","$98,744",-1.62%,-0.56%
+Option 1: Full Repeal,2056,-$573,conventional,"$35,432","$102,652",-1.62%,-0.56%
+Option 1: Full Repeal,2057,-$599,conventional,"$36,790","$106,711",-1.63%,-0.56%
+Option 1: Full Repeal,2058,-$628,conventional,"$38,201","$110,930",-1.64%,-0.57%
+Option 1: Full Repeal,2059,-$657,conventional,"$39,670","$115,324",-1.66%,-0.57%
+Option 1: Full Repeal,2060,-$681,conventional,"$41,196","$119,893",-1.65%,-0.57%
+Option 1: Full Repeal,2061,-$713,conventional,"$42,782","$124,643",-1.67%,-0.57%
+Option 1: Full Repeal,2062,-$749,conventional,"$44,429","$129,581",-1.68%,-0.58%
+Option 1: Full Repeal,2063,-$778,conventional,"$46,136","$134,700",-1.69%,-0.58%
+Option 1: Full Repeal,2064,-$817,conventional,"$47,902","$140,004",-1.70%,-0.58%
+Option 1: Full Repeal,2065,-$850,conventional,"$49,733","$145,507",-1.71%,-0.58%
+Option 1: Full Repeal,2066,-$894,conventional,"$51,631","$151,216",-1.73%,-0.59%
+Option 1: Full Repeal,2067,-$939,conventional,"$53,598","$157,138",-1.75%,-0.60%
+Option 1: Full Repeal,2068,-$977,conventional,"$55,637","$163,282",-1.76%,-0.60%
+Option 1: Full Repeal,2069,"-$1,024",conventional,"$57,746","$169,644",-1.77%,-0.60%
+Option 1: Full Repeal,2070,"-$1,062",conventional,"$59,930","$176,236",-1.77%,-0.60%
+Option 1: Full Repeal,2071,"-$1,113",conventional,"$62,196","$183,086",-1.79%,-0.61%
+Option 1: Full Repeal,2072,"-$1,165",conventional,"$64,543","$190,184",-1.80%,-0.61%
+Option 1: Full Repeal,2073,"-$1,204",conventional,"$66,975","$197,546",-1.80%,-0.61%
+Option 1: Full Repeal,2074,"-$1,262",conventional,"$69,501","$205,203",-1.82%,-0.61%
+Option 1: Full Repeal,2075,"-$1,310",conventional,"$72,131","$213,176",-1.82%,-0.61%
+Option 1: Full Repeal,2076,"-$1,367",conventional,"$74,862","$221,462",-1.83%,-0.62%
+Option 1: Full Repeal,2077,"-$1,416",conventional,"$77,698","$230,072",-1.82%,-0.62%
+Option 1: Full Repeal,2078,"-$1,466",conventional,"$80,650","$239,042",-1.82%,-0.61%
+Option 1: Full Repeal,2079,"-$1,540",conventional,"$83,727","$248,394",-1.84%,-0.62%
+Option 1: Full Repeal,2080,"-$1,594",conventional,"$86,933","$258,141",-1.83%,-0.62%
+Option 1: Full Repeal,2081,"-$1,655",conventional,"$90,268","$268,290",-1.83%,-0.62%
+Option 1: Full Repeal,2082,"-$1,717",conventional,"$93,749","$278,887",-1.83%,-0.62%
+Option 1: Full Repeal,2083,"-$1,787",conventional,"$97,381","$289,948",-1.83%,-0.62%
+Option 1: Full Repeal,2084,"-$1,861",conventional,"$101,163","$301,471",-1.84%,-0.62%
+Option 1: Full Repeal,2085,"-$1,937",conventional,"$105,104","$313,485",-1.84%,-0.62%
+Option 1: Full Repeal,2086,"-$1,980",conventional,"$109,217","$326,029",-1.81%,-0.61%
+Option 1: Full Repeal,2087,"-$2,055",conventional,"$113,504","$339,109",-1.81%,-0.61%
+Option 1: Full Repeal,2088,"-$2,145",conventional,"$117,973","$352,750",-1.82%,-0.61%
+Option 1: Full Repeal,2089,"-$2,212",conventional,"$122,629","$366,974",-1.80%,-0.60%
+Option 1: Full Repeal,2090,"-$2,310",conventional,"$127,477","$381,790",-1.81%,-0.60%
+Option 1: Full Repeal,2091,"-$2,427",conventional,"$132,518","$397,210",-1.83%,-0.61%
+Option 1: Full Repeal,2092,"-$2,522",conventional,"$137,764","$413,267",-1.83%,-0.61%
+Option 1: Full Repeal,2093,"-$2,595",conventional,"$143,215","$429,964",-1.81%,-0.60%
+Option 1: Full Repeal,2094,"-$2,686",conventional,"$148,876","$447,320",-1.80%,-0.60%
+Option 1: Full Repeal,2095,"-$2,790",conventional,"$154,754","$465,356",-1.80%,-0.60%
+Option 1: Full Repeal,2096,"-$2,910",conventional,"$160,855","$484,092",-1.81%,-0.60%
+Option 1: Full Repeal,2097,"-$3,008",conventional,"$167,185","$503,555",-1.80%,-0.60%
+Option 1: Full Repeal,2098,"-$3,130",conventional,"$173,750","$523,755",-1.80%,-0.60%
+Option 1: Full Repeal,2099,"-$3,276",conventional,"$180,557","$544,719",-1.81%,-0.60%
+Option 1: Full Repeal,2100,"-$3,387",conventional,"$187,614","$566,475",-1.81%,-0.60%
+Option 2: 85% Taxation,2026,$29,conventional,"$11,129","$31,754",0.26%,0.09%
+Option 2: 85% Taxation,2027,$30,conventional,"$11,627","$33,058",0.26%,0.09%
+Option 2: 85% Taxation,2028,$32,conventional,"$12,159","$34,455",0.26%,0.09%
+Option 2: 85% Taxation,2029,$43,conventional,"$12,696","$35,907",0.34%,0.12%
+Option 2: 85% Taxation,2030,$45,conventional,"$13,239","$37,377",0.34%,0.12%
+Option 2: 85% Taxation,2031,$46,conventional,"$13,798","$38,903",0.34%,0.12%
+Option 2: 85% Taxation,2032,$49,conventional,"$14,380","$40,497",0.34%,0.12%
+Option 2: 85% Taxation,2033,$51,conventional,"$14,987","$42,145",0.34%,0.12%
+Option 2: 85% Taxation,2034,$52,conventional,"$15,594","$43,836",0.33%,0.12%
+Option 2: 85% Taxation,2035,$53,conventional,"$16,205","$45,586",0.33%,0.12%
+Option 2: 85% Taxation,2036,$54,conventional,"$16,825","$47,402",0.32%,0.11%
+Option 2: 85% Taxation,2037,$56,conventional,"$17,465","$49,277",0.32%,0.11%
+Option 2: 85% Taxation,2038,$58,conventional,"$18,132","$51,237",0.32%,0.11%
+Option 2: 85% Taxation,2039,$59,conventional,"$18,819","$53,261",0.31%,0.11%
+Option 2: 85% Taxation,2040,$62,conventional,"$19,532","$55,363",0.32%,0.11%
+Option 2: 85% Taxation,2041,$63,conventional,"$20,269","$57,541",0.31%,0.11%
+Option 2: 85% Taxation,2042,$64,conventional,"$21,035","$59,808",0.30%,0.11%
+Option 2: 85% Taxation,2043,$66,conventional,"$21,828","$62,157",0.30%,0.11%
+Option 2: 85% Taxation,2044,$66,conventional,"$22,653","$64,603",0.29%,0.10%
+Option 2: 85% Taxation,2045,$69,conventional,"$23,507","$67,136",0.29%,0.10%
+Option 2: 85% Taxation,2046,$72,conventional,"$24,391","$69,760",0.30%,0.10%
+Option 2: 85% Taxation,2047,$77,conventional,"$25,313","$72,499",0.30%,0.11%
+Option 2: 85% Taxation,2048,$78,conventional,"$26,270","$75,343",0.30%,0.10%
+Option 2: 85% Taxation,2049,$77,conventional,"$27,263","$78,296",0.28%,0.10%
+Option 2: 85% Taxation,2050,$78,conventional,"$28,300","$81,378",0.28%,0.10%
+Option 2: 85% Taxation,2051,$78,conventional,"$29,376","$84,581",0.27%,0.09%
+Option 2: 85% Taxation,2052,$76,conventional,"$30,494","$87,914",0.25%,0.09%
+Option 2: 85% Taxation,2053,$77,conventional,"$31,661","$91,390",0.24%,0.08%
+Option 2: 85% Taxation,2054,$92,conventional,"$32,869","$94,996",0.28%,0.10%
+Option 2: 85% Taxation,2055,$96,conventional,"$34,124","$98,744",0.28%,0.10%
+Option 2: 85% Taxation,2056,$101,conventional,"$35,432","$102,652",0.28%,0.10%
+Option 2: 85% Taxation,2057,$105,conventional,"$36,790","$106,711",0.29%,0.10%
+Option 2: 85% Taxation,2058,$109,conventional,"$38,201","$110,930",0.29%,0.10%
+Option 2: 85% Taxation,2059,$114,conventional,"$39,670","$115,324",0.29%,0.10%
+Option 2: 85% Taxation,2060,$119,conventional,"$41,196","$119,893",0.29%,0.10%
+Option 2: 85% Taxation,2061,$124,conventional,"$42,782","$124,643",0.29%,0.10%
+Option 2: 85% Taxation,2062,$128,conventional,"$44,429","$129,581",0.29%,0.10%
+Option 2: 85% Taxation,2063,$133,conventional,"$46,136","$134,700",0.29%,0.10%
+Option 2: 85% Taxation,2064,$138,conventional,"$47,902","$140,004",0.29%,0.10%
+Option 2: 85% Taxation,2065,$144,conventional,"$49,733","$145,507",0.29%,0.10%
+Option 2: 85% Taxation,2066,$150,conventional,"$51,631","$151,216",0.29%,0.10%
+Option 2: 85% Taxation,2067,$155,conventional,"$53,598","$157,138",0.29%,0.10%
+Option 2: 85% Taxation,2068,$163,conventional,"$55,637","$163,282",0.29%,0.10%
+Option 2: 85% Taxation,2069,$169,conventional,"$57,746","$169,644",0.29%,0.10%
+Option 2: 85% Taxation,2070,$177,conventional,"$59,930","$176,236",0.29%,0.10%
+Option 2: 85% Taxation,2071,$183,conventional,"$62,196","$183,086",0.29%,0.10%
+Option 2: 85% Taxation,2072,$191,conventional,"$64,543","$190,184",0.30%,0.10%
+Option 2: 85% Taxation,2073,$200,conventional,"$66,975","$197,546",0.30%,0.10%
+Option 2: 85% Taxation,2074,$208,conventional,"$69,501","$205,203",0.30%,0.10%
+Option 2: 85% Taxation,2075,$219,conventional,"$72,131","$213,176",0.30%,0.10%
+Option 2: 85% Taxation,2076,$227,conventional,"$74,862","$221,462",0.30%,0.10%
+Option 2: 85% Taxation,2077,$239,conventional,"$77,698","$230,072",0.31%,0.10%
+Option 2: 85% Taxation,2078,$250,conventional,"$80,650","$239,042",0.31%,0.10%
+Option 2: 85% Taxation,2079,$261,conventional,"$83,727","$248,394",0.31%,0.10%
+Option 2: 85% Taxation,2080,$273,conventional,"$86,933","$258,141",0.31%,0.11%
+Option 2: 85% Taxation,2081,$285,conventional,"$90,268","$268,290",0.32%,0.11%
+Option 2: 85% Taxation,2082,$298,conventional,"$93,749","$278,887",0.32%,0.11%
+Option 2: 85% Taxation,2083,$310,conventional,"$97,381","$289,948",0.32%,0.11%
+Option 2: 85% Taxation,2084,$324,conventional,"$101,163","$301,471",0.32%,0.11%
+Option 2: 85% Taxation,2085,$337,conventional,"$105,104","$313,485",0.32%,0.11%
+Option 2: 85% Taxation,2086,$353,conventional,"$109,217","$326,029",0.32%,0.11%
+Option 2: 85% Taxation,2087,$368,conventional,"$113,504","$339,109",0.32%,0.11%
+Option 2: 85% Taxation,2088,$382,conventional,"$117,973","$352,750",0.32%,0.11%
+Option 2: 85% Taxation,2089,$400,conventional,"$122,629","$366,974",0.33%,0.11%
+Option 2: 85% Taxation,2090,$415,conventional,"$127,477","$381,790",0.33%,0.11%
+Option 2: 85% Taxation,2091,$430,conventional,"$132,518","$397,210",0.32%,0.11%
+Option 2: 85% Taxation,2092,$447,conventional,"$137,764","$413,267",0.32%,0.11%
+Option 2: 85% Taxation,2093,$466,conventional,"$143,215","$429,964",0.33%,0.11%
+Option 2: 85% Taxation,2094,$485,conventional,"$148,876","$447,320",0.33%,0.11%
+Option 2: 85% Taxation,2095,$506,conventional,"$154,754","$465,356",0.33%,0.11%
+Option 2: 85% Taxation,2096,$528,conventional,"$160,855","$484,092",0.33%,0.11%
+Option 2: 85% Taxation,2097,$555,conventional,"$167,185","$503,555",0.33%,0.11%
+Option 2: 85% Taxation,2098,$578,conventional,"$173,750","$523,755",0.33%,0.11%
+Option 2: 85% Taxation,2099,$600,conventional,"$180,557","$544,719",0.33%,0.11%
+Option 2: 85% Taxation,2100,$628,conventional,"$187,614","$566,475",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2026,$29,conventional,"$11,129","$31,754",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2027,$30,conventional,"$11,627","$33,058",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2028,$32,conventional,"$12,159","$34,455",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2029,$7,conventional,"$12,696","$35,907",0.06%,0.02%
+Option 3: 85% + Senior Deduction,2030,$8,conventional,"$13,239","$37,377",0.06%,0.02%
+Option 3: 85% + Senior Deduction,2031,$9,conventional,"$13,798","$38,903",0.07%,0.02%
+Option 3: 85% + Senior Deduction,2032,$11,conventional,"$14,380","$40,497",0.07%,0.03%
+Option 3: 85% + Senior Deduction,2033,$14,conventional,"$14,987","$42,145",0.09%,0.03%
+Option 3: 85% + Senior Deduction,2034,$14,conventional,"$15,594","$43,836",0.09%,0.03%
+Option 3: 85% + Senior Deduction,2035,$16,conventional,"$16,205","$45,586",0.10%,0.03%
+Option 3: 85% + Senior Deduction,2036,$17,conventional,"$16,825","$47,402",0.10%,0.04%
+Option 3: 85% + Senior Deduction,2037,$19,conventional,"$17,465","$49,277",0.11%,0.04%
+Option 3: 85% + Senior Deduction,2038,$21,conventional,"$18,132","$51,237",0.12%,0.04%
+Option 3: 85% + Senior Deduction,2039,$23,conventional,"$18,819","$53,261",0.12%,0.04%
+Option 3: 85% + Senior Deduction,2040,$27,conventional,"$19,532","$55,363",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2041,$28,conventional,"$20,269","$57,541",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2042,$28,conventional,"$21,035","$59,808",0.13%,0.05%
+Option 3: 85% + Senior Deduction,2043,$31,conventional,"$21,828","$62,157",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2044,$32,conventional,"$22,653","$64,603",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2045,$35,conventional,"$23,507","$67,136",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2046,$39,conventional,"$24,391","$69,760",0.16%,0.06%
+Option 3: 85% + Senior Deduction,2047,$42,conventional,"$25,313","$72,499",0.17%,0.06%
+Option 3: 85% + Senior Deduction,2048,$43,conventional,"$26,270","$75,343",0.16%,0.06%
+Option 3: 85% + Senior Deduction,2049,$42,conventional,"$27,263","$78,296",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2050,$43,conventional,"$28,300","$81,378",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2051,$43,conventional,"$29,376","$84,581",0.15%,0.05%
+Option 3: 85% + Senior Deduction,2052,$42,conventional,"$30,494","$87,914",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2053,$43,conventional,"$31,661","$91,390",0.14%,0.05%
+Option 3: 85% + Senior Deduction,2054,$62,conventional,"$32,869","$94,996",0.19%,0.07%
+Option 3: 85% + Senior Deduction,2055,$67,conventional,"$34,124","$98,744",0.20%,0.07%
+Option 3: 85% + Senior Deduction,2056,$72,conventional,"$35,432","$102,652",0.20%,0.07%
+Option 3: 85% + Senior Deduction,2057,$76,conventional,"$36,790","$106,711",0.21%,0.07%
+Option 3: 85% + Senior Deduction,2058,$81,conventional,"$38,201","$110,930",0.21%,0.07%
+Option 3: 85% + Senior Deduction,2059,$86,conventional,"$39,670","$115,324",0.22%,0.07%
+Option 3: 85% + Senior Deduction,2060,$92,conventional,"$41,196","$119,893",0.22%,0.08%
+Option 3: 85% + Senior Deduction,2061,$97,conventional,"$42,782","$124,643",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2062,$101,conventional,"$44,429","$129,581",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2063,$107,conventional,"$46,136","$134,700",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2064,$112,conventional,"$47,902","$140,004",0.23%,0.08%
+Option 3: 85% + Senior Deduction,2065,$119,conventional,"$49,733","$145,507",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2066,$125,conventional,"$51,631","$151,216",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2067,$131,conventional,"$53,598","$157,138",0.24%,0.08%
+Option 3: 85% + Senior Deduction,2068,$139,conventional,"$55,637","$163,282",0.25%,0.08%
+Option 3: 85% + Senior Deduction,2069,$146,conventional,"$57,746","$169,644",0.25%,0.09%
+Option 3: 85% + Senior Deduction,2070,$154,conventional,"$59,930","$176,236",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2071,$161,conventional,"$62,196","$183,086",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2072,$169,conventional,"$64,543","$190,184",0.26%,0.09%
+Option 3: 85% + Senior Deduction,2073,$178,conventional,"$66,975","$197,546",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2074,$187,conventional,"$69,501","$205,203",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2075,$198,conventional,"$72,131","$213,176",0.27%,0.09%
+Option 3: 85% + Senior Deduction,2076,$207,conventional,"$74,862","$221,462",0.28%,0.09%
+Option 3: 85% + Senior Deduction,2077,$219,conventional,"$77,698","$230,072",0.28%,0.09%
+Option 3: 85% + Senior Deduction,2078,$231,conventional,"$80,650","$239,042",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2079,$241,conventional,"$83,727","$248,394",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2080,$254,conventional,"$86,933","$258,141",0.29%,0.10%
+Option 3: 85% + Senior Deduction,2081,$267,conventional,"$90,268","$268,290",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2082,$280,conventional,"$93,749","$278,887",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2083,$293,conventional,"$97,381","$289,948",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2084,$307,conventional,"$101,163","$301,471",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2085,$321,conventional,"$105,104","$313,485",0.30%,0.10%
+Option 3: 85% + Senior Deduction,2086,$337,conventional,"$109,217","$326,029",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2087,$353,conventional,"$113,504","$339,109",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2088,$367,conventional,"$117,973","$352,750",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2089,$386,conventional,"$122,629","$366,974",0.31%,0.11%
+Option 3: 85% + Senior Deduction,2090,$401,conventional,"$127,477","$381,790",0.31%,0.11%
+Option 3: 85% + Senior Deduction,2091,$416,conventional,"$132,518","$397,210",0.31%,0.10%
+Option 3: 85% + Senior Deduction,2092,$434,conventional,"$137,764","$413,267",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2093,$453,conventional,"$143,215","$429,964",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2094,$473,conventional,"$148,876","$447,320",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2095,$494,conventional,"$154,754","$465,356",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2096,$517,conventional,"$160,855","$484,092",0.32%,0.11%
+Option 3: 85% + Senior Deduction,2097,$544,conventional,"$167,185","$503,555",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2098,$567,conventional,"$173,750","$523,755",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2099,$590,conventional,"$180,557","$544,719",0.33%,0.11%
+Option 3: 85% + Senior Deduction,2100,$628,conventional,"$187,614","$566,475",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2026,$37,conventional,"$11,129","$31,754",0.33%,0.12%
+Option 4: 85% + $500 Tax Credit,2027,$38,conventional,"$11,627","$33,058",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2028,$39,conventional,"$12,159","$34,455",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2029,$15,conventional,"$12,696","$35,907",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2030,$16,conventional,"$13,239","$37,377",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2031,$16,conventional,"$13,798","$38,903",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2032,$17,conventional,"$14,380","$40,497",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2033,$19,conventional,"$14,987","$42,145",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2034,$19,conventional,"$15,594","$43,836",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2035,$19,conventional,"$16,205","$45,586",0.12%,0.04%
+Option 4: 85% + $500 Tax Credit,2036,$54,conventional,"$16,825","$47,402",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2037,$56,conventional,"$17,465","$49,277",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2038,$58,conventional,"$18,132","$51,237",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2039,$59,conventional,"$18,819","$53,261",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2040,$62,conventional,"$19,532","$55,363",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2041,$63,conventional,"$20,269","$57,541",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2042,$64,conventional,"$21,035","$59,808",0.30%,0.11%
+Option 4: 85% + $500 Tax Credit,2043,$66,conventional,"$21,828","$62,157",0.30%,0.11%
+Option 4: 85% + $500 Tax Credit,2044,$66,conventional,"$22,653","$64,603",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2045,$69,conventional,"$23,507","$67,136",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2046,$72,conventional,"$24,391","$69,760",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2047,$77,conventional,"$25,313","$72,499",0.30%,0.11%
+Option 4: 85% + $500 Tax Credit,2048,$78,conventional,"$26,270","$75,343",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2049,$77,conventional,"$27,263","$78,296",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2050,$78,conventional,"$28,300","$81,378",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2051,$78,conventional,"$29,376","$84,581",0.27%,0.09%
+Option 4: 85% + $500 Tax Credit,2052,$76,conventional,"$30,494","$87,914",0.25%,0.09%
+Option 4: 85% + $500 Tax Credit,2053,$77,conventional,"$31,661","$91,390",0.24%,0.08%
+Option 4: 85% + $500 Tax Credit,2054,$92,conventional,"$32,869","$94,996",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2055,$96,conventional,"$34,124","$98,744",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2056,$101,conventional,"$35,432","$102,652",0.28%,0.10%
+Option 4: 85% + $500 Tax Credit,2057,$105,conventional,"$36,790","$106,711",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2058,$109,conventional,"$38,201","$110,930",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2059,$114,conventional,"$39,670","$115,324",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2060,$119,conventional,"$41,196","$119,893",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2061,$124,conventional,"$42,782","$124,643",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2062,$128,conventional,"$44,429","$129,581",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2063,$133,conventional,"$46,136","$134,700",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2064,$138,conventional,"$47,902","$140,004",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2065,$144,conventional,"$49,733","$145,507",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2066,$150,conventional,"$51,631","$151,216",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2067,$155,conventional,"$53,598","$157,138",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2068,$163,conventional,"$55,637","$163,282",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2069,$169,conventional,"$57,746","$169,644",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2070,$177,conventional,"$59,930","$176,236",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2071,$183,conventional,"$62,196","$183,086",0.29%,0.10%
+Option 4: 85% + $500 Tax Credit,2072,$191,conventional,"$64,543","$190,184",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2073,$200,conventional,"$66,975","$197,546",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2074,$208,conventional,"$69,501","$205,203",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2075,$219,conventional,"$72,131","$213,176",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2076,$227,conventional,"$74,862","$221,462",0.30%,0.10%
+Option 4: 85% + $500 Tax Credit,2077,$239,conventional,"$77,698","$230,072",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2078,$250,conventional,"$80,650","$239,042",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2079,$261,conventional,"$83,727","$248,394",0.31%,0.10%
+Option 4: 85% + $500 Tax Credit,2080,$273,conventional,"$86,933","$258,141",0.31%,0.11%
+Option 4: 85% + $500 Tax Credit,2081,$285,conventional,"$90,268","$268,290",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2082,$298,conventional,"$93,749","$278,887",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2083,$310,conventional,"$97,381","$289,948",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2084,$324,conventional,"$101,163","$301,471",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2085,$337,conventional,"$105,104","$313,485",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2086,$353,conventional,"$109,217","$326,029",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2087,$368,conventional,"$113,504","$339,109",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2088,$382,conventional,"$117,973","$352,750",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2089,$400,conventional,"$122,629","$366,974",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2090,$415,conventional,"$127,477","$381,790",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2091,$430,conventional,"$132,518","$397,210",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2092,$447,conventional,"$137,764","$413,267",0.32%,0.11%
+Option 4: 85% + $500 Tax Credit,2093,$466,conventional,"$143,215","$429,964",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2094,$485,conventional,"$148,876","$447,320",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2095,$506,conventional,"$154,754","$465,356",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2096,$528,conventional,"$160,855","$484,092",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2097,$555,conventional,"$167,185","$503,555",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2098,$578,conventional,"$173,750","$523,755",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2099,$600,conventional,"$180,557","$544,719",0.33%,0.11%
+Option 4: 85% + $500 Tax Credit,2100,$628,conventional,"$187,614","$566,475",0.33%,0.11%
+Option 5: Roth-Style Swap,2026,$59,conventional,"$11,129","$31,754",0.53%,0.19%
+Option 5: Roth-Style Swap,2027,$61,conventional,"$11,627","$33,058",0.52%,0.18%
+Option 5: Roth-Style Swap,2028,$62,conventional,"$12,159","$34,455",0.51%,0.18%
+Option 5: Roth-Style Swap,2029,$59,conventional,"$12,696","$35,907",0.47%,0.17%
+Option 5: Roth-Style Swap,2030,$62,conventional,"$13,239","$37,377",0.47%,0.17%
+Option 5: Roth-Style Swap,2031,$63,conventional,"$13,798","$38,903",0.45%,0.16%
+Option 5: Roth-Style Swap,2032,$64,conventional,"$14,380","$40,497",0.44%,0.16%
+Option 5: Roth-Style Swap,2033,$63,conventional,"$14,987","$42,145",0.42%,0.15%
+Option 5: Roth-Style Swap,2034,$62,conventional,"$15,594","$43,836",0.39%,0.14%
+Option 5: Roth-Style Swap,2035,$62,conventional,"$16,205","$45,586",0.38%,0.14%
+Option 5: Roth-Style Swap,2036,$56,conventional,"$16,825","$47,402",0.33%,0.12%
+Option 5: Roth-Style Swap,2037,$55,conventional,"$17,465","$49,277",0.31%,0.11%
+Option 5: Roth-Style Swap,2038,$53,conventional,"$18,132","$51,237",0.29%,0.10%
+Option 5: Roth-Style Swap,2039,$50,conventional,"$18,819","$53,261",0.26%,0.09%
+Option 5: Roth-Style Swap,2040,$42,conventional,"$19,532","$55,363",0.22%,0.08%
+Option 5: Roth-Style Swap,2041,$39,conventional,"$20,269","$57,541",0.19%,0.07%
+Option 5: Roth-Style Swap,2042,$32,conventional,"$21,035","$59,808",0.15%,0.05%
+Option 5: Roth-Style Swap,2043,$33,conventional,"$21,828","$62,157",0.15%,0.05%
+Option 5: Roth-Style Swap,2044,$25,conventional,"$22,653","$64,603",0.11%,0.04%
+Option 5: Roth-Style Swap,2045,$20,conventional,"$23,507","$67,136",0.08%,0.03%
+Option 5: Roth-Style Swap,2046,$17,conventional,"$24,391","$69,760",0.07%,0.02%
+Option 5: Roth-Style Swap,2047,$16,conventional,"$25,313","$72,499",0.06%,0.02%
+Option 5: Roth-Style Swap,2048,-$3,conventional,"$26,270","$75,343",-0.01%,0.00%
+Option 5: Roth-Style Swap,2049,-$3,conventional,"$27,263","$78,296",-0.01%,0.00%
+Option 5: Roth-Style Swap,2050,-$5,conventional,"$28,300","$81,378",-0.02%,-0.01%
+Option 5: Roth-Style Swap,2051,-$14,conventional,"$29,376","$84,581",-0.05%,-0.02%
+Option 5: Roth-Style Swap,2052,-$30,conventional,"$30,494","$87,914",-0.10%,-0.03%
+Option 5: Roth-Style Swap,2053,-$49,conventional,"$31,661","$91,390",-0.15%,-0.05%
+Option 5: Roth-Style Swap,2054,-$8,conventional,"$32,869","$94,996",-0.03%,-0.01%
+Option 5: Roth-Style Swap,2055,-$18,conventional,"$34,124","$98,744",-0.05%,-0.02%
+Option 5: Roth-Style Swap,2056,-$19,conventional,"$35,432","$102,652",-0.05%,-0.02%
+Option 5: Roth-Style Swap,2057,-$29,conventional,"$36,790","$106,711",-0.08%,-0.03%
+Option 5: Roth-Style Swap,2058,-$39,conventional,"$38,201","$110,930",-0.10%,-0.03%
+Option 5: Roth-Style Swap,2059,-$44,conventional,"$39,670","$115,324",-0.11%,-0.04%
+Option 5: Roth-Style Swap,2060,-$53,conventional,"$41,196","$119,893",-0.13%,-0.04%
+Option 5: Roth-Style Swap,2061,-$69,conventional,"$42,782","$124,643",-0.16%,-0.06%
+Option 5: Roth-Style Swap,2062,-$84,conventional,"$44,429","$129,581",-0.19%,-0.07%
+Option 5: Roth-Style Swap,2063,-$103,conventional,"$46,136","$134,700",-0.22%,-0.08%
+Option 5: Roth-Style Swap,2064,-$124,conventional,"$47,902","$140,004",-0.26%,-0.09%
+Option 5: Roth-Style Swap,2065,-$135,conventional,"$49,733","$145,507",-0.27%,-0.09%
+Option 5: Roth-Style Swap,2066,-$160,conventional,"$51,631","$151,216",-0.31%,-0.11%
+Option 5: Roth-Style Swap,2067,-$185,conventional,"$53,598","$157,138",-0.35%,-0.12%
+Option 5: Roth-Style Swap,2068,-$202,conventional,"$55,637","$163,282",-0.36%,-0.12%
+Option 5: Roth-Style Swap,2069,-$240,conventional,"$57,746","$169,644",-0.42%,-0.14%
+Option 5: Roth-Style Swap,2070,-$241,conventional,"$59,930","$176,236",-0.40%,-0.14%
+Option 5: Roth-Style Swap,2071,-$274,conventional,"$62,196","$183,086",-0.44%,-0.15%
+Option 5: Roth-Style Swap,2072,-$300,conventional,"$64,543","$190,184",-0.46%,-0.16%
+Option 5: Roth-Style Swap,2073,-$309,conventional,"$66,975","$197,546",-0.46%,-0.16%
+Option 5: Roth-Style Swap,2074,-$355,conventional,"$69,501","$205,203",-0.51%,-0.17%
+Option 5: Roth-Style Swap,2075,-$384,conventional,"$72,131","$213,176",-0.53%,-0.18%
+Option 5: Roth-Style Swap,2076,-$425,conventional,"$74,862","$221,462",-0.57%,-0.19%
+Option 5: Roth-Style Swap,2077,-$448,conventional,"$77,698","$230,072",-0.58%,-0.19%
+Option 5: Roth-Style Swap,2078,-$471,conventional,"$80,650","$239,042",-0.58%,-0.20%
+Option 5: Roth-Style Swap,2079,-$519,conventional,"$83,727","$248,394",-0.62%,-0.21%
+Option 5: Roth-Style Swap,2080,-$557,conventional,"$86,933","$258,141",-0.64%,-0.22%
+Option 5: Roth-Style Swap,2081,-$593,conventional,"$90,268","$268,290",-0.66%,-0.22%
+Option 5: Roth-Style Swap,2082,-$624,conventional,"$93,749","$278,887",-0.67%,-0.22%
+Option 5: Roth-Style Swap,2083,-$669,conventional,"$97,381","$289,948",-0.69%,-0.23%
+Option 5: Roth-Style Swap,2084,-$724,conventional,"$101,163","$301,471",-0.72%,-0.24%
+Option 5: Roth-Style Swap,2085,-$743,conventional,"$105,104","$313,485",-0.71%,-0.24%
+Option 5: Roth-Style Swap,2086,-$765,conventional,"$109,217","$326,029",-0.70%,-0.23%
+Option 5: Roth-Style Swap,2087,-$798,conventional,"$113,504","$339,109",-0.70%,-0.24%
+Option 5: Roth-Style Swap,2088,-$856,conventional,"$117,973","$352,750",-0.73%,-0.24%
+Option 5: Roth-Style Swap,2089,-$896,conventional,"$122,629","$366,974",-0.73%,-0.24%
+Option 5: Roth-Style Swap,2090,-$965,conventional,"$127,477","$381,790",-0.76%,-0.25%
+Option 5: Roth-Style Swap,2091,"-$1,034",conventional,"$132,518","$397,210",-0.78%,-0.26%
+Option 5: Roth-Style Swap,2092,"-$1,088",conventional,"$137,764","$413,267",-0.79%,-0.26%
+Option 5: Roth-Style Swap,2093,"-$1,109",conventional,"$143,215","$429,964",-0.77%,-0.26%
+Option 5: Roth-Style Swap,2094,"-$1,167",conventional,"$148,876","$447,320",-0.78%,-0.26%
+Option 5: Roth-Style Swap,2095,"-$1,231",conventional,"$154,754","$465,356",-0.80%,-0.26%
+Option 5: Roth-Style Swap,2096,"-$1,295",conventional,"$160,855","$484,092",-0.80%,-0.27%
+Option 5: Roth-Style Swap,2097,"-$1,355",conventional,"$167,185","$503,555",-0.81%,-0.27%
+Option 5: Roth-Style Swap,2098,"-$1,420",conventional,"$173,750","$523,755",-0.82%,-0.27%
+Option 5: Roth-Style Swap,2099,"-$1,531",conventional,"$180,557","$544,719",-0.85%,-0.28%
+Option 5: Roth-Style Swap,2100,"-$1,587",conventional,"$187,614","$566,475",-0.85%,-0.28%
+Option 6: Phased Roth-Style,2026,$21,conventional,"$11,129","$31,754",0.19%,0.07%
+Option 6: Phased Roth-Style,2027,$43,conventional,"$11,627","$33,058",0.37%,0.13%
+Option 6: Phased Roth-Style,2028,$72,conventional,"$12,159","$34,455",0.59%,0.21%
+Option 6: Phased Roth-Style,2029,$95,conventional,"$12,696","$35,907",0.75%,0.27%
+Option 6: Phased Roth-Style,2030,$117,conventional,"$13,239","$37,377",0.89%,0.31%
+Option 6: Phased Roth-Style,2031,$142,conventional,"$13,798","$38,903",1.03%,0.37%
+Option 6: Phased Roth-Style,2032,$169,conventional,"$14,380","$40,497",1.18%,0.42%
+Option 6: Phased Roth-Style,2033,$188,conventional,"$14,987","$42,145",1.25%,0.45%
+Option 6: Phased Roth-Style,2034,$182,conventional,"$15,594","$43,836",1.17%,0.41%
+Option 6: Phased Roth-Style,2035,$178,conventional,"$16,205","$45,586",1.10%,0.39%
+Option 6: Phased Roth-Style,2036,$167,conventional,"$16,825","$47,402",0.99%,0.35%
+Option 6: Phased Roth-Style,2037,$156,conventional,"$17,465","$49,277",0.89%,0.32%
+Option 6: Phased Roth-Style,2038,$143,conventional,"$18,132","$51,237",0.79%,0.28%
+Option 6: Phased Roth-Style,2039,$132,conventional,"$18,819","$53,261",0.70%,0.25%
+Option 6: Phased Roth-Style,2040,$115,conventional,"$19,532","$55,363",0.59%,0.21%
+Option 6: Phased Roth-Style,2041,$99,conventional,"$20,269","$57,541",0.49%,0.17%
+Option 6: Phased Roth-Style,2042,$81,conventional,"$21,035","$59,808",0.38%,0.13%
+Option 6: Phased Roth-Style,2043,$66,conventional,"$21,828","$62,157",0.30%,0.11%
+Option 6: Phased Roth-Style,2044,$42,conventional,"$22,653","$64,603",0.19%,0.07%
+Option 6: Phased Roth-Style,2045,$20,conventional,"$23,507","$67,136",0.08%,0.03%
+Option 6: Phased Roth-Style,2046,$17,conventional,"$24,391","$69,760",0.07%,0.02%
+Option 6: Phased Roth-Style,2047,$16,conventional,"$25,313","$72,499",0.06%,0.02%
+Option 6: Phased Roth-Style,2048,-$3,conventional,"$26,270","$75,343",-0.01%,0.00%
+Option 6: Phased Roth-Style,2049,-$3,conventional,"$27,263","$78,296",-0.01%,0.00%
