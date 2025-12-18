@@ -9,6 +9,7 @@ interface ImpactChartProps {
 
 const TEAL_500 = '#319795'
 const TEAL_300 = '#4FD1C5'
+const TEAL_900 = '#1D4044'
 const ERROR = '#EF4444'
 
 export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactChartProps) {
@@ -32,6 +33,16 @@ export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactC
           marker: { color: TEAL_300 },
           hovertemplate: '%{y:$,.1f}B<extra>Medicare HI</extra>',
         },
+        {
+          x: years,
+          y: data.map(d => d.tobOasdiImpact + d.tobMedicareHiImpact),
+          type: 'scatter' as const,
+          mode: 'lines+markers' as const,
+          name: 'Net Total',
+          line: { color: TEAL_900, width: 2 },
+          marker: { color: TEAL_900, size: 4 },
+          hovertemplate: '%{y:$,.1f}B<extra>Net Total</extra>',
+        },
       ]
     : [
         {
@@ -48,6 +59,8 @@ export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactC
 
   // Show every 10 years for 75-year view, every year for 10-year view
   const tickInterval = data.length > 20 ? 10 : 1
+  const minYear = Math.min(...years)
+  const maxYear = Math.max(...years)
 
   const layout: Partial<Plotly.Layout> = {
     title: { text: title },
@@ -56,16 +69,17 @@ export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactC
       title: { text: 'Year' },
       tickformat: 'd',
       dtick: tickInterval,
+      range: [minYear - 0.5, maxYear + 0.5],
     },
     yaxis: {
       title: { text: 'Billions ($)' },
       tickprefix: '$',
       ticksuffix: 'B',
     },
-    barmode: showTrustFundSplit ? 'stack' : 'relative',
+    barmode: showTrustFundSplit ? 'group' : 'relative',
     showlegend: showTrustFundSplit,
-    legend: { orientation: 'h', y: -0.2 },
-    margin: { l: 80, r: 40, t: 60, b: 80 },
+    legend: { orientation: 'h', y: -0.25, x: 0.5, xanchor: 'center' },
+    margin: { l: 80, r: 40, t: 60, b: 100 },
     plot_bgcolor: '#fff',
     paper_bgcolor: '#fff',
     images: [

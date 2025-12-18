@@ -93,6 +93,11 @@ export function parse75YearData(
     })
   }
 
+  // Sort each reform's data by year
+  for (const reformName in result) {
+    result[reformName].sort((a, b) => a.year - b.year)
+  }
+
   return result
 }
 
