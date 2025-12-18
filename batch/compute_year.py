@@ -170,7 +170,7 @@ def main():
     print(f"[1/{3+len(reform_ids)}] Downloading dataset for {year}...")
     print(f"      DIAGNOSTIC: About to create dataset reference...")
     dataset_start = time.time()
-    dataset_name = f"hf://policyengine/test/{year}.h5"
+    dataset_name = f"hf://policyengine/test/alt2/{year}.h5"
     print(f"      Dataset: {dataset_name}")
     dataset_time = time.time() - dataset_start
     print(f"      ✓ Dataset reference prepared ({dataset_time:.1f}s)")
@@ -315,6 +315,24 @@ def main():
             tob_time = time.time() - tob_start
             print(f"        - TOB revenue variables calculated: {tob_time:.1f}s")
 
+            # Calculate employer payroll revenue variables for Options 5 & 6
+            employer_ss_revenue = 0.0
+            employer_medicare_revenue = 0.0
+            if reform_id in ['option5', 'option6']:
+                print(f"      DIAGNOSTIC: Calculating employer payroll revenue variables...")
+                emp_start = time.time()
+                try:
+                    emp_ss = reform_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year)
+                    emp_medicare = reform_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year)
+                    employer_ss_revenue = float(emp_ss.sum())
+                    employer_medicare_revenue = float(emp_medicare.sum())
+                    emp_time = time.time() - emp_start
+                    print(f"        - Employer payroll revenue variables calculated: {emp_time:.1f}s")
+                    print(f"        - Employer SS tax revenue: ${employer_ss_revenue/1e9:.2f}B")
+                    print(f"        - Employer Medicare tax revenue: ${employer_medicare_revenue/1e9:.2f}B")
+                except Exception as emp_error:
+                    print(f"        - Warning: Could not calculate employer payroll variables: {emp_error}")
+
             reform_revenue = float(reform_income_tax.sum())
             reform_tob_medicare_revenue = float(reform_tob_medicare.sum())
             reform_tob_oasdi_revenue = float(reform_tob_oasdi.sum())
@@ -326,6 +344,62 @@ def main():
             tob_medicare_impact = reform_tob_medicare_revenue - baseline_tob_medicare_revenue
             tob_oasdi_impact = reform_tob_oasdi_revenue - baseline_tob_oasdi_revenue
             tob_total_impact = reform_tob_total_revenue - baseline_tob_total_revenue
+
+            # Calculate allocated gains/losses for Options 5 & 6
+            oasdi_gain = 0.0
+            hi_gain = 0.0
+            oasdi_loss = 0.0
+            hi_loss = 0.0
+            oasdi_net = 0.0
+            hi_net = 0.0
+
+            if reform_id in ['option5', 'option6']:
+                # Calculate losses (from TOB reduction/elimination)
+                oasdi_loss = baseline_tob_oasdi_revenue - reform_tob_oasdi_revenue
+                hi_loss = baseline_tob_medicare_revenue - reform_tob_medicare_revenue
+
+                # Calculate gains based on allocation rules
+                if reform_id == 'option5':
+                    # Option 5: Use branching results directly
+                    oasdi_gain = employer_ss_revenue
+                    hi_gain = employer_medicare_revenue
+                elif reform_id == 'option6':
+                    # Option 6: Phased allocation based on 6.2pp threshold
+                    # Phase-in rates (percentage of employer payroll taxed)
+                    phase_in_rates = {
+                        2026: 0.1307, 2027: 0.2614, 2028: 0.3922, 2029: 0.5229,
+                        2030: 0.6536, 2031: 0.7843, 2032: 0.9150
+                    }
+
+                    if year >= 2033:
+                        # Fully phased in (100%) - use Option 5 branching approach
+                        oasdi_gain = employer_ss_revenue
+                        hi_gain = employer_medicare_revenue
+                    else:
+                        # During phase-in: allocate based on 6.2pp threshold
+                        rate = phase_in_rates.get(year, 1.0)
+                        total_pp = rate * 7.65  # Total percentage points included
+
+                        total_gain = employer_ss_revenue + employer_medicare_revenue
+
+                        if total_pp <= 6.2:
+                            # All to OASDI when rate ≤ 6.2pp
+                            oasdi_gain = total_gain
+                            hi_gain = 0.0
+                        else:
+                            # Split: 6.2/rate to OASDI, remainder to HI
+                            oasdi_share = 6.2 / total_pp
+                            oasdi_gain = total_gain * oasdi_share
+                            hi_gain = total_gain * (1 - oasdi_share)
+
+                        print(f"        - Option 6 phase-in: {rate*100:.1f}% = {total_pp:.2f}pp, OASDI share: {(6.2/total_pp if total_pp > 6.2 else 1.0)*100:.1f}%")
+
+                # Calculate net impacts
+                oasdi_net = oasdi_gain - oasdi_loss
+                hi_net = hi_gain - hi_loss
+
+                print(f"        - OASDI gain: ${oasdi_gain/1e9:+.2f}B, loss: ${oasdi_loss/1e9:.2f}B, net: ${oasdi_net/1e9:+.2f}B")
+                print(f"        - HI gain: ${hi_gain/1e9:+.2f}B, loss: ${hi_loss/1e9:.2f}B, net: ${hi_net/1e9:+.2f}B")
 
             reform_time = time.time() - reform_start
             print(f"      ✓ Reform revenue: ${reform_revenue/1e9:.2f}B")
@@ -350,7 +424,16 @@ def main():
                 'baseline_tob_total': baseline_tob_total_revenue,
                 'reform_tob_total': reform_tob_total_revenue,
                 'tob_total_impact': tob_total_impact,
-                'scoring_type': scoring_type
+                'scoring_type': scoring_type,
+                # New columns for Options 5 & 6 revenue allocation
+                'employer_ss_tax_revenue': employer_ss_revenue,
+                'employer_medicare_tax_revenue': employer_medicare_revenue,
+                'oasdi_gain': oasdi_gain,
+                'hi_gain': hi_gain,
+                'oasdi_loss': oasdi_loss,
+                'hi_loss': hi_loss,
+                'oasdi_net_impact': oasdi_net,
+                'hi_net_impact': hi_net
             }
             results.append(result)
 

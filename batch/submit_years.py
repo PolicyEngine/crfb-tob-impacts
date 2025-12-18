@@ -24,7 +24,7 @@ def generate_job_id(prefix="years"):
     random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
     return f"{prefix}-{timestamp}-{random_suffix}"
 
-def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, memory_mib, cpu_milli, memory_label, job_id=None):
+def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, memory_mib, cpu_milli, memory_label, job_id=None, max_retries=1):
     """Submit a single Cloud Batch job with specified VM configuration."""
 
     if job_id is None:
@@ -77,13 +77,13 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
 
     runnable = batch_v1.Runnable()
     runnable.container = batch_v1.Runnable.Container()
-    runnable.container.image_uri = "gcr.io/policyengine-api/ss-calculator:latest"
+    runnable.container.image_uri = "gcr.io/policyengine-api/crfb-analysis:latest"
     runnable.container.entrypoint = "/bin/bash"
     runnable.container.commands = ["-c", script]
 
     task_spec.runnables = [runnable]
-    task_spec.max_retry_count = 1  # Allow one retry per task
-    task_spec.max_run_duration = "1200s"  # 20 min timeout per year
+    task_spec.max_retry_count = max_retries  # Number of retries per task (0 = no retries)
+    task_spec.max_run_duration = "3600s"  # 60 min (1 hour) timeout per year
 
     # Resource allocation - adaptive based on years
     resources = batch_v1.ComputeResource()
@@ -155,7 +155,7 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
 
     return job_id
 
-def submit_job(years, reforms, scoring_type, bucket_name):
+def submit_job(years, reforms, scoring_type, bucket_name, max_retries=1):
     """
     Submit Cloud Batch jobs with automatic VM sizing.
 
@@ -188,7 +188,8 @@ def submit_job(years, reforms, scoring_type, bucket_name):
             machine_type="e2-highmem-8",  # 8 vCPU, 64GB RAM
             memory_mib=65536,  # 64GB
             cpu_milli=8000,    # 8 CPUs
-            memory_label="64GB"
+            memory_label="64GB",
+            max_retries=max_retries
         )
         job_ids.append((job_id, high_memory_years))
         print()
@@ -211,7 +212,8 @@ def submit_job(years, reforms, scoring_type, bucket_name):
             machine_type="e2-highmem-8",  # 8 vCPU, 64GB RAM (increased for TOB variables)
             memory_mib=65536,  # 64GB
             cpu_milli=8000,    # 8 CPUs
-            memory_label="64GB"
+            memory_label="64GB",
+            max_retries=max_retries
         )
         job_ids.append((job_id, standard_memory_years))
         print()
@@ -239,13 +241,15 @@ def main():
     parser.add_argument("--reforms", required=True, help="Comma-separated reform IDs (e.g., option1,option2,option3,option4)")
     parser.add_argument("--scoring", required=True, choices=["static", "dynamic"], help="Scoring type")
     parser.add_argument("--bucket", default="crfb-ss-analysis-results", help="Cloud Storage bucket")
+    parser.add_argument("--no-retry", action="store_true", help="Disable retries (fail immediately on timeout)")
 
     args = parser.parse_args()
 
     years = [int(y.strip()) for y in args.years.split(",")]
     reforms = [r.strip() for r in args.reforms.split(",")]
+    max_retries = 0 if args.no_retry else 1
 
-    submit_job(years, reforms, args.scoring, args.bucket)
+    submit_job(years, reforms, args.scoring, args.bucket, max_retries=max_retries)
 
 if __name__ == "__main__":
     main()
