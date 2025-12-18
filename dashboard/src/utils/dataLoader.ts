@@ -40,12 +40,28 @@ export function parse75YearData(
     const values = lines[i].split(',')
     const reformName = values[0]
     const year = parseInt(values[headers.indexOf('year')])
-    const revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')])
     const baselineRevenue = parseFloat(values[headers.indexOf('baseline_revenue')])
     const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
-    const tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')])
-    const tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')])
-    const tobTotalImpact = parseFloat(values[headers.indexOf('tob_total_impact')])
+
+    // For Options 5-6, use net impact columns; for others use TOB impact columns
+    const isOption5or6 = reformName === 'option5' || reformName === 'option6'
+
+    let tobOasdiImpact: number
+    let tobMedicareHiImpact: number
+
+    if (isOption5or6) {
+      // Options 5-6: use oasdi_net_impact and hi_net_impact
+      tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
+      tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
+    } else {
+      // Options 1-4, 7-8: use tob_oasdi_impact and tob_medicare_hi_impact
+      tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')]) || 0
+      tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')]) || 0
+    }
+
+    // Revenue impact is the sum of the two trust fund impacts
+    const tobTotalImpact = tobOasdiImpact + tobMedicareHiImpact
+    const revenueImpact = tobTotalImpact
 
     // Get economic context for this year
     const econ = economicProjections.get(year) || { oasdiTaxablePayroll: 0, gdp: 0 }
@@ -104,8 +120,8 @@ export async function loadData(): Promise<Record<string, YearlyImpact[]>> {
   // Load economic projections first
   const economicProjections = await loadEconomicProjections()
 
-  // Load and parse the 75-year data with economic context
-  const response = await fetch(`${BASE_URL}data/75_year_tf_splits.csv`)
+  // Load and parse the static results data
+  const response = await fetch(`${BASE_URL}data/all_static_results.csv`)
   const csvContent = await response.text()
   return parse75YearData(csvContent, economicProjections)
 }
