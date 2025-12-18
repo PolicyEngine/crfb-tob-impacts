@@ -116,12 +116,15 @@ export function calculateTotals(data: YearlyImpact[]): {
   return { tenYear, total, tenYearPctPayroll, tenYearPctGdp }
 }
 
-export async function loadData(): Promise<Record<string, YearlyImpact[]>> {
+export type ScoringType = 'static' | 'dynamic'
+
+export async function loadData(scoringType: ScoringType = 'static'): Promise<Record<string, YearlyImpact[]>> {
   // Load economic projections first
   const economicProjections = await loadEconomicProjections()
 
-  // Load and parse the static results data
-  const response = await fetch(`${BASE_URL}data/all_static_results.csv`)
+  // Load and parse the results data based on scoring type
+  const filename = scoringType === 'dynamic' ? 'all_dynamic_results.csv' : 'all_static_results.csv'
+  const response = await fetch(`${BASE_URL}data/${filename}`)
   const csvContent = await response.text()
   return parse75YearData(csvContent, economicProjections)
 }

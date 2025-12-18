@@ -4,7 +4,7 @@ import { ImpactChart } from './components/ImpactChart'
 import { ComparisonTable } from './components/ComparisonTable'
 import { SummaryCards } from './components/SummaryCards'
 import { MethodologySection } from './components/MethodologySection'
-import { loadData, calculateTotals, exportToCsv } from './utils/dataLoader'
+import { loadData, calculateTotals, exportToCsv, type ScoringType } from './utils/dataLoader'
 import type { YearlyImpact } from './types'
 import { REFORMS } from './types'
 import './App.css'
@@ -14,12 +14,14 @@ function App() {
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({})
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'10year' | '75year'>('10year')
+  const [scoringType, setScoringType] = useState<ScoringType>('static')
 
   useEffect(() => {
-    loadData()
+    setLoading(true)
+    loadData(scoringType)
       .then(setData)
       .finally(() => setLoading(false))
-  }, [])
+  }, [scoringType])
 
   const selectedData = data[selectedReform] || []
   const tenYearData = selectedData.filter(d => d.year >= 2026 && d.year <= 2035)
@@ -81,6 +83,22 @@ function App() {
             tenYearTotal={totals.tenYear}
             seventyFiveYearTotal={totals.total}
           />
+
+          <div className="scoring-toggle">
+            <span className="toggle-label">Scoring Type:</span>
+            <button
+              className={scoringType === 'static' ? 'active' : ''}
+              onClick={() => setScoringType('static')}
+            >
+              Static
+            </button>
+            <button
+              className={scoringType === 'dynamic' ? 'active' : ''}
+              onClick={() => setScoringType('dynamic')}
+            >
+              Dynamic
+            </button>
+          </div>
 
           <div className="view-toggle">
             <button
