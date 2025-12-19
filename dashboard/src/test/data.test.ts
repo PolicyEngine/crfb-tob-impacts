@@ -25,8 +25,8 @@ option1,2026,2577.12,2474.28,-102.84,82.28,0,-82.28,20.56,0,-20.56,102.84,0,-102
 
   it('should calculate 10-year and 75-year totals with percentages', () => {
     const yearlyData = [
-      { year: 2026, revenueImpact: -100, tobOasdiImpact: -20, tobMedicareHiImpact: -80, tobTotalImpact: -100, baselineRevenue: 1000, reformRevenue: 900, oasdiTaxablePayroll: 10000, gdp: 25000, pctOfOasdiPayroll: -1, pctOfGdp: -0.4 },
-      { year: 2027, revenueImpact: -110, tobOasdiImpact: -22, tobMedicareHiImpact: -88, tobTotalImpact: -110, baselineRevenue: 1100, reformRevenue: 990, oasdiTaxablePayroll: 10500, gdp: 26000, pctOfOasdiPayroll: -1.05, pctOfGdp: -0.42 },
+      { year: 2026, revenueImpact: -100, tobOasdiImpact: -20, tobMedicareHiImpact: -80, tobTotalImpact: -100, baselineRevenue: 1000, reformRevenue: 900, oasdiTaxablePayroll: 10000, gdp: 25000, pctOfOasdiPayroll: -1, pctOfGdp: -0.4, oasdiPctOfPayroll: -0.2, hiPctOfPayroll: -0.8, oasdiPctOfGdp: -0.08, hiPctOfGdp: -0.32 },
+      { year: 2027, revenueImpact: -110, tobOasdiImpact: -22, tobMedicareHiImpact: -88, tobTotalImpact: -110, baselineRevenue: 1100, reformRevenue: 990, oasdiTaxablePayroll: 10500, gdp: 26000, pctOfOasdiPayroll: -1.05, pctOfGdp: -0.42, oasdiPctOfPayroll: -0.21, hiPctOfPayroll: -0.84, oasdiPctOfGdp: -0.08, hiPctOfGdp: -0.34 },
     ]
 
     const totals = calculateTotals(yearlyData)

@@ -16,10 +16,17 @@ export interface YearlyImpact {
   // Economic context from SSA Trustees Report
   oasdiTaxablePayroll: number
   gdp: number
-  // Calculated percentages
+  // Calculated percentages - total
   pctOfOasdiPayroll: number
   pctOfGdp: number
+  // Calculated percentages - by trust fund
+  oasdiPctOfPayroll: number
+  hiPctOfPayroll: number
+  oasdiPctOfGdp: number
+  hiPctOfGdp: number
 }
+
+export type DisplayUnit = 'dollars' | 'pctPayroll' | 'pctGdp'
 
 // SSA Trustees Report reference
 export const SSA_TRUSTEES_REPORT = {

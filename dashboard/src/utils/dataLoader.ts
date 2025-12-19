@@ -74,6 +74,20 @@ export function parse75YearData(
       ? (revenueImpact / econ.gdp) * 100
       : 0
 
+    // Calculate percentages by trust fund
+    const oasdiPctOfPayroll = econ.oasdiTaxablePayroll > 0
+      ? (tobOasdiImpact / econ.oasdiTaxablePayroll) * 100
+      : 0
+    const hiPctOfPayroll = econ.oasdiTaxablePayroll > 0
+      ? (tobMedicareHiImpact / econ.oasdiTaxablePayroll) * 100
+      : 0
+    const oasdiPctOfGdp = econ.gdp > 0
+      ? (tobOasdiImpact / econ.gdp) * 100
+      : 0
+    const hiPctOfGdp = econ.gdp > 0
+      ? (tobMedicareHiImpact / econ.gdp) * 100
+      : 0
+
     if (!result[reformName]) {
       result[reformName] = []
     }
@@ -90,6 +104,10 @@ export function parse75YearData(
       gdp: econ.gdp,
       pctOfOasdiPayroll,
       pctOfGdp,
+      oasdiPctOfPayroll,
+      hiPctOfPayroll,
+      oasdiPctOfGdp,
+      hiPctOfGdp,
     })
   }
 
@@ -106,6 +124,8 @@ export function calculateTotals(data: YearlyImpact[]): {
   total: number
   tenYearPctPayroll: number
   tenYearPctGdp: number
+  totalPctPayroll: number
+  totalPctGdp: number
 } {
   const tenYearData = data.filter(d => d.year >= 2026 && d.year <= 2035)
   const tenYear = tenYearData.reduce((sum, d) => sum + d.revenueImpact, 0)
@@ -118,10 +138,18 @@ export function calculateTotals(data: YearlyImpact[]): {
   const tenYearPctPayroll = tenYearPayroll > 0 ? (tenYear / tenYearPayroll) * 100 : 0
   const tenYearPctGdp = tenYearGdp > 0 ? (tenYear / tenYearGdp) * 100 : 0
 
-  return { tenYear, total, tenYearPctPayroll, tenYearPctGdp }
+  // Calculate 75-year totals for payroll and GDP
+  const totalPayroll = data.reduce((sum, d) => sum + d.oasdiTaxablePayroll, 0)
+  const totalGdp = data.reduce((sum, d) => sum + d.gdp, 0)
+
+  const totalPctPayroll = totalPayroll > 0 ? (total / totalPayroll) * 100 : 0
+  const totalPctGdp = totalGdp > 0 ? (total / totalGdp) * 100 : 0
+
+  return { tenYear, total, tenYearPctPayroll, tenYearPctGdp, totalPctPayroll, totalPctGdp }
 }
 
 export type ScoringType = 'static' | 'dynamic'
+export type { DisplayUnit } from '../types'
 
 export async function loadData(scoringType: ScoringType = 'static'): Promise<Record<string, YearlyImpact[]>> {
   // Load economic projections first

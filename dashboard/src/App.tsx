@@ -5,7 +5,7 @@ import { ComparisonTable } from './components/ComparisonTable'
 import { SummaryCards } from './components/SummaryCards'
 import { MethodologySection } from './components/MethodologySection'
 import { loadData, calculateTotals, exportToCsv, type ScoringType } from './utils/dataLoader'
-import type { YearlyImpact } from './types'
+import type { YearlyImpact, DisplayUnit } from './types'
 import { REFORMS } from './types'
 import './App.css'
 
@@ -15,6 +15,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'10year' | '75year'>('10year')
   const [scoringType, setScoringType] = useState<ScoringType>('static')
+  const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('dollars')
 
   useEffect(() => {
     setLoading(true)
@@ -28,6 +29,7 @@ function App() {
   const displayData = viewMode === '10year' ? tenYearData : selectedData
   const totals = calculateTotals(selectedData)
   const reform = REFORMS.find(r => r.id === selectedReform)
+
 
   if (loading) {
     return (
@@ -83,6 +85,11 @@ function App() {
             tenYearTotal={totals.tenYear}
             seventyFiveYearTotal={totals.total}
             scoringType={scoringType}
+            displayUnit={displayUnit}
+            tenYearPctPayroll={totals.tenYearPctPayroll}
+            tenYearPctGdp={totals.tenYearPctGdp}
+            totalPctPayroll={totals.totalPctPayroll}
+            totalPctGdp={totals.totalPctGdp}
           />
 
           <div className="scoring-toggle">
@@ -98,6 +105,28 @@ function App() {
               onClick={() => setScoringType('dynamic')}
             >
               Conventional
+            </button>
+          </div>
+
+          <div className="scoring-toggle">
+            <span className="toggle-label">Display Unit:</span>
+            <button
+              className={displayUnit === 'dollars' ? 'active' : ''}
+              onClick={() => setDisplayUnit('dollars')}
+            >
+              Dollars
+            </button>
+            <button
+              className={displayUnit === 'pctPayroll' ? 'active' : ''}
+              onClick={() => setDisplayUnit('pctPayroll')}
+            >
+              % of Payroll
+            </button>
+            <button
+              className={displayUnit === 'pctGdp' ? 'active' : ''}
+              onClick={() => setDisplayUnit('pctGdp')}
+            >
+              % of GDP
             </button>
           </div>
 
@@ -126,6 +155,7 @@ function App() {
             data={displayData}
             title={`Revenue Impact of ${reform?.name} (${scoringType === 'static' ? 'Static' : 'Conventional'})`}
             showTrustFundSplit
+            displayUnit={displayUnit}
           />
 
           <ComparisonTable
