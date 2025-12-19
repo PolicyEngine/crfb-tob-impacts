@@ -92,62 +92,72 @@ function App() {
             totalPctGdp={totals.totalPctGdp}
           />
 
-          <div className="scoring-toggle">
-            <span className="toggle-label">Scoring Type:</span>
-            <button
-              className={scoringType === 'static' ? 'active' : ''}
-              onClick={() => setScoringType('static')}
-            >
-              Static
-            </button>
-            <button
-              className={scoringType === 'dynamic' ? 'active' : ''}
-              onClick={() => setScoringType('dynamic')}
-            >
-              Conventional
-            </button>
-          </div>
+          <div className="controls-bar">
+            <div className="control-group">
+              <span className="control-label">Scoring</span>
+              <div className="toggle-buttons">
+                <button
+                  className={scoringType === 'static' ? 'active' : ''}
+                  onClick={() => setScoringType('static')}
+                >
+                  Static
+                </button>
+                <button
+                  className={scoringType === 'dynamic' ? 'active' : ''}
+                  onClick={() => setScoringType('dynamic')}
+                >
+                  Conventional
+                </button>
+              </div>
+            </div>
 
-          <div className="scoring-toggle">
-            <span className="toggle-label">Display Unit:</span>
-            <button
-              className={displayUnit === 'dollars' ? 'active' : ''}
-              onClick={() => setDisplayUnit('dollars')}
-            >
-              Dollars
-            </button>
-            <button
-              className={displayUnit === 'pctPayroll' ? 'active' : ''}
-              onClick={() => setDisplayUnit('pctPayroll')}
-            >
-              % of Payroll
-            </button>
-            <button
-              className={displayUnit === 'pctGdp' ? 'active' : ''}
-              onClick={() => setDisplayUnit('pctGdp')}
-            >
-              % of GDP
-            </button>
-          </div>
+            <div className="control-group">
+              <span className="control-label">Unit</span>
+              <div className="toggle-buttons">
+                <button
+                  className={displayUnit === 'dollars' ? 'active' : ''}
+                  onClick={() => setDisplayUnit('dollars')}
+                >
+                  $
+                </button>
+                <button
+                  className={displayUnit === 'pctPayroll' ? 'active' : ''}
+                  onClick={() => setDisplayUnit('pctPayroll')}
+                >
+                  % Payroll
+                </button>
+                <button
+                  className={displayUnit === 'pctGdp' ? 'active' : ''}
+                  onClick={() => setDisplayUnit('pctGdp')}
+                >
+                  % GDP
+                </button>
+              </div>
+            </div>
 
-          <div className="view-toggle">
-            <button
-              className={viewMode === '10year' ? 'active' : ''}
-              onClick={() => setViewMode('10year')}
-            >
-              10-Year (2026-2035)
-            </button>
-            <button
-              className={viewMode === '75year' ? 'active' : ''}
-              onClick={() => setViewMode('75year')}
-            >
-              75-Year (2026-2100)
-            </button>
+            <div className="control-group">
+              <span className="control-label">Period</span>
+              <div className="toggle-buttons">
+                <button
+                  className={viewMode === '10year' ? 'active' : ''}
+                  onClick={() => setViewMode('10year')}
+                >
+                  10-Year
+                </button>
+                <button
+                  className={viewMode === '75year' ? 'active' : ''}
+                  onClick={() => setViewMode('75year')}
+                >
+                  75-Year
+                </button>
+              </div>
+            </div>
+
             <button
               className="export-btn"
               onClick={() => exportToCsv(selectedData, selectedReform, reform?.name || selectedReform)}
             >
-              Export to CSV
+              Export CSV
             </button>
           </div>
 
