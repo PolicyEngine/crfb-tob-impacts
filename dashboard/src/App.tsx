@@ -18,7 +18,9 @@ function App() {
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('dollars')
 
   useEffect(() => {
-    setLoading(true)
+    // Only show full-page loading on initial load, not when switching scoring types
+    const isInitialLoad = Object.keys(data).length === 0
+    if (isInitialLoad) setLoading(true)
     loadData(scoringType)
       .then(setData)
       .finally(() => setLoading(false))
