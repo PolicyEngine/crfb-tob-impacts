@@ -1,4 +1,4 @@
-name: Deploy Jupyter Book to GitHub Pages
+name: Deploy Jupyter Book and Dashboard to GitHub Pages
 
 on:
   push:
@@ -31,7 +31,12 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Install dependencies
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Install Python dependencies
       run: |
         uv venv --python 3.13
         source .venv/bin/activate
@@ -62,15 +67,31 @@ jobs:
     # Note: Data generation takes too long for CI (~30 minutes)
     # Consider caching data or using pre-generated data for CI
 
-    - name: Build the book
+    - name: Build the Jupyter Book
       run: |
         source .venv/bin/activate
         cd jupyterbook
-        echo "Building with BASE_URL=/crfb-tob-impacts"
+        echo "Building Jupyter Book with BASE_URL=/crfb-tob-impacts"
         export BASE_URL=/crfb-tob-impacts
         myst build --html
         # Add .nojekyll file to prevent GitHub Pages from processing with Jekyll
         touch _build/html/.nojekyll
+
+    - name: Build the React Dashboard
+      run: |
+        cd dashboard
+        npm ci
+        npm run build
+        echo "Dashboard built successfully"
+
+    - name: Combine outputs
+      run: |
+        # Copy dashboard build into jupyterbook output at /dashboard/
+        mkdir -p jupyterbook/_build/html/dashboard
+        cp -r dashboard/dist/* jupyterbook/_build/html/dashboard/
+        echo "Combined Jupyter Book and Dashboard outputs"
+        ls -la jupyterbook/_build/html/
+        ls -la jupyterbook/_build/html/dashboard/
 
     - name: Setup Pages
       if: github.ref == 'refs/heads/main'

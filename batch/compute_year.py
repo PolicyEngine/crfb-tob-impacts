@@ -170,7 +170,7 @@ def main():
     print(f"[1/{3+len(reform_ids)}] Downloading dataset for {year}...")
     print(f"      DIAGNOSTIC: About to create dataset reference...")
     dataset_start = time.time()
-    dataset_name = f"hf://policyengine/test/alt2/{year}.h5"
+    dataset_name = f"hf://policyengine/test/no-h6/{year}.h5"
     print(f"      Dataset: {dataset_name}")
     dataset_time = time.time() - dataset_start
     print(f"      ✓ Dataset reference prepared ({dataset_time:.1f}s)")
