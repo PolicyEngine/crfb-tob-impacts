@@ -82,6 +82,7 @@ function App() {
           <SummaryCards
             tenYearTotal={totals.tenYear}
             seventyFiveYearTotal={totals.total}
+            scoringType={scoringType}
           />
 
           <div className="scoring-toggle">
@@ -96,7 +97,7 @@ function App() {
               className={scoringType === 'dynamic' ? 'active' : ''}
               onClick={() => setScoringType('dynamic')}
             >
-              Dynamic
+              Conventional
             </button>
           </div>
 
@@ -121,17 +122,11 @@ function App() {
             </button>
           </div>
 
-          <div className="charts-grid">
-            <ImpactChart
-              data={displayData}
-              title="Total Revenue Impact by Year"
-            />
-            <ImpactChart
-              data={displayData}
-              title="Trust Fund Breakdown"
-              showTrustFundSplit
-            />
-          </div>
+          <ImpactChart
+            data={displayData}
+            title={`Revenue Impact of ${reform?.name} (${scoringType === 'static' ? 'Static' : 'Conventional'})`}
+            showTrustFundSplit
+          />
 
           <ComparisonTable
             reformId={selectedReform}

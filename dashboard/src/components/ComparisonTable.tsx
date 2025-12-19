@@ -8,7 +8,7 @@ interface ComparisonTableProps {
 function formatCurrency(value: number): string {
   const prefix = value >= 0 ? '+' : '-'
   const absValue = Math.abs(value)
-  return `${prefix}$${absValue.toLocaleString()}B`
+  return `${prefix}$${absValue.toFixed(1)}B`
 }
 
 export function ComparisonTable({ reformId, policyEngineEstimate }: ComparisonTableProps) {

@@ -72,11 +72,10 @@ export function ImpactChart({ data, title, showTrustFundSplit = false }: ImpactC
       range: [minYear - 0.5, maxYear + 0.5],
     },
     yaxis: {
-      title: { text: 'Billions ($)' },
-      tickprefix: '$',
       ticksuffix: 'B',
+      tickformat: '$,.0f',
     },
-    barmode: showTrustFundSplit ? 'group' : 'relative',
+    barmode: 'relative',
     showlegend: showTrustFundSplit,
     legend: { orientation: 'h', y: -0.25, x: 0.5, xanchor: 'center' },
     margin: { l: 80, r: 40, t: 60, b: 100 },

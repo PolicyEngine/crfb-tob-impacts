@@ -99,7 +99,7 @@ export const EXTERNAL_ESTIMATES: Record<string, ExternalEstimate[]> = {
     { source: 'CBO', scoringType: 'Conventional', tenYearImpact: -1600, budgetWindow: '2025-2034', citation: 'cbo2024options' },
     { source: 'Social Security Trustees', scoringType: 'Conventional', tenYearImpact: -1800, budgetWindow: '2025-2034', citation: 'ssa2024trustees' },
     { source: 'Tax Foundation', scoringType: 'Conventional', tenYearImpact: -1400, budgetWindow: '2025-2034', citation: 'taxfoundation2024trump' },
-    { source: 'Tax Foundation', scoringType: 'Dynamic', tenYearImpact: -1300, budgetWindow: '2025-2034', citation: 'taxfoundation2024trump' },
+    { source: 'Tax Foundation', scoringType: 'Conventional', tenYearImpact: -1300, budgetWindow: '2025-2034', citation: 'taxfoundation2024trump' },
   ],
   option7: [
     { source: 'JCT', scoringType: 'Conventional', tenYearImpact: 66.3, budgetWindow: 'FY 2025-2034', citation: 'jct2025bonus' },
