@@ -40,7 +40,11 @@ export function ComparisonTable({ reformId, policyEngineEstimate }: ComparisonTa
           </tr>
           {externalEstimates.map((est, idx) => (
             <tr key={idx}>
-              <td>{est.source}</td>
+              <td>
+                <a href={est.url} target="_blank" rel="noopener noreferrer">
+                  {est.source}
+                </a>
+              </td>
               <td>{est.scoringType}</td>
               <td>{formatCurrency(est.tenYearImpact)}</td>
               <td>{est.budgetWindow}</td>

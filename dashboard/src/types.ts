@@ -98,17 +98,16 @@ export interface ExternalEstimate {
   scoringType: string
   tenYearImpact: number
   budgetWindow: string
-  citation: string
+  url: string
 }
 
 export const EXTERNAL_ESTIMATES: Record<string, ExternalEstimate[]> = {
   option1: [
-    { source: 'CBO', scoringType: 'Conventional', tenYearImpact: -1600, budgetWindow: '2025-2034', citation: 'cbo2024options' },
-    { source: 'Social Security Trustees', scoringType: 'Conventional', tenYearImpact: -1800, budgetWindow: '2025-2034', citation: 'ssa2024trustees' },
-    { source: 'Tax Foundation', scoringType: 'Conventional', tenYearImpact: -1400, budgetWindow: '2025-2034', citation: 'taxfoundation2024trump' },
-    { source: 'Tax Foundation', scoringType: 'Conventional', tenYearImpact: -1300, budgetWindow: '2025-2034', citation: 'taxfoundation2024trump' },
+    { source: 'CBO', scoringType: 'Conventional', tenYearImpact: -1600, budgetWindow: '2025-2034', url: 'https://www.cbo.gov/budget-options/56856' },
+    { source: 'Social Security Trustees', scoringType: 'Conventional', tenYearImpact: -1800, budgetWindow: '2025-2034', url: 'https://www.ssa.gov/OACT/TR/2024/' },
+    { source: 'Tax Foundation', scoringType: 'Conventional', tenYearImpact: -1400, budgetWindow: '2025-2034', url: 'https://taxfoundation.org/blog/trump-social-security-tax/' },
   ],
   option7: [
-    { source: 'JCT', scoringType: 'Conventional', tenYearImpact: 66.3, budgetWindow: 'FY 2025-2034', citation: 'jct2025bonus' },
+    { source: 'JCT', scoringType: 'Conventional', tenYearImpact: 66.3, budgetWindow: 'FY 2025-2034', url: 'https://www.jct.gov/publications/2025/jcx-26-25r/' },
   ],
 }
