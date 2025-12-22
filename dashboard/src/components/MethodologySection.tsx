@@ -94,55 +94,77 @@ export function MethodologySection() {
 
         <AccordionItem
           title="GREG Calibration Method"
-          summary="Achieves <0.1% error on age distribution (86 categories), Social Security benefits, and taxable payroll using matrix-based calibration."
+          summary="Achieves <0.1% error on five calibration targets: demographics, benefits, payroll, and trust fund revenues."
         >
           <p>
             <strong>GREG (Generalized Regression)</strong> calibration simultaneously matches
-            three constraint types:
+            five calibration targets from official government projections:
           </p>
           <ul>
             <li>
-              <strong>Age Distribution</strong> — 86 categories: ages 0–84 individually, 85+
-              aggregated. Source: SSA Single Year Age demographic projections.
+              <strong>Age Distribution</strong> — 86 categories (ages 0–84 individually, 85+
+              aggregated) from SSA population projections.
             </li>
             <li>
               <strong>Social Security Benefits</strong> — Total OASDI benefit payments in
-              nominal dollars, ensuring aggregate Social Security income matches SSA fiscal
-              projections.
+              nominal dollars.
             </li>
             <li>
               <strong>Taxable Payroll</strong> — Total earnings subject to Social Security
-              taxation, properly accounting for the annual wage base cap ($168,600 in 2024).
+              taxation, accounting for the annual wage base cap.
+            </li>
+            <li>
+              <strong>OASDI Trust Fund Revenue</strong> — Taxation of benefits revenue
+              allocated to Social Security (Tier 1: first 50% of taxable benefits).
+            </li>
+            <li>
+              <strong>Medicare HI Trust Fund Revenue</strong> — Taxation of benefits revenue
+              allocated to Medicare (Tier 2: additional 35% of taxable benefits).
             </li>
           </ul>
           <div className="validation-callout">
             <p>
-              <strong>Validation (2027):</strong> Social Security <code>$1,800B</code> ✓ |
-              Taxable payroll <code>$11,627B</code> ✓ | Age 6 population{' '}
-              <code>3,730,632</code> ✓ — all within 0.1% of SSA targets.
+              <strong>Validation:</strong> All calibration targets achieved within 0.1% of
+              SSA and CMS projections across the 75-year horizon.
             </p>
           </div>
         </AccordionItem>
 
         <AccordionItem
           title="Data Sources"
-          summary="Analysis uses Enhanced CPS 2024 and 2025 Social Security Trustees Report intermediate assumptions."
+          summary="Calibrated to SSA and CMS Trustees Report projections for demographics, benefits, payroll, and trust fund revenues."
         >
           <p>
-            <strong>Microdata:</strong> Enhanced CPS 2024 from PolicyEngine US, with tax record
-            integration and machine learning imputation (quantile regression forests) for
-            missing or underreported income.
+            <strong>Microdata Foundation:</strong> Enhanced CPS 2024 from PolicyEngine US,
+            integrating IRS tax records and machine learning imputation (quantile regression
+            forests) for accurate income distributions.
           </p>
           <p>
-            <strong>Demographic Projections:</strong> <code>SSPopJul_TR2024.csv</code> —
-            Population by single year of age through 2100 from SSA Single Year Age Demographic
-            Projections 2024.
+            <strong>Calibration Targets:</strong> GREG calibration matches five aggregate
+            targets from official government projections:
           </p>
-          <p>
-            <strong>Fiscal Projections:</strong> <code>social_security_aux.csv</code> — OASDI
-            costs and taxable payroll through 2100 from SSA 2025 Trustees Report Tables VI.G6
-            and VI.G10.
-          </p>
+          <ul>
+            <li>
+              <strong>Age distribution</strong> — 86 categories from SSA Single Year Age
+              Demographic Projections (2024 publication)
+            </li>
+            <li>
+              <strong>Social Security benefits</strong> — Total OASDI payments from SSA 2025
+              Trustees Report
+            </li>
+            <li>
+              <strong>Taxable payroll</strong> — Earnings subject to Social Security taxation
+              from SSA 2025 Trustees Report
+            </li>
+            <li>
+              <strong>OASDI trust fund revenue</strong> — Calculated from SSA 2025 Trustees
+              Report (taxation rate × taxable payroll)
+            </li>
+            <li>
+              <strong>Medicare HI trust fund revenue</strong> — Direct projections from CMS
+              2025 Medicare Trustees Report
+            </li>
+          </ul>
         </AccordionItem>
 
         <AccordionItem

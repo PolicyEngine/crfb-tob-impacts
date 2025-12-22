@@ -65,45 +65,48 @@ export function MethodologyDiagram() {
 
         {/* Stage 2 Boxes */}
         {/* Calibration Targets */}
-        <rect x="420" y="80" width="200" height="70" rx="6" fill="white" stroke="#d1d5db" strokeWidth="1" />
-        <text x="520" y="100" textAnchor="middle" fontSize="12" fontWeight="500" fill="#374151">
-          Calibration Targets
+        <rect x="420" y="80" width="200" height="90" rx="6" fill="white" stroke="#d1d5db" strokeWidth="1" />
+        <text x="520" y="98" textAnchor="middle" fontSize="12" fontWeight="500" fill="#374151">
+          5 Calibration Targets
         </text>
-        <text x="520" y="118" textAnchor="middle" fontSize="10" fill="#6b7280">
+        <text x="520" y="114" textAnchor="middle" fontSize="9" fill="#6b7280">
           • Age distribution (86 categories)
         </text>
-        <text x="520" y="132" textAnchor="middle" fontSize="10" fill="#6b7280">
+        <text x="520" y="128" textAnchor="middle" fontSize="9" fill="#6b7280">
           • SS benefits • Taxable payroll
+        </text>
+        <text x="520" y="142" textAnchor="middle" fontSize="9" fill="#6b7280">
+          • OASDI TOB • Medicare HI TOB
         </text>
 
         {/* Arrow down */}
-        <path d="M520 150 L520 168 L515 163 M520 168 L525 163" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
+        <path d="M520 170 L520 188 L515 183 M520 188 L525 183" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
 
         {/* GREG Calibration */}
-        <rect x="420" y="175" width="200" height="50" rx="6" fill="#319795" stroke="#2c7a7b" strokeWidth="1" />
-        <text x="520" y="195" textAnchor="middle" fontSize="12" fontWeight="600" fill="white">
+        <rect x="420" y="195" width="200" height="50" rx="6" fill="#319795" stroke="#2c7a7b" strokeWidth="1" />
+        <text x="520" y="215" textAnchor="middle" fontSize="12" fontWeight="600" fill="white">
           GREG Calibration
         </text>
-        <text x="520" y="213" textAnchor="middle" fontSize="10" fill="#e6fffa">
+        <text x="520" y="233" textAnchor="middle" fontSize="10" fill="#e6fffa">
           {"<"}0.1% error on all targets
         </text>
 
         {/* Arrow down */}
-        <path d="M520 225 L520 243 L515 238 M520 243 L525 238" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
+        <path d="M520 245 L520 263 L515 258 M520 263 L525 258" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
 
         {/* Calibrated Datasets */}
-        <rect x="420" y="250" width="200" height="50" rx="6" fill="#e6fffa" stroke="#319795" strokeWidth="1.5" />
-        <text x="520" y="270" textAnchor="middle" fontSize="12" fontWeight="500" fill="#234e52">
+        <rect x="420" y="268" width="200" height="42" rx="6" fill="#e6fffa" stroke="#319795" strokeWidth="1.5" />
+        <text x="520" y="285" textAnchor="middle" fontSize="12" fontWeight="500" fill="#234e52">
           Calibrated Datasets
         </text>
-        <text x="520" y="288" textAnchor="middle" fontSize="10" fill="#285e61">
+        <text x="520" y="300" textAnchor="middle" fontSize="10" fill="#285e61">
           2026–2100 (75 years)
         </text>
 
         {/* Horizontal arrows connecting stages */}
         {/* Arrow from Stage 1 box to Stage 2 input */}
         <path
-          d="M280 255 Q340 255 340 145 Q340 115 420 115"
+          d="M280 255 Q340 255 340 145 Q340 125 420 125"
           stroke="#319795"
           strokeWidth="2"
           fill="none"
@@ -112,7 +115,7 @@ export function MethodologyDiagram() {
 
         {/* Arrow from Stage 1 bottom to Stage 2 GREG */}
         <path
-          d="M280 255 Q350 255 350 200 L420 200"
+          d="M280 255 Q350 255 350 220 L420 220"
           stroke="#319795"
           strokeWidth="2"
           fill="none"
