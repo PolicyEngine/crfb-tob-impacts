@@ -36,42 +36,63 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
     switch (displayUnit) {
       case 'pctPayroll': return d.pctOfOasdiPayroll
       case 'pctGdp': return d.pctOfGdp
-      default: return d.tobOasdiImpact + d.tobMedicareHiImpact
+      default: return d.revenueImpact  // Use revenueImpact for correct total (handles Option 7)
     }
   }
+
+  // Check if trust fund split is meaningful (e.g., Option 7 has 0 for trust funds)
+  const hasTrustFundData = data.some(d => d.tobOasdiImpact !== 0 || d.tobMedicareHiImpact !== 0)
 
   // Format strings for hover based on display unit
   const hoverFormat = displayUnit === 'dollars' ? '%{y:$,.1f}B' : '%{y:.2f}%'
 
+  // When showing trust fund split but data has no trust fund breakdown (e.g., Option 7),
+  // show only the total line with a note that revenue goes to general revenues
+  const showTrustFundBars = showTrustFundSplit && hasTrustFundData
+
   const traces: Plotly.Data[] = showTrustFundSplit
-    ? [
-        {
-          x: years,
-          y: data.map(getOasdiValue),
-          type: 'bar' as const,
-          name: 'OASDI Trust Fund',
-          marker: { color: TEAL_500 },
-          hovertemplate: `${hoverFormat}<extra>OASDI</extra>`,
-        },
-        {
-          x: years,
-          y: data.map(getHiValue),
-          type: 'bar' as const,
-          name: 'Medicare HI Trust Fund',
-          marker: { color: TEAL_300 },
-          hovertemplate: `${hoverFormat}<extra>Medicare HI</extra>`,
-        },
-        {
-          x: years,
-          y: data.map(getTotalValue),
-          type: 'scatter' as const,
-          mode: 'lines+markers' as const,
-          name: 'Net Total',
-          line: { color: TEAL_900, width: 2 },
-          marker: { color: TEAL_900, size: 4 },
-          hovertemplate: `${hoverFormat}<extra>Net Total</extra>`,
-        },
-      ]
+    ? showTrustFundBars
+      ? [
+          {
+            x: years,
+            y: data.map(getOasdiValue),
+            type: 'bar' as const,
+            name: 'OASDI Trust Fund',
+            marker: { color: TEAL_500 },
+            hovertemplate: `${hoverFormat}<extra>OASDI</extra>`,
+          },
+          {
+            x: years,
+            y: data.map(getHiValue),
+            type: 'bar' as const,
+            name: 'Medicare HI Trust Fund',
+            marker: { color: TEAL_300 },
+            hovertemplate: `${hoverFormat}<extra>Medicare HI</extra>`,
+          },
+          {
+            x: years,
+            y: data.map(getTotalValue),
+            type: 'scatter' as const,
+            mode: 'lines+markers' as const,
+            name: 'Net Total',
+            line: { color: TEAL_900, width: 2 },
+            marker: { color: TEAL_900, size: 4 },
+            hovertemplate: `${hoverFormat}<extra>Net Total</extra>`,
+          },
+        ]
+      : [
+          // Option 7: Only show total line (revenue goes to general revenues, not trust funds)
+          {
+            x: years,
+            y: data.map(getTotalValue),
+            type: 'scatter' as const,
+            mode: 'lines+markers' as const,
+            name: 'Net Total',
+            line: { color: TEAL_900, width: 2 },
+            marker: { color: TEAL_900, size: 6 },
+            hovertemplate: `${hoverFormat}<extra>Net Total</extra>`,
+          },
+        ]
     : [
         {
           x: years,
@@ -91,7 +112,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
   const maxYear = Math.max(...years)
 
   // Calculate y-axis range for consistent scaling
-  const allValues = showTrustFundSplit
+  const allValues = showTrustFundBars
     ? [...data.map(getOasdiValue), ...data.map(getHiValue), ...data.map(getTotalValue)]
     : data.map(getTotalValue)
 
@@ -154,7 +175,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
     },
     yaxis: yaxisConfig,
     barmode: 'relative',
-    showlegend: showTrustFundSplit,
+    showlegend: showTrustFundBars,  // Only show legend when we have trust fund breakdown
     legend: { orientation: 'h', y: -0.25, x: 0.5, xanchor: 'center' },
     margin: { l: 80, r: 40, t: 60, b: 100 },
     plot_bgcolor: '#fff',

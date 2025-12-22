@@ -43,25 +43,53 @@ export function parse75YearData(
     const baselineRevenue = parseFloat(values[headers.indexOf('baseline_revenue')])
     const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
 
-    // For Options 5-6, use net impact columns; for others use TOB impact columns
+    // Different options use different columns for impacts
+    const isOption3or4 = reformName === 'option3' || reformName === 'option4'
     const isOption5or6 = reformName === 'option5' || reformName === 'option6'
+    const isOption7 = reformName === 'option7'
 
     let tobOasdiImpact: number
     let tobMedicareHiImpact: number
+    let revenueImpact: number
 
-    if (isOption5or6) {
+    if (isOption7) {
+      // Option 7: Revenue goes to general revenues, not trust funds
+      // Use revenue_impact directly, set trust fund splits to 0
+      revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
+      tobOasdiImpact = 0
+      tobMedicareHiImpact = 0
+    } else if (isOption3or4) {
+      // Options 3-4: Allocate full revenue_impact to trust funds based on baseline shares
+      // "The additional revenue raised will be allocated to the OASDI and HI trust funds
+      // in a way that maintains the current projected shares of contributions from TOB revenue"
+      revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
+      const baselineOasdi = parseFloat(values[headers.indexOf('baseline_tob_oasdi')]) || 0
+      const baselineHi = parseFloat(values[headers.indexOf('baseline_tob_medicare_hi')]) || 0
+      const baselineTotal = baselineOasdi + baselineHi
+
+      if (baselineTotal > 0) {
+        const oasdiShare = baselineOasdi / baselineTotal
+        const hiShare = baselineHi / baselineTotal
+        tobOasdiImpact = revenueImpact * oasdiShare
+        tobMedicareHiImpact = revenueImpact * hiShare
+      } else {
+        tobOasdiImpact = 0
+        tobMedicareHiImpact = 0
+      }
+    } else if (isOption5or6) {
       // Options 5-6: use oasdi_net_impact and hi_net_impact
       tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
+      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
     } else {
-      // Options 1-4, 7-8: use tob_oasdi_impact and tob_medicare_hi_impact
+      // Options 1-3, 8: use tob_oasdi_impact and tob_medicare_hi_impact
       tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')]) || 0
+      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
     }
 
-    // Revenue impact is the sum of the two trust fund impacts
+    // Total trust fund impact
     const tobTotalImpact = tobOasdiImpact + tobMedicareHiImpact
-    const revenueImpact = tobTotalImpact
 
     // Get economic context for this year
     const econ = economicProjections.get(year) || { oasdiTaxablePayroll: 0, gdp: 0 }

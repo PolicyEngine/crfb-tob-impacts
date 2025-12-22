@@ -189,6 +189,32 @@ export function MethodologySection() {
             payroll contributions.
           </p>
         </AccordionItem>
+
+        <AccordionItem
+          title="Trust Fund Allocation"
+          summary="Revenue allocation varies by option: current law rules, baseline shares, employer contributions, or general revenues."
+        >
+          <p>
+            Revenue allocation varies by option:
+          </p>
+          <ul>
+            <li>
+              <strong>Options 1-2 & 8:</strong> Use current law rules (50% of taxable benefits
+              to OASDI, additional 35% to HI).
+            </li>
+            <li>
+              <strong>Options 3-4:</strong> Allocate revenue to maintain current projected
+              trust fund shares.
+            </li>
+            <li>
+              <strong>Options 5-6:</strong> Direct employer contribution taxes to their
+              respective trust funds.
+            </li>
+            <li>
+              <strong>Option 7:</strong> Revenue is allocated to general revenues, not trust funds.
+            </li>
+          </ul>
+        </AccordionItem>
       </div>
 
       <div className="data-sources">
