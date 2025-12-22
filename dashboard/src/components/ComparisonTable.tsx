@@ -14,6 +14,11 @@ function formatCurrency(value: number): string {
 export function ComparisonTable({ reformId, policyEngineEstimate }: ComparisonTableProps) {
   const externalEstimates = EXTERNAL_ESTIMATES[reformId] || []
 
+  // Don't render the section if there are no external estimates
+  if (externalEstimates.length === 0) {
+    return null
+  }
+
   return (
     <div className="comparison-table">
       <h3>Comparison with External Estimates</h3>
@@ -33,22 +38,14 @@ export function ComparisonTable({ reformId, policyEngineEstimate }: ComparisonTa
             <td>{formatCurrency(policyEngineEstimate)}</td>
             <td>2026-2035</td>
           </tr>
-          {externalEstimates.length > 0 ? (
-            externalEstimates.map((est, idx) => (
-              <tr key={idx}>
-                <td>{est.source}</td>
-                <td>{est.scoringType}</td>
-                <td>{formatCurrency(est.tenYearImpact)}</td>
-                <td>{est.budgetWindow}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={4} className="no-estimates">
-                No external estimates available for comparison
-              </td>
+          {externalEstimates.map((est, idx) => (
+            <tr key={idx}>
+              <td>{est.source}</td>
+              <td>{est.scoringType}</td>
+              <td>{formatCurrency(est.tenYearImpact)}</td>
+              <td>{est.budgetWindow}</td>
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
     </div>
