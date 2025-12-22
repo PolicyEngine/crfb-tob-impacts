@@ -1,5 +1,6 @@
 """
 Create a combined spreadsheet with all reform data for both static and dynamic scoring.
+Uses the same allocation logic as dataLoader.ts in the dashboard.
 """
 import pandas as pd
 
@@ -21,15 +22,37 @@ for _, row in combined.iterrows():
     year = row['year']
     scoring_type = row['scoring_type']
 
-    # For Options 5-6, use net impact columns; for others use TOB impact columns
-    if reform in ['option5', 'option6']:
+    # Different options use different columns for impacts (matches dataLoader.ts)
+    if reform == 'option7':
+        # Option 7: Revenue goes to general revenues, not trust funds
+        revenue_impact = row['revenue_impact']
+        oasdi_impact = 0
+        hi_impact = 0
+    elif reform in ['option3', 'option4']:
+        # Options 3-4: Allocate full revenue_impact to trust funds based on baseline shares
+        revenue_impact = row['revenue_impact']
+        baseline_oasdi = row['baseline_tob_oasdi']
+        baseline_hi = row['baseline_tob_medicare_hi']
+        baseline_total = baseline_oasdi + baseline_hi
+
+        if baseline_total > 0:
+            oasdi_share = baseline_oasdi / baseline_total
+            hi_share = baseline_hi / baseline_total
+            oasdi_impact = revenue_impact * oasdi_share
+            hi_impact = revenue_impact * hi_share
+        else:
+            oasdi_impact = 0
+            hi_impact = 0
+    elif reform in ['option5', 'option6']:
+        # Options 5-6: use oasdi_net_impact and hi_net_impact
         oasdi_impact = row['oasdi_net_impact']
         hi_impact = row['hi_net_impact']
+        revenue_impact = oasdi_impact + hi_impact
     else:
+        # Options 1-2, 8: use tob_oasdi_impact and tob_medicare_hi_impact
         oasdi_impact = row['tob_oasdi_impact']
         hi_impact = row['tob_medicare_hi_impact']
-
-    revenue_impact = oasdi_impact + hi_impact
+        revenue_impact = oasdi_impact + hi_impact
 
     # Get economic data for this year
     econ_row = econ_dict.get(year, {'taxable_payroll': 0, 'gdp': 0})
@@ -73,10 +96,10 @@ print(f"Types: {result_df['Type'].unique()}")
 print(f"Years: {result_df['Year'].min()} - {result_df['Year'].max()}")
 
 # Show sample rows
-print("\n--- Sample: Option 1, Static, 2026 ---")
-sample = result_df[(result_df['Reform'] == 'option1') & (result_df['Type'] == 'static') & (result_df['Year'] == 2026)]
+print("\n--- Sample: Option 3, Static, 2029 (shows baseline allocation) ---")
+sample = result_df[(result_df['Reform'] == 'option3') & (result_df['Type'] == 'static') & (result_df['Year'] == 2029)]
 print(sample.to_string(index=False))
 
-print("\n--- Sample: Option 5, Dynamic, 2061 (the row you selected) ---")
-sample = result_df[(result_df['Reform'] == 'option5') & (result_df['Type'] == 'dynamic') & (result_df['Year'] == 2061)]
+print("\n--- Sample: Option 7, Static, 2026 (shows general revenue allocation) ---")
+sample = result_df[(result_df['Reform'] == 'option7') & (result_df['Type'] == 'static') & (result_df['Year'] == 2026)]
 print(sample.to_string(index=False))
