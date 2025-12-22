@@ -59,13 +59,13 @@ export const REFORMS: Reform[] = [
     id: 'option3',
     name: 'Tax 85% with Bonus Senior Deduction',
     shortName: '85% + Senior Deduction',
-    description: '85% taxation with permanent extension of the $6,000 bonus senior deduction',
+    description: '85% taxation with permanent extension of the bonus senior deduction',
   },
   {
     id: 'option4',
-    name: 'Social Security Tax Credit System ($500)',
-    shortName: '$500 Tax Credit',
-    description: 'Replace bonus senior deduction with $500 nonrefundable tax credit',
+    name: '85% Taxation, Replace Senior Deduction with $500 Credit',
+    shortName: '85%, No Deduction, $500 Credit',
+    description: '85% taxation and replace bonus senior deduction with $500 nonrefundable tax credit',
   },
   {
     id: 'option5',
@@ -83,7 +83,7 @@ export const REFORMS: Reform[] = [
     id: 'option7',
     name: 'Eliminate Bonus Senior Deduction',
     shortName: 'No Senior Deduction',
-    description: 'Eliminate the $6,000 bonus senior deduction from 2026-2028',
+    description: 'Eliminate the bonus senior deduction',
   },
   {
     id: 'option8',
