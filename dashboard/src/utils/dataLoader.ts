@@ -44,6 +44,7 @@ export function parse75YearData(
     const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
 
     // Different options use different columns for impacts
+    const isOption4 = reformName === 'option4'
     const isOption5or6 = reformName === 'option5' || reformName === 'option6'
     const isOption7 = reformName === 'option7'
 
@@ -57,13 +58,31 @@ export function parse75YearData(
       revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
       tobOasdiImpact = 0
       tobMedicareHiImpact = 0
+    } else if (isOption4) {
+      // Option 4: Allocate full revenue_impact to trust funds based on baseline shares
+      // "The additional revenue raised will be allocated to the OASDI and HI trust funds
+      // in a way that maintains the current projected shares of contributions from TOB revenue"
+      revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
+      const baselineOasdi = parseFloat(values[headers.indexOf('baseline_tob_oasdi')]) || 0
+      const baselineHi = parseFloat(values[headers.indexOf('baseline_tob_medicare_hi')]) || 0
+      const baselineTotal = baselineOasdi + baselineHi
+
+      if (baselineTotal > 0) {
+        const oasdiShare = baselineOasdi / baselineTotal
+        const hiShare = baselineHi / baselineTotal
+        tobOasdiImpact = revenueImpact * oasdiShare
+        tobMedicareHiImpact = revenueImpact * hiShare
+      } else {
+        tobOasdiImpact = 0
+        tobMedicareHiImpact = 0
+      }
     } else if (isOption5or6) {
       // Options 5-6: use oasdi_net_impact and hi_net_impact
       tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
       revenueImpact = tobOasdiImpact + tobMedicareHiImpact
     } else {
-      // Options 1-4, 8: use tob_oasdi_impact and tob_medicare_hi_impact
+      // Options 1-3, 8: use tob_oasdi_impact and tob_medicare_hi_impact
       tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')]) || 0
       revenueImpact = tobOasdiImpact + tobMedicareHiImpact

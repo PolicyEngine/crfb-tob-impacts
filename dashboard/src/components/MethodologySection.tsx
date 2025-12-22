@@ -25,9 +25,11 @@ export function MethodologySection() {
         <div className="method-card">
           <h3>Trust Fund Allocation</h3>
           <p>
-            Revenue impacts are split between the <strong>OASDI</strong> (Social Security) and
-            <strong> Medicare HI</strong> trust funds based on current law allocation rules,
-            where the first 50% of taxable benefits goes to OASDI and the additional 35% to Medicare.
+            Revenue allocation varies by option: <strong>Options 1-3 & 8</strong> use current law rules
+            (50% of taxable benefits to OASDI, additional 35% to HI). <strong>Option 4</strong> allocates
+            revenue to maintain current projected trust fund shares. <strong>Options 5-6</strong> direct
+            employer contribution taxes to their respective trust funds. <strong>Option 7</strong> revenue
+            is allocated to general revenues, not trust funds.
           </p>
         </div>
 
