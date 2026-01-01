@@ -26,3 +26,24 @@ jupyter nbconvert --to notebook --execute --inplace policy-impacts-dynamic.ipynb
 ```
 
 **Note**: These data files are committed to the repo, so you don't need to regenerate them unless reforms or parameters change.
+
+### `policy-impacts-2100.ipynb`
+Tests all 8 reform options using the 2100 projection dataset to assess long-term impacts.
+
+**Dataset**: `hf://policyengine/test/2100.h5`
+**Year**: 2100 only
+**Scoring**: Static (no behavioral responses)
+
+**Execution time**: ~20-30 minutes (single year, 8 reforms)
+
+**Output files** (saved to `data/`):
+- `policy_impacts_2100.csv` - Full results with all columns
+- `policy_impacts_2100_summary.csv` - Summary table sorted by impact
+
+**How to run**:
+```bash
+cd analysis
+jupyter nbconvert --to notebook --execute --inplace policy-impacts-2100.ipynb
+```
+
+**Purpose**: Validates that reforms work correctly in long-term projections and provides insight into how demographic/economic changes affect reform impacts.
