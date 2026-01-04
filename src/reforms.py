@@ -107,6 +107,134 @@ def tax_85_percent_ss():
     }
 
 
+def tax_90_percent_ss():
+    """Tax 90% of Social Security benefits for all recipients.
+
+    This reform makes 90% of Social Security benefits taxable regardless
+    of income level, slightly above the current 85% maximum.
+
+    Sets all rate parameters to 0.90 with all thresholds at zero.
+    """
+    return {
+        # Set combined income fraction to 1.0
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        # Set all base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all adjusted base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all rate parameters to 0.90 for 90% taxation
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {
+            "2026-01-01.2100-12-31": 0.90
+        },
+        "gov.irs.social_security.taxability.rate.base.excess": {
+            "2026-01-01.2100-12-31": 0.90
+        },
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap": {
+            "2026-01-01.2100-12-31": 0.90
+        },
+        "gov.irs.social_security.taxability.rate.additional.excess": {
+            "2026-01-01.2100-12-31": 0.90
+        },
+        "gov.irs.social_security.taxability.rate.additional.bracket": {
+            "2026-01-01.2100-12-31": 0.90
+        }
+    }
+
+
+def tax_95_percent_ss():
+    """Tax 95% of Social Security benefits for all recipients.
+
+    This reform makes 95% of Social Security benefits taxable regardless
+    of income level, above the current 85% maximum but below 100%.
+
+    Sets all rate parameters to 0.95 with all thresholds at zero.
+    """
+    return {
+        # Set combined income fraction to 1.0
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        },
+        # Set all base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all adjusted base thresholds to 0
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.JOINT": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SINGLE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SEPARATE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.SURVIVING_SPOUSE": {
+            "2026-01-01.2100-12-31": 0
+        },
+        "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
+            "2026-01-01.2100-12-31": 0
+        },
+        # Set all rate parameters to 0.95 for 95% taxation
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {
+            "2026-01-01.2100-12-31": 0.95
+        },
+        "gov.irs.social_security.taxability.rate.base.excess": {
+            "2026-01-01.2100-12-31": 0.95
+        },
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap": {
+            "2026-01-01.2100-12-31": 0.95
+        },
+        "gov.irs.social_security.taxability.rate.additional.excess": {
+            "2026-01-01.2100-12-31": 0.95
+        },
+        "gov.irs.social_security.taxability.rate.additional.bracket": {
+            "2026-01-01.2100-12-31": 0.95
+        }
+    }
+
+
 def tax_100_percent_ss():
     """Tax 100% of Social Security benefits for all recipients.
 
@@ -226,6 +354,20 @@ def enable_employer_payroll_tax(percentage=1.0):
         },
         "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
             "2026-01-01.2100-12-31": percentage
+        }
+    }
+
+
+def enable_ss_credit_phase_out():
+    """Enable the phase-out for the SS nonrefundable credit.
+
+    Phase-out rates (from policyengine-us PR #7089):
+    - Joint filers: 6% phase-out rate for AGI above $150,000
+    - Other filers: 6% phase-out rate for AGI above $75,000
+    """
+    return {
+        "gov.contrib.crfb.ss_credit.phase_out.applies": {
+            "2026-01-01.2100-12-31": True
         }
     }
 
@@ -352,6 +494,26 @@ def get_option8_dict():
     """Return parameter dict for Option 8 (static scoring only - no elasticities)."""
     return tax_100_percent_ss()
 
+def get_option9_dict():
+    """Return parameter dict for Option 9 (static scoring only - no elasticities)."""
+    return tax_90_percent_ss()
+
+def get_option10_dict():
+    """Return parameter dict for Option 10 (static scoring only - no elasticities)."""
+    return tax_95_percent_ss()
+
+def get_option11_dict():
+    """Return parameter dict for Option 11 (static scoring only - no elasticities).
+
+    $700 credit with 6% phase-out above $150k (joint) / $75k (other).
+    """
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(add_ss_tax_credit(700))
+    result.update(enable_ss_credit_phase_out())
+    result.update(eliminate_senior_deduction())
+    return result
+
 
 # Complete dynamic scoring dictionaries with CBO elasticities pre-merged
 def get_option1_dynamic_dict():
@@ -452,6 +614,33 @@ def get_option8_dynamic_dict():
     result.update(CBO_ELASTICITIES)
     return result
 
+def get_option9_dynamic_dict():
+    """Return complete parameter dict for Option 9 with CBO elasticities."""
+    result = {}
+    result.update(tax_90_percent_ss())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option10_dynamic_dict():
+    """Return complete parameter dict for Option 10 with CBO elasticities."""
+    result = {}
+    result.update(tax_95_percent_ss())
+    result.update(CBO_ELASTICITIES)
+    return result
+
+def get_option11_dynamic_dict():
+    """Return complete parameter dict for Option 11 with CBO elasticities.
+
+    $700 credit with 6% phase-out above $150k (joint) / $75k (other).
+    """
+    result = {}
+    result.update(tax_85_percent_ss())
+    result.update(add_ss_tax_credit(700))
+    result.update(enable_ss_credit_phase_out())
+    result.update(eliminate_senior_deduction())
+    result.update(CBO_ELASTICITIES)
+    return result
+
 
 # Policy reform functions using modular components
 
@@ -535,6 +724,38 @@ def get_option8_reform():
     return Reform.from_dict(get_option8_dict(), country_id="us")
 
 
+def get_option9_reform():
+    """Option 9: Taxation of 90% of Social Security Benefits.
+
+    Makes 90% of Social Security benefits taxable for all recipients,
+    regardless of income level. This is above the current 85% maximum
+    but below full 100% taxation.
+    """
+    return Reform.from_dict(get_option9_dict(), country_id="us")
+
+
+def get_option10_reform():
+    """Option 10: Taxation of 95% of Social Security Benefits.
+
+    Makes 95% of Social Security benefits taxable for all recipients,
+    regardless of income level. This is above the current 85% maximum
+    but below full 100% taxation.
+    """
+    return Reform.from_dict(get_option10_dict(), country_id="us")
+
+
+def get_option11_reform():
+    """Option 11: $700 Tax Credit with Phase-Out.
+
+    Taxes 85% of Social Security benefits, replaces the senior deduction
+    with a $700 nonrefundable credit that phases out at 6% of AGI above
+    $150,000 (joint) / $75,000 (other filers).
+
+    Requires policyengine-us with PR #7089 merged.
+    """
+    return Reform.from_dict(get_option11_dict(), country_id="us")
+
+
 # Dictionary mapping reform IDs to configurations
 REFORMS = {
     "option1": {
@@ -568,5 +789,17 @@ REFORMS = {
     "option8": {
         "name": "Full Taxation of Social Security Benefits",
         "func": get_option8_reform,
+    },
+    "option9": {
+        "name": "Taxation of 90% of Social Security Benefits",
+        "func": get_option9_reform,
+    },
+    "option10": {
+        "name": "Taxation of 95% of Social Security Benefits",
+        "func": get_option10_reform,
+    },
+    "option11": {
+        "name": "$700 Tax Credit with Phase-Out",
+        "func": get_option11_reform,
     },
 }
