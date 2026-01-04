@@ -17,6 +17,13 @@ function App() {
   const [scoringType, setScoringType] = useState<ScoringType>('static')
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('dollars')
 
+  // Update display unit when view mode changes
+  const handleViewModeChange = (mode: '10year' | '75year') => {
+    setViewMode(mode)
+    // Default to dollars for 10-year, percent of payroll for 75-year
+    setDisplayUnit(mode === '10year' ? 'dollars' : 'pctPayroll')
+  }
+
   useEffect(() => {
     // Only show full-page loading on initial load, not when switching scoring types
     const isInitialLoad = Object.keys(data).length === 0
@@ -142,13 +149,13 @@ function App() {
               <div className="toggle-buttons">
                 <button
                   className={viewMode === '10year' ? 'active' : ''}
-                  onClick={() => setViewMode('10year')}
+                  onClick={() => handleViewModeChange('10year')}
                 >
                   10-Year
                 </button>
                 <button
                   className={viewMode === '75year' ? 'active' : ''}
-                  onClick={() => setViewMode('75year')}
+                  onClick={() => handleViewModeChange('75year')}
                 >
                   75-Year
                 </button>
