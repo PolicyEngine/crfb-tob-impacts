@@ -21,26 +21,26 @@ PROJECT_ROOT = Path(__file__).parent.parent
 # Create the Modal app
 app = modal.App("crfb-ss-analysis")
 
-# Define the image with all dependencies
+# Path to local policyengine-us repo
+POLICYENGINE_US_PATH = Path("/Users/pavelmakarchuk/policyengine-us")
+
+# Define the image with all dependencies and copy src code into it
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "policyengine-us==1.98.1",
         "pandas>=2.0.0",
         "numpy>=1.24.0",
     )
-)
-
-# Mount the src directory so we can import reforms.py
-src_mount = modal.Mount.from_local_dir(
-    PROJECT_ROOT / "src",
-    remote_path="/app/src",
+    # Copy local policyengine-us and install (copy=True allows run_commands after)
+    .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
+    .run_commands("pip install -e /app/policyengine-us")
+    # Copy src for reforms.py
+    .add_local_dir(PROJECT_ROOT / "src", "/app/src")
 )
 
 
 @app.function(
     image=image,
-    mounts=[src_mount],
     cpu=4,
     memory=32768,  # 32GB
     timeout=3600,  # 1 hour max
@@ -83,11 +83,13 @@ def compute_year(
         get_option1_reform, get_option2_reform, get_option3_reform,
         get_option4_reform, get_option5_reform, get_option6_reform,
         get_option7_reform, get_option8_reform, get_option9_reform,
-        get_option10_reform, get_option11_reform,
+        get_option10_reform, get_option11_reform, get_option12_reform,
+        get_option13_reform, get_balanced_fix_reform,
         get_option1_dynamic_dict, get_option2_dynamic_dict, get_option3_dynamic_dict,
         get_option4_dynamic_dict, get_option5_dynamic_dict, get_option6_dynamic_dict,
         get_option7_dynamic_dict, get_option8_dynamic_dict, get_option9_dynamic_dict,
-        get_option10_dynamic_dict, get_option11_dynamic_dict,
+        get_option10_dynamic_dict, get_option11_dynamic_dict, get_option12_dynamic_dict,
+        get_option13_dynamic_dict, get_balanced_fix_dynamic_dict,
     )
 
     # Reform functions for static scoring (same as GCP batch)
@@ -103,6 +105,9 @@ def compute_year(
         'option9': get_option9_reform,
         'option10': get_option10_reform,
         'option11': get_option11_reform,
+        'option12': get_option12_reform,
+        'option13': get_option13_reform,
+        'balanced_fix': get_balanced_fix_reform,
     }
 
     # Dict-returning functions for dynamic scoring with CBO elasticities
@@ -118,6 +123,9 @@ def compute_year(
         'option9': get_option9_dynamic_dict,
         'option10': get_option10_dynamic_dict,
         'option11': get_option11_dynamic_dict,
+        'option12': get_option12_dynamic_dict,
+        'option13': get_option13_dynamic_dict,
+        'balanced_fix': get_balanced_fix_dynamic_dict,
     }
 
     print(f"\n{'='*60}")
@@ -337,18 +345,24 @@ def run_reforms(
     scoring: str = "dynamic",
     years: str = "2026-2100",
     output: str = "results/modal_results.csv",
+    resume: bool = False,
 ):
     """
-    Run multiple reforms across all years in parallel.
+    Run multiple reforms across all years in parallel (year-based parallelization).
+
+    Saves intermediate results after each year completes, so interrupted runs
+    can be resumed with --resume flag.
 
     Args:
         reforms: Comma-separated reform IDs
         scoring: 'static' or 'dynamic'
         years: Year range like '2026-2100' or comma-separated '2026,2030,2050'
         output: Output CSV path
+        resume: If True, skip years that already have results in the output folder
     """
     import pandas as pd
     from pathlib import Path
+    from datetime import datetime
 
     reform_list = [r.strip() for r in reforms.split(",")]
 
@@ -359,36 +373,84 @@ def run_reforms(
     else:
         year_list = [int(y.strip()) for y in years.split(",")]
 
+    # Create output directory with timestamp for intermediate results
+    output_path = Path(output)
+    output_dir = output_path.parent / f"{output_path.stem}_{scoring}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Check for existing results if resuming
+    completed_years = set()
+    if resume:
+        for f in output_dir.glob("year_*.csv"):
+            try:
+                year = int(f.stem.split("_")[1])
+                completed_years.add(year)
+            except (IndexError, ValueError):
+                pass
+        if completed_years:
+            print(f"Resuming: found {len(completed_years)} completed years")
+            year_list = [y for y in year_list if y not in completed_years]
+            if not year_list:
+                print("All years already completed!")
+                # Combine and exit
+                _combine_results(output_dir, output_path, reform_list)
+                return
+
     print(f"\nRunning {len(reform_list)} reforms x {len(year_list)} years")
     print(f"= {len(year_list)} parallel tasks (one per year)")
     print(f"Reforms: {reform_list}")
     print(f"Years: {year_list[0]} to {year_list[-1]}")
     print(f"Scoring: {scoring}")
+    print(f"Intermediate results: {output_dir}/")
     print()
 
     # Prepare arguments - one task per year (each year computes all reforms)
     args = [(year, reform_list, scoring) for year in year_list]
 
-    # Run in parallel
+    # Run in parallel, saving intermediate results as they complete
     all_results = []
+    completed = 0
     for result_batch in compute_year.starmap(args):
         all_results.extend(result_batch)
-        completed_years = len(all_results) // len(reform_list)
-        print(f"  Completed: {completed_years}/{len(year_list)} years...")
+        completed += 1
 
-    # Save results
-    Path(output).parent.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(all_results)
-    df.to_csv(output, index=False)
-    print(f"\nSaved {len(df)} results to {output}")
+        # Save intermediate results for this year
+        if result_batch:
+            year = result_batch[0]['year']
+            year_df = pd.DataFrame(result_batch)
+            year_file = output_dir / f"year_{year}.csv"
+            year_df.to_csv(year_file, index=False)
+            print(f"  [{completed}/{len(year_list)}] Year {year} saved to {year_file}")
+
+    # Combine all intermediate results into final output
+    _combine_results(output_dir, output_path, reform_list)
+
+
+def _combine_results(output_dir, output_path, reform_list):
+    """Combine all year_*.csv files into a single output file."""
+    import pandas as pd
+    from pathlib import Path
+
+    all_files = sorted(output_dir.glob("year_*.csv"))
+    if not all_files:
+        print("No results to combine!")
+        return
+
+    dfs = [pd.read_csv(f) for f in all_files]
+    df = pd.concat(dfs, ignore_index=True)
+    df = df.sort_values(['reform_name', 'year'])
+    df.to_csv(output_path, index=False)
+    print(f"\nCombined {len(all_files)} year files into {output_path}")
+    print(f"Total results: {len(df)} rows")
 
     # Print summary
     print("\n" + "=" * 60)
-    print("SUMMARY (75-year totals)")
+    print("SUMMARY (totals across computed years)")
     print("=" * 60)
     for reform_id in reform_list:
         reform_df = df[df['reform_name'] == reform_id]
-        total_impact = reform_df['revenue_impact'].sum() / 1e9
-        oasdi_impact = reform_df['tob_oasdi_impact'].sum() / 1e9
-        hi_impact = reform_df['tob_medicare_hi_impact'].sum() / 1e9
-        print(f"{reform_id}: ${total_impact:+,.1f}B total (OASDI: ${oasdi_impact:+,.1f}B, HI: ${hi_impact:+,.1f}B)")
+        if len(reform_df) > 0:
+            total_impact = reform_df['revenue_impact'].sum() / 1e9
+            oasdi_impact = reform_df['tob_oasdi_impact'].sum() / 1e9
+            hi_impact = reform_df['tob_medicare_hi_impact'].sum() / 1e9
+            print(f"{reform_id}: ${total_impact:+,.1f}B total (OASDI: ${oasdi_impact:+,.1f}B, HI: ${hi_impact:+,.1f}B)")
