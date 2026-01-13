@@ -21,6 +21,10 @@ PROJECT_ROOT = Path(__file__).parent.parent
 # Create the Modal app
 app = modal.App("crfb-ss-analysis")
 
+# Create a Modal Volume for persistent result storage
+# This ensures results survive even if the client disconnects
+results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
+
 # Path to local policyengine-us repo
 POLICYENGINE_US_PATH = Path("/Users/pavelmakarchuk/policyengine-us")
 
@@ -43,15 +47,20 @@ image = (
     image=image,
     cpu=4,
     memory=32768,  # 32GB
-    timeout=3600,  # 1 hour max
+    timeout=7200,  # 2 hours max
+    volumes={"/results": results_volume},  # Mount volume for saving results
 )
 def compute_year(
     year: int,
     reform_ids: list[str],
     scoring_type: str = "static",
+    save_path: str = None,  # Optional: path in /results volume to save immediately
 ) -> list[dict]:
     """
     Compute all specified reforms for a single year.
+
+    Results are saved IMMEDIATELY to the Modal volume if save_path is provided.
+    This ensures results survive even if the job fails or client disconnects.
 
     Mirrors the GCP batch/compute_year.py logic:
     - Download dataset ONCE per year
@@ -106,8 +115,8 @@ def compute_year(
         'option10': get_option10_reform,
         'option11': get_option11_reform,
         'option12': get_option12_reform,
-        'option13': get_option13_reform,
-        'balanced_fix': get_balanced_fix_reform,
+        # option13 uses option12 reform against balanced_fix baseline (handled specially below)
+        'option13': get_option12_reform,
     }
 
     # Dict-returning functions for dynamic scoring with CBO elasticities
@@ -124,8 +133,8 @@ def compute_year(
         'option10': get_option10_dynamic_dict,
         'option11': get_option11_dynamic_dict,
         'option12': get_option12_dynamic_dict,
-        'option13': get_option13_dynamic_dict,
-        'balanced_fix': get_balanced_fix_dynamic_dict,
+        # option13 uses option12 reform against balanced_fix baseline (handled specially below)
+        'option13': get_option12_dynamic_dict,
     }
 
     print(f"\n{'='*60}")
@@ -158,6 +167,38 @@ def compute_year(
     # Clean up baseline objects
     del baseline_sim, baseline_income_tax, baseline_tob_medicare, baseline_tob_oasdi, baseline_tob_total
     gc.collect()
+
+    # Step 2b: If option13 is requested, compute balanced_fix baseline
+    # Option13 = Option12 scored against balanced_fix baseline (not current law)
+    balanced_fix_baseline = None
+    if 'option13' in reform_ids:
+        print(f"\n[2b] Computing balanced_fix baseline for option13...")
+        bf_start = time.time()
+
+        # Create balanced_fix reform to use as baseline for option13
+        if scoring_type == 'static':
+            bf_reform = get_balanced_fix_reform()
+        else:
+            bf_reform = Reform.from_dict(get_balanced_fix_dynamic_dict(), country_id="us")
+
+        bf_sim = Microsimulation(reform=bf_reform, dataset=dataset_name)
+        bf_income_tax = bf_sim.calculate("income_tax", map_to="household", period=year)
+        bf_tob_medicare = bf_sim.calculate("tob_revenue_medicare_hi", map_to="household", period=year)
+        bf_tob_oasdi = bf_sim.calculate("tob_revenue_oasdi", map_to="household", period=year)
+        bf_tob_total = bf_sim.calculate("tob_revenue_total", map_to="household", period=year)
+
+        balanced_fix_baseline = {
+            'revenue': float(bf_income_tax.sum()),
+            'tob_medicare': float(bf_tob_medicare.sum()),
+            'tob_oasdi': float(bf_tob_oasdi.sum()),
+            'tob_total': float(bf_tob_total.sum()),
+        }
+
+        print(f"    Balanced Fix Baseline: ${balanced_fix_baseline['revenue']/1e9:.2f}B ({time.time()-bf_start:.1f}s)")
+        print(f"    TOB - OASDI: ${balanced_fix_baseline['tob_oasdi']/1e9:.2f}B, Medicare HI: ${balanced_fix_baseline['tob_medicare']/1e9:.2f}B")
+
+        del bf_sim, bf_income_tax, bf_tob_medicare, bf_tob_oasdi, bf_tob_total, bf_reform
+        gc.collect()
 
     # Step 3: Run reforms (same logic as GCP batch)
     results = []
@@ -194,13 +235,25 @@ def compute_year(
             reform_tob_oasdi_revenue = float(reform_tob_oasdi.sum())
             reform_tob_total_revenue = float(reform_tob_total.sum())
 
-            # Calculate impacts
-            impact = reform_revenue - baseline_revenue
-            tob_medicare_impact = reform_tob_medicare_revenue - baseline_tob_medicare_revenue
-            tob_oasdi_impact = reform_tob_oasdi_revenue - baseline_tob_oasdi_revenue
-            tob_total_impact = reform_tob_total_revenue - baseline_tob_total_revenue
+            # For option13, use balanced_fix as the baseline instead of current law
+            if reform_id == 'option13' and balanced_fix_baseline:
+                compare_revenue = balanced_fix_baseline['revenue']
+                compare_tob_medicare = balanced_fix_baseline['tob_medicare']
+                compare_tob_oasdi = balanced_fix_baseline['tob_oasdi']
+                compare_tob_total = balanced_fix_baseline['tob_total']
+            else:
+                compare_revenue = baseline_revenue
+                compare_tob_medicare = baseline_tob_medicare_revenue
+                compare_tob_oasdi = baseline_tob_oasdi_revenue
+                compare_tob_total = baseline_tob_total_revenue
 
-            # Handle Options 5 & 6 employer payroll tax (same as GCP batch)
+            # Calculate impacts (against appropriate baseline)
+            impact = reform_revenue - compare_revenue
+            tob_medicare_impact = reform_tob_medicare_revenue - compare_tob_medicare
+            tob_oasdi_impact = reform_tob_oasdi_revenue - compare_tob_oasdi
+            tob_total_impact = reform_tob_total_revenue - compare_tob_total
+
+            # Handle Options 5, 6, 12, 13 employer payroll tax (direct branching)
             employer_ss_revenue = 0.0
             employer_medicare_revenue = 0.0
             oasdi_gain = 0.0
@@ -210,22 +263,20 @@ def compute_year(
             oasdi_net = tob_oasdi_impact
             hi_net = tob_medicare_impact
 
-            if reform_id in ['option5', 'option6']:
+            if reform_id in ['option5', 'option6', 'option12', 'option13']:
                 try:
                     emp_ss = reform_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year)
                     emp_medicare = reform_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year)
                     employer_ss_revenue = float(emp_ss.sum())
                     employer_medicare_revenue = float(emp_medicare.sum())
 
-                    # Calculate losses (from TOB reduction/elimination)
-                    oasdi_loss = baseline_tob_oasdi_revenue - reform_tob_oasdi_revenue
-                    hi_loss = baseline_tob_medicare_revenue - reform_tob_medicare_revenue
-
-                    # Calculate gains based on allocation rules (same as GCP batch)
-                    if reform_id == 'option5':
+                    # === GAINS: Calculate based on allocation rules ===
+                    if reform_id in ['option5', 'option12', 'option13']:
+                        # Direct branching: employer SS tax → OASDI, employer Medicare tax → HI
                         oasdi_gain = employer_ss_revenue
                         hi_gain = employer_medicare_revenue
                     elif reform_id == 'option6':
+                        # Phased allocation during 2026-2032
                         phase_in_rates = {
                             2026: 0.1307, 2027: 0.2614, 2028: 0.3922, 2029: 0.5229,
                             2030: 0.6536, 2031: 0.7843, 2032: 0.9150
@@ -244,6 +295,38 @@ def compute_year(
                                 oasdi_share = 6.2 / total_pp
                                 oasdi_gain = total_gain * oasdi_share
                                 hi_gain = total_gain * (1 - oasdi_share)
+
+                    # === LOSSES: Calculate based on allocation rules ===
+                    if reform_id in ['option12', 'option13']:
+                        # Option 12/13: Sequential phase-out with policy-driven attribution
+                        # Phase 1 (2029-2048): OASDI portion phases out - ALL loss to OASDI
+                        # Phase 2 (2049-2062): HI portion phases out - ALL loss to HI
+                        total_tob_loss = (compare_tob_oasdi + compare_tob_medicare) - (reform_tob_oasdi_revenue + reform_tob_medicare_revenue)
+
+                        if year < 2029:
+                            # Before phase-out starts - no TOB loss yet
+                            oasdi_loss = 0.0
+                            hi_loss = 0.0
+                        elif year <= 2048:
+                            # Phase 1: ALL loss attributed to OASDI
+                            oasdi_loss = total_tob_loss
+                            hi_loss = 0.0
+                        elif year <= 2062:
+                            # Phase 2: OASDI portion fully phased out, remaining loss to HI
+                            # OASDI loses its full baseline share, HI loses the rest
+                            baseline_oasdi_share = compare_tob_oasdi / (compare_tob_oasdi + compare_tob_medicare) if (compare_tob_oasdi + compare_tob_medicare) > 0 else 0.54
+                            baseline_oasdi_tob = (compare_tob_oasdi + compare_tob_medicare) * baseline_oasdi_share
+                            oasdi_loss = baseline_oasdi_tob  # Full OASDI baseline lost
+                            hi_loss = total_tob_loss - oasdi_loss  # Remainder is HI loss
+                        else:
+                            # After 2062: TOB fully phased out - attribute by baseline shares
+                            baseline_oasdi_share = compare_tob_oasdi / (compare_tob_oasdi + compare_tob_medicare) if (compare_tob_oasdi + compare_tob_medicare) > 0 else 0.54
+                            oasdi_loss = (compare_tob_oasdi + compare_tob_medicare) * baseline_oasdi_share
+                            hi_loss = (compare_tob_oasdi + compare_tob_medicare) * (1 - baseline_oasdi_share)
+                    else:
+                        # Options 5, 6: Use actual TOB revenue changes from simulation
+                        oasdi_loss = compare_tob_oasdi - reform_tob_oasdi_revenue
+                        hi_loss = compare_tob_medicare - reform_tob_medicare_revenue
 
                     oasdi_net = oasdi_gain - oasdi_loss
                     hi_net = hi_gain - hi_loss
@@ -295,6 +378,23 @@ def compute_year(
     print(f"COMPLETE: {len(results)} reforms for year {year}")
     print(f"{'='*60}\n")
 
+    # Save results to Modal Volume IMMEDIATELY if save_path provided
+    # This ensures results survive even if the client disconnects
+    if save_path and results:
+        import pandas as pd
+        from pathlib import Path
+
+        volume_path = Path("/results") / save_path / f"year_{year}.csv"
+        volume_path.parent.mkdir(parents=True, exist_ok=True)
+
+        df = pd.DataFrame(results)
+        df.to_csv(volume_path, index=False)
+
+        # Commit the volume to persist changes
+        results_volume.commit()
+
+        print(f"SAVED TO VOLUME: {volume_path}")
+
     return results
 
 
@@ -345,7 +445,7 @@ def run_reforms(
     scoring: str = "dynamic",
     years: str = "2026-2100",
     output: str = "results/modal_results.csv",
-    resume: bool = False,
+    resume: bool = True,
 ):
     """
     Run multiple reforms across all years in parallel (year-based parallelization).
@@ -378,6 +478,11 @@ def run_reforms(
     output_dir = output_path.parent / f"{output_path.stem}_{scoring}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Create unique volume path for this run (results saved on remote workers)
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    volume_save_path = f"{output_path.stem}_{scoring}_{run_id}"
+    print(f"Volume save path: /results/{volume_save_path}/")
+
     # Check for existing results if resuming
     completed_years = set()
     if resume:
@@ -402,28 +507,75 @@ def run_reforms(
     print(f"Years: {year_list[0]} to {year_list[-1]}")
     print(f"Scoring: {scoring}")
     print(f"Intermediate results: {output_dir}/")
+    print(f"Volume backup: /results/{volume_save_path}/")
     print()
 
     # Prepare arguments - one task per year (each year computes all reforms)
-    args = [(year, reform_list, scoring) for year in year_list]
+    # IMPORTANT: Include save_path so remote workers save to Modal Volume immediately
+    args = [(year, reform_list, scoring, volume_save_path) for year in year_list]
 
     # Run in parallel, saving intermediate results as they complete
     all_results = []
     completed = 0
-    for result_batch in compute_year.starmap(args):
-        all_results.extend(result_batch)
-        completed += 1
+    job_failed = False
 
-        # Save intermediate results for this year
-        if result_batch:
-            year = result_batch[0]['year']
-            year_df = pd.DataFrame(result_batch)
-            year_file = output_dir / f"year_{year}.csv"
-            year_df.to_csv(year_file, index=False)
-            print(f"  [{completed}/{len(year_list)}] Year {year} saved to {year_file}")
+    try:
+        for result_batch in compute_year.starmap(args):
+            all_results.extend(result_batch)
+            completed += 1
+
+            # Also save locally for redundancy
+            if result_batch:
+                year = result_batch[0]['year']
+                year_df = pd.DataFrame(result_batch)
+                year_file = output_dir / f"year_{year}.csv"
+                year_df.to_csv(year_file, index=False)
+                print(f"  [{completed}/{len(year_list)}] Year {year} saved to {year_file}")
+    except Exception as e:
+        print(f"\n{'='*60}")
+        print(f"JOB FAILED: {e}")
+        print(f"{'='*60}")
+        print(f"\nBut results were saved to Modal Volume!")
+        print(f"Downloading completed results from volume...")
+        job_failed = True
+
+    # If job failed, download whatever completed from the volume
+    if job_failed:
+        _download_from_volume(volume_save_path, output_dir)
 
     # Combine all intermediate results into final output
     _combine_results(output_dir, output_path, reform_list)
+
+
+def _download_from_volume(volume_path: str, output_dir):
+    """Download results from Modal Volume to local directory."""
+    import subprocess
+
+    print(f"\nDownloading from volume: {volume_path}")
+
+    # List files in the volume
+    result = subprocess.run(
+        ["modal", "volume", "ls", "crfb-results", volume_path],
+        capture_output=True,
+        text=True
+    )
+    print(f"Volume contents:\n{result.stdout}")
+
+    # Download each file
+    result = subprocess.run(
+        ["modal", "volume", "get", "crfb-results", f"{volume_path}/", str(output_dir) + "/"],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        print(f"Downloaded to {output_dir}/")
+    else:
+        print(f"Download error: {result.stderr}")
+
+    # Count what we got
+    from pathlib import Path
+    downloaded = list(Path(output_dir).glob("year_*.csv"))
+    print(f"Downloaded {len(downloaded)} year files")
 
 
 def _combine_results(output_dir, output_path, reform_list):
@@ -454,3 +606,47 @@ def _combine_results(output_dir, output_path, reform_list):
             oasdi_impact = reform_df['tob_oasdi_impact'].sum() / 1e9
             hi_impact = reform_df['tob_medicare_hi_impact'].sum() / 1e9
             print(f"{reform_id}: ${total_impact:+,.1f}B total (OASDI: ${oasdi_impact:+,.1f}B, HI: ${hi_impact:+,.1f}B)")
+
+
+@app.local_entrypoint()
+def list_volume_results():
+    """List all saved results in the Modal volume."""
+    import subprocess
+
+    print("\nResults saved in Modal volume 'crfb-results':")
+    print("=" * 60)
+
+    result = subprocess.run(
+        ["modal", "volume", "ls", "crfb-results"],
+        capture_output=True,
+        text=True
+    )
+    print(result.stdout)
+    if result.stderr:
+        print(f"Error: {result.stderr}")
+
+
+@app.local_entrypoint()
+def recover_results(
+    volume_path: str,
+    output: str = "results/recovered/",
+):
+    """
+    Recover results from a failed job that saved to Modal volume.
+
+    Args:
+        volume_path: The volume path from a previous run (shown in job output)
+        output: Local directory to download results to
+    """
+    from pathlib import Path
+
+    output_dir = Path(output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    _download_from_volume(volume_path, output_dir)
+
+    # List what we got
+    files = sorted(output_dir.glob("year_*.csv"))
+    print(f"\nRecovered {len(files)} year files:")
+    for f in files:
+        print(f"  {f.name}")
