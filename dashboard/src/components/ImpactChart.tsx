@@ -59,7 +59,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             type: 'bar' as const,
             name: 'OASDI Trust Fund',
             marker: { color: TEAL_500 },
-            hovertemplate: `${hoverFormat}<extra>OASDI</extra>`,
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>OASDI</extra>`,
           },
           {
             x: years,
@@ -67,7 +67,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             type: 'bar' as const,
             name: 'Medicare HI Trust Fund',
             marker: { color: TEAL_300 },
-            hovertemplate: `${hoverFormat}<extra>Medicare HI</extra>`,
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Medicare HI</extra>`,
           },
           {
             x: years,
@@ -77,7 +77,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             name: 'Net Total',
             line: { color: TEAL_900, width: 2 },
             marker: { color: TEAL_900, size: 4 },
-            hovertemplate: `${hoverFormat}<extra>Net Total</extra>`,
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Net Total</extra>`,
           },
         ]
       : [
@@ -90,7 +90,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             name: 'Net Total',
             line: { color: TEAL_900, width: 2 },
             marker: { color: TEAL_900, size: 6 },
-            hovertemplate: `${hoverFormat}<extra>Net Total</extra>`,
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Net Total</extra>`,
           },
         ]
     : [
@@ -102,7 +102,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
           marker: {
             color: data.map(d => getTotalValue(d) >= 0 ? TEAL_500 : '#EF4444'),
           },
-          hovertemplate: `${hoverFormat}<extra></extra>`,
+          hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra></extra>`,
         },
       ]
 

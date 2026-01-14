@@ -42,7 +42,13 @@ from reforms import (
     get_option5_reform,
     get_option6_reform,
     get_option7_reform,
-    get_option8_reform
+    get_option8_reform,
+    get_option9_reform,
+    get_option10_reform,
+    get_option11_reform,
+    get_option12_reform,
+    get_option13_reform,
+    get_balanced_fix_reform,
 )
 
 # Import dict-returning functions (for dynamic scoring) from reforms.py
@@ -55,6 +61,12 @@ from reforms import (
     get_option6_dict,
     get_option7_dict,
     get_option8_dict,
+    get_option9_dict,
+    get_option10_dict,
+    get_option11_dict,
+    get_option12_dict,
+    get_option13_dict,
+    get_balanced_fix_dict,
     # Complete dynamic dicts with CBO elasticities pre-merged
     get_option1_dynamic_dict,
     get_option2_dynamic_dict,
@@ -64,6 +76,12 @@ from reforms import (
     get_option6_dynamic_dict,
     get_option7_dynamic_dict,
     get_option8_dynamic_dict,
+    get_option9_dynamic_dict,
+    get_option10_dynamic_dict,
+    get_option11_dynamic_dict,
+    get_option12_dynamic_dict,
+    get_option13_dynamic_dict,
+    get_balanced_fix_dynamic_dict,
 )
 
 # Reform functions for static scoring (return Reform classes)
@@ -76,6 +94,12 @@ REFORM_FUNCTIONS = {
     'option6': get_option6_reform,
     'option7': get_option7_reform,
     'option8': get_option8_reform,
+    'option9': get_option9_reform,
+    'option10': get_option10_reform,
+    'option11': get_option11_reform,
+    'option12': get_option12_reform,
+    'option13': get_option13_reform,
+    'balanced_fix': get_balanced_fix_reform,
 }
 
 # Dict-returning functions for dynamic scoring with CBO elasticities
@@ -88,6 +112,12 @@ REFORM_DYNAMIC_DICT_FUNCTIONS = {
     'option6': get_option6_dynamic_dict,
     'option7': get_option7_dynamic_dict,
     'option8': get_option8_dynamic_dict,
+    'option9': get_option9_dynamic_dict,
+    'option10': get_option10_dynamic_dict,
+    'option11': get_option11_dynamic_dict,
+    'option12': get_option12_dynamic_dict,
+    'option13': get_option13_dynamic_dict,
+    'balanced_fix': get_balanced_fix_dynamic_dict,
 }
 
 # CBO labor supply elasticities for dynamic scoring

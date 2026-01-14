@@ -91,6 +91,38 @@ export const REFORMS: Reform[] = [
     shortName: '100% Taxation',
     description: '100% of all Social Security benefits taxable regardless of income',
   },
+  {
+    id: 'option9',
+    name: 'Tax 90% of Benefits',
+    shortName: '90% Taxation',
+    description: '90% of all Social Security benefits taxable regardless of income',
+  },
+  {
+    id: 'option10',
+    name: 'Tax 95% of Benefits',
+    shortName: '95% Taxation',
+    description: '95% of all Social Security benefits taxable regardless of income',
+  },
+  {
+    id: 'option11',
+    name: '85% Taxation, Replace Senior Deduction with $700 Credit',
+    shortName: '85%, No Deduction, $700 Credit',
+    description: '85% taxation with $700 nonrefundable credit (phased out above $150k joint / $75k other), replacing senior deduction',
+  },
+  // Option 12 hidden temporarily - needs further review
+  // {
+  //   id: 'option12',
+  //   name: 'Extended Roth-Style Swap',
+  //   shortName: 'Extended Roth',
+  //   description: 'Immediate employer payroll taxation with benefit taxation phased out 2029-2062',
+  // },
+  // Option 13 hidden temporarily - needs further review
+  // {
+  //   id: 'option13',
+  //   name: 'Extended Roth-Style Swap vs Balanced Fix Baseline',
+  //   shortName: 'Roth vs Balanced Fix',
+  //   description: 'Option 12 scored against a baseline where trust fund gaps are closed via payroll tax increases starting 2035',
+  // },
 ]
 
 export interface ExternalEstimate {
