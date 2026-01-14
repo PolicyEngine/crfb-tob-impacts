@@ -44,9 +44,10 @@ export function parse75YearData(
     const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
 
     // Different options use different columns for impacts
-    const isOption3or4 = reformName === 'option3' || reformName === 'option4'
+    const isOption3or4or11 = reformName === 'option3' || reformName === 'option4' || reformName === 'option11'
     const isOption5or6 = reformName === 'option5' || reformName === 'option6'
     const isOption7 = reformName === 'option7'
+    const isOption12or13 = reformName === 'option12' || reformName === 'option13'
 
     let tobOasdiImpact: number
     let tobMedicareHiImpact: number
@@ -58,8 +59,14 @@ export function parse75YearData(
       revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
       tobOasdiImpact = 0
       tobMedicareHiImpact = 0
-    } else if (isOption3or4) {
-      // Options 3-4: Allocate full revenue_impact to trust funds based on baseline shares
+    } else if (isOption12or13) {
+      // Options 12, 13: Use direct branching like Options 5-6
+      // Employer payroll tax income is allocated to trust funds, so total = sum of trust fund impacts
+      tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
+      tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
+      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
+    } else if (isOption3or4or11) {
+      // Options 3, 4, 11: Allocate full revenue_impact to trust funds based on baseline shares
       // "The additional revenue raised will be allocated to the OASDI and HI trust funds
       // in a way that maintains the current projected shares of contributions from TOB revenue"
       revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0

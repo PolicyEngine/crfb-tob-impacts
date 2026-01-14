@@ -599,3 +599,12 @@ policy_id,policy_name,credit_value,year,impact_billions
 8,100% taxation of Social Security benefits,,2098,1492.08
 8,100% taxation of Social Security benefits,,2099,1545.85
 8,100% taxation of Social Security benefits,,2100,1609.74
+14,Balanced Fix (50% Tax Increase Starting 2035),,2030,0.0
+14,Balanced Fix (50% Tax Increase Starting 2035),,2050,-0.0
+14,Balanced Fix (50% Tax Increase Starting 2035),,2080,-0.0
+12,Extended Roth-Style Swap (2029-2062 Phase-Out),,2030,225.14
+12,Extended Roth-Style Swap (2029-2062 Phase-Out),,2050,199.0
+12,Extended Roth-Style Swap (2029-2062 Phase-Out),,2080,130.6
+13,Extended Roth-Style Swap vs Balanced Fix,,2030,225.14
+13,Extended Roth-Style Swap vs Balanced Fix,,2050,273.84
+13,Extended Roth-Style Swap vs Balanced Fix,,2080,399.12
