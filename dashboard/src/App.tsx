@@ -4,12 +4,16 @@ import { ImpactChart } from './components/ImpactChart'
 import { ComparisonTable } from './components/ComparisonTable'
 import { SummaryCards } from './components/SummaryCards'
 import { MethodologySection } from './components/MethodologySection'
+import { Option13Tab } from './components/Option13Tab'
 import { loadData, calculateTotals, exportToCsv, type ScoringType } from './utils/dataLoader'
 import type { YearlyImpact, DisplayUnit } from './types'
 import { REFORMS } from './types'
 import './App.css'
 
+type TabType = 'reforms' | 'option13'
+
 function App() {
+  const [activeTab, setActiveTab] = useState<TabType>('reforms')
   const [selectedReform, setSelectedReform] = useState('option1')
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({})
   const [loading, setLoading] = useState(true)
@@ -70,12 +74,30 @@ function App() {
       <main className="main">
         <section className="intro-section">
           <p>
-            This dashboard examines eight policy options for reforming the taxation of Social Security benefits,
+            This dashboard examines policy options for reforming Social Security,
             evaluating their budgetary impacts through 2100 using microsimulation modeling.
-            Select a reform option below to explore its fiscal effects.
           </p>
         </section>
 
+        <nav className="tab-navigation">
+          <button
+            className={`tab-btn ${activeTab === 'reforms' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reforms')}
+          >
+            TOB Reform Options
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'option13' ? 'active' : ''}`}
+            onClick={() => setActiveTab('option13')}
+          >
+            Balanced Fix Baseline
+          </button>
+        </nav>
+
+        {activeTab === 'option13' ? (
+          <Option13Tab />
+        ) : (
+          <>
         <section className="reform-section">
           <h2>Select a Reform Option</h2>
           <ReformSelector
@@ -184,6 +206,8 @@ function App() {
         </section>
 
         <MethodologySection />
+        </>
+        )}
       </main>
 
       <footer className="footer">

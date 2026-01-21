@@ -109,20 +109,18 @@ export const REFORMS: Reform[] = [
     shortName: '85%, No Deduction, $700 Credit',
     description: '85% taxation with $700 nonrefundable credit (phased out above $150k joint / $75k other), replacing senior deduction',
   },
-  // Option 12 hidden temporarily - needs further review
-  // {
-  //   id: 'option12',
-  //   name: 'Extended Roth-Style Swap',
-  //   shortName: 'Extended Roth',
-  //   description: 'Immediate employer payroll taxation with benefit taxation phased out 2029-2062',
-  // },
-  // Option 13 hidden temporarily - needs further review
-  // {
-  //   id: 'option13',
-  //   name: 'Extended Roth-Style Swap vs Balanced Fix Baseline',
-  //   shortName: 'Roth vs Balanced Fix',
-  //   description: 'Option 12 scored against a baseline where trust fund gaps are closed via payroll tax increases starting 2035',
-  // },
+  {
+    id: 'option12',
+    name: 'Extended Roth-Style Swap',
+    shortName: 'Extended Roth',
+    description: 'Immediate employer payroll taxation with benefit taxation phased out 2029-2062',
+  },
+  {
+    id: 'option13',
+    name: 'Balanced Fix Baseline',
+    shortName: 'Balanced Fix',
+    description: 'Trust fund gaps closed starting 2035 via 50% payroll tax increases + 50% benefit cuts (see dedicated tab for detailed analysis)',
+  },
 ]
 
 export interface ExternalEstimate {

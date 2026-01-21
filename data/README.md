@@ -1,105 +1,133 @@
 # Trust Fund Gap Data for Option 13
 
-This file documents `trust_fund_gaps.csv`, which provides the data needed to implement Option 13's "balanced fix" baseline.
+## Overview
 
-## What is the "Gap"?
+Option 13 implements a "balanced fix" baseline starting in 2035 that closes trust fund gaps via:
+1. **50% payroll tax increases** (split employee/employer)
+2. **50% SS benefit cuts** (with TOB feedback adjustment)
 
-Each trust fund has a **gap** when it pays out more in benefits than it collects in taxes:
+---
 
+## Gap Calculation Methodology
+
+### Our Simulation Approach
+
+For each year, we calculate gaps from PolicyEngine microsimulation:
+
+**SS (OASDI) Gap:**
 ```
-Gap = Cost Rate − Income Rate
+SS Income = employee_ss_tax + employer_ss_tax + tob_oasdi
+SS Outgo  = social_security (benefits)
+SS Gap    = SS Income - SS Outgo
 ```
 
-Where:
-- **Cost Rate** = Benefits paid ÷ Taxable Payroll (as % of payroll)
-- **Income Rate** = Payroll taxes + other income ÷ Taxable Payroll (as % of payroll)
+**HI (Medicare) Gap:**
+```
+HI Income = employee_medicare_tax + employer_medicare_tax + tob_hi
+HI Outgo  = HI Cost Rate × HI Taxable Payroll (from Trustees)
+HI Gap    = HI Income - HI Outgo
+```
 
-### Why express as % of payroll?
+Note: We calculate HI outgo from Trustees data because Medicare expenditures aren't in our microsimulation.
 
-Expressing the gap as a percentage of taxable payroll makes it:
-1. Comparable across years (inflation-adjusted)
-2. Directly translatable to policy fixes (e.g., "raise payroll tax by X%")
+### Gap Closing Formula (Two-Stage Approach)
 
-### Example
+Option 13 is the "traditional fix" baseline - it does NOT include the employer payroll tax reform (taxing employer contributions as income). This provides an apples-to-apples comparison with current law.
 
-If OASDI has:
-- Cost rate: 17% (pays $1.7T in benefits on $10T taxable payroll)
-- Income rate: 13.5% (collects $1.35T in payroll taxes + TOB)
-- **Gap: 3.5%** of payroll ($350B shortfall)
+Starting 2035, for each year:
 
-To close a 3.5% gap with a "balanced fix":
-- 50% via benefit cuts → reduce cost rate by 1.75%
-- 50% via tax increases → raise payroll tax by 1.75%
+**Stage 1: Apply benefit cuts, measure remaining gaps**
+```
+benefit_cut = ss_shortfall * 0.5  # Straight 50% cut
+benefit_multiplier = 1 - (benefit_cut / ss_benefits)
 
----
+# Run simulation with benefit cuts only (no other reforms)
+# Measure remaining SS and HI gaps (includes TOB effects naturally)
+remaining_ss_gap = stage1_ss_gap  # Payroll income - benefits
+remaining_hi_gap = stage1_hi_gap  # Payroll income - expenditures
+```
 
-## File: `trust_fund_gaps.csv`
+**Stage 2: Close remaining gaps with rate increases**
+```
+ss_rate_increase = abs(remaining_ss_gap) / oasdi_taxable_payroll  # If deficit
+hi_rate_increase = abs(remaining_hi_gap) / hi_taxable_payroll    # Always an increase (no surplus)
+```
+Each rate change is split equally between employee and employer.
 
-| Column | Description |
-|--------|-------------|
-| `year` | Calendar year (2026-2100) |
-| `oasdi_cost_rate` | OASDI benefits paid as % of taxable payroll |
-| `oasdi_income_rate` | OASDI income (payroll tax + TOB) as % of taxable payroll |
-| `oasdi_gap_pct` | OASDI gap = cost − income |
-| `hi_cost_rate` | Medicare HI (Part A) spending as % of taxable payroll |
-| `hi_income_rate` | HI income as % of taxable payroll |
-| `hi_gap_pct` | HI gap = cost − income |
-
----
-
-## Key Numbers from 2025 Trustees Reports
-
-| Metric | OASDI | Medicare HI |
-|--------|-------|-------------|
-| 75-year actuarial deficit | **3.82%** of payroll | **0.42%** of payroll |
-| Current payroll tax rate | 12.4% (6.2% + 6.2%) | 2.9% (1.45% + 1.45%) |
-| Trust fund depletion year | 2034 | 2033 |
-| Cost rate trajectory | 15% → 19% → 18% | 3.4% → 4.7% → 4.5% |
-
----
-
-## How Option 13 Uses This Data
-
-Option 13 scores Option 12 against a "balanced fix" baseline where, starting in 2035:
-
-**For OASDI (3.82% gap):**
-- 50% via benefit cuts = 1.91% (not modeled in PolicyEngine)
-- 50% via payroll tax increase = 1.91% → rate goes from 12.4% to 14.31%
-
-**For HI (0.42% gap):**
-- 50% via benefit cuts = 0.21% (not modeled)
-- 50% via payroll tax increase = 0.21% → rate goes from 2.9% to 3.11%
-
-The payroll tax increases are implemented in `src/reforms.py` via `get_balanced_fix_dict()`.
+**Implementation:**
+- Benefit cuts: Use `simulation.set_input("social_security", year, reduced_values)` BEFORE any `.calculate()` calls
+- Tax rates: Use `Reform.from_dict()` to modify payroll tax parameters
+- Two simulations: Stage 1 measures gaps after benefit cuts, Stage 2 applies rate increases
 
 ---
 
 ## Data Sources
 
-**OASDI:**
-- [SSA 2025 OASDI Trustees Report](https://www.ssa.gov/OACT/TR/2025/)
-- [Boston College CRR Analysis](https://crr.bc.edu/social-securitys-financial-outlook-the-2025-update-in-perspective/)
+### Trustees 2025 Data
 
-**Medicare HI:**
-- [CMS 2025 Medicare Trustees Report](https://www.cms.gov/oact/tr/2025)
-- [CRFB Analysis](https://www.crfb.org/papers/analysis-2025-medicare-trustees-report)
+| File | Contents | Source |
+|------|----------|--------|
+| `hi_expenditures_tr2025.csv` | HI expenditures by year (2035-2099) | Derived from CMS Trustees Report |
+
+**HI Expenditures** were pre-calculated from Trustees data:
+```
+HI Expenditures = Cost Rate × HI Taxable Payroll
+Example 2035: 4.31% × $20.3T = $875B
+```
 
 ---
 
-## Methodology Notes
+## Validation Against Trustees Data
 
-### Data Quality
+### 2035 Comparison
 
-The **key anchor points** (75-year deficits, depletion dates, cost rate endpoints) come directly from the Trustees Reports.
+| Metric | Our Simulation | Trustees 2025 |
+|--------|---------------|---------------|
+| HI Payroll Taxes | $535.6B | ~$589B (2.9% × $20.3T) |
+| HI TOB | $112.0B | ~$105B (2034 value) |
+| HI Expenditures | $875.0B | $875B (from cost rate) |
+| **HI Gap** | **-$227.4B** | **-$113.7B** |
 
-**Intermediate year values are interpolations** based on the trajectories described in the reports. For official year-by-year projections, download:
-- `SingleYearTRTables_TR2025.xlsx` from [SSA](https://www.ssa.gov/OACT/TR/2025/)
-- Supplementary tables from [CMS](https://www.cms.gov/oact/tr/2025)
+### Known Discrepancies
 
-### Why Start in 2035?
+1. **Payroll taxes ~$53B lower:** Our microsimulation dataset doesn't perfectly match Trustees aggregate economic projections.
 
-Both trust funds are projected to be depleted by 2034. A "balanced fix" starting in 2035 represents a scenario where Congress acts proactively to restore solvency, rather than allowing automatic benefit cuts when reserves run out.
+2. **Gap ~$114B larger:** Trustees income includes interest on trust fund assets (~$115B historically), which we don't model. By 2035, interest is near zero as trust fund depletes, so this discrepancy shrinks.
 
-### Why 50/50 Split?
+3. **Trustees detailed table stops at 2034:** The "Operations of HI Trust Fund" table only goes through 2034. For 2035+, we use cost/income rates × taxable payroll.
 
-The 50% benefit cuts / 50% tax increases split is a common assumption in solvency analyses. It represents a politically balanced approach where both beneficiaries and workers share the adjustment burden equally.
+### Validation Method
+
+Compare simulation outputs against:
+- Trustees Report "Operations of the Hospital Insurance (HI) Trust Fund" table (through 2034)
+- `hi_expenditures_tr2025.csv` (2035+)
+
+---
+
+## Example: 2035 Gap Closing
+
+**Baseline gaps:**
+- SS Gap: -$556.0B
+- HI Gap: -$227.4B
+
+**Stage 1 - Benefit cuts only:**
+- Benefit cut: $278B (50% of SS gap)
+- Benefit multiplier: 1 - ($278B / $2,630B) = 0.894 (10.6% cut)
+- Run simulation → measure remaining gaps (includes TOB losses from reduced benefits)
+
+**Stage 2 - Rate increases to close remaining gaps:**
+- SS remaining gap → calculate rate increase
+- HI remaining gap → calculate rate increase
+
+**Result:**
+- SS Gap: ~$0 ✓
+- HI Gap: ~$0 ✓
+- Combined Gap: ~$0 ✓
+
+---
+
+## References
+
+- [SSA 2025 OASDI Trustees Report](https://www.ssa.gov/OACT/TR/2025/)
+- [CMS 2025 Medicare Trustees Report](https://www.cms.gov/oact/tr/2025)
+- [CRFB Analysis](https://www.crfb.org/papers/analysis-2025-medicare-trustees-report)

@@ -519,9 +519,17 @@ def get_option12_dict():
 
     Extended Roth-Style Swap with specific phase-out schedule:
     - Employer payroll tax: 100% immediately (2026+)
-    - Benefit taxation phase-out at 2.5%/year:
-      - 2029-2048: OASDI portion (50%) phases out (base rates 0.50 → 0)
-      - 2049-2062: Medicare HI portion (35%) phases out (additional rates 0.35 → 0)
+    - Benefit taxation phase-out at 2.5%/year using TRUST FUND ALLOCATION:
+      - Phase 1 (2029-2048): OASDI portion phases out
+        - oasdi_share_of_gross_ss: 0.5 → 0 (controls trust fund split)
+        - base rates: 0.50 → 0 (tier 1 people stop paying TOB)
+        - additional rates: 0.85 → 0.35 (tier 2 people keep paying HI portion)
+      - Phase 2 (2049-2062): Medicare HI portion phases out
+        - additional rates: 0.35 → 0
+
+    Key insight: oasdi_share_of_gross_ss controls how TOB revenue is SPLIT between
+    OASDI and HI trust funds via branching calculation. Reducing it alongside
+    taxability rates ensures OASDI goes to zero while HI stays approximately constant.
     """
     reform_dict = {
         # Immediate employer payroll taxation (100% from 2026)
@@ -533,33 +541,42 @@ def get_option12_dict():
         },
     }
 
-    # Phase 1: Phase out base rate (OASDI portion) 0.50 → 0 over 2029-2048
-    # 20 years at 2.5%/year = 0.025/year reduction
-    base_years = list(range(2029, 2049))  # 2029 to 2048 inclusive
-    base_values = [0.50 - 0.025 * (i + 1) for i in range(20)]  # 0.475, 0.450, ..., 0.00
+    # Phase 1: Phase out OASDI portion over 2029-2048 (20 years at 2.5%/year)
+    phase1_years = list(range(2029, 2049))  # 2029 to 2048 inclusive
 
+    # 1. oasdi_share_of_gross_ss: 0.5 → 0 (controls trust fund allocation)
+    oasdi_share_values = [0.50 - 0.025 * (i + 1) for i in range(20)]
+    reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"] = {}
+    for year, value in zip(phase1_years, oasdi_share_values):
+        reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"][str(year)] = round(value, 4)
+    reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"]["2049-01-01.2100-12-31"] = 0
+
+    # 2. base rates: 0.50 → 0 (tier 1 people phase out of TOB entirely)
+    base_values = [0.50 - 0.025 * (i + 1) for i in range(20)]
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.base.{param_name}"
         reform_dict[param_path] = {}
-        for year, value in zip(base_years, base_values):
+        for year, value in zip(phase1_years, base_values):
             reform_dict[param_path][str(year)] = round(value, 4)
         reform_dict[param_path]["2049-01-01.2100-12-31"] = 0
 
-    # Phase 2: Phase out additional rate (Medicare HI portion) 0.35 → 0 over 2049-2062
-    # 14 years at 2.5%/year = 0.025/year reduction
-    # Note: additional.benefit_cap is total (0.85), but once base is 0, only 0.35 remains
-    # So we set additional rates to the remaining Medicare portion
-    add_years = list(range(2049, 2063))  # 2049 to 2062 inclusive
-    add_values = [0.35 - 0.025 * (i + 1) for i in range(14)]  # 0.325, 0.300, ..., 0.00
-
-    for param_name in ["benefit_cap", "bracket", "excess"]:
+    # 3. additional rates: 0.85 → 0.35 (tier 2 people keep paying HI portion)
+    # Formula: additional = oasdi_share + 0.35, so as oasdi_share → 0, additional → 0.35
+    additional_values = [0.85 - 0.025 * (i + 1) for i in range(20)]
+    for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
         reform_dict[param_path] = {}
-        # During Phase 1 (2029-2048), additional rate stays at 0.85
-        # (but effective Medicare portion shrinks as base shrinks)
-        # Actually, we need to keep it at 0.85 during phase 1, then drop to 0.35 and phase out
-        reform_dict[param_path]["2029-01-01.2048-12-31"] = 0.85
-        for year, value in zip(add_years, add_values):
+        for year, value in zip(phase1_years, additional_values):
+            reform_dict[param_path][str(year)] = round(value, 4)
+        # Will be overwritten by Phase 2 values below
+
+    # Phase 2: Phase out HI portion over 2049-2062 (14 years at 2.5%/year)
+    phase2_years = list(range(2049, 2063))  # 2049 to 2062 inclusive
+    hi_values = [0.35 - 0.025 * (i + 1) for i in range(14)]
+
+    for param_name in ["benefit_cap", "excess"]:
+        param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
+        for year, value in zip(phase2_years, hi_values):
             reform_dict[param_path][str(year)] = round(value, 4)
         reform_dict[param_path]["2063-01-01.2100-12-31"] = 0
 
@@ -702,77 +719,27 @@ def get_option12_dynamic_dict():
     return result
 
 
-def get_balanced_fix_dict():
-    """Return parameter dict for balanced trust fund fix starting 2035.
-
-    Closes OASDI and HI trust fund gaps with 50% benefit cuts + 50% payroll tax increases.
-
-    Based on 2025 Trustees Report projections:
-    - OASDI 75-year actuarial deficit: 3.82% of taxable payroll
-    - HI 75-year actuarial deficit: 0.42% of taxable payroll
-
-    Starting 2035 (after projected depletion), implements:
-    - OASDI payroll tax increase: ~1.91% (0.955% each for employee/employer)
-    - HI payroll tax increase: ~0.21% (0.105% each for employee/employer)
-    - Benefit cuts modeled separately (not in PolicyEngine parameters)
-    """
-    # Current rates: OASDI 12.4% (6.2% each), HI 2.9% (1.45% each)
-    # With 50% of gap closed via taxes:
-    # - OASDI: 6.2% + 0.955% = 7.155% each side
-    # - HI: 1.45% + 0.105% = 1.555% each side
-
-    return {
-        # OASDI (Social Security) payroll tax increase (employee and employer)
-        # Correct parameter path: gov.irs.payroll.social_security.rate.*
-        "gov.irs.payroll.social_security.rate.employee": {
-            "2035-01-01.2100-12-31": 0.07155
-        },
-        "gov.irs.payroll.social_security.rate.employer": {
-            "2035-01-01.2100-12-31": 0.07155
-        },
-        # HI (Medicare Part A) payroll tax increase
-        # Correct parameter path: gov.irs.payroll.medicare.rate.*
-        "gov.irs.payroll.medicare.rate.employee": {
-            "2035-01-01.2100-12-31": 0.01555
-        },
-        "gov.irs.payroll.medicare.rate.employer": {
-            "2035-01-01.2100-12-31": 0.01555
-        },
-    }
-
-
-def get_option13_dict():
-    """Return parameter dict for Option 13 (static scoring only - no elasticities).
-
-    Option 12 (Extended Roth-Style Swap) scored against a "balanced fix" baseline
-    where starting 2035, OASDI and HI trust fund gaps are closed with:
-    - 50% via benefit cuts (not modeled in PolicyEngine)
-    - 50% via payroll tax increases (included here)
-
-    This reform combines:
-    1. All Option 12 components (employer payroll taxation + benefit phase-out)
-    2. Balanced fix payroll tax increases starting 2035
-
-    Note: The benefit cut portion of the balanced fix cannot be directly modeled
-    in PolicyEngine, so this represents only the tax-side adjustments.
-    """
-    result = get_option12_dict()
-    result.update(get_balanced_fix_dict())
-    return result
-
-
-def get_option13_dynamic_dict():
-    """Return complete parameter dict for Option 13 with CBO elasticities."""
-    result = get_option13_dict()
-    result.update(CBO_ELASTICITIES)
-    return result
-
-
-def get_balanced_fix_dynamic_dict():
-    """Return complete parameter dict for balanced fix with CBO elasticities."""
-    result = get_balanced_fix_dict()
-    result.update(CBO_ELASTICITIES)
-    return result
+# =============================================================================
+# OPTION 13 / BALANCED FIX - NOT IMPLEMENTED HERE
+# =============================================================================
+#
+# Option 13 (Balanced Fix Baseline) requires dynamic year-by-year gap closing
+# that CANNOT be implemented via Reform.from_dict(). The implementation requires:
+#
+#   1. Running a baseline simulation to calculate actual SS/HI gaps each year
+#   2. Computing tax rate increases dynamically based on real gaps
+#   3. Applying benefit cuts via set_input() with TOB feedback adjustment
+#
+# The correct implementation is in: batch/run_option13_modal.py
+#
+# Gap Closing Formula (per year):
+#   - SS Gap = (employee_ss_tax + employer_ss_tax + tob_oasdi) - ss_benefits
+#   - HI Gap = (employee_hi_tax + employer_hi_tax + tob_hi) - medicare_expenditures
+#   - 50% closed via payroll tax increases (split employee/employer)
+#   - 50% closed via SS benefit cuts (with TOB feedback: cut / (1 - 0.175))
+#
+# To run Option 13: modal run --detach batch/run_option13_modal.py --years 2035,2036,...
+# =============================================================================
 
 
 # Policy reform functions using modular components
@@ -900,35 +867,9 @@ def get_option12_reform():
     return Reform.from_dict(get_option12_dict(), country_id="us")
 
 
-def get_option13_reform():
-    """Option 13: Extended Roth-Style Swap vs Balanced Fix Baseline.
-
-    This reform combines Option 12 with a "balanced fix" baseline adjustment.
-    The balanced fix closes OASDI and HI trust fund gaps starting 2035 with:
-    - 50% via benefit cuts (not directly modeled - would require separate calculation)
-    - 50% via payroll tax increases (included in this reform)
-
-    To get the true "Option 12 vs Balanced Fix" impact:
-    1. Run Option 13 vs current law
-    2. Run balanced_fix alone vs current law
-    3. Compute: Option 13 impact - Balanced Fix impact
-
-    Alternatively, run Option 12 and Option 13 separately and compare.
-    """
-    return Reform.from_dict(get_option13_dict(), country_id="us")
-
-
-def get_balanced_fix_reform():
-    """Balanced Fix Baseline: Proactive Trust Fund Solvency Fix.
-
-    Implements payroll tax increases starting 2035 to close 50% of the
-    OASDI and HI trust fund gaps. This represents the "alternative baseline"
-    where Congress proactively addresses solvency rather than allowing
-    automatic benefit cuts upon trust fund depletion.
-
-    Use this to compute the "baseline" for scoring Option 12 against.
-    """
-    return Reform.from_dict(get_balanced_fix_dict(), country_id="us")
+# NOTE: get_option13_reform() and get_balanced_fix_reform() have been removed.
+# See comment block above for why Option 13 cannot be implemented here.
+# Use batch/run_option13_modal.py instead.
 
 
 # Dictionary mapping reform IDs to configurations
@@ -981,12 +922,5 @@ REFORMS = {
         "name": "Extended Roth-Style Swap (2029-2062 Phase-Out)",
         "func": get_option12_reform,
     },
-    "option13": {
-        "name": "Extended Roth-Style Swap vs Balanced Fix Baseline",
-        "func": get_option13_reform,
-    },
-    "balanced_fix": {
-        "name": "Balanced Trust Fund Fix (50% Tax / 50% Benefit Cuts)",
-        "func": get_balanced_fix_reform,
-    },
+    # NOTE: option13 and balanced_fix removed - use batch/run_option13_modal.py
 }

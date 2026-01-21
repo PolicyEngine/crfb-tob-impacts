@@ -20,6 +20,9 @@ RUN pip install --no-cache-dir /app/policyengine-us/
 # Copy source code (will be available when we build from parent directory)
 COPY src/ /app/src/
 
+# Copy data files (for Option 13 HI expenditures, etc.)
+COPY data/ /app/data/
+
 # Copy batch worker scripts
 COPY batch/compute_year.py /app/batch/
 
