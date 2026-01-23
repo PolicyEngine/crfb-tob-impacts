@@ -32,6 +32,20 @@ interface Option13Data {
   totalGapAfter: number
 }
 
+interface TrusteesComparisonData {
+  year: number
+  oasdiTaxablePayrollB: number
+  hiTaxablePayrollB: number
+  oasdiGapPct: number
+  trusteesOasdiGapB: number
+  peOasdiGapB: number | null
+  oasdiPeTrusteesRatio: number | null
+  hiGapPct: number
+  trusteesHiGapB: number
+  peHiGapB: number | null
+  hiPeTrusteesRatio: number | null
+}
+
 // Current law rates (2024)
 const CURRENT_SS_RATE = 0.062 // 6.2% each for employee/employer
 const CURRENT_HI_RATE = 0.0145 // 1.45% each for employee/employer
@@ -81,13 +95,47 @@ async function loadOption13Data(): Promise<Option13Data[]> {
   return data.sort((a, b) => a.year - b.year)
 }
 
+async function loadTrusteesComparisonData(): Promise<TrusteesComparisonData[]> {
+  const response = await fetch(`${BASE_URL}data/trustees_vs_pe_gaps_comparison.csv`)
+  const csvContent = await response.text()
+  const lines = csvContent.trim().split('\n')
+  const data: TrusteesComparisonData[] = []
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',')
+    const parseOrNull = (val: string) => val === '' ? null : parseFloat(val)
+    // Columns: year, oasdi_taxable_payroll_B, hi_taxable_payroll_B, oasdi_gap_pct,
+    //          trustees_oasdi_gap_B, pe_oasdi_gap_B, oasdi_pe_trustees_ratio,
+    //          hi_gap_pct, trustees_hi_gap_B, pe_hi_gap_B, hi_pe_trustees_ratio
+    data.push({
+      year: parseInt(values[0]),
+      oasdiTaxablePayrollB: parseFloat(values[1]),
+      hiTaxablePayrollB: parseFloat(values[2]),
+      oasdiGapPct: parseFloat(values[3]),
+      trusteesOasdiGapB: parseFloat(values[4]),
+      peOasdiGapB: parseOrNull(values[5]),
+      oasdiPeTrusteesRatio: parseOrNull(values[6]),
+      hiGapPct: parseFloat(values[7]),
+      trusteesHiGapB: parseFloat(values[8]),
+      peHiGapB: parseOrNull(values[9]),
+      hiPeTrusteesRatio: parseOrNull(values[10]),
+    })
+  }
+
+  return data.sort((a, b) => a.year - b.year)
+}
+
 export function Option13Tab() {
   const [data, setData] = useState<Option13Data[]>([])
+  const [trusteesData, setTrusteesData] = useState<TrusteesComparisonData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadOption13Data()
-      .then(setData)
+    Promise.all([loadOption13Data(), loadTrusteesComparisonData()])
+      .then(([option13Data, trusteesCompData]) => {
+        setData(option13Data)
+        setTrusteesData(trusteesCompData)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -157,10 +205,10 @@ export function Option13Tab() {
               },
             ]}
             layout={{
-              title: 'Benefit Cuts by Year',
-              xaxis: { title: 'Year', tickmode: 'array', tickvals: years },
+              title: { text: 'Benefit Cuts by Year', font: { size: 16, family: 'Roboto, sans-serif' } },
+              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
               yaxis: { title: 'Benefit Cut (%)', ticksuffix: '%' },
-              margin: { t: 50, b: 50, l: 60, r: 30 },
+              margin: { t: 60, b: 60, l: 60, r: 30 },
               height: 300,
             }}
             config={{ responsive: true, displayModeBar: false }}
@@ -189,10 +237,10 @@ export function Option13Tab() {
               },
             ]}
             layout={{
-              title: 'Payroll Tax Rate Increases',
-              xaxis: { title: 'Year', tickmode: 'array', tickvals: years },
+              title: { text: 'Payroll Tax Rate Increases', font: { size: 16, family: 'Roboto, sans-serif' } },
+              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
               yaxis: { title: 'Rate Increase (pp)', ticksuffix: 'pp' },
-              margin: { t: 50, b: 50, l: 60, r: 30 },
+              margin: { t: 60, b: 60, l: 60, r: 30 },
               height: 300,
               barmode: 'group',
               legend: { orientation: 'h', y: -0.2 },
@@ -223,10 +271,10 @@ export function Option13Tab() {
               },
             ]}
             layout={{
-              title: 'Social Security Trust Fund Gap',
-              xaxis: { title: 'Year', tickmode: 'array', tickvals: years },
+              title: { text: 'Social Security Trust Fund Gap', font: { size: 16, family: 'Roboto, sans-serif' } },
+              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
               yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
-              margin: { t: 50, b: 50, l: 70, r: 30 },
+              margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',
               legend: { orientation: 'h', y: -0.2 },
@@ -257,10 +305,10 @@ export function Option13Tab() {
               },
             ]}
             layout={{
-              title: 'Medicare HI Trust Fund Gap',
-              xaxis: { title: 'Year', tickmode: 'array', tickvals: years },
+              title: { text: 'Medicare HI Trust Fund Gap', font: { size: 16, family: 'Roboto, sans-serif' } },
+              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
               yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
-              margin: { t: 50, b: 50, l: 70, r: 30 },
+              margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',
               legend: { orientation: 'h', y: -0.2 },
@@ -291,10 +339,10 @@ export function Option13Tab() {
               },
             ]}
             layout={{
-              title: 'Combined Trust Fund Gap (SS + HI)',
-              xaxis: { title: 'Year', tickmode: 'array', tickvals: years },
+              title: { text: 'Combined Trust Fund Gap (SS + HI)', font: { size: 16, family: 'Roboto, sans-serif' } },
+              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
               yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
-              margin: { t: 50, b: 50, l: 70, r: 30 },
+              margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',
               legend: { orientation: 'h', y: -0.2 },
@@ -306,39 +354,67 @@ export function Option13Tab() {
       </div>
 
       <div className="option13-table">
-        <h3>Detailed Results by Year</h3>
+        <h3>Detailed Results by Year (with Trustees Comparison)</h3>
+        <p className="table-intro">
+          This table shows Option 13 reform parameters alongside trust fund gap comparisons between PolicyEngine microsimulation and SSA Trustees Report actuarial projections.
+        </p>
         <table>
           <thead>
             <tr>
-              <th>Year</th>
+              <th rowSpan={2}>Year</th>
+              <th colSpan={3} className="header-group">Option 13 Reforms</th>
+              <th colSpan={4} className="header-group">OASDI Gap ($B)</th>
+              <th colSpan={4} className="header-group">HI Gap ($B)</th>
+            </tr>
+            <tr>
               <th>Benefit Cut</th>
               <th>SS Rate</th>
               <th>HI Rate</th>
-              <th>SS Gap (Before)</th>
-              <th>SS Gap (After)</th>
-              <th>HI Gap (Before)</th>
-              <th>HI Gap (After)</th>
-              <th>Combined (Before)</th>
-              <th>Combined (After)</th>
+              <th>Trustees</th>
+              <th>PE (Before)</th>
+              <th>PE/TR</th>
+              <th>PE (After)</th>
+              <th>Trustees</th>
+              <th>PE (Before)</th>
+              <th>PE/TR</th>
+              <th>PE (After)</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((row, i) => (
-              <tr key={row.year}>
-                <td>{row.year}</td>
-                <td className="negative">{benefitCutPct[i].toFixed(1)}%</td>
-                <td>{(row.newEmployeeSsRate * 2 * 100).toFixed(2)}%</td>
-                <td>{(row.newEmployeeHiRate * 2 * 100).toFixed(2)}%</td>
-                <td className="negative">${ssGapBefore[i].toFixed(0)}B</td>
-                <td className="positive">${ssGapAfterArr[i].toFixed(0)}B</td>
-                <td className="negative">${hiGapBefore[i].toFixed(0)}B</td>
-                <td className="positive">${hiGapAfterArr[i].toFixed(0)}B</td>
-                <td className="negative">${combinedGapBefore[i].toFixed(0)}B</td>
-                <td className="positive">${combinedGapAfter[i].toFixed(0)}B</td>
-              </tr>
-            ))}
+            {data.map((row, i) => {
+              const trusteesRow = trusteesData.find(t => t.year === row.year)
+              // Gaps are negative for deficit, positive for surplus
+              const ssGap = ssGapBefore[i]  // Already in $B, negative = deficit
+              const hiGap = hiGapBefore[i]  // Already in $B, negative = deficit
+              const oasdiRatio = trusteesRow && trusteesRow.trusteesOasdiGapB !== 0
+                ? (Math.abs(ssGap) / trusteesRow.trusteesOasdiGapB)
+                : null
+              const hiRatio = trusteesRow && trusteesRow.trusteesHiGapB > 0 && hiGap < 0
+                ? (Math.abs(hiGap) / trusteesRow.trusteesHiGapB)
+                : null
+              return (
+                <tr key={row.year}>
+                  <td>{row.year}</td>
+                  <td className="negative">{benefitCutPct[i].toFixed(1)}%</td>
+                  <td>{(row.newEmployeeSsRate * 2 * 100).toFixed(2)}%</td>
+                  <td>{(row.newEmployeeHiRate * 2 * 100).toFixed(2)}%</td>
+                  <td className="negative">{trusteesRow ? `-$${trusteesRow.trusteesOasdiGapB.toFixed(0)}` : '—'}</td>
+                  <td className={ssGap < 0 ? 'negative' : 'positive'}>{ssGap < 0 ? `-$${Math.abs(ssGap).toFixed(0)}` : `+$${ssGap.toFixed(0)}`}</td>
+                  <td>{oasdiRatio ? `${oasdiRatio.toFixed(2)}x` : '—'}</td>
+                  <td className="positive">${ssGapAfterArr[i].toFixed(0)}</td>
+                  <td className={trusteesRow && trusteesRow.trusteesHiGapB > 0 ? 'negative' : 'positive'}>{trusteesRow ? (trusteesRow.trusteesHiGapB > 0 ? `-$${trusteesRow.trusteesHiGapB.toFixed(0)}` : `+$${Math.abs(trusteesRow.trusteesHiGapB).toFixed(0)}`) : '—'}</td>
+                  <td className={hiGap < 0 ? 'negative' : 'positive'}>{hiGap < 0 ? `-$${Math.abs(hiGap).toFixed(0)}` : `+$${hiGap.toFixed(0)}`}</td>
+                  <td>{hiRatio ? `${hiRatio.toFixed(2)}x` : (hiGap >= 0 ? 'surplus' : '—')}</td>
+                  <td className="positive">${hiGapAfterArr[i].toFixed(0)}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
+        <div className="table-notes">
+          <p><strong>Legend:</strong> Trustees = SSA Trustees Report projection, PE = PolicyEngine microsimulation, PE/TR = ratio (1.0x = perfect match)</p>
+          <p><strong>Signs:</strong> <span className="negative">-$X = deficit</span>, <span className="positive">+$X = surplus</span>. Note: PE shows HI surplus starting ~2097 due to SECA taxes; Trustees shows near-zero gap.</p>
+        </div>
       </div>
 
       <div className="option13-methodology">
@@ -407,6 +483,7 @@ export function Option13Tab() {
           <li><strong>Two-stage approach:</strong> Measure actual gaps after benefit cuts instead of estimating TOB losses upfront.</li>
         </ul>
       </div>
+
     </div>
   )
 }

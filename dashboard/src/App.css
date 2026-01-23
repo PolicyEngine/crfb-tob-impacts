@@ -941,3 +941,94 @@ body {
 .option13-methodology li strong {
   color: var(--gray-700);
 }
+
+/* Trustees vs PE Comparison Table */
+.option13-trustees-comparison {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+}
+
+.option13-trustees-comparison h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-800);
+  font-size: 1.25rem;
+}
+
+.comparison-intro {
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.option13-trustees-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.option13-trustees-comparison th,
+.option13-trustees-comparison td {
+  padding: 0.5rem 0.75rem;
+  text-align: right;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.option13-trustees-comparison th {
+  background: var(--gray-100);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.option13-trustees-comparison th.header-group {
+  text-align: center;
+  background: var(--gray-200);
+  border-left: 2px solid var(--gray-300);
+}
+
+.option13-trustees-comparison th:first-child,
+.option13-trustees-comparison td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.option13-trustees-comparison td.positive {
+  color: var(--teal-600);
+}
+
+.option13-trustees-comparison td.negative {
+  color: var(--red-600);
+}
+
+.comparison-notes {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid var(--teal-500);
+}
+
+.comparison-notes h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-700);
+  font-size: 0.95rem;
+}
+
+.comparison-notes ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.comparison-notes li {
+  margin-bottom: 0.5rem;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.comparison-notes li strong {
+  color: var(--gray-700);
+}

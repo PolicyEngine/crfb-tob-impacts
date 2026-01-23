@@ -122,6 +122,7 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     # SS components
     employee_ss_tax = baseline.calculate("employee_social_security_tax", year).sum()
     employer_ss_tax = baseline.calculate("employer_social_security_tax", year).sum()
+    se_ss_tax = baseline.calculate("self_employment_social_security_tax", year).sum()
     tob_oasdi = baseline.calculate("tob_revenue_oasdi", year).sum()
 
     ss_benefits_series = baseline.calculate("social_security", year)
@@ -131,6 +132,7 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     # HI components
     employee_hi_tax = baseline.calculate("employee_medicare_tax", year).sum()
     employer_hi_tax = baseline.calculate("employer_medicare_tax", year).sum()
+    se_medicare_tax = baseline.calculate("self_employment_medicare_tax", year).sum()
     additional_medicare_tax = baseline.calculate("additional_medicare_tax", year).sum()
     tob_hi = baseline.calculate("tob_revenue_medicare_hi", year).sum()
 
@@ -147,12 +149,14 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     print(f"Baseline SS Benefits: ${ss_benefits / 1e9:.1f}B")
     print(f"Baseline Income Tax: ${baseline_income_tax / 1e9:.1f}B")
 
-    # Calculate gaps
-    ss_income = employee_ss_tax + employer_ss_tax + tob_oasdi
+    # Calculate gaps (including SECA self-employment taxes)
+    ss_income = employee_ss_tax + employer_ss_tax + se_ss_tax + tob_oasdi
     ss_gap = ss_income - ss_benefits
 
-    hi_income = employee_hi_tax + employer_hi_tax + additional_medicare_tax + tob_hi
+    hi_income = employee_hi_tax + employer_hi_tax + se_medicare_tax + additional_medicare_tax + tob_hi
     hi_gap = hi_income - medicare_expenditures
+
+    print(f"SE taxes: SS ${se_ss_tax/1e9:.1f}B, Medicare ${se_medicare_tax/1e9:.1f}B")
 
     ss_shortfall = abs(min(ss_gap, 0))
     hi_shortfall = abs(min(hi_gap, 0))
@@ -195,15 +199,17 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     stage1_ss_benefits = stage1_sim.calculate("social_security", year).sum()
     stage1_employee_ss = stage1_sim.calculate("employee_social_security_tax", year).sum()
     stage1_employer_ss = stage1_sim.calculate("employer_social_security_tax", year).sum()
+    stage1_se_ss = stage1_sim.calculate("self_employment_social_security_tax", year).sum()
     stage1_tob_oasdi = stage1_sim.calculate("tob_revenue_oasdi", year).sum()
     stage1_employee_hi = stage1_sim.calculate("employee_medicare_tax", year).sum()
     stage1_employer_hi = stage1_sim.calculate("employer_medicare_tax", year).sum()
+    stage1_se_medicare = stage1_sim.calculate("self_employment_medicare_tax", year).sum()
     stage1_additional_medicare = stage1_sim.calculate("additional_medicare_tax", year).sum()
     stage1_tob_hi = stage1_sim.calculate("tob_revenue_medicare_hi", year).sum()
 
     # Calculate remaining gaps AFTER benefit cuts (no employer tax revenue)
-    stage1_ss_income = stage1_employee_ss + stage1_employer_ss + stage1_tob_oasdi
-    stage1_hi_income = stage1_employee_hi + stage1_employer_hi + stage1_additional_medicare + stage1_tob_hi
+    stage1_ss_income = stage1_employee_ss + stage1_employer_ss + stage1_se_ss + stage1_tob_oasdi
+    stage1_hi_income = stage1_employee_hi + stage1_employer_hi + stage1_se_medicare + stage1_additional_medicare + stage1_tob_hi
 
     stage1_ss_gap = stage1_ss_income - stage1_ss_benefits  # Trust fund gap (payroll taxes only)
     stage1_hi_gap = stage1_hi_income - medicare_expenditures
@@ -274,8 +280,10 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     reform_ss_benefits = reform_sim.calculate("social_security", year).sum()
     reform_employee_ss = reform_sim.calculate("employee_social_security_tax", year).sum()
     reform_employer_ss = reform_sim.calculate("employer_social_security_tax", year).sum()
+    reform_se_ss = reform_sim.calculate("self_employment_social_security_tax", year).sum()
     reform_employee_hi = reform_sim.calculate("employee_medicare_tax", year).sum()
     reform_employer_hi = reform_sim.calculate("employer_medicare_tax", year).sum()
+    reform_se_medicare = reform_sim.calculate("self_employment_medicare_tax", year).sum()
     reform_additional_medicare = reform_sim.calculate("additional_medicare_tax", year).sum()
 
     # Calculate rate increase revenue (manual calculation)
@@ -283,9 +291,9 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
     rate_increase_hi_revenue = hi_rate_increase * hi_taxable_payroll
     total_rate_increase_revenue = rate_increase_ss_revenue + rate_increase_hi_revenue
 
-    # New gaps
-    reform_ss_income = reform_employee_ss + reform_employer_ss + reform_tob_oasdi
-    reform_hi_income = reform_employee_hi + reform_employer_hi + reform_additional_medicare + reform_tob_hi
+    # New gaps (including SECA)
+    reform_ss_income = reform_employee_ss + reform_employer_ss + reform_se_ss + reform_tob_oasdi
+    reform_hi_income = reform_employee_hi + reform_employer_hi + reform_se_medicare + reform_additional_medicare + reform_tob_hi
     new_ss_gap = reform_ss_income - reform_ss_benefits
     new_hi_gap = reform_hi_income - medicare_expenditures
 
@@ -432,11 +440,90 @@ def compute_option13_and_14_year(year: int, skip_option13: bool = False, skip_op
         }
 
         # Save Option 14 result
-        os.makedirs("/results/option14", exist_ok=True)
+        os.makedirs("/results/option14_stacked", exist_ok=True)
         df = pd.DataFrame([option14_result])
-        df.to_csv(f"/results/option14/{year}_static_results.csv", index=False)
+        df.to_csv(f"/results/option14_stacked/{year}_static_results.csv", index=False)
         results_volume.commit()
-        results['option14'] = option14_result
+        results['option14_stacked'] = option14_result
+
+        # =========================================================================
+        # OPTION 12 STANDALONE: Option 12 only vs Balanced Fix Baseline
+        # Shows what happens if we do Extended Roth INSTEAD OF balanced fix
+        # =========================================================================
+        print(f"\n{'='*60}")
+        print(f"OPTION 12 STANDALONE (vs BALANCED FIX): {year}")
+        print(f"{'='*60}")
+
+        # Option 12 only - no balanced fix rate increases, no benefit cuts
+        option12_reform = Reform.from_dict(option12_dict, country_id="us")
+
+        print("Running Option 12 standalone simulation...")
+        option12_sim = Microsimulation(reform=option12_reform, dataset=dataset, start_instant=f"{year}-01-01")
+
+        # NO benefit cuts - use original baseline SS values
+        # (don't call set_input for social_security)
+
+        # Calculate Option 12 standalone results
+        option12_income_tax = option12_sim.calculate("income_tax", year).sum()
+        option12_tob_oasdi = option12_sim.calculate("tob_revenue_oasdi", year).sum()
+        option12_tob_hi = option12_sim.calculate("tob_revenue_medicare_hi", year).sum()
+        option12_ss_benefits = option12_sim.calculate("social_security", year).sum()
+
+        # Option 12 specific: employer payroll tax revenue
+        option12_employer_ss_revenue = option12_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year).sum()
+        option12_employer_hi_revenue = option12_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year).sum()
+
+        # Compare to Option 13 baseline (balanced fix)
+        option12_income_tax_impact = option12_income_tax - reform_income_tax
+        option12_tob_oasdi_impact = option12_tob_oasdi - reform_tob_oasdi
+        option12_tob_hi_impact = option12_tob_hi - reform_tob_hi
+
+        # Trust fund impacts
+        option12_oasdi_gain = float(option12_employer_ss_revenue)
+        option12_hi_gain = float(option12_employer_hi_revenue)
+        option12_oasdi_loss = float(reform_tob_oasdi - option12_tob_oasdi)
+        option12_hi_loss = float(reform_tob_hi - option12_tob_hi)
+        option12_oasdi_net = option12_oasdi_gain - option12_oasdi_loss
+        option12_hi_net = option12_hi_gain - option12_hi_loss
+
+        print(f"\nOption 12 Standalone Results (vs Balanced Fix):")
+        print(f"  Income tax impact: ${option12_income_tax_impact/1e9:+.1f}B")
+        print(f"  OASDI net impact: ${option12_oasdi_net/1e9:+.1f}B (gain: ${option12_oasdi_gain/1e9:.1f}B, loss: ${option12_oasdi_loss/1e9:.1f}B)")
+        print(f"  HI net impact: ${option12_hi_net/1e9:+.1f}B (gain: ${option12_hi_gain/1e9:.1f}B, loss: ${option12_hi_loss/1e9:.1f}B)")
+
+        option12_standalone_result = {
+            "year": year,
+            # Baseline is the balanced fix (Option 13)
+            "baseline_income_tax": float(reform_income_tax),
+            "baseline_tob_oasdi": float(reform_tob_oasdi),
+            "baseline_tob_hi": float(reform_tob_hi),
+            "baseline_ss_benefits": float(reform_ss_benefits),
+            # Reform is Option 12 only (no balanced fix)
+            "reform_income_tax": float(option12_income_tax),
+            "reform_tob_oasdi": float(option12_tob_oasdi),
+            "reform_tob_hi": float(option12_tob_hi),
+            "reform_ss_benefits": float(option12_ss_benefits),
+            # Impacts
+            "income_tax_impact": float(option12_income_tax_impact),
+            "tob_oasdi_impact": float(option12_tob_oasdi_impact),
+            "tob_hi_impact": float(option12_tob_hi_impact),
+            # Trust fund breakdown
+            "employer_ss_tax_revenue": float(option12_employer_ss_revenue),
+            "employer_hi_tax_revenue": float(option12_employer_hi_revenue),
+            "oasdi_gain": option12_oasdi_gain,
+            "hi_gain": option12_hi_gain,
+            "oasdi_loss": option12_oasdi_loss,
+            "hi_loss": option12_hi_loss,
+            "oasdi_net_impact": option12_oasdi_net,
+            "hi_net_impact": option12_hi_net,
+        }
+
+        # Save Option 12 standalone result
+        os.makedirs("/results/option12_standalone", exist_ok=True)
+        df = pd.DataFrame([option12_standalone_result])
+        df.to_csv(f"/results/option12_standalone/{year}_static_results.csv", index=False)
+        results_volume.commit()
+        results['option12_standalone'] = option12_standalone_result
 
     return results
 
@@ -490,13 +577,20 @@ def main(
             print(f"  HI Gap: ${opt13['baseline_hi_gap']/1e9:.1f}B -> ${opt13['reform_hi_gap']/1e9:.1f}B")
             print(f"  Benefit cut: {(1-opt13['benefit_multiplier'])*100:.1f}%")
 
-        if result.get('option14'):
-            opt14 = result['option14']
+        if result.get('option14_stacked'):
+            opt14 = result['option14_stacked']
             option14_results.append(opt14)
-            print(f"\n=== Year {opt14['year']} - Option 14 ===")
+            print(f"\n=== Year {opt14['year']} - Option 14 (Stacked) ===")
             print(f"  Income tax impact: ${opt14['income_tax_impact']/1e9:+.1f}B")
             print(f"  OASDI net: ${opt14['oasdi_net_impact']/1e9:+.1f}B")
             print(f"  HI net: ${opt14['hi_net_impact']/1e9:+.1f}B")
+
+        if result.get('option12_standalone'):
+            opt12 = result['option12_standalone']
+            print(f"\n=== Year {opt12['year']} - Option 12 Standalone ===")
+            print(f"  Income tax impact: ${opt12['income_tax_impact']/1e9:+.1f}B")
+            print(f"  OASDI net: ${opt12['oasdi_net_impact']/1e9:+.1f}B")
+            print(f"  HI net: ${opt12['hi_net_impact']/1e9:+.1f}B")
 
     # Save combined results
     if option13_results:
@@ -506,5 +600,5 @@ def main(
 
     if option14_results:
         df14 = pd.DataFrame(option14_results)
-        df14.to_csv("results/option14_results.csv", index=False)
-        print(f"Option 14 results saved to results/option14_results.csv")
+        df14.to_csv("results/option14_stacked_results.csv", index=False)
+        print(f"Option 14 (Stacked) results saved to results/option14_stacked_results.csv")
