@@ -531,6 +531,15 @@ def get_option12_dict():
     OASDI and HI trust funds via branching calculation. Reducing it alongside
     taxability rates ensures OASDI goes to zero while HI stays approximately constant.
     """
+    # Phase-out schedule constants
+    ANNUAL_PHASE_OUT_RATE = 0.025  # 2.5% per year
+    INITIAL_OASDI_SHARE = 0.50     # Starting OASDI share of gross SS taxation
+    INITIAL_BASE_RATE = 0.50       # Starting base taxability rate (tier 1)
+    INITIAL_ADDITIONAL_RATE = 0.85 # Starting additional taxability rate (tier 2)
+    HI_ONLY_RATE = 0.35            # Rate after OASDI phased out (HI portion only)
+    PHASE1_YEARS_COUNT = 20        # Years to phase out OASDI (2029-2048)
+    PHASE2_YEARS_COUNT = 14        # Years to phase out HI (2049-2062)
+
     reform_dict = {
         # Immediate employer payroll taxation (100% from 2026)
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
@@ -541,18 +550,18 @@ def get_option12_dict():
         },
     }
 
-    # Phase 1: Phase out OASDI portion over 2029-2048 (20 years at 2.5%/year)
-    phase1_years = list(range(2029, 2049))  # 2029 to 2048 inclusive
+    # Phase 1: Phase out OASDI portion over 2029-2048
+    phase1_years = list(range(2029, 2029 + PHASE1_YEARS_COUNT))
 
     # 1. oasdi_share_of_gross_ss: 0.5 → 0 (controls trust fund allocation)
-    oasdi_share_values = [0.50 - 0.025 * (i + 1) for i in range(20)]
+    oasdi_share_values = [INITIAL_OASDI_SHARE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
     reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"] = {}
     for year, value in zip(phase1_years, oasdi_share_values):
         reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"][str(year)] = round(value, 4)
     reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"]["2049-01-01.2100-12-31"] = 0
 
     # 2. base rates: 0.50 → 0 (tier 1 people phase out of TOB entirely)
-    base_values = [0.50 - 0.025 * (i + 1) for i in range(20)]
+    base_values = [INITIAL_BASE_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.base.{param_name}"
         reform_dict[param_path] = {}
@@ -561,8 +570,8 @@ def get_option12_dict():
         reform_dict[param_path]["2049-01-01.2100-12-31"] = 0
 
     # 3. additional rates: 0.85 → 0.35 (tier 2 people keep paying HI portion)
-    # Formula: additional = oasdi_share + 0.35, so as oasdi_share → 0, additional → 0.35
-    additional_values = [0.85 - 0.025 * (i + 1) for i in range(20)]
+    # Formula: additional = oasdi_share + HI_ONLY_RATE, so as oasdi_share → 0, additional → HI_ONLY_RATE
+    additional_values = [INITIAL_ADDITIONAL_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
         reform_dict[param_path] = {}
@@ -570,9 +579,10 @@ def get_option12_dict():
             reform_dict[param_path][str(year)] = round(value, 4)
         # Will be overwritten by Phase 2 values below
 
-    # Phase 2: Phase out HI portion over 2049-2062 (14 years at 2.5%/year)
-    phase2_years = list(range(2049, 2063))  # 2049 to 2062 inclusive
-    hi_values = [0.35 - 0.025 * (i + 1) for i in range(14)]
+    # Phase 2: Phase out HI portion over 2049-2062
+    phase2_start = 2029 + PHASE1_YEARS_COUNT  # 2049
+    phase2_years = list(range(phase2_start, phase2_start + PHASE2_YEARS_COUNT))
+    hi_values = [HI_ONLY_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE2_YEARS_COUNT)]
 
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
