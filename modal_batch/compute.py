@@ -88,20 +88,20 @@ def compute_year(
     from policyengine_core.reforms import Reform
 
     # Import reform functions from src/reforms.py (shared with GCP batch)
+    # NOTE: option13/balanced_fix removed - use batch/run_option13_modal.py instead
     from reforms import (
         get_option1_reform, get_option2_reform, get_option3_reform,
         get_option4_reform, get_option5_reform, get_option6_reform,
         get_option7_reform, get_option8_reform, get_option9_reform,
         get_option10_reform, get_option11_reform, get_option12_reform,
-        get_option13_reform, get_balanced_fix_reform,
         get_option1_dynamic_dict, get_option2_dynamic_dict, get_option3_dynamic_dict,
         get_option4_dynamic_dict, get_option5_dynamic_dict, get_option6_dynamic_dict,
         get_option7_dynamic_dict, get_option8_dynamic_dict, get_option9_dynamic_dict,
         get_option10_dynamic_dict, get_option11_dynamic_dict, get_option12_dynamic_dict,
-        get_option13_dynamic_dict, get_balanced_fix_dynamic_dict,
     )
 
     # Reform functions for static scoring (same as GCP batch)
+    # NOTE: option13 removed - use batch/run_option13_modal.py for gap-closing baseline
     REFORM_FUNCTIONS = {
         'option1': get_option1_reform,
         'option2': get_option2_reform,
@@ -115,8 +115,6 @@ def compute_year(
         'option10': get_option10_reform,
         'option11': get_option11_reform,
         'option12': get_option12_reform,
-        # option13 uses option12 reform against balanced_fix baseline (handled specially below)
-        'option13': get_option12_reform,
     }
 
     # Dict-returning functions for dynamic scoring with CBO elasticities
@@ -133,8 +131,6 @@ def compute_year(
         'option10': get_option10_dynamic_dict,
         'option11': get_option11_dynamic_dict,
         'option12': get_option12_dynamic_dict,
-        # option13 uses option12 reform against balanced_fix baseline (handled specially below)
-        'option13': get_option12_dynamic_dict,
     }
 
     print(f"\n{'='*60}")
@@ -168,37 +164,13 @@ def compute_year(
     del baseline_sim, baseline_income_tax, baseline_tob_medicare, baseline_tob_oasdi, baseline_tob_total
     gc.collect()
 
-    # Step 2b: If option13 is requested, compute balanced_fix baseline
-    # Option13 = Option12 scored against balanced_fix baseline (not current law)
-    balanced_fix_baseline = None
+    # NOTE: option13/balanced_fix handling removed.
+    # For Option 13 (gap-closing baseline), use: batch/run_option13_modal.py
     if 'option13' in reform_ids:
-        print(f"\n[2b] Computing balanced_fix baseline for option13...")
-        bf_start = time.time()
-
-        # Create balanced_fix reform to use as baseline for option13
-        if scoring_type == 'static':
-            bf_reform = get_balanced_fix_reform()
-        else:
-            bf_reform = Reform.from_dict(get_balanced_fix_dynamic_dict(), country_id="us")
-
-        bf_sim = Microsimulation(reform=bf_reform, dataset=dataset_name)
-        bf_income_tax = bf_sim.calculate("income_tax", map_to="household", period=year)
-        bf_tob_medicare = bf_sim.calculate("tob_revenue_medicare_hi", map_to="household", period=year)
-        bf_tob_oasdi = bf_sim.calculate("tob_revenue_oasdi", map_to="household", period=year)
-        bf_tob_total = bf_sim.calculate("tob_revenue_total", map_to="household", period=year)
-
-        balanced_fix_baseline = {
-            'revenue': float(bf_income_tax.sum()),
-            'tob_medicare': float(bf_tob_medicare.sum()),
-            'tob_oasdi': float(bf_tob_oasdi.sum()),
-            'tob_total': float(bf_tob_total.sum()),
-        }
-
-        print(f"    Balanced Fix Baseline: ${balanced_fix_baseline['revenue']/1e9:.2f}B ({time.time()-bf_start:.1f}s)")
-        print(f"    TOB - OASDI: ${balanced_fix_baseline['tob_oasdi']/1e9:.2f}B, Medicare HI: ${balanced_fix_baseline['tob_medicare']/1e9:.2f}B")
-
-        del bf_sim, bf_income_tax, bf_tob_medicare, bf_tob_oasdi, bf_tob_total, bf_reform
-        gc.collect()
+        raise ValueError(
+            "option13 is not available in this script. "
+            "Use batch/run_option13_modal.py for the gap-closing baseline implementation."
+        )
 
     # Step 3: Run reforms (same logic as GCP batch)
     results = []
@@ -235,17 +207,11 @@ def compute_year(
             reform_tob_oasdi_revenue = float(reform_tob_oasdi.sum())
             reform_tob_total_revenue = float(reform_tob_total.sum())
 
-            # For option13, use balanced_fix as the baseline instead of current law
-            if reform_id == 'option13' and balanced_fix_baseline:
-                compare_revenue = balanced_fix_baseline['revenue']
-                compare_tob_medicare = balanced_fix_baseline['tob_medicare']
-                compare_tob_oasdi = balanced_fix_baseline['tob_oasdi']
-                compare_tob_total = balanced_fix_baseline['tob_total']
-            else:
-                compare_revenue = baseline_revenue
-                compare_tob_medicare = baseline_tob_medicare_revenue
-                compare_tob_oasdi = baseline_tob_oasdi_revenue
-                compare_tob_total = baseline_tob_total_revenue
+            # Compare against current law baseline
+            compare_revenue = baseline_revenue
+            compare_tob_medicare = baseline_tob_medicare_revenue
+            compare_tob_oasdi = baseline_tob_oasdi_revenue
+            compare_tob_total = baseline_tob_total_revenue
 
             # Calculate impacts (against appropriate baseline)
             impact = reform_revenue - compare_revenue
@@ -253,7 +219,7 @@ def compute_year(
             tob_oasdi_impact = reform_tob_oasdi_revenue - compare_tob_oasdi
             tob_total_impact = reform_tob_total_revenue - compare_tob_total
 
-            # Handle Options 5, 6, 12, 13 employer payroll tax (direct branching)
+            # Handle Options 5, 6, 12 employer payroll tax (direct branching)
             employer_ss_revenue = 0.0
             employer_medicare_revenue = 0.0
             oasdi_gain = 0.0
@@ -263,7 +229,7 @@ def compute_year(
             oasdi_net = tob_oasdi_impact
             hi_net = tob_medicare_impact
 
-            if reform_id in ['option5', 'option6', 'option12', 'option13']:
+            if reform_id in ['option5', 'option6', 'option12']:
                 try:
                     emp_ss = reform_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year)
                     emp_medicare = reform_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year)
@@ -271,7 +237,7 @@ def compute_year(
                     employer_medicare_revenue = float(emp_medicare.sum())
 
                     # === GAINS: Calculate based on allocation rules ===
-                    if reform_id in ['option5', 'option12', 'option13']:
+                    if reform_id in ['option5', 'option12']:
                         # Direct branching: employer SS tax → OASDI, employer Medicare tax → HI
                         oasdi_gain = employer_ss_revenue
                         hi_gain = employer_medicare_revenue
@@ -296,37 +262,12 @@ def compute_year(
                                 oasdi_gain = total_gain * oasdi_share
                                 hi_gain = total_gain * (1 - oasdi_share)
 
-                    # === LOSSES: Calculate based on allocation rules ===
-                    if reform_id in ['option12', 'option13']:
-                        # Option 12/13: Sequential phase-out with policy-driven attribution
-                        # Phase 1 (2029-2048): OASDI portion phases out - ALL loss to OASDI
-                        # Phase 2 (2049-2062): HI portion phases out - ALL loss to HI
-                        total_tob_loss = (compare_tob_oasdi + compare_tob_medicare) - (reform_tob_oasdi_revenue + reform_tob_medicare_revenue)
-
-                        if year < 2029:
-                            # Before phase-out starts - no TOB loss yet
-                            oasdi_loss = 0.0
-                            hi_loss = 0.0
-                        elif year <= 2048:
-                            # Phase 1: ALL loss attributed to OASDI
-                            oasdi_loss = total_tob_loss
-                            hi_loss = 0.0
-                        elif year <= 2062:
-                            # Phase 2: OASDI portion fully phased out, remaining loss to HI
-                            # OASDI loses its full baseline share, HI loses the rest
-                            baseline_oasdi_share = compare_tob_oasdi / (compare_tob_oasdi + compare_tob_medicare) if (compare_tob_oasdi + compare_tob_medicare) > 0 else 0.54
-                            baseline_oasdi_tob = (compare_tob_oasdi + compare_tob_medicare) * baseline_oasdi_share
-                            oasdi_loss = baseline_oasdi_tob  # Full OASDI baseline lost
-                            hi_loss = total_tob_loss - oasdi_loss  # Remainder is HI loss
-                        else:
-                            # After 2062: TOB fully phased out - attribute by baseline shares
-                            baseline_oasdi_share = compare_tob_oasdi / (compare_tob_oasdi + compare_tob_medicare) if (compare_tob_oasdi + compare_tob_medicare) > 0 else 0.54
-                            oasdi_loss = (compare_tob_oasdi + compare_tob_medicare) * baseline_oasdi_share
-                            hi_loss = (compare_tob_oasdi + compare_tob_medicare) * (1 - baseline_oasdi_share)
-                    else:
-                        # Options 5, 6: Use actual TOB revenue changes from simulation
-                        oasdi_loss = compare_tob_oasdi - reform_tob_oasdi_revenue
-                        hi_loss = compare_tob_medicare - reform_tob_medicare_revenue
+                    # === LOSSES: Use actual TOB revenue changes from simulation ===
+                    # Options 5, 6, 12 all use the oasdi_share_of_gross_ss parameter
+                    # to correctly allocate TOB revenue between trust funds, so we can
+                    # use the actual simulation values directly.
+                    oasdi_loss = compare_tob_oasdi - reform_tob_oasdi_revenue
+                    hi_loss = compare_tob_medicare - reform_tob_medicare_revenue
 
                     oasdi_net = oasdi_gain - oasdi_loss
                     hi_net = hi_gain - hi_loss

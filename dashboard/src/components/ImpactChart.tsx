@@ -74,10 +74,10 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             y: data.map(getTotalValue),
             type: 'scatter' as const,
             mode: 'lines+markers' as const,
-            name: 'Net Total',
-            line: { color: TEAL_900, width: 2 },
-            marker: { color: TEAL_900, size: 4 },
-            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Net Total</extra>`,
+            name: 'Total Revenue Impact',
+            line: { color: TEAL_900, width: 3 },
+            marker: { color: TEAL_900, size: 6 },
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Total Revenue</extra>`,
           },
         ]
       : [
@@ -87,10 +87,10 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
             y: data.map(getTotalValue),
             type: 'scatter' as const,
             mode: 'lines+markers' as const,
-            name: 'Net Total',
-            line: { color: TEAL_900, width: 2 },
-            marker: { color: TEAL_900, size: 6 },
-            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Net Total</extra>`,
+            name: 'Total Revenue Impact',
+            line: { color: TEAL_900, width: 3 },
+            marker: { color: TEAL_900, size: 8 },
+            hovertemplate: `<b>%{x}</b><br>${hoverFormat}<extra>Total Revenue</extra>`,
           },
         ]
     : [
@@ -175,7 +175,7 @@ export function ImpactChart({ data, title, showTrustFundSplit = false, displayUn
     },
     yaxis: yaxisConfig,
     barmode: 'relative',
-    showlegend: showTrustFundBars,  // Only show legend when we have trust fund breakdown
+    showlegend: showTrustFundSplit,  // Show legend when trust fund split is requested
     legend: { orientation: 'h', y: -0.25, x: 0.5, xanchor: 'center' },
     margin: { l: 80, r: 40, t: 60, b: 100 },
     plot_bgcolor: '#fff',

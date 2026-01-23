@@ -725,3 +725,310 @@ body {
     padding: 1rem 0.5rem;
   }
 }
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: var(--bg-primary);
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--gray-200);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
+}
+
+.tab-btn:hover {
+  background: var(--gray-100);
+  color: var(--gray-800);
+}
+
+.tab-btn.active {
+  background: var(--teal-500);
+  color: white;
+  box-shadow: 0 2px 4px rgba(49, 151, 149, 0.3);
+}
+
+/* Option 13 Tab Styles */
+.option13-tab {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--gray-200);
+}
+
+.option13-intro {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.option13-intro h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.option13-description {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 800px;
+}
+
+.option13-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .option13-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .option13-summary-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option13-summary-cards .summary-card {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.option13-summary-cards .card-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: 0.5rem;
+}
+
+.option13-summary-cards .card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.option13-summary-cards .card-value.positive {
+  color: var(--teal-700);
+}
+
+.option13-summary-cards .card-value.negative {
+  color: var(--error);
+}
+
+.option13-charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .option13-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option13-charts .chart-container {
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--gray-200);
+}
+
+.option13-table {
+  margin-bottom: 2rem;
+}
+
+.option13-table h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+}
+
+.option13-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.option13-table th,
+.option13-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.option13-table th {
+  background: var(--gray-100);
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.8rem;
+}
+
+.option13-table td.positive {
+  color: var(--teal-700);
+  font-weight: 500;
+}
+
+.option13-table td.negative {
+  color: var(--error);
+  font-weight: 500;
+}
+
+.option13-methodology {
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+}
+
+.option13-methodology h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 1rem;
+}
+
+.option13-methodology ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.option13-methodology li {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.option13-methodology li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 6px;
+  height: 6px;
+  background: var(--teal-500);
+  border-radius: 50%;
+}
+
+.option13-methodology li strong {
+  color: var(--gray-700);
+}
+
+/* Trustees vs PE Comparison Table */
+.option13-trustees-comparison {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+}
+
+.option13-trustees-comparison h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-800);
+  font-size: 1.25rem;
+}
+
+.comparison-intro {
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.option13-trustees-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.option13-trustees-comparison th,
+.option13-trustees-comparison td {
+  padding: 0.5rem 0.75rem;
+  text-align: right;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.option13-trustees-comparison th {
+  background: var(--gray-100);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.option13-trustees-comparison th.header-group {
+  text-align: center;
+  background: var(--gray-200);
+  border-left: 2px solid var(--gray-300);
+}
+
+.option13-trustees-comparison th:first-child,
+.option13-trustees-comparison td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.option13-trustees-comparison td.positive {
+  color: var(--teal-600);
+}
+
+.option13-trustees-comparison td.negative {
+  color: var(--red-600);
+}
+
+.comparison-notes {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid var(--teal-500);
+}
+
+.comparison-notes h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--gray-700);
+  font-size: 0.95rem;
+}
+
+.comparison-notes ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.comparison-notes li {
+  margin-bottom: 0.5rem;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.comparison-notes li strong {
+  color: var(--gray-700);
+}
