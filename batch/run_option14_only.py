@@ -25,8 +25,8 @@ image = (
 @app.function(
     image=image,
     volumes={"/results": results_volume},
-    timeout=3600,  # 60 minutes
-    memory=32000,  # More memory
+    timeout=7200,  # 2 hours
+    memory=32000,
 )
 def compute_option14_year(year: int) -> dict:
     """Compute Option 14 (Stacked) and Option 12 standalone for a single year.
