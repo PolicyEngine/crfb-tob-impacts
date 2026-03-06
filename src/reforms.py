@@ -11,6 +11,7 @@ from policyengine_us.model_api import *
 
 # Common reform components as modular functions
 
+
 def zero_ss_tax_thresholds():
     """Set all Social Security taxation thresholds to zero."""
     return {
@@ -28,7 +29,7 @@ def zero_ss_tax_thresholds():
         },
         "gov.irs.social_security.taxability.threshold.base.main.HEAD_OF_HOUSEHOLD": {
             "2026-01-01.2100-12-31": 0
-        }
+        },
     }
 
 
@@ -55,7 +56,7 @@ def eliminate_ss_taxation():
         },
         "gov.irs.social_security.taxability.rate.additional.excess": {
             "2026-01-01.2100-12-31": 0
-        }
+        },
     }
 
 
@@ -103,7 +104,7 @@ def tax_85_percent_ss():
         },
         "gov.irs.social_security.taxability.threshold.adjusted_base.main.HEAD_OF_HOUSEHOLD": {
             "2026-01-01.2100-12-31": 0
-        }
+        },
     }
 
 
@@ -167,7 +168,7 @@ def tax_90_percent_ss():
         },
         "gov.irs.social_security.taxability.rate.additional.bracket": {
             "2026-01-01.2100-12-31": 0.90
-        }
+        },
     }
 
 
@@ -231,7 +232,7 @@ def tax_95_percent_ss():
         },
         "gov.irs.social_security.taxability.rate.additional.bracket": {
             "2026-01-01.2100-12-31": 0.95
-        }
+        },
     }
 
 
@@ -295,17 +296,13 @@ def tax_100_percent_ss():
         },
         "gov.irs.social_security.taxability.rate.additional.bracket": {
             "2026-01-01.2100-12-31": 1.0
-        }
+        },
     }
 
 
 def eliminate_senior_deduction():
     """Eliminate the bonus senior deduction."""
-    return {
-        "gov.irs.deductions.senior_deduction.amount": {
-            "2026-01-01.2100-12-31": 0
-        }
-    }
+    return {"gov.irs.deductions.senior_deduction.amount": {"2026-01-01.2100-12-31": 0}}
 
 
 def extend_senior_deduction():
@@ -326,12 +323,16 @@ def add_ss_tax_credit(amount, filing_statuses=None):
                         (default: all statuses)
     """
     if filing_statuses is None:
-        filing_statuses = ["JOINT", "SINGLE", "SEPARATE", "SURVIVING_SPOUSE", "HEAD_OF_HOUSEHOLD"]
+        filing_statuses = [
+            "JOINT",
+            "SINGLE",
+            "SEPARATE",
+            "SURVIVING_SPOUSE",
+            "HEAD_OF_HOUSEHOLD",
+        ]
 
     credit_params = {
-        "gov.contrib.crfb.ss_credit.in_effect": {
-            "2026-01-01.2100-12-31": True
-        }
+        "gov.contrib.crfb.ss_credit.in_effect": {"2026-01-01.2100-12-31": True}
     }
 
     for status in filing_statuses:
@@ -354,7 +355,7 @@ def enable_employer_payroll_tax(percentage=1.0):
         },
         "gov.contrib.crfb.tax_employer_payroll_tax.percentage": {
             "2026-01-01.2100-12-31": percentage
-        }
+        },
     }
 
 
@@ -366,9 +367,7 @@ def enable_ss_credit_phase_out():
     - Other filers: 6% phase-out rate for AGI above $75,000
     """
     return {
-        "gov.contrib.crfb.ss_credit.phase_out.applies": {
-            "2026-01-01.2100-12-31": True
-        }
+        "gov.contrib.crfb.ss_credit.phase_out.applies": {"2026-01-01.2100-12-31": True}
     }
 
 
@@ -406,20 +405,23 @@ CBO_ELASTICITIES = {
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.10": {
         "2024-01-01.2100-12-31": 0.10
-    }
+    },
 }
 
 
 # Dict-returning functions for each option (used for dynamic scoring)
 # These return complete parameter dictionaries with CBO elasticities pre-merged
 
+
 def get_option1_dict():
     """Return parameter dict for Option 1 (static scoring only - no elasticities)."""
     return eliminate_ss_taxation()
 
+
 def get_option2_dict():
     """Return parameter dict for Option 2 (static scoring only - no elasticities)."""
     return tax_85_percent_ss()
+
 
 def get_option3_dict():
     """Return parameter dict for Option 3 (static scoring only - no elasticities)."""
@@ -427,6 +429,7 @@ def get_option3_dict():
     result.update(tax_85_percent_ss())
     result.update(extend_senior_deduction())
     return result
+
 
 def get_option4_dict(credit_amount=500):
     """Return parameter dict for Option 4 (static scoring only - no elasticities)."""
@@ -436,12 +439,14 @@ def get_option4_dict(credit_amount=500):
     result.update(eliminate_senior_deduction())
     return result
 
+
 def get_option5_dict():
     """Return parameter dict for Option 5 (static scoring only - no elasticities)."""
     result = {}
     result.update(eliminate_ss_taxation())
     result.update(enable_employer_payroll_tax(1.0))
     return result
+
 
 def get_option6_dict():
     """Return parameter dict for Option 6 (static scoring only - no elasticities)."""
@@ -457,7 +462,7 @@ def get_option6_dict():
             "2030": 0.6536,
             "2031": 0.7843,
             "2032": 0.9150,
-            "2033-01-01.2100-12-31": 1.0
+            "2033-01-01.2100-12-31": 1.0,
         },
     }
 
@@ -474,8 +479,24 @@ def get_option6_dict():
 
     # Phase down additional rate parameters
     add_years = list(range(2029, 2045))
-    add_values = [0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40,
-                  0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+    add_values = [
+        0.80,
+        0.75,
+        0.70,
+        0.65,
+        0.60,
+        0.55,
+        0.50,
+        0.45,
+        0.40,
+        0.35,
+        0.30,
+        0.25,
+        0.20,
+        0.15,
+        0.10,
+        0.05,
+    ]
 
     for param_name in ["benefit_cap", "bracket", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
@@ -486,21 +507,26 @@ def get_option6_dict():
 
     return reform_dict
 
+
 def get_option7_dict():
     """Return parameter dict for Option 7 (static scoring only - no elasticities)."""
     return eliminate_senior_deduction()
+
 
 def get_option8_dict():
     """Return parameter dict for Option 8 (static scoring only - no elasticities)."""
     return tax_100_percent_ss()
 
+
 def get_option9_dict():
     """Return parameter dict for Option 9 (static scoring only - no elasticities)."""
     return tax_90_percent_ss()
 
+
 def get_option10_dict():
     """Return parameter dict for Option 10 (static scoring only - no elasticities)."""
     return tax_95_percent_ss()
+
 
 def get_option11_dict():
     """Return parameter dict for Option 11 (static scoring only - no elasticities).
@@ -513,6 +539,7 @@ def get_option11_dict():
     result.update(enable_ss_credit_phase_out())
     result.update(eliminate_senior_deduction())
     return result
+
 
 def get_option12_dict():
     """Return parameter dict for Option 12 (static scoring only - no elasticities).
@@ -533,12 +560,12 @@ def get_option12_dict():
     """
     # Phase-out schedule constants
     ANNUAL_PHASE_OUT_RATE = 0.025  # 2.5% per year
-    INITIAL_OASDI_SHARE = 0.50     # Starting OASDI share of gross SS taxation
-    INITIAL_BASE_RATE = 0.50       # Starting base taxability rate (tier 1)
-    INITIAL_ADDITIONAL_RATE = 0.85 # Starting additional taxability rate (tier 2)
-    HI_ONLY_RATE = 0.35            # Rate after OASDI phased out (HI portion only)
-    PHASE1_YEARS_COUNT = 20        # Years to phase out OASDI (2029-2048)
-    PHASE2_YEARS_COUNT = 14        # Years to phase out HI (2049-2062)
+    INITIAL_OASDI_SHARE = 0.50  # Starting OASDI share of gross SS taxation
+    INITIAL_BASE_RATE = 0.50  # Starting base taxability rate (tier 1)
+    INITIAL_ADDITIONAL_RATE = 0.85  # Starting additional taxability rate (tier 2)
+    HI_ONLY_RATE = 0.35  # Rate after OASDI phased out (HI portion only)
+    PHASE1_YEARS_COUNT = 20  # Years to phase out OASDI (2029-2048)
+    PHASE2_YEARS_COUNT = 14  # Years to phase out HI (2049-2062)
 
     reform_dict = {
         # Immediate employer payroll taxation (100% from 2026)
@@ -554,14 +581,22 @@ def get_option12_dict():
     phase1_years = list(range(2029, 2029 + PHASE1_YEARS_COUNT))
 
     # 1. oasdi_share_of_gross_ss: 0.5 → 0 (controls trust fund allocation)
-    oasdi_share_values = [INITIAL_OASDI_SHARE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
+    oasdi_share_values = [
+        INITIAL_OASDI_SHARE - ANNUAL_PHASE_OUT_RATE * (i + 1)
+        for i in range(PHASE1_YEARS_COUNT)
+    ]
     reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"] = {}
     for year, value in zip(phase1_years, oasdi_share_values):
-        reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"][str(year)] = round(value, 4)
+        reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"][str(year)] = round(
+            value, 4
+        )
     reform_dict["gov.ssa.revenue.oasdi_share_of_gross_ss"]["2049-01-01.2100-12-31"] = 0
 
     # 2. base rates: 0.50 → 0 (tier 1 people phase out of TOB entirely)
-    base_values = [INITIAL_BASE_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
+    base_values = [
+        INITIAL_BASE_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1)
+        for i in range(PHASE1_YEARS_COUNT)
+    ]
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.base.{param_name}"
         reform_dict[param_path] = {}
@@ -571,7 +606,10 @@ def get_option12_dict():
 
     # 3. additional rates: 0.85 → 0.35 (tier 2 people keep paying HI portion)
     # Formula: additional = oasdi_share + HI_ONLY_RATE, so as oasdi_share → 0, additional → HI_ONLY_RATE
-    additional_values = [INITIAL_ADDITIONAL_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE1_YEARS_COUNT)]
+    additional_values = [
+        INITIAL_ADDITIONAL_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1)
+        for i in range(PHASE1_YEARS_COUNT)
+    ]
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
         reform_dict[param_path] = {}
@@ -582,7 +620,10 @@ def get_option12_dict():
     # Phase 2: Phase out HI portion over 2049-2062
     phase2_start = 2029 + PHASE1_YEARS_COUNT  # 2049
     phase2_years = list(range(phase2_start, phase2_start + PHASE2_YEARS_COUNT))
-    hi_values = [HI_ONLY_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1) for i in range(PHASE2_YEARS_COUNT)]
+    hi_values = [
+        HI_ONLY_RATE - ANNUAL_PHASE_OUT_RATE * (i + 1)
+        for i in range(PHASE2_YEARS_COUNT)
+    ]
 
     for param_name in ["benefit_cap", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
@@ -601,12 +642,14 @@ def get_option1_dynamic_dict():
     result.update(CBO_ELASTICITIES)
     return result
 
+
 def get_option2_dynamic_dict():
     """Return complete parameter dict for Option 2 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option3_dynamic_dict():
     """Return complete parameter dict for Option 3 with CBO elasticities."""
@@ -615,6 +658,7 @@ def get_option3_dynamic_dict():
     result.update(extend_senior_deduction())
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option4_dynamic_dict(credit_amount=500):
     """Return complete parameter dict for Option 4 with CBO elasticities."""
@@ -625,6 +669,7 @@ def get_option4_dynamic_dict(credit_amount=500):
     result.update(CBO_ELASTICITIES)
     return result
 
+
 def get_option5_dynamic_dict():
     """Return complete parameter dict for Option 5 with CBO elasticities."""
     result = {}
@@ -632,6 +677,7 @@ def get_option5_dynamic_dict():
     result.update(enable_employer_payroll_tax(1.0))
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option6_dynamic_dict():
     """Return complete parameter dict for Option 6 with CBO elasticities."""
@@ -647,7 +693,7 @@ def get_option6_dynamic_dict():
             "2030": 0.6536,
             "2031": 0.7843,
             "2032": 0.9150,
-            "2033-01-01.2100-12-31": 1.0
+            "2033-01-01.2100-12-31": 1.0,
         },
     }
 
@@ -664,8 +710,24 @@ def get_option6_dynamic_dict():
 
     # Phase down additional rate parameters
     add_years = list(range(2029, 2045))
-    add_values = [0.80, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50, 0.45, 0.40,
-                  0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05]
+    add_values = [
+        0.80,
+        0.75,
+        0.70,
+        0.65,
+        0.60,
+        0.55,
+        0.50,
+        0.45,
+        0.40,
+        0.35,
+        0.30,
+        0.25,
+        0.20,
+        0.15,
+        0.10,
+        0.05,
+    ]
 
     for param_name in ["benefit_cap", "bracket", "excess"]:
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
@@ -678,12 +740,14 @@ def get_option6_dynamic_dict():
     reform_dict.update(CBO_ELASTICITIES)
     return reform_dict
 
+
 def get_option7_dynamic_dict():
     """Return complete parameter dict for Option 7 with CBO elasticities."""
     result = {}
     result.update(eliminate_senior_deduction())
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option8_dynamic_dict():
     """Return complete parameter dict for Option 8 with CBO elasticities."""
@@ -692,6 +756,7 @@ def get_option8_dynamic_dict():
     result.update(CBO_ELASTICITIES)
     return result
 
+
 def get_option9_dynamic_dict():
     """Return complete parameter dict for Option 9 with CBO elasticities."""
     result = {}
@@ -699,12 +764,14 @@ def get_option9_dynamic_dict():
     result.update(CBO_ELASTICITIES)
     return result
 
+
 def get_option10_dynamic_dict():
     """Return complete parameter dict for Option 10 with CBO elasticities."""
     result = {}
     result.update(tax_95_percent_ss())
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option11_dynamic_dict():
     """Return complete parameter dict for Option 11 with CBO elasticities.
@@ -718,6 +785,7 @@ def get_option11_dynamic_dict():
     result.update(eliminate_senior_deduction())
     result.update(CBO_ELASTICITIES)
     return result
+
 
 def get_option12_dynamic_dict():
     """Return complete parameter dict for Option 12 with CBO elasticities.
@@ -753,6 +821,7 @@ def get_option12_dynamic_dict():
 
 
 # Policy reform functions using modular components
+
 
 def get_option1_reform():
     """Option 1: Full Repeal of Social Security Benefits Taxation.

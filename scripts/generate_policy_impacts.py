@@ -16,7 +16,10 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.reforms import REFORMS
-from src.impact_calculator import calculate_multi_year_impacts, calculate_household_impact
+from src.impact_calculator import (
+    calculate_multi_year_impacts,
+    calculate_household_impact,
+)
 import pandas as pd
 
 
@@ -24,6 +27,7 @@ def write_simulation_metadata(output_dir, start_year, end_year):
     """Write simulation metadata including PolicyEngine version and dataset info."""
     try:
         import policyengine_us
+
         pe_version = policyengine_us.__version__
     except:
         pe_version = "unknown"
@@ -32,17 +36,18 @@ def write_simulation_metadata(output_dir, start_year, end_year):
     dataset_stats = {}
     try:
         from policyengine_us import Microsimulation
+
         sim = Microsimulation()
-        household_count = len(sim.calculate('household_id', 2024))
-        person_count = len(sim.calculate('person_id', 2024))
+        household_count = len(sim.calculate("household_id", 2024))
+        person_count = len(sim.calculate("person_id", 2024))
         dataset_stats = {
             "household_count": household_count,
-            "individual_count": person_count
+            "individual_count": person_count,
         }
     except:
         dataset_stats = {
             "household_count": 56839,  # Fallback to known values
-            "individual_count": 146133
+            "individual_count": 146133,
         }
 
     metadata = {
@@ -52,13 +57,13 @@ def write_simulation_metadata(output_dir, start_year, end_year):
         "analysis_period": f"{start_year}-{end_year}",
         "data_sources": {
             "enhanced_cps": "PolicyEngine enhanced CPS microdata",
-            "base_year": "2024"
+            "base_year": "2024",
         },
-        "dataset_statistics": dataset_stats
+        "dataset_statistics": dataset_stats,
     }
 
-    metadata_file = output_dir / 'simulation_metadata.json'
-    with open(metadata_file, 'w') as f:
+    metadata_file = output_dir / "simulation_metadata.json"
+    with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
     print(f"Simulation metadata saved to {metadata_file}")
     return metadata
@@ -66,41 +71,41 @@ def write_simulation_metadata(output_dir, start_year, end_year):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Generate policy impact data for Social Security reforms'
+        description="Generate policy impact data for Social Security reforms"
     )
     parser.add_argument(
-        '--start-year',
+        "--start-year",
         type=int,
         default=2026,
-        help='Start year for analysis (default: 2026)'
+        help="Start year for analysis (default: 2026)",
     )
     parser.add_argument(
-        '--end-year',
+        "--end-year",
         type=int,
         default=2035,
-        help='End year for analysis (default: 2035)'
+        help="End year for analysis (default: 2035)",
     )
     parser.add_argument(
-        '--output-dir',
+        "--output-dir",
         type=str,
-        default='data',
-        help='Output directory for CSV files (default: data)'
+        default="data",
+        help="Output directory for CSV files (default: data)",
     )
     parser.add_argument(
-        '--skip-household',
-        action='store_true',
-        help='Skip household impact calculations'
+        "--skip-household",
+        action="store_true",
+        help="Skip household impact calculations",
     )
     parser.add_argument(
-        '--household-only',
-        action='store_true',
-        help='Only generate household impacts (skip fiscal impacts)'
+        "--household-only",
+        action="store_true",
+        help="Only generate household impacts (skip fiscal impacts)",
     )
     parser.add_argument(
-        '--only-reform',
+        "--only-reform",
         type=str,
         default=None,
-        help='Only process this specific reform (e.g., option8)'
+        help="Only process this specific reform (e.g., option8)",
     )
 
     args = parser.parse_args()
@@ -135,7 +140,7 @@ def main():
         print("CALCULATING FISCAL IMPACTS")
         print("=" * 60)
 
-        fiscal_output = output_dir / 'policy_impacts.csv'
+        fiscal_output = output_dir / "policy_impacts.csv"
         fiscal_impacts = calculate_multi_year_impacts(
             reforms_to_process, years, checkpoint_file=str(fiscal_output)
         )
@@ -146,11 +151,11 @@ def main():
             existing_df = pd.read_csv(fiscal_output)
 
             # Get the reform ID(s) we're adding
-            new_reform_ids = fiscal_impacts['reform_id'].unique()
+            new_reform_ids = fiscal_impacts["reform_id"].unique()
 
             # Remove any existing data for these reforms
             print(f"  Removing existing data for: {', '.join(new_reform_ids)}")
-            existing_df = existing_df[~existing_df['reform_id'].isin(new_reform_ids)]
+            existing_df = existing_df[~existing_df["reform_id"].isin(new_reform_ids)]
 
             # Append new data
             fiscal_impacts = pd.concat([existing_df, fiscal_impacts], ignore_index=True)
@@ -161,7 +166,7 @@ def main():
         print(f"\nFiscal impacts saved to {fiscal_output}")
 
         # Also save to React dashboard location
-        dashboard_output = Path('policy-impact-dashboard/public/policy_impacts.csv')
+        dashboard_output = Path("policy-impact-dashboard/public/policy_impacts.csv")
         if dashboard_output.parent.exists():
             fiscal_impacts.to_csv(dashboard_output, index=False)
             print(f"Also saved to {dashboard_output}")
@@ -171,7 +176,9 @@ def main():
         print("\n" + "=" * 60)
         print("CALCULATING HOUSEHOLD IMPACTS")
         print("=" * 60)
-        print(f"Processing {len(reforms_to_process)} reforms × {len(years)} years = {len(reforms_to_process) * len(years)} vectorized calculations")
+        print(
+            f"Processing {len(reforms_to_process)} reforms × {len(years)} years = {len(reforms_to_process) * len(years)} vectorized calculations"
+        )
         print("Note: Each calculation processes ALL income levels simultaneously")
 
         household_results = []
@@ -181,32 +188,37 @@ def main():
         for reform_id, config in reforms_to_process.items():
             print(f"\nReform: {config['name']}")
 
-            if config.get('has_variants', False):
+            if config.get("has_variants", False):
                 # Use middle variant for household analysis
-                variant = config['variants'][len(config['variants']) // 2]
-                reform = config['func'](variant)
+                variant = config["variants"][len(config["variants"]) // 2]
+                reform = config["func"](variant)
                 reform_name = f"{config['name']} (${variant})"
             else:
-                reform = config['func']()
-                reform_name = config['name']
+                reform = config["func"]()
+                reform_name = config["name"]
 
             for year in years:
                 completed += 1
-                print(f"  [{completed}/{total_calculations}] Year {year}... ", end='', flush=True)
+                print(
+                    f"  [{completed}/{total_calculations}] Year {year}... ",
+                    end="",
+                    flush=True,
+                )
                 import time
+
                 start_time = time.time()
                 df = calculate_household_impact(reform, year)
                 elapsed = time.time() - start_time
                 print(f"✓ ({elapsed:.1f}s)")
-                df['reform'] = reform_name
-                df['year'] = year
+                df["reform"] = reform_name
+                df["year"] = year
                 household_results.append(df)
 
         # Combine all household results
         household_df = pd.concat(household_results, ignore_index=True)
 
         # Save household impacts
-        household_output = output_dir / 'household_impacts.csv'
+        household_output = output_dir / "household_impacts.csv"
 
         # If --only-reform is specified and file exists, append to existing data
         if args.only_reform and household_output.exists():
@@ -214,15 +226,17 @@ def main():
             existing_df = pd.read_csv(household_output)
 
             # Get the reform name(s) we're adding
-            new_reform_names = household_df['reform'].unique()
+            new_reform_names = household_df["reform"].unique()
 
             # Remove any existing data for these reforms
             print(f"  Removing existing data for: {', '.join(new_reform_names)}")
-            existing_df = existing_df[~existing_df['reform'].isin(new_reform_names)]
+            existing_df = existing_df[~existing_df["reform"].isin(new_reform_names)]
 
             # Append new data
             household_df = pd.concat([existing_df, household_df], ignore_index=True)
-            print(f"  Combined {len(existing_df)} existing rows + {len(household_results)} new calculations")
+            print(
+                f"  Combined {len(existing_df)} existing rows + {len(household_results)} new calculations"
+            )
 
         household_df.to_csv(household_output, index=False)
         print(f"\nHousehold impacts saved to {household_output}")

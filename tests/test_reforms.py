@@ -10,7 +10,7 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
-    REFORMS
+    REFORMS,
 )
 
 
@@ -62,7 +62,7 @@ def test_option4_reform_custom_amount():
     credit_params = [v for k, v in params.items() if "ss_credit.amount" in str(k)]
     assert len(credit_params) > 0
     # The credit amount should be 750 for the time period
-    assert any(750 in v.values() for v in credit_params if hasattr(v, 'values'))
+    assert any(750 in v.values() for v in credit_params if hasattr(v, "values"))
 
 
 def test_option5_reform():
@@ -82,8 +82,9 @@ def test_option6_reform():
     # Should have phased parameters
     assert any("tax_employer_payroll_tax.percentage" in str(k) for k in params.keys())
     # Check that it has multiple year entries for phase-in
-    percentage_params = [v for k, v in params.items()
-                         if "tax_employer_payroll_tax.percentage" in str(k)]
+    percentage_params = [
+        v for k, v in params.items() if "tax_employer_payroll_tax.percentage" in str(k)
+    ]
     assert len(percentage_params) > 0
 
 
