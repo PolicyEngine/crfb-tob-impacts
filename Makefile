@@ -60,7 +60,7 @@ lint: lint-python lint-react
 
 lint-python:
 	@echo "Linting Python code..."
-	black src/ tests/ scripts/ --check
+	ruff format --check src/ tests/ scripts/
 	pylint src/
 
 lint-react:
@@ -71,7 +71,7 @@ format: format-python format-react
 
 format-python:
 	@echo "Formatting Python code..."
-	black src/ tests/ scripts/
+	ruff format src/ tests/ scripts/
 
 format-react:
 	@echo "Formatting React code..."

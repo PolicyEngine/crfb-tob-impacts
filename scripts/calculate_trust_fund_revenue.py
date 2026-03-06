@@ -1,21 +1,20 @@
 """
 Calculate trust fund revenue from SS benefit taxation for Option 2.
 """
+
 import sys
-sys.path.insert(0, 'src')
+
+sys.path.insert(0, "src")
 
 from trust_fund_revenue import calculate_trust_fund_revenue
 from reforms import get_option2_reform
 
 # Calculate for 2026
-revenue = calculate_trust_fund_revenue(
-    reform=get_option2_reform(),
-    year=2026
-)
+revenue = calculate_trust_fund_revenue(reform=get_option2_reform(), year=2026)
 
-print(f"\n{'='*80}")
+print(f"\n{'=' * 80}")
 print(f"Trust Fund Revenue Calculation for Option 2 (2026)")
-print(f"{'='*80}\n")
+print(f"{'=' * 80}\n")
 print(f"TOTAL trust fund revenue under Option 2 (85% taxation):")
 print(f"  ${revenue / 1e9:.2f} billion")
 print(f"  ${revenue / 1e6:.0f} million\n")

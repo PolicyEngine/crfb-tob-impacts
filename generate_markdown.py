@@ -13,17 +13,17 @@ from pathlib import Path
 
 def load_revenue_data():
     """Load and process revenue impacts CSV."""
-    df = pd.read_csv('data/revenue_impacts.csv')
+    df = pd.read_csv("data/revenue_impacts.csv")
     return df
 
 
 def calculate_10year_totals(df):
     """Calculate 10-year totals (2026-2035) for each reform option."""
     # Filter for 10-year window and static scoring
-    df_10yr = df[(df['year'].between(2026, 2035)) & (df['scoring_type'] == 'static')]
+    df_10yr = df[(df["year"].between(2026, 2035)) & (df["scoring_type"] == "static")]
 
     # Sum by reform
-    totals = df_10yr.groupby('reform_name')['revenue_impact'].sum()
+    totals = df_10yr.groupby("reform_name")["revenue_impact"].sum()
 
     return totals
 
@@ -51,21 +51,20 @@ def generate_external_estimates():
 
     # Prepare template variables (all in billions, rounded to nearest billion)
     variables = {
-        'opt1_10yr': format_billions(totals['option1']),
-        'opt2_10yr': format_billions(totals['option2']),
-        'opt3_10yr': format_billions(totals['option3']),
-        'opt4_10yr': format_billions(totals['option4']),
-        'opt5_10yr': format_billions(totals['option5']),
-        'opt6_10yr': format_billions(totals['option6']),
-        'opt7_10yr': format_billions(totals['option7']),
-        'opt8_10yr': format_billions(totals['option8']),
-
+        "opt1_10yr": format_billions(totals["option1"]),
+        "opt2_10yr": format_billions(totals["option2"]),
+        "opt3_10yr": format_billions(totals["option3"]),
+        "opt4_10yr": format_billions(totals["option4"]),
+        "opt5_10yr": format_billions(totals["option5"]),
+        "opt6_10yr": format_billions(totals["option6"]),
+        "opt7_10yr": format_billions(totals["option7"]),
+        "opt8_10yr": format_billions(totals["option8"]),
         # Special formatting for Option 1 in trillions with sign
-        'opt1_10yr_with_sign': format_trillions(totals['option1'], decimals=1),
+        "opt1_10yr_with_sign": format_trillions(totals["option1"], decimals=1),
     }
 
     # Load template
-    template_path = Path('jupyterbook/templates/external-estimates.md.tpl')
+    template_path = Path("jupyterbook/templates/external-estimates.md.tpl")
     with open(template_path) as f:
         template = Template(f.read())
 
@@ -73,8 +72,8 @@ def generate_external_estimates():
     output = template.render(**variables)
 
     # Write output
-    output_path = Path('jupyterbook/external-estimates.md')
-    with open(output_path, 'w') as f:
+    output_path = Path("jupyterbook/external-estimates.md")
+    with open(output_path, "w") as f:
         f.write(output)
 
     print(f"✓ Generated {output_path}")
@@ -83,6 +82,6 @@ def generate_external_estimates():
         print(f"  {key}: {value}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_external_estimates()
     print("\n✓ All markdown files generated successfully")

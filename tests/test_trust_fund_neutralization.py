@@ -1,6 +1,7 @@
 """
 Test that neutralizing tax_unit_taxable_social_security works correctly.
 """
+
 from policyengine_us import Microsimulation
 from src.reforms import get_option2_reform
 
@@ -36,20 +37,26 @@ def test_neutralize_tax_unit_taxable_ss():
                 pass
 
     income_tax_without = branch.calculate("income_tax", map_to="household", period=year)
-    taxable_ss_without = branch.calculate("tax_unit_taxable_social_security", period=year)
+    taxable_ss_without = branch.calculate(
+        "tax_unit_taxable_social_security", period=year
+    )
 
     print(f"\nWithout SS taxation (neutralized):")
     print(f"  Taxable SS: ${taxable_ss_without.sum() / 1e9:.2f}B")
     print(f"  Income tax: ${income_tax_without.sum() / 1e9:.2f}B")
 
     print(f"\nDifference:")
-    print(f"  Trust fund revenue: ${(income_tax_with.sum() - income_tax_without.sum()) / 1e9:.2f}B")
+    print(
+        f"  Trust fund revenue: ${(income_tax_with.sum() - income_tax_without.sum()) / 1e9:.2f}B"
+    )
 
     assert taxable_ss_without.sum() == 0, "Neutralized taxable SS should be 0"
-    assert income_tax_with.sum() > income_tax_without.sum(), \
+    assert income_tax_with.sum() > income_tax_without.sum(), (
         "Income tax with SS taxation should be higher"
-    assert (income_tax_with.sum() - income_tax_without.sum()) > 10e9, \
+    )
+    assert (income_tax_with.sum() - income_tax_without.sum()) > 10e9, (
         "Trust fund revenue should be substantial (>$10B)"
+    )
 
 
 if __name__ == "__main__":

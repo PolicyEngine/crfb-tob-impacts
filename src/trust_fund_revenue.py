@@ -5,15 +5,14 @@ This module provides functions to calculate the portion of income tax revenue
 that is attributable to taxation of Social Security benefits, which by law
 flows to the Social Security trust funds.
 """
+
 import numpy as np
 from policyengine_us import Microsimulation
 from typing import Optional
 
 
 def calculate_trust_fund_revenue(
-    reform,
-    year: int,
-    dataset: Optional[str] = None
+    reform, year: int, dataset: Optional[str] = None
 ) -> float:
     """
     Calculate TOTAL trust fund revenue from SS benefit taxation under a reform.
@@ -60,7 +59,9 @@ def calculate_trust_fund_revenue(
                 pass
 
     # Calculate income tax WITHOUT taxable SS
-    income_tax_without_ss = branch.calculate("income_tax", map_to="household", period=year)
+    income_tax_without_ss = branch.calculate(
+        "income_tax", map_to="household", period=year
+    )
 
     # Clean up branch
     del sim.branches["trust_fund_calc"]
@@ -72,9 +73,7 @@ def calculate_trust_fund_revenue(
 
 
 def calculate_trust_fund_revenue_dynamic(
-    reform_with_labor_responses,
-    year: int,
-    dataset: Optional[str] = None
+    reform_with_labor_responses, year: int, dataset: Optional[str] = None
 ) -> float:
     """
     Calculate trust fund revenue with labor supply responses.
@@ -110,7 +109,9 @@ def calculate_trust_fund_revenue_dynamic(
 
     # Extract behaviorally-adjusted employment income (already includes LSR)
     employment_income = sim.calculate("employment_income", map_to="person", period=year)
-    self_employment_income = sim.calculate("self_employment_income", map_to="person", period=year)
+    self_employment_income = sim.calculate(
+        "self_employment_income", map_to="person", period=year
+    )
 
     # Create branch and neutralize BOTH tax_unit_taxable_social_security AND LSR variables
     branch = sim.get_branch("trust_fund_calc", clone_system=True)
@@ -118,8 +119,12 @@ def calculate_trust_fund_revenue_dynamic(
 
     # Neutralize all LSR variables so they return 0 (disables behavioral responses in branch)
     branch.tax_benefit_system.neutralize_variable("labor_supply_behavioral_response")
-    branch.tax_benefit_system.neutralize_variable("employment_income_behavioral_response")
-    branch.tax_benefit_system.neutralize_variable("self_employment_income_behavioral_response")
+    branch.tax_benefit_system.neutralize_variable(
+        "employment_income_behavioral_response"
+    )
+    branch.tax_benefit_system.neutralize_variable(
+        "self_employment_income_behavioral_response"
+    )
     branch.tax_benefit_system.neutralize_variable("income_elasticity_lsr")
     branch.tax_benefit_system.neutralize_variable("substitution_elasticity_lsr")
 
@@ -137,7 +142,9 @@ def calculate_trust_fund_revenue_dynamic(
                 pass
 
     # Calculate income tax with fixed incomes but no taxable SS
-    income_tax_without_ss = branch.calculate("income_tax", map_to="household", period=year)
+    income_tax_without_ss = branch.calculate(
+        "income_tax", map_to="household", period=year
+    )
 
     # Clean up
     del sim.branches["trust_fund_calc"]
