@@ -28,9 +28,15 @@ async function loadEconomicProjections(): Promise<Map<number, EconomicProjection
   return projections
 }
 
+export type AllocationMode = 'currentLaw' | 'baselineShares'
+
+// Options where allocation mode applies (not Roth 5/6, not general rev 7, not 12/13 branching)
+export const ALLOCATION_ELIGIBLE_OPTIONS = ['option1', 'option2', 'option8', 'option9', 'option10']
+
 export function parse75YearData(
   csvContent: string,
-  economicProjections: Map<number, EconomicProjection>
+  economicProjections: Map<number, EconomicProjection>,
+  allocationMode: AllocationMode = 'currentLaw'
 ): Record<string, YearlyImpact[]> {
   const lines = csvContent.trim().split('\n')
   const headers = lines[0].split(',')
@@ -44,7 +50,8 @@ export function parse75YearData(
     const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
 
     // Different options use different columns for impacts
-    const isOption3or4or11 = reformName === 'option3' || reformName === 'option4' || reformName === 'option11'
+    const useBaselineShares = reformName === 'option3' || reformName === 'option4' || reformName === 'option11'
+      || (allocationMode === 'baselineShares' && ALLOCATION_ELIGIBLE_OPTIONS.includes(reformName))
     const isOption5or6 = reformName === 'option5' || reformName === 'option6'
     const isOption7 = reformName === 'option7'
     const isOption12or13 = reformName === 'option12' || reformName === 'option13'
@@ -55,20 +62,16 @@ export function parse75YearData(
 
     if (isOption7) {
       // Option 7: Revenue goes to general revenues, not trust funds
-      // Use revenue_impact directly, set trust fund splits to 0
       revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
       tobOasdiImpact = 0
       tobMedicareHiImpact = 0
     } else if (isOption12or13) {
-      // Options 12, 13, 14: Use direct branching like Options 5-6
-      // Employer payroll tax income is allocated to trust funds, so total = sum of trust fund impacts
+      // Options 12, 13: Use direct branching like Options 5-6
       tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
       revenueImpact = tobOasdiImpact + tobMedicareHiImpact
-    } else if (isOption3or4or11) {
-      // Options 3, 4, 11: Allocate full revenue_impact to trust funds based on baseline shares
-      // "The additional revenue raised will be allocated to the OASDI and HI trust funds
-      // in a way that maintains the current projected shares of contributions from TOB revenue"
+    } else if (useBaselineShares) {
+      // Allocate revenue_impact to trust funds based on baseline TOB shares
       revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
       const baselineOasdi = parseFloat(values[headers.indexOf('baseline_tob_oasdi')]) || 0
       const baselineHi = parseFloat(values[headers.indexOf('baseline_tob_medicare_hi')]) || 0
@@ -89,7 +92,7 @@ export function parse75YearData(
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
       revenueImpact = tobOasdiImpact + tobMedicareHiImpact
     } else {
-      // Options 1-3, 8: use tob_oasdi_impact and tob_medicare_hi_impact
+      // Current law TOB rules: use tob_oasdi_impact and tob_medicare_hi_impact
       tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')]) || 0
       tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')]) || 0
       revenueImpact = tobOasdiImpact + tobMedicareHiImpact
@@ -186,7 +189,10 @@ export function calculateTotals(data: YearlyImpact[]): {
 export type ScoringType = 'static' | 'dynamic'
 export type { DisplayUnit } from '../types'
 
-export async function loadData(scoringType: ScoringType = 'static'): Promise<Record<string, YearlyImpact[]>> {
+export async function loadData(
+  scoringType: ScoringType = 'static',
+  allocationMode: AllocationMode = 'currentLaw'
+): Promise<Record<string, YearlyImpact[]>> {
   // Load economic projections first
   const economicProjections = await loadEconomicProjections()
 
@@ -194,7 +200,7 @@ export async function loadData(scoringType: ScoringType = 'static'): Promise<Rec
   const filename = scoringType === 'dynamic' ? 'all_dynamic_results.csv' : 'all_static_results.csv'
   const response = await fetch(`${BASE_URL}data/${filename}`)
   const csvContent = await response.text()
-  return parse75YearData(csvContent, economicProjections)
+  return parse75YearData(csvContent, economicProjections, allocationMode)
 }
 
 export function exportToCsv(data: YearlyImpact[], reformId: string, reformName: string): void {

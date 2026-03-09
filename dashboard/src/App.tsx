@@ -5,7 +5,7 @@ import { ComparisonTable } from './components/ComparisonTable'
 import { SummaryCards } from './components/SummaryCards'
 import { MethodologySection } from './components/MethodologySection'
 import { Option13Tab } from './components/Option13Tab'
-import { loadData, calculateTotals, exportToCsv, type ScoringType } from './utils/dataLoader'
+import { loadData, calculateTotals, exportToCsv, type ScoringType, type AllocationMode, ALLOCATION_ELIGIBLE_OPTIONS } from './utils/dataLoader'
 import type { YearlyImpact, DisplayUnit } from './types'
 import { REFORMS } from './types'
 import './App.css'
@@ -20,6 +20,7 @@ function App() {
   const [viewMode, setViewMode] = useState<'10year' | '75year'>('10year')
   const [scoringType, setScoringType] = useState<ScoringType>('static')
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('dollars')
+  const [allocationMode, setAllocationMode] = useState<AllocationMode>('currentLaw')
 
   // Update display unit when view mode changes
   const handleViewModeChange = (mode: '10year' | '75year') => {
@@ -32,10 +33,10 @@ function App() {
     // Only show full-page loading on initial load, not when switching scoring types
     const isInitialLoad = Object.keys(data).length === 0
     if (isInitialLoad) setLoading(true)
-    loadData(scoringType)
+    loadData(scoringType, allocationMode)
       .then(setData)
       .finally(() => setLoading(false))
-  }, [scoringType])
+  }, [scoringType, allocationMode])
 
   const selectedData = data[selectedReform] || []
   const tenYearData = selectedData.filter(d => d.year >= 2026 && d.year <= 2035)
@@ -141,6 +142,26 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {ALLOCATION_ELIGIBLE_OPTIONS.includes(selectedReform) && (
+            <div className="control-group">
+              <span className="control-label">Trust Fund Split</span>
+              <div className="toggle-buttons">
+                <button
+                  className={allocationMode === 'currentLaw' ? 'active' : ''}
+                  onClick={() => setAllocationMode('currentLaw')}
+                >
+                  Current Law
+                </button>
+                <button
+                  className={allocationMode === 'baselineShares' ? 'active' : ''}
+                  onClick={() => setAllocationMode('baselineShares')}
+                >
+                  Baseline Shares
+                </button>
+              </div>
+            </div>
+            )}
 
             <div className="control-group">
               <span className="control-label">Unit</span>
