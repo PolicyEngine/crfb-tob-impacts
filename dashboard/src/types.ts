@@ -121,12 +121,6 @@ export const REFORMS: Reform[] = [
     shortName: 'Balanced Fix',
     description: 'Trust fund gaps closed starting 2035 via 50% payroll tax increases + 50% benefit cuts (see dedicated tab for detailed analysis)',
   },
-  {
-    id: 'option14',
-    name: 'Extended Roth vs Balanced Fix',
-    shortName: 'Roth vs Balanced',
-    description: 'Option 12 (employer tax + TOB phase-out) compared to Option 13 baseline (benefit cuts + rate increases)',
-  },
 ]
 
 export interface ExternalEstimate {
