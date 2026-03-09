@@ -47,7 +47,7 @@ export function parse75YearData(
     const isOption3or4or11 = reformName === 'option3' || reformName === 'option4' || reformName === 'option11'
     const isOption5or6 = reformName === 'option5' || reformName === 'option6'
     const isOption7 = reformName === 'option7'
-    const isOption12or13or14 = reformName === 'option12' || reformName === 'option13' || reformName === 'option14' || reformName === 'option14_stacked'
+    const isOption12or13or14 = reformName === 'option12' || reformName === 'option13' || reformName === 'option14'
 
     let tobOasdiImpact: number
     let tobMedicareHiImpact: number

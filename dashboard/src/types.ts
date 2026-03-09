@@ -125,13 +125,7 @@ export const REFORMS: Reform[] = [
     id: 'option14',
     name: 'Extended Roth vs Balanced Fix',
     shortName: 'Roth vs Balanced',
-    description: 'Option 12 standalone (employer tax + TOB phase-out, NO cuts) compared to Option 13 baseline (benefit cuts + rate increases) - alternative approaches',
-  },
-  {
-    id: 'option14_stacked',
-    name: 'Roth + Balanced Fix Combined',
-    shortName: 'Roth + Balanced',
-    description: 'Option 12 + Option 13 combined (employer tax + TOB phase-out + benefit cuts + rate increases) compared to Option 13 baseline - additive impact',
+    description: 'Option 12 (employer tax + TOB phase-out) compared to Option 13 baseline (benefit cuts + rate increases)',
   },
 ]
 
