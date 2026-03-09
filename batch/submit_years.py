@@ -18,13 +18,26 @@ import random
 import string
 from google.cloud import batch_v1
 
+
 def generate_job_id(prefix="years"):
     """Generate unique job ID with timestamp and random suffix."""
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    random_suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
     return f"{prefix}-{timestamp}-{random_suffix}"
 
-def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, memory_mib, cpu_milli, memory_label, job_id=None, max_retries=1):
+
+def submit_single_job(
+    years,
+    reforms,
+    scoring_type,
+    bucket_name,
+    machine_type,
+    memory_mib,
+    cpu_milli,
+    memory_label,
+    job_id=None,
+    max_retries=1,
+):
     """Submit a single Cloud Batch job with specified VM configuration."""
 
     if job_id is None:
@@ -36,11 +49,13 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     # Job configuration
     num_tasks = len(years)
 
-    print("="*80)
+    print("=" * 80)
     print("SUBMITTING YEAR-BASED JOB")
-    print("="*80)
+    print("=" * 80)
     print(f"Job ID: {job_id}")
-    print(f"Years: {len(years)} ({min(years)}-{max(years) if len(years) > 1 else min(years)})")
+    print(
+        f"Years: {len(years)} ({min(years)}-{max(years) if len(years) > 1 else min(years)})"
+    )
     print(f"Machine: {machine_type} ({memory_label} RAM)")
     print(f"Reforms per year: {len(reforms)} ({', '.join(reforms)})")
     print(f"Scoring: {scoring_type}")
@@ -48,7 +63,7 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     print(f"Total reforms to compute: {num_tasks * len(reforms)}")
     print(f"Bucket: gs://{bucket_name}/")
     print(f"Container: gcr.io/policyengine-api/ss-calculator:latest")
-    print("="*80)
+    print("=" * 80)
     print()
 
     # Create batch client
@@ -58,8 +73,8 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     task_spec = batch_v1.TaskSpec()
 
     # Build command that maps BATCH_TASK_INDEX to year
-    years_array = ' '.join(map(str, years))
-    reforms_args = ' '.join(reforms)
+    years_array = " ".join(map(str, years))
+    reforms_args = " ".join(reforms)
 
     script = f"""
     set -e  # Exit immediately if any command fails
@@ -82,7 +97,9 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     runnable.container.commands = ["-c", script]
 
     task_spec.runnables = [runnable]
-    task_spec.max_retry_count = max_retries  # Number of retries per task (0 = no retries)
+    task_spec.max_retry_count = (
+        max_retries  # Number of retries per task (0 = no retries)
+    )
     task_spec.max_run_duration = "3600s"  # 60 min (1 hour) timeout per year
 
     # Resource allocation - adaptive based on years
@@ -100,7 +117,9 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     # Configure allocation policy
     allocation_policy = batch_v1.AllocationPolicy()
     instance_policy = batch_v1.AllocationPolicy.InstancePolicy()
-    instance_policy.provisioning_model = batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
+    instance_policy.provisioning_model = (
+        batch_v1.AllocationPolicy.ProvisioningModel.STANDARD
+    )
     instance_policy.machine_type = machine_type
 
     instance_policy_or_template = batch_v1.AllocationPolicy.InstancePolicyOrTemplate()
@@ -121,10 +140,7 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
     job.task_groups = [task_group]
     job.allocation_policy = allocation_policy
     job.logs_policy = logs_policy
-    job.labels = {
-        "job_type": "year_based",
-        "scoring": scoring_type
-    }
+    job.labels = {"job_type": "year_based", "scoring": scoring_type}
 
     # Submit job
     print("Submitting job to Cloud Batch...")
@@ -137,23 +153,26 @@ def submit_single_job(years, reforms, scoring_type, bucket_name, machine_type, m
 
     response = client.create_job(create_request)
 
-    print("="*80)
+    print("=" * 80)
     print("✓ JOB SUBMITTED SUCCESSFULLY")
-    print("="*80)
+    print("=" * 80)
     print(f"Job ID: {job_id}")
     print(f"Status: {response.status.state.name}")
     print()
     print("Monitor progress:")
     print(f"  Command: gcloud batch jobs describe {job_id} --location={region}")
-    print(f"  Console: https://console.cloud.google.com/batch/jobs/{job_id}?project={project_id}")
+    print(
+        f"  Console: https://console.cloud.google.com/batch/jobs/{job_id}?project={project_id}"
+    )
     print()
     print(f"Results will be saved to: gs://{bucket_name}/results/{job_id}/")
     print()
     print("When complete, check results:")
     print(f"  gsutil ls gs://{bucket_name}/results/{job_id}/")
-    print("="*80)
+    print("=" * 80)
 
     return job_id
+
 
 def submit_job(years, reforms, scoring_type, bucket_name, max_retries=1):
     """
@@ -167,18 +186,33 @@ def submit_job(years, reforms, scoring_type, bucket_name, max_retries=1):
         bucket_name=bucket_name,
         machine_type="e2-highmem-8",  # 8 vCPU, 64GB RAM
         memory_mib=65536,  # 64GB
-        cpu_milli=8000,    # 8 CPUs
+        cpu_milli=8000,  # 8 CPUs
         memory_label="64GB",
-        max_retries=max_retries
+        max_retries=max_retries,
     )
+
 
 def main():
     parser = argparse.ArgumentParser(description="Submit year-based parallel jobs")
-    parser.add_argument("--years", required=True, help="Comma-separated years (e.g., 2026,2027)")
-    parser.add_argument("--reforms", required=True, help="Comma-separated reform IDs (e.g., option1,option2,option3,option4)")
-    parser.add_argument("--scoring", required=True, choices=["static", "dynamic"], help="Scoring type")
-    parser.add_argument("--bucket", default="crfb-ss-analysis-results", help="Cloud Storage bucket")
-    parser.add_argument("--no-retry", action="store_true", help="Disable retries (fail immediately on timeout)")
+    parser.add_argument(
+        "--years", required=True, help="Comma-separated years (e.g., 2026,2027)"
+    )
+    parser.add_argument(
+        "--reforms",
+        required=True,
+        help="Comma-separated reform IDs (e.g., option1,option2,option3,option4)",
+    )
+    parser.add_argument(
+        "--scoring", required=True, choices=["static", "dynamic"], help="Scoring type"
+    )
+    parser.add_argument(
+        "--bucket", default="crfb-ss-analysis-results", help="Cloud Storage bucket"
+    )
+    parser.add_argument(
+        "--no-retry",
+        action="store_true",
+        help="Disable retries (fail immediately on timeout)",
+    )
 
     args = parser.parse_args()
 
@@ -187,6 +221,7 @@ def main():
     max_retries = 0 if args.no_retry else 1
 
     submit_job(years, reforms, args.scoring, args.bucket, max_retries=max_retries)
+
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 from src.impact_calculator import (
     calculate_fiscal_impact,
     compute_baselines,
-    calculate_household_impact
+    calculate_household_impact,
 )
 from src.reforms import get_option1_reform
 
@@ -21,7 +21,7 @@ class TestFiscalImpact:
         baseline_income_tax = np.array([1000, 2000, 3000])
 
         # Mock the Microsimulation
-        with patch('src.impact_calculator.Microsimulation') as MockMicrosim:
+        with patch("src.impact_calculator.Microsimulation") as MockMicrosim:
             # Setup mock reformed simulation
             mock_reformed = Mock()
             mock_reformed.calculate.return_value = np.array([900, 1900, 2900])
@@ -45,7 +45,7 @@ class TestFiscalImpact:
         """Test error handling in fiscal impact calculation."""
         baseline_income_tax = np.array([1000, 2000, 3000])
 
-        with patch('src.impact_calculator.Microsimulation') as MockMicrosim:
+        with patch("src.impact_calculator.Microsimulation") as MockMicrosim:
             # Setup mock to raise an error
             MockMicrosim.side_effect = Exception("Test error")
 
@@ -63,7 +63,7 @@ class TestComputeBaselines:
         """Test computing baselines for multiple years."""
         years = [2026, 2027]
 
-        with patch('src.impact_calculator.Microsimulation') as MockMicrosim:
+        with patch("src.impact_calculator.Microsimulation") as MockMicrosim:
             # Setup mock baseline simulation
             mock_baseline = Mock()
             mock_baseline.calculate.return_value = np.array([1000, 2000, 3000])
@@ -83,7 +83,7 @@ class TestHouseholdImpact:
 
     def test_calculate_household_impact(self):
         """Test household impact calculation."""
-        with patch('src.impact_calculator.Simulation') as MockSim:
+        with patch("src.impact_calculator.Simulation") as MockSim:
             # Setup mock simulations
             mock_reform_sim = Mock()
             mock_reform_sim.calculate.return_value = np.array([50000, 60000, 70000])
@@ -103,25 +103,23 @@ class TestHouseholdImpact:
             # Calculate impact
             reform = Mock()
             df = calculate_household_impact(
-                reform,
-                2026,
-                employment_income_range=(0, 1000, 500)
+                reform, 2026, employment_income_range=(0, 1000, 500)
             )
 
             # Check DataFrame structure
             assert isinstance(df, pd.DataFrame)
             assert len(df) == 3  # 0, 500, 1000
-            assert 'employment_income' in df.columns
-            assert 'baseline_net_income' in df.columns
-            assert 'reform_net_income' in df.columns
-            assert 'change_in_net_income' in df.columns
+            assert "employment_income" in df.columns
+            assert "baseline_net_income" in df.columns
+            assert "reform_net_income" in df.columns
+            assert "change_in_net_income" in df.columns
 
             # Check that change is calculated correctly
-            assert all(df['change_in_net_income'] == 1000)
+            assert all(df["change_in_net_income"] == 1000)
 
     def test_calculate_household_impact_custom_params(self):
         """Test household impact with custom parameters."""
-        with patch('src.impact_calculator.Simulation') as MockSim:
+        with patch("src.impact_calculator.Simulation") as MockSim:
             mock_sim = Mock()
             mock_sim.calculate.return_value = np.array([50000])
             MockSim.return_value = mock_sim
@@ -133,9 +131,9 @@ class TestHouseholdImpact:
                 employment_income_range=(10000, 10000, 1000),
                 social_security_benefits=25000,
                 age=65,
-                state="CA"
+                state="CA",
             )
 
             # Should have only one row (10000)
             assert len(df) == 1
-            assert df.iloc[0]['employment_income'] == 10000
+            assert df.iloc[0]["employment_income"] == 10000

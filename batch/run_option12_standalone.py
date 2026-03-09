@@ -2,6 +2,7 @@
 Run Option 12 standalone (without Option 13 baseline).
 Compares employer payroll tax reform to current law.
 """
+
 import os
 import sys
 import modal
@@ -17,7 +18,9 @@ image = (
     .pip_install("pandas", "numpy", "h5py", "tables")
     .add_local_dir("data", "/app/data", copy=True)
     .add_local_dir("src", "/app/src", copy=True)
-    .add_local_dir("/Users/pavelmakarchuk/policyengine-us", "/app/policyengine-us", copy=True)
+    .add_local_dir(
+        "/Users/pavelmakarchuk/policyengine-us", "/app/policyengine-us", copy=True
+    )
     .run_commands("pip install -e /app/policyengine-us")
 )
 
@@ -33,12 +36,12 @@ def compute_option12_standalone(year: int) -> dict:
     from policyengine_us import Microsimulation
     from policyengine_core.reforms import Reform
 
-    sys.path.insert(0, '/app/src')
+    sys.path.insert(0, "/app/src")
     from reforms import get_option12_dict
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"OPTION 12 STANDALONE: {year}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     dataset = f"hf://policyengine/test/no-h6/{year}.h5"
 
@@ -56,14 +59,18 @@ def compute_option12_standalone(year: int) -> dict:
     baseline_tob_hi = baseline_sim.calculate("tob_revenue_medicare_hi", year).sum()
     baseline_ss_benefits = baseline_sim.calculate("social_security", year).sum()
 
-    print(f"Baseline: Income tax ${baseline_income_tax/1e9:.1f}B, SS benefits ${baseline_ss_benefits/1e9:.1f}B")
+    print(
+        f"Baseline: Income tax ${baseline_income_tax / 1e9:.1f}B, SS benefits ${baseline_ss_benefits / 1e9:.1f}B"
+    )
 
     # =========================================================================
     # OPTION 12: Employer payroll tax reform
     # =========================================================================
     print(f"\nRunning Option 12 reform simulation...")
     option12_reform = Reform.from_dict(option12_dict, country_id="us")
-    reform_sim = Microsimulation(reform=option12_reform, dataset=dataset, start_instant=f"{year}-01-01")
+    reform_sim = Microsimulation(
+        reform=option12_reform, dataset=dataset, start_instant=f"{year}-01-01"
+    )
 
     reform_income_tax = reform_sim.calculate("income_tax", year).sum()
     reform_tob_oasdi = reform_sim.calculate("tob_revenue_oasdi", year).sum()
@@ -71,8 +78,12 @@ def compute_option12_standalone(year: int) -> dict:
     reform_ss_benefits = reform_sim.calculate("social_security", year).sum()
 
     # Employer payroll tax revenue (goes to trust funds)
-    employer_ss_revenue = reform_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year).sum()
-    employer_hi_revenue = reform_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year).sum()
+    employer_ss_revenue = reform_sim.calculate(
+        "employer_ss_tax_income_tax_revenue", map_to="household", period=year
+    ).sum()
+    employer_hi_revenue = reform_sim.calculate(
+        "employer_medicare_tax_income_tax_revenue", map_to="household", period=year
+    ).sum()
 
     # Calculate impacts
     income_tax_impact = reform_income_tax - baseline_income_tax
@@ -84,9 +95,13 @@ def compute_option12_standalone(year: int) -> dict:
     hi_net = hi_gain - hi_loss
 
     print(f"\nOption 12 Standalone Results (vs Current Law):")
-    print(f"  Income tax impact: ${income_tax_impact/1e9:+.1f}B")
-    print(f"  OASDI net: ${oasdi_net/1e9:+.1f}B (gain: ${oasdi_gain/1e9:.1f}B, loss: ${oasdi_loss/1e9:.1f}B)")
-    print(f"  HI net: ${hi_net/1e9:+.1f}B (gain: ${hi_gain/1e9:.1f}B, loss: ${hi_loss/1e9:.1f}B)")
+    print(f"  Income tax impact: ${income_tax_impact / 1e9:+.1f}B")
+    print(
+        f"  OASDI net: ${oasdi_net / 1e9:+.1f}B (gain: ${oasdi_gain / 1e9:.1f}B, loss: ${oasdi_loss / 1e9:.1f}B)"
+    )
+    print(
+        f"  HI net: ${hi_net / 1e9:+.1f}B (gain: ${hi_gain / 1e9:.1f}B, loss: ${hi_loss / 1e9:.1f}B)"
+    )
 
     result = {
         "year": year,
@@ -110,7 +125,9 @@ def compute_option12_standalone(year: int) -> dict:
     }
 
     os.makedirs("/results/option12_standalone", exist_ok=True)
-    pd.DataFrame([result]).to_csv(f"/results/option12_standalone/{year}_static_results.csv", index=False)
+    pd.DataFrame([result]).to_csv(
+        f"/results/option12_standalone/{year}_static_results.csv", index=False
+    )
 
     results_volume.commit()
     return result
@@ -125,6 +142,6 @@ def main(years: str = "2040,2055,2070,2085,2095"):
 
     for result in compute_option12_standalone.map(year_list):
         print(f"\n=== Year {result['year']} - Option 12 Standalone ===")
-        print(f"  Income tax: ${result['income_tax_impact']/1e9:+.1f}B")
-        print(f"  OASDI net: ${result['oasdi_net_impact']/1e9:+.1f}B")
-        print(f"  HI net: ${result['hi_net_impact']/1e9:+.1f}B")
+        print(f"  Income tax: ${result['income_tax_impact'] / 1e9:+.1f}B")
+        print(f"  OASDI net: ${result['oasdi_net_impact'] / 1e9:+.1f}B")
+        print(f"  HI net: ${result['hi_net_impact'] / 1e9:+.1f}B")

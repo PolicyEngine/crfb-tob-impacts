@@ -4,6 +4,7 @@
 import pandas as pd
 import os
 
+
 def remove_variant_column():
     """Remove variant_value column from policy_impacts.csv"""
 
@@ -17,9 +18,9 @@ def remove_variant_column():
     df = pd.read_csv(csv_path)
 
     # Check if variant_value column exists
-    if 'variant_value' in df.columns:
+    if "variant_value" in df.columns:
         print(f"Removing variant_value column from {csv_path}")
-        df = df.drop('variant_value', axis=1)
+        df = df.drop("variant_value", axis=1)
 
         # Save back
         df.to_csv(csv_path, index=False)
@@ -28,6 +29,7 @@ def remove_variant_column():
     else:
         print(f"variant_value column not found in {csv_path}")
         print(f"  Current columns: {', '.join(df.columns)}")
+
 
 if __name__ == "__main__":
     remove_variant_column()

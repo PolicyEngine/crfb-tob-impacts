@@ -10,10 +10,7 @@ from policyengine_us import Microsimulation, Simulation
 
 
 def calculate_fiscal_impact(
-    reform,
-    year: int,
-    baseline_income_tax: np.ndarray,
-    dataset: Optional[str] = None
+    reform, year: int, baseline_income_tax: np.ndarray, dataset: Optional[str] = None
 ) -> float:
     """Calculate the budgetary impact for a given reform and year.
 
@@ -31,7 +28,9 @@ def calculate_fiscal_impact(
         if reform is not None:
             # Handle empty baseline (computation failed)
             if len(baseline_income_tax) == 0:
-                raise ValueError(f"Empty baseline for year {year} - cannot compute impact")
+                raise ValueError(
+                    f"Empty baseline for year {year} - cannot compute impact"
+                )
 
             # Create reformed simulation
             if dataset:
@@ -39,7 +38,9 @@ def calculate_fiscal_impact(
             else:
                 reformed = Microsimulation(reform=reform)
 
-            reformed_income_tax = reformed.calculate("income_tax", map_to="household", period=year)
+            reformed_income_tax = reformed.calculate(
+                "income_tax", map_to="household", period=year
+            )
             # JCT convention: reformed - baseline (positive = more revenue)
             revenue_impact = reformed_income_tax.sum() - baseline_income_tax.sum()
         else:
@@ -52,8 +53,7 @@ def calculate_fiscal_impact(
 
 
 def compute_baselines(
-    years: List[int],
-    dataset: Optional[str] = None
+    years: List[int], dataset: Optional[str] = None
 ) -> Dict[int, np.ndarray]:
     """Pre-compute baselines for all years to avoid redundant calculations.
 
@@ -77,7 +77,9 @@ def compute_baselines(
                 # Use default dataset
                 baseline = Microsimulation()
 
-            baseline_income_tax = baseline.calculate("income_tax", map_to="household", period=year)
+            baseline_income_tax = baseline.calculate(
+                "income_tax", map_to="household", period=year
+            )
             baselines[year] = baseline_income_tax
         except Exception as e:
             print(f"  Error computing baseline for {year}: {e}")
@@ -85,7 +87,9 @@ def compute_baselines(
             # Try without specifying dataset
             try:
                 baseline = Microsimulation()
-                baseline_income_tax = baseline.calculate("income_tax", map_to="household", period=year)
+                baseline_income_tax = baseline.calculate(
+                    "income_tax", map_to="household", period=year
+                )
                 baselines[year] = baseline_income_tax
                 print(f"  Successfully computed baseline for {year}")
             except Exception as e2:
@@ -102,7 +106,7 @@ def calculate_household_impact(
     employment_income_range: Tuple[int, int, int] = (0, 200000, 1000),
     social_security_benefits: float = 30000,
     age: int = 70,
-    state: str = "FL"
+    state: str = "FL",
 ) -> pd.DataFrame:
     """Calculate household-level impacts for a reform across income levels.
 
@@ -125,35 +129,26 @@ def calculate_household_impact(
         "people": {
             "person1": {
                 "age": {str(year): age},
-                "social_security_retirement": {str(year): social_security_benefits}
+                "social_security_retirement": {str(year): social_security_benefits},
             }
         },
-        "families": {
-            "your family": {"members": ["person1"]}
-        },
-        "marital_units": {
-            "your marital unit": {"members": ["person1"]}
-        },
-        "tax_units": {
-            "your tax unit": {"members": ["person1"]}
-        },
-        "spm_units": {
-            "your household": {"members": ["person1"]}
-        },
+        "families": {"your family": {"members": ["person1"]}},
+        "marital_units": {"your marital unit": {"members": ["person1"]}},
+        "tax_units": {"your tax unit": {"members": ["person1"]}},
+        "spm_units": {"your household": {"members": ["person1"]}},
         "households": {
-            "your household": {
-                "members": ["person1"],
-                "state_name": {str(year): state}
-            }
+            "your household": {"members": ["person1"], "state_name": {str(year): state}}
         },
-        "axes": [[
-            {
-                "name": "employment_income",
-                "count": len(income_points),
-                "min": min_income,
-                "max": max_income
-            }
-        ]]
+        "axes": [
+            [
+                {
+                    "name": "employment_income",
+                    "count": len(income_points),
+                    "min": min_income,
+                    "max": max_income,
+                }
+            ]
+        ],
     }
 
     # Calculate reform net income
@@ -168,12 +163,14 @@ def calculate_household_impact(
     change_in_net_income = reform_net_income - baseline_net_income
 
     # Create DataFrame
-    df = pd.DataFrame({
-        'employment_income': income_points,
-        'baseline_net_income': baseline_net_income,
-        'reform_net_income': reform_net_income,
-        'change_in_net_income': change_in_net_income
-    })
+    df = pd.DataFrame(
+        {
+            "employment_income": income_points,
+            "baseline_net_income": baseline_net_income,
+            "reform_net_income": reform_net_income,
+            "change_in_net_income": change_in_net_income,
+        }
+    )
 
     return df
 
@@ -183,7 +180,7 @@ def calculate_multi_year_impacts(
     years: List[int],
     dataset: Optional[str] = None,
     sample_fraction: Optional[float] = None,
-    checkpoint_file: Optional[str] = None
+    checkpoint_file: Optional[str] = None,
 ) -> pd.DataFrame:
     """Calculate impacts for all reforms across multiple years.
 
@@ -205,17 +202,17 @@ def calculate_multi_year_impacts(
     if checkpoint_file and Path(checkpoint_file).exists():
         print(f"Loading checkpoint from {checkpoint_file}")
         existing_df = pd.read_csv(checkpoint_file)
-        all_results = existing_df.to_dict('records')
+        all_results = existing_df.to_dict("records")
         # Track what's already done
         for row in all_results:
-            completed.add((row['reform_id'], row['year']))
+            completed.add((row["reform_id"], row["year"]))
         print(f"  Loaded {len(all_results)} existing results")
 
     for reform_id, config in reform_configs.items():
         print(f"\nProcessing {config['name']}...")
 
         # All reforms now handled the same way
-        reform = config['func']()
+        reform = config["func"]()
 
         for year in years:
             # Skip if already computed
@@ -224,14 +221,18 @@ def calculate_multi_year_impacts(
                 continue
 
             print(f"  Year {year}: Computing...")
-            revenue_impact = calculate_fiscal_impact(reform, year, baselines[year], dataset)
+            revenue_impact = calculate_fiscal_impact(
+                reform, year, baselines[year], dataset
+            )
 
-            all_results.append({
-                'reform_id': reform_id,
-                'reform_name': config['name'],
-                'year': year,
-                'revenue_impact': revenue_impact
-            })
+            all_results.append(
+                {
+                    "reform_id": reform_id,
+                    "reform_name": config["name"],
+                    "year": year,
+                    "revenue_impact": revenue_impact,
+                }
+            )
 
             # Save checkpoint after each calculation
             if checkpoint_file:

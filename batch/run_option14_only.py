@@ -3,6 +3,7 @@ Run Option 14 (Extended Roth vs Balanced Fix Baseline).
 Compares Option 12 standalone to Option 13 baseline.
 Loads Option 13 parameters from saved results to use as baseline.
 """
+
 import os
 import sys
 import modal
@@ -18,7 +19,9 @@ image = (
     .pip_install("pandas", "numpy", "h5py", "tables")
     .add_local_dir("data", "/app/data", copy=True)
     .add_local_dir("src", "/app/src", copy=True)
-    .add_local_dir("/Users/pavelmakarchuk/policyengine-us", "/app/policyengine-us", copy=True)
+    .add_local_dir(
+        "/Users/pavelmakarchuk/policyengine-us", "/app/policyengine-us", copy=True
+    )
     .run_commands("pip install -e /app/policyengine-us")
 )
 
@@ -37,12 +40,12 @@ def compute_option14_year(year: int) -> dict:
     from policyengine_us import Microsimulation
     from policyengine_core.reforms import Reform
 
-    sys.path.insert(0, '/app/src')
+    sys.path.insert(0, "/app/src")
     from reforms import get_option12_dict
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"OPTION 14 (using saved Option 13 params): {year}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # Load Option 13 parameters
     opt13_path = f"/results/option13/{year}_static_results.csv"
@@ -52,16 +55,16 @@ def compute_option14_year(year: int) -> dict:
     opt13_df = pd.read_csv(opt13_path)
     opt13 = opt13_df.iloc[0]
 
-    benefit_multiplier = opt13['benefit_multiplier']
-    new_employee_ss_rate = opt13['new_employee_ss_rate']
-    new_employer_ss_rate = opt13['new_employer_ss_rate']
-    new_employee_hi_rate = opt13['new_employee_hi_rate']
-    new_employer_hi_rate = opt13['new_employer_hi_rate']
+    benefit_multiplier = opt13["benefit_multiplier"]
+    new_employee_ss_rate = opt13["new_employee_ss_rate"]
+    new_employer_ss_rate = opt13["new_employer_ss_rate"]
+    new_employee_hi_rate = opt13["new_employee_hi_rate"]
+    new_employer_hi_rate = opt13["new_employer_hi_rate"]
 
     print(f"Loaded Option 13 params:")
     print(f"  Benefit multiplier: {benefit_multiplier:.4f}")
-    print(f"  SS rate: {new_employee_ss_rate*100:.2f}%")
-    print(f"  HI rate: {new_employee_hi_rate*100:.2f}%")
+    print(f"  SS rate: {new_employee_ss_rate * 100:.2f}%")
+    print(f"  HI rate: {new_employee_hi_rate * 100:.2f}%")
 
     dataset = f"hf://policyengine/test/no-h6/{year}.h5"
 
@@ -89,7 +92,9 @@ def compute_option14_year(year: int) -> dict:
     # =========================================================================
     print("\nRunning Option 13 baseline simulation...")
     baseline_reform = Reform.from_dict(option13_reform_dict, country_id="us")
-    baseline_sim = Microsimulation(reform=baseline_reform, dataset=dataset, start_instant=f"{year}-01-01")
+    baseline_sim = Microsimulation(
+        reform=baseline_reform, dataset=dataset, start_instant=f"{year}-01-01"
+    )
 
     # Apply benefit cuts
     original_ss = baseline_sim.calculate("social_security", year)
@@ -101,21 +106,25 @@ def compute_option14_year(year: int) -> dict:
     baseline_tob_hi = baseline_sim.calculate("tob_revenue_medicare_hi", year).sum()
     baseline_ss_benefits = baseline_sim.calculate("social_security", year).sum()
 
-    print(f"Baseline (Option 13): Income tax ${baseline_income_tax/1e9:.1f}B, SS benefits ${baseline_ss_benefits/1e9:.1f}B")
+    print(
+        f"Baseline (Option 13): Income tax ${baseline_income_tax / 1e9:.1f}B, SS benefits ${baseline_ss_benefits / 1e9:.1f}B"
+    )
 
     results = {"year": year}
 
     # =========================================================================
     # OPTION 14: Option 12 vs Option 13 baseline
     # =========================================================================
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"OPTION 14 (Option 12 vs Option 13 baseline): {year}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # Option 12 only - no rate increases, no benefit cuts
     option12_reform = Reform.from_dict(option12_dict, country_id="us")
     print("Running Option 12 standalone simulation...")
-    option12_sim = Microsimulation(reform=option12_reform, dataset=dataset, start_instant=f"{year}-01-01")
+    option12_sim = Microsimulation(
+        reform=option12_reform, dataset=dataset, start_instant=f"{year}-01-01"
+    )
 
     # NO benefit cuts - uses original SS benefits
 
@@ -124,8 +133,12 @@ def compute_option14_year(year: int) -> dict:
     option12_tob_hi = option12_sim.calculate("tob_revenue_medicare_hi", year).sum()
     option12_ss_benefits = option12_sim.calculate("social_security", year).sum()
 
-    option12_employer_ss_revenue = option12_sim.calculate("employer_ss_tax_income_tax_revenue", map_to="household", period=year).sum()
-    option12_employer_hi_revenue = option12_sim.calculate("employer_medicare_tax_income_tax_revenue", map_to="household", period=year).sum()
+    option12_employer_ss_revenue = option12_sim.calculate(
+        "employer_ss_tax_income_tax_revenue", map_to="household", period=year
+    ).sum()
+    option12_employer_hi_revenue = option12_sim.calculate(
+        "employer_medicare_tax_income_tax_revenue", map_to="household", period=year
+    ).sum()
 
     # Impacts vs Option 13 baseline
     option12_income_tax_impact = option12_income_tax - baseline_income_tax
@@ -137,9 +150,13 @@ def compute_option14_year(year: int) -> dict:
     option12_hi_net = option12_hi_gain - option12_hi_loss
 
     print(f"\nOption 14 Results (vs Option 13 baseline):")
-    print(f"  Income tax impact: ${option12_income_tax_impact/1e9:+.1f}B")
-    print(f"  OASDI net: ${option12_oasdi_net/1e9:+.1f}B (gain: ${option12_oasdi_gain/1e9:.1f}B, loss: ${option12_oasdi_loss/1e9:.1f}B)")
-    print(f"  HI net: ${option12_hi_net/1e9:+.1f}B (gain: ${option12_hi_gain/1e9:.1f}B, loss: ${option12_hi_loss/1e9:.1f}B)")
+    print(f"  Income tax impact: ${option12_income_tax_impact / 1e9:+.1f}B")
+    print(
+        f"  OASDI net: ${option12_oasdi_net / 1e9:+.1f}B (gain: ${option12_oasdi_gain / 1e9:.1f}B, loss: ${option12_oasdi_loss / 1e9:.1f}B)"
+    )
+    print(
+        f"  HI net: ${option12_hi_net / 1e9:+.1f}B (gain: ${option12_hi_gain / 1e9:.1f}B, loss: ${option12_hi_loss / 1e9:.1f}B)"
+    )
 
     option12_result = {
         "year": year,
@@ -163,8 +180,10 @@ def compute_option14_year(year: int) -> dict:
     }
 
     os.makedirs("/results/option14", exist_ok=True)
-    pd.DataFrame([option12_result]).to_csv(f"/results/option14/{year}_static_results.csv", index=False)
-    results['option14'] = option12_result
+    pd.DataFrame([option12_result]).to_csv(
+        f"/results/option14/{year}_static_results.csv", index=False
+    )
+    results["option14"] = option12_result
 
     results_volume.commit()
     return results
@@ -179,13 +198,13 @@ def main(years: str = "2040,2055,2070,2085,2095"):
     print("Using pre-computed Option 13 parameters from Modal volume")
 
     for result in compute_option14_year.map(year_list):
-        if result.get('error'):
+        if result.get("error"):
             print(f"\n=== Year {result['year']} - ERROR: {result['error']} ===")
             continue
 
-        if result.get('option14'):
-            opt = result['option14']
+        if result.get("option14"):
+            opt = result["option14"]
             print(f"\n=== Year {opt['year']} - Option 14 ===")
-            print(f"  Income tax: ${opt['income_tax_impact']/1e9:+.1f}B")
-            print(f"  OASDI net: ${opt['oasdi_net_impact']/1e9:+.1f}B")
-            print(f"  HI net: ${opt['hi_net_impact']/1e9:+.1f}B")
+            print(f"  Income tax: ${opt['income_tax_impact'] / 1e9:+.1f}B")
+            print(f"  OASDI net: ${opt['oasdi_net_impact'] / 1e9:+.1f}B")
+            print(f"  HI net: ${opt['hi_net_impact'] / 1e9:+.1f}B")

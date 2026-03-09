@@ -5,12 +5,14 @@ Quick integration test to verify PolicyEngine works correctly.
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.reforms import REFORMS, get_option1_reform
 from src.impact_calculator import calculate_fiscal_impact
 from policyengine_us import Microsimulation
 import numpy as np
+
 
 def test_basic_functionality():
     """Test that we can create reforms and run simulations."""
@@ -21,10 +23,10 @@ def test_basic_functionality():
     print("\n1. Testing reform creation:")
     for reform_id, config in REFORMS.items():
         try:
-            if config.get('has_variants'):
-                reform = config['func'](500)  # Test with middle value
+            if config.get("has_variants"):
+                reform = config["func"](500)  # Test with middle value
             else:
-                reform = config['func']()
+                reform = config["func"]()
             print(f"   ✓ {config['name']}")
         except Exception as e:
             print(f"   ✗ {config['name']}: {e}")
@@ -56,9 +58,7 @@ def test_basic_functionality():
     print("\n3. Testing impact calculator:")
     try:
         impact = calculate_fiscal_impact(
-            reform=reform,
-            year=2026,
-            baseline_income_tax=baseline_tax
+            reform=reform, year=2026, baseline_income_tax=baseline_tax
         )
         print(f"   ✓ Impact calculator returned: ${impact}B")
     except Exception as e:
