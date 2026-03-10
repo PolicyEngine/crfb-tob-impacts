@@ -441,123 +441,15 @@ def compute_option13_and_14_year(
         results["option13"] = option13_result
 
     # =========================================================================
-    # OPTION 14: Option 12 (Extended Roth-Style Swap) vs Balanced Fix Baseline
+    # OPTION 14: Option 12 (Extended Roth) vs Balanced Fix Baseline
+    # Shows what happens if we do Extended Roth INSTEAD OF balanced fix
     # =========================================================================
     if not skip_option14:
         print(f"\n{'=' * 60}")
         print(f"OPTION 14 (OPTION 12 vs BALANCED FIX): {year}")
         print(f"{'=' * 60}")
 
-        # Option 14 = Balanced fix tax increases + Option 12 reforms
-        # The baseline for Option 14 is the Option 13 result (balanced fix)
         option12_dict = get_option12_dict()
-
-        # Combine balanced fix tax increases with Option 12 reforms
-        # Option 12 reforms override tax rates where they apply
-        option14_reform_dict = {**reform_dict}  # Start with balanced fix tax increases
-        option14_reform_dict.update(option12_dict)  # Add Option 12 reforms
-
-        option14_reform = Reform.from_dict(option14_reform_dict, country_id="us")
-
-        # CRITICAL: Must pass start_instant for the year we're reforming
-        print("Running Option 14 simulation...")
-        option14_sim = Microsimulation(
-            reform=option14_reform, dataset=dataset, start_instant=f"{year}-01-01"
-        )
-
-        # Apply same benefit cuts as balanced fix
-        option14_sim.set_input("social_security", year, reduced_ss_values)
-
-        # Calculate Option 14 results
-        option14_income_tax = option14_sim.calculate("income_tax", year).sum()
-        option14_tob_oasdi = option14_sim.calculate("tob_revenue_oasdi", year).sum()
-        option14_tob_hi = option14_sim.calculate("tob_revenue_medicare_hi", year).sum()
-        option14_ss_benefits = option14_sim.calculate("social_security", year).sum()
-        option14_employee_ss = option14_sim.calculate(
-            "employee_social_security_tax", year
-        ).sum()
-        option14_employer_ss = option14_sim.calculate(
-            "employer_social_security_tax", year
-        ).sum()
-        option14_employee_hi = option14_sim.calculate(
-            "employee_medicare_tax", year
-        ).sum()
-        option14_employer_hi = option14_sim.calculate(
-            "employer_medicare_tax", year
-        ).sum()
-
-        # Option 12 specific: employer payroll tax revenue
-        # Must use map_to="household" and period=year to properly aggregate tax_unit level variables
-        option14_employer_ss_revenue = option14_sim.calculate(
-            "employer_ss_tax_income_tax_revenue", map_to="household", period=year
-        ).sum()
-        option14_employer_hi_revenue = option14_sim.calculate(
-            "employer_medicare_tax_income_tax_revenue", map_to="household", period=year
-        ).sum()
-
-        # Option 14 impacts (vs balanced fix baseline = Option 13)
-        option14_income_tax_impact = option14_income_tax - reform_income_tax
-        option14_tob_oasdi_impact = option14_tob_oasdi - reform_tob_oasdi
-        option14_tob_hi_impact = option14_tob_hi - reform_tob_hi
-
-        # Trust fund impacts for Option 14
-        # Gains: employer payroll taxes now taxable as income
-        option14_oasdi_gain = float(option14_employer_ss_revenue)
-        option14_hi_gain = float(option14_employer_hi_revenue)
-        # Losses: reduced TOB from lower taxable SS (due to phase-out)
-        option14_oasdi_loss = float(reform_tob_oasdi - option14_tob_oasdi)
-        option14_hi_loss = float(reform_tob_hi - option14_tob_hi)
-        option14_oasdi_net = option14_oasdi_gain - option14_oasdi_loss
-        option14_hi_net = option14_hi_gain - option14_hi_loss
-
-        print(f"\nOption 14 Results (vs Balanced Fix):")
-        print(f"  Income tax impact: ${option14_income_tax_impact / 1e9:+.1f}B")
-        print(
-            f"  OASDI net impact: ${option14_oasdi_net / 1e9:+.1f}B (gain: ${option14_oasdi_gain / 1e9:.1f}B, loss: ${option14_oasdi_loss / 1e9:.1f}B)"
-        )
-        print(
-            f"  HI net impact: ${option14_hi_net / 1e9:+.1f}B (gain: ${option14_hi_gain / 1e9:.1f}B, loss: ${option14_hi_loss / 1e9:.1f}B)"
-        )
-
-        option14_result = {
-            "year": year,
-            # Baseline is the balanced fix (Option 13)
-            "baseline_income_tax": float(reform_income_tax),
-            "baseline_tob_oasdi": float(reform_tob_oasdi),
-            "baseline_tob_hi": float(reform_tob_hi),
-            # Reform is Option 12 on top of balanced fix
-            "reform_income_tax": float(option14_income_tax),
-            "reform_tob_oasdi": float(option14_tob_oasdi),
-            "reform_tob_hi": float(option14_tob_hi),
-            # Impacts
-            "income_tax_impact": float(option14_income_tax_impact),
-            "tob_oasdi_impact": float(option14_tob_oasdi_impact),
-            "tob_hi_impact": float(option14_tob_hi_impact),
-            # Trust fund breakdown
-            "employer_ss_tax_revenue": float(option14_employer_ss_revenue),
-            "employer_hi_tax_revenue": float(option14_employer_hi_revenue),
-            "oasdi_gain": option14_oasdi_gain,
-            "hi_gain": option14_hi_gain,
-            "oasdi_loss": option14_oasdi_loss,
-            "hi_loss": option14_hi_loss,
-            "oasdi_net_impact": option14_oasdi_net,
-            "hi_net_impact": option14_hi_net,
-        }
-
-        # Save Option 14 result
-        os.makedirs("/results/option14_stacked", exist_ok=True)
-        df = pd.DataFrame([option14_result])
-        df.to_csv(f"/results/option14_stacked/{year}_static_results.csv", index=False)
-        results_volume.commit()
-        results["option14_stacked"] = option14_result
-
-        # =========================================================================
-        # OPTION 12 STANDALONE: Option 12 only vs Balanced Fix Baseline
-        # Shows what happens if we do Extended Roth INSTEAD OF balanced fix
-        # =========================================================================
-        print(f"\n{'=' * 60}")
-        print(f"OPTION 12 STANDALONE (vs BALANCED FIX): {year}")
-        print(f"{'=' * 60}")
 
         # Option 12 only - no balanced fix rate increases, no benefit cuts
         option12_reform = Reform.from_dict(option12_dict, country_id="us")
@@ -597,7 +489,7 @@ def compute_option13_and_14_year(
         option12_oasdi_net = option12_oasdi_gain - option12_oasdi_loss
         option12_hi_net = option12_hi_gain - option12_hi_loss
 
-        print(f"\nOption 12 Standalone Results (vs Balanced Fix):")
+        print(f"\nOption 14 Results (vs Balanced Fix):")
         print(f"  Income tax impact: ${option12_income_tax_impact / 1e9:+.1f}B")
         print(
             f"  OASDI net impact: ${option12_oasdi_net / 1e9:+.1f}B (gain: ${option12_oasdi_gain / 1e9:.1f}B, loss: ${option12_oasdi_loss / 1e9:.1f}B)"
@@ -606,7 +498,7 @@ def compute_option13_and_14_year(
             f"  HI net impact: ${option12_hi_net / 1e9:+.1f}B (gain: ${option12_hi_gain / 1e9:.1f}B, loss: ${option12_hi_loss / 1e9:.1f}B)"
         )
 
-        option12_standalone_result = {
+        option14_result = {
             "year": year,
             # Baseline is the balanced fix (Option 13)
             "baseline_income_tax": float(reform_income_tax),
@@ -633,14 +525,12 @@ def compute_option13_and_14_year(
             "hi_net_impact": option12_hi_net,
         }
 
-        # Save Option 12 standalone result
-        os.makedirs("/results/option12_standalone", exist_ok=True)
-        df = pd.DataFrame([option12_standalone_result])
-        df.to_csv(
-            f"/results/option12_standalone/{year}_static_results.csv", index=False
-        )
+        # Save Option 14 result
+        os.makedirs("/results/option14", exist_ok=True)
+        df = pd.DataFrame([option14_result])
+        df.to_csv(f"/results/option14/{year}_static_results.csv", index=False)
         results_volume.commit()
-        results["option12_standalone"] = option12_standalone_result
+        results["option14"] = option14_result
 
     return results
 
@@ -698,20 +588,13 @@ def main(
             )
             print(f"  Benefit cut: {(1 - opt13['benefit_multiplier']) * 100:.1f}%")
 
-        if result.get("option14_stacked"):
-            opt14 = result["option14_stacked"]
+        if result.get("option14"):
+            opt14 = result["option14"]
             option14_results.append(opt14)
-            print(f"\n=== Year {opt14['year']} - Option 14 (Stacked) ===")
+            print(f"\n=== Year {opt14['year']} - Option 14 ===")
             print(f"  Income tax impact: ${opt14['income_tax_impact'] / 1e9:+.1f}B")
             print(f"  OASDI net: ${opt14['oasdi_net_impact'] / 1e9:+.1f}B")
             print(f"  HI net: ${opt14['hi_net_impact'] / 1e9:+.1f}B")
-
-        if result.get("option12_standalone"):
-            opt12 = result["option12_standalone"]
-            print(f"\n=== Year {opt12['year']} - Option 12 Standalone ===")
-            print(f"  Income tax impact: ${opt12['income_tax_impact'] / 1e9:+.1f}B")
-            print(f"  OASDI net: ${opt12['oasdi_net_impact'] / 1e9:+.1f}B")
-            print(f"  HI net: ${opt12['hi_net_impact'] / 1e9:+.1f}B")
 
     # Save combined results
     if option13_results:
@@ -721,7 +604,5 @@ def main(
 
     if option14_results:
         df14 = pd.DataFrame(option14_results)
-        df14.to_csv("results/option14_stacked_results.csv", index=False)
-        print(
-            f"Option 14 (Stacked) results saved to results/option14_stacked_results.csv"
-        )
+        df14.to_csv("results/option14_results.csv", index=False)
+        print(f"Option 14 results saved to results/option14_results.csv")
