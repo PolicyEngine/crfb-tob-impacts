@@ -36,7 +36,7 @@ export const ALLOCATION_ELIGIBLE_OPTIONS = ['option1', 'option2', 'option8', 'op
 export function parse75YearData(
   csvContent: string,
   economicProjections: Map<number, EconomicProjection>,
-  allocationMode: AllocationMode = 'currentLaw'
+  allocationMode: AllocationMode = 'baselineShares'
 ): Record<string, YearlyImpact[]> {
   const lines = csvContent.trim().split('\n')
   const headers = lines[0].split(',')
@@ -189,18 +189,25 @@ export function calculateTotals(data: YearlyImpact[]): {
 export type ScoringType = 'static' | 'dynamic'
 export type { DisplayUnit } from '../types'
 
+// Cache fetched data to avoid re-downloading when only allocation mode changes
+let cachedProjections: Map<number, EconomicProjection> | null = null
+let cachedCsv: Record<string, string> = {}
+
 export async function loadData(
   scoringType: ScoringType = 'static',
-  allocationMode: AllocationMode = 'currentLaw'
+  allocationMode: AllocationMode = 'baselineShares'
 ): Promise<Record<string, YearlyImpact[]>> {
-  // Load economic projections first
-  const economicProjections = await loadEconomicProjections()
+  if (!cachedProjections) {
+    cachedProjections = await loadEconomicProjections()
+  }
 
-  // Load and parse the results data based on scoring type
   const filename = scoringType === 'dynamic' ? 'all_dynamic_results.csv' : 'all_static_results.csv'
-  const response = await fetch(`${BASE_URL}data/${filename}`)
-  const csvContent = await response.text()
-  return parse75YearData(csvContent, economicProjections, allocationMode)
+  if (!cachedCsv[filename]) {
+    const response = await fetch(`${BASE_URL}data/${filename}`)
+    cachedCsv[filename] = await response.text()
+  }
+
+  return parse75YearData(cachedCsv[filename], cachedProjections, allocationMode)
 }
 
 export function exportToCsv(data: YearlyImpact[], reformId: string, reformName: string): void {
