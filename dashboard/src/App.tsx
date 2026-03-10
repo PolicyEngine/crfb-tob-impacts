@@ -20,7 +20,7 @@ function App() {
   const [viewMode, setViewMode] = useState<'10year' | '75year'>('10year')
   const [scoringType, setScoringType] = useState<ScoringType>('static')
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('dollars')
-  const [allocationMode, setAllocationMode] = useState<AllocationMode>('currentLaw')
+  const [allocationMode, setAllocationMode] = useState<AllocationMode>('baselineShares')
 
   // Update display unit when view mode changes
   const handleViewModeChange = (mode: '10year' | '75year') => {
