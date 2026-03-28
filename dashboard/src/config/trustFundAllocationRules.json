@@ -1,7 +1,0 @@
-{
-  "allocationEligibleOptions": ["option1", "option2", "option8", "option9", "option10"],
-  "baselineShareOptions": ["option3", "option4", "option11"],
-  "netImpactOptions": ["option5", "option6"],
-  "directBranchingOptions": ["option12", "option13"],
-  "generalRevenueOptions": ["option7"]
-}
