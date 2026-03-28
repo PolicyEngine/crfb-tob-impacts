@@ -11,6 +11,7 @@ Usage:
     modal run batch/run_option13_modal.py --years 2035 --option14-only  # Skip option13 if already done
 """
 
+import os
 import modal
 import pandas as pd
 from pathlib import Path
@@ -24,7 +25,9 @@ app = modal.App("option13-test")
 results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
 
 # Path to local policyengine-us repo (contains TOB variables)
-POLICYENGINE_US_PATH = Path("/Users/pavelmakarchuk/policyengine-us")
+POLICYENGINE_US_PATH = Path(
+    os.environ.get("CRFB_POLICYENGINE_US_PATH", "/Users/pavelmakarchuk/policyengine-us")
+)
 
 # Container image with local policyengine-us (includes TOB variables)
 image = (
@@ -105,6 +108,7 @@ def compute_option13_and_14_year(
     # Add src to path for imports
     sys.path.insert(0, "/app/src")
     from reforms import get_option12_dict
+    from runtime_config import dataset_path
 
     print(f"\n{'=' * 60}")
     print(f"OPTION 13 (BALANCED FIX): {year}")
@@ -117,7 +121,7 @@ def compute_option13_and_14_year(
     hi_info = hi_data[year]
     medicare_expenditures = hi_info["hi_expenditures"]
 
-    dataset = f"hf://policyengine/test/no-h6/{year}.h5"
+    dataset = dataset_path(year)
 
     # Run baseline
     print("Running baseline simulation...")

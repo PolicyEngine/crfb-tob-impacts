@@ -56,39 +56,49 @@ async function loadOption13Data(): Promise<Option13Data[]> {
   const response = await fetch(`${BASE_URL}data/option13_balanced_fix.csv`)
   const csvContent = await response.text()
   const lines = csvContent.trim().split('\n')
+  const headers = lines[0].split(',')
+  const headerIndex = new Map(headers.map((header, index) => [header, index]))
   const data: Option13Data[] = []
+
+  const getNumber = (values: string[], header: string): number => {
+    const index = headerIndex.get(header)
+    if (index === undefined) {
+      throw new Error(`Missing Option 13 column: ${header}`)
+    }
+    return parseFloat(values[index])
+  }
 
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',')
     data.push({
-      year: parseInt(values[0]),
-      baselineSsBenefits: parseFloat(values[1]),
-      baselineIncomesTax: parseFloat(values[2]),
-      baselineSsGap: parseFloat(values[3]),
-      baselineHiGap: parseFloat(values[4]),
-      benefitMultiplier: parseFloat(values[5]),
-      newEmployeeSsRate: parseFloat(values[6]),
-      newEmployerSsRate: parseFloat(values[7]),
-      newEmployeeHiRate: parseFloat(values[8]),
-      newEmployerHiRate: parseFloat(values[9]),
-      reformSsBenefits: parseFloat(values[10]),
-      reformIncomeTax: parseFloat(values[11]),
-      reformSsGap: parseFloat(values[12]),
-      reformHiGap: parseFloat(values[13]),
-      benefitCut: parseFloat(values[14]),
-      incomeTaxImpact: parseFloat(values[15]),
-      tobOasdiImpact: parseFloat(values[16]),
-      tobHiImpact: parseFloat(values[17]),
-      rateIncreaseSsRevenue: parseFloat(values[18]),
-      rateIncreaseHiRevenue: parseFloat(values[19]),
-      totalRateIncreaseRevenue: parseFloat(values[20]),
-      ssRateIncreasePp: parseFloat(values[21]),
-      hiRateIncreasePp: parseFloat(values[22]),
-      tobOasdiLoss: parseFloat(values[23]),
-      tobHiLoss: parseFloat(values[24]),
-      ssGapAfter: parseFloat(values[25]),
-      hiGapAfter: parseFloat(values[26]),
-      totalGapAfter: parseFloat(values[27]),
+      year: getNumber(values, 'year'),
+      baselineSsBenefits: getNumber(values, 'baseline_ss_benefits'),
+      baselineIncomesTax: getNumber(values, 'baseline_income_tax'),
+      baselineSsGap: getNumber(values, 'baseline_ss_gap'),
+      baselineHiGap: getNumber(values, 'baseline_hi_gap'),
+      benefitMultiplier: getNumber(values, 'benefit_multiplier'),
+      newEmployeeSsRate: getNumber(values, 'new_employee_ss_rate'),
+      newEmployerSsRate: getNumber(values, 'new_employer_ss_rate'),
+      newEmployeeHiRate: getNumber(values, 'new_employee_hi_rate'),
+      newEmployerHiRate: getNumber(values, 'new_employer_hi_rate'),
+      reformSsBenefits: getNumber(values, 'reform_ss_benefits'),
+      reformIncomeTax: getNumber(values, 'reform_income_tax'),
+      reformSsGap: getNumber(values, 'reform_ss_gap'),
+      reformHiGap: getNumber(values, 'reform_hi_gap'),
+      benefitCut: getNumber(values, 'benefit_cut'),
+      incomeTaxImpact: getNumber(values, 'income_tax_impact'),
+      tobOasdiImpact: getNumber(values, 'tob_oasdi_impact'),
+      tobHiImpact: getNumber(values, 'tob_hi_impact'),
+      rateIncreaseSsRevenue: getNumber(values, 'rate_increase_ss_revenue'),
+      rateIncreaseHiRevenue: getNumber(values, 'rate_increase_hi_revenue'),
+      totalRateIncreaseRevenue: getNumber(values, 'total_rate_increase_revenue'),
+      ssRateIncreasePp: getNumber(values, 'ss_rate_increase_pp'),
+      hiRateIncreasePp: getNumber(values, 'hi_rate_increase_pp'),
+      tobOasdiLoss: getNumber(values, 'tob_oasdi_loss'),
+      tobHiLoss: getNumber(values, 'tob_hi_loss'),
+      ssGapAfter: getNumber(values, 'ss_gap_after'),
+      hiGapAfter: getNumber(values, 'hi_gap_after'),
+      totalGapAfter: getNumber(values, 'total_gap_after'),
     })
   }
 
@@ -206,8 +216,8 @@ export function Option13Tab() {
             ]}
             layout={{
               title: { text: 'Benefit Cuts by Year', font: { size: 16, family: 'Roboto, sans-serif' } },
-              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
-              yaxis: { title: 'Benefit Cut (%)', ticksuffix: '%' },
+              xaxis: { title: { text: 'Year' }, tickmode: 'linear', dtick: 10 },
+              yaxis: { title: { text: 'Benefit Cut (%)' }, ticksuffix: '%' },
               margin: { t: 60, b: 60, l: 60, r: 30 },
               height: 300,
             }}
@@ -238,8 +248,8 @@ export function Option13Tab() {
             ]}
             layout={{
               title: { text: 'Payroll Tax Rate Increases', font: { size: 16, family: 'Roboto, sans-serif' } },
-              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
-              yaxis: { title: 'Rate Increase (pp)', ticksuffix: 'pp' },
+              xaxis: { title: { text: 'Year' }, tickmode: 'linear', dtick: 10 },
+              yaxis: { title: { text: 'Rate Increase (pp)' }, ticksuffix: 'pp' },
               margin: { t: 60, b: 60, l: 60, r: 30 },
               height: 300,
               barmode: 'group',
@@ -272,8 +282,8 @@ export function Option13Tab() {
             ]}
             layout={{
               title: { text: 'Social Security Trust Fund Gap', font: { size: 16, family: 'Roboto, sans-serif' } },
-              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
-              yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
+              xaxis: { title: { text: 'Year' }, tickmode: 'linear', dtick: 10 },
+              yaxis: { title: { text: 'Gap ($B)' }, tickprefix: '$', ticksuffix: 'B' },
               margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',
@@ -306,8 +316,8 @@ export function Option13Tab() {
             ]}
             layout={{
               title: { text: 'Medicare HI Trust Fund Gap', font: { size: 16, family: 'Roboto, sans-serif' } },
-              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
-              yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
+              xaxis: { title: { text: 'Year' }, tickmode: 'linear', dtick: 10 },
+              yaxis: { title: { text: 'Gap ($B)' }, tickprefix: '$', ticksuffix: 'B' },
               margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',
@@ -340,8 +350,8 @@ export function Option13Tab() {
             ]}
             layout={{
               title: { text: 'Combined Trust Fund Gap (SS + HI)', font: { size: 16, family: 'Roboto, sans-serif' } },
-              xaxis: { title: 'Year', tickmode: 'linear', dtick: 10 },
-              yaxis: { title: 'Gap ($B)', tickprefix: '$', ticksuffix: 'B' },
+              xaxis: { title: { text: 'Year' }, tickmode: 'linear', dtick: 10 },
+              yaxis: { title: { text: 'Gap ($B)' }, tickprefix: '$', ticksuffix: 'B' },
               margin: { t: 60, b: 60, l: 70, r: 30 },
               height: 300,
               barmode: 'group',

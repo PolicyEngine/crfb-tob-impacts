@@ -1,18 +1,49 @@
 import type { YearlyImpact } from '../types'
+import {
+  splitRevenueImpacts,
+  type AllocationInput,
+  type AllocationMode,
+} from './trustFundAllocation'
+export { ALLOCATION_ELIGIBLE_OPTIONS } from './trustFundAllocation'
+export type { AllocationMode } from './trustFundAllocation'
 
 // SSA Trustees Report economic projections (Table VI.G6)
 // Source: https://www.ssa.gov/oact/tr/2025/lr6g6.html
 interface EconomicProjection {
   year: number
   oasdiTaxablePayroll: number  // billions
+  hiTaxablePayroll: number  // billions
   gdp: number  // billions
 }
 
 // Get base URL from Vite's import.meta.env.BASE_URL
 const BASE_URL = import.meta.env.BASE_URL || '/'
 
+async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
+  const response = await fetch(`${BASE_URL}data/hi_taxable_payroll.csv`)
+  if (!response.ok) {
+    return new Map()
+  }
+
+  const csvContent = await response.text()
+  const lines = csvContent.trim().split('\n')
+  const hiPayroll = new Map<number, number>()
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',')
+    const year = parseInt(values[0])
+    const amount = parseFloat(values[1])
+    hiPayroll.set(year, amount)
+  }
+
+  return hiPayroll
+}
+
 async function loadEconomicProjections(): Promise<Map<number, EconomicProjection>> {
-  const response = await fetch(`${BASE_URL}data/ssa_economic_projections.csv`)
+  const [response, hiTaxablePayroll] = await Promise.all([
+    fetch(`${BASE_URL}data/ssa_economic_projections.csv`),
+    loadHiTaxablePayroll(),
+  ])
   const csvContent = await response.text()
   const lines = csvContent.trim().split('\n')
   const projections = new Map<number, EconomicProjection>()
@@ -22,16 +53,16 @@ async function loadEconomicProjections(): Promise<Map<number, EconomicProjection
     const year = parseInt(values[0])
     const oasdiTaxablePayroll = parseFloat(values[1])
     const gdp = parseFloat(values[2])
-    projections.set(year, { year, oasdiTaxablePayroll, gdp })
+    projections.set(year, {
+      year,
+      oasdiTaxablePayroll,
+      hiTaxablePayroll: hiTaxablePayroll.get(year) ?? oasdiTaxablePayroll,
+      gdp,
+    })
   }
 
   return projections
 }
-
-export type AllocationMode = 'currentLaw' | 'baselineShares'
-
-// Options where allocation mode applies (not Roth 5/6, not general rev 7, not 12/13 branching)
-export const ALLOCATION_ELIGIBLE_OPTIONS = ['option1', 'option2', 'option8', 'option9', 'option10']
 
 export function parse75YearData(
   csvContent: string,
@@ -40,69 +71,39 @@ export function parse75YearData(
 ): Record<string, YearlyImpact[]> {
   const lines = csvContent.trim().split('\n')
   const headers = lines[0].split(',')
+  const headerIndex = new Map(headers.map((header, index) => [header, index]))
   const result: Record<string, YearlyImpact[]> = {}
 
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',')
     const reformName = values[0]
-    const year = parseInt(values[headers.indexOf('year')])
-    const baselineRevenue = parseFloat(values[headers.indexOf('baseline_revenue')])
-    const reformRevenue = parseFloat(values[headers.indexOf('reform_revenue')])
+    const year = parseInt(values[headerIndex.get('year') ?? -1])
+    const baselineRevenue = parseFloat(values[headerIndex.get('baseline_revenue') ?? -1])
+    const reformRevenue = parseFloat(values[headerIndex.get('reform_revenue') ?? -1])
 
-    // Different options use different columns for impacts
-    const useBaselineShares = reformName === 'option3' || reformName === 'option4' || reformName === 'option11'
-      || (allocationMode === 'baselineShares' && ALLOCATION_ELIGIBLE_OPTIONS.includes(reformName))
-    const isOption5or6 = reformName === 'option5' || reformName === 'option6'
-    const isOption7 = reformName === 'option7'
-    const isOption12or13 = reformName === 'option12' || reformName === 'option13'
-
-    let tobOasdiImpact: number
-    let tobMedicareHiImpact: number
-    let revenueImpact: number
-
-    if (isOption7) {
-      // Option 7: Revenue goes to general revenues, not trust funds
-      revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
-      tobOasdiImpact = 0
-      tobMedicareHiImpact = 0
-    } else if (isOption12or13) {
-      // Options 12, 13: Use direct branching like Options 5-6
-      tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
-      tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
-      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
-    } else if (useBaselineShares) {
-      // Allocate revenue_impact to trust funds based on baseline TOB shares
-      revenueImpact = parseFloat(values[headers.indexOf('revenue_impact')]) || 0
-      const baselineOasdi = parseFloat(values[headers.indexOf('baseline_tob_oasdi')]) || 0
-      const baselineHi = parseFloat(values[headers.indexOf('baseline_tob_medicare_hi')]) || 0
-      const baselineTotal = baselineOasdi + baselineHi
-
-      if (baselineTotal > 0) {
-        const oasdiShare = baselineOasdi / baselineTotal
-        const hiShare = baselineHi / baselineTotal
-        tobOasdiImpact = revenueImpact * oasdiShare
-        tobMedicareHiImpact = revenueImpact * hiShare
-      } else {
-        tobOasdiImpact = 0
-        tobMedicareHiImpact = 0
-      }
-    } else if (isOption5or6) {
-      // Options 5-6: use oasdi_net_impact and hi_net_impact
-      tobOasdiImpact = parseFloat(values[headers.indexOf('oasdi_net_impact')]) || 0
-      tobMedicareHiImpact = parseFloat(values[headers.indexOf('hi_net_impact')]) || 0
-      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
-    } else {
-      // Current law TOB rules: use tob_oasdi_impact and tob_medicare_hi_impact
-      tobOasdiImpact = parseFloat(values[headers.indexOf('tob_oasdi_impact')]) || 0
-      tobMedicareHiImpact = parseFloat(values[headers.indexOf('tob_medicare_hi_impact')]) || 0
-      revenueImpact = tobOasdiImpact + tobMedicareHiImpact
+    const allocationRow: AllocationInput = {
+      reformName,
+      revenueImpact: parseFloat(values[headerIndex.get('revenue_impact') ?? -1]) || 0,
+      baselineTobOasdi: parseFloat(values[headerIndex.get('baseline_tob_oasdi') ?? -1]) || 0,
+      baselineTobMedicareHi: parseFloat(values[headerIndex.get('baseline_tob_medicare_hi') ?? -1]) || 0,
+      tobOasdiImpact: parseFloat(values[headerIndex.get('tob_oasdi_impact') ?? -1]) || 0,
+      tobMedicareHiImpact: parseFloat(values[headerIndex.get('tob_medicare_hi_impact') ?? -1]) || 0,
+      oasdiNetImpact: parseFloat(values[headerIndex.get('oasdi_net_impact') ?? -1]) || 0,
+      hiNetImpact: parseFloat(values[headerIndex.get('hi_net_impact') ?? -1]) || 0,
     }
-
-    // Total trust fund impact
-    const tobTotalImpact = tobOasdiImpact + tobMedicareHiImpact
+    const {
+      revenueImpact,
+      tobOasdiImpact,
+      tobMedicareHiImpact,
+      tobTotalImpact,
+    } = splitRevenueImpacts(allocationRow, allocationMode)
 
     // Get economic context for this year
-    const econ = economicProjections.get(year) || { oasdiTaxablePayroll: 0, gdp: 0 }
+    const econ = economicProjections.get(year) || {
+      oasdiTaxablePayroll: 0,
+      hiTaxablePayroll: 0,
+      gdp: 0,
+    }
 
     // Calculate percentages (revenue impact is in billions, so is payroll/GDP)
     const pctOfOasdiPayroll = econ.oasdiTaxablePayroll > 0
@@ -116,8 +117,8 @@ export function parse75YearData(
     const oasdiPctOfPayroll = econ.oasdiTaxablePayroll > 0
       ? (tobOasdiImpact / econ.oasdiTaxablePayroll) * 100
       : 0
-    const hiPctOfPayroll = econ.oasdiTaxablePayroll > 0
-      ? (tobMedicareHiImpact / econ.oasdiTaxablePayroll) * 100
+    const hiPctOfPayroll = econ.hiTaxablePayroll > 0
+      ? (tobMedicareHiImpact / econ.hiTaxablePayroll) * 100
       : 0
     const oasdiPctOfGdp = econ.gdp > 0
       ? (tobOasdiImpact / econ.gdp) * 100
@@ -139,6 +140,7 @@ export function parse75YearData(
       tobMedicareHiImpact,
       tobTotalImpact,
       oasdiTaxablePayroll: econ.oasdiTaxablePayroll,
+      hiTaxablePayroll: econ.hiTaxablePayroll,
       gdp: econ.gdp,
       pctOfOasdiPayroll,
       pctOfGdp,

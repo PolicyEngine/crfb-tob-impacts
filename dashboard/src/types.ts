@@ -15,6 +15,7 @@ export interface YearlyImpact {
   reformRevenue: number
   // Economic context from SSA Trustees Report
   oasdiTaxablePayroll: number
+  hiTaxablePayroll: number
   gdp: number
   // Calculated percentages - total
   pctOfOasdiPayroll: number

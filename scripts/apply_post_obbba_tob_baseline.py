@@ -1,14 +1,23 @@
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
 
 import pandas as pd
+from src.tob_baseline import (
+    GENERATED_BASELINE_PATH,
+    HI_METHOD_MATCH_OASDI_PCT_CHANGE,
+    HI_METHODS,
+    build_tob_baseline,
+    validate_generated_baseline,
+    write_tob_baseline,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BASELINE_PATH = REPO_ROOT / "data" / "ssa_tob_baseline_75year.csv"
+BASELINE_PATH = GENERATED_BASELINE_PATH
 BASELINE_COLUMNS = [
     "baseline_tob_oasdi",
     "baseline_tob_medicare_hi",
@@ -23,6 +32,19 @@ RESULT_PATHS = [
 ]
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate and apply a post-OBBBA TOB baseline to result CSVs."
+    )
+    parser.add_argument(
+        "--hi-method",
+        choices=sorted(HI_METHODS),
+        default=HI_METHOD_MATCH_OASDI_PCT_CHANGE,
+        help="How to bridge the annual HI path while the public CMS post-OBBBA series is unresolved.",
+    )
+    return parser.parse_args()
+
+
 def load_baseline() -> pd.DataFrame:
     baseline = pd.read_csv(BASELINE_PATH)
     baseline = baseline.rename(
@@ -33,6 +55,21 @@ def load_baseline() -> pd.DataFrame:
         }
     )
     return baseline[["year", *BASELINE_COLUMNS]]
+
+
+def generate_baseline(hi_method: str) -> None:
+    baseline = build_tob_baseline(hi_method)
+    validate_generated_baseline(baseline)
+    write_tob_baseline(baseline, BASELINE_PATH)
+
+    sample = baseline.loc[baseline["year"] == SAMPLE_YEAR].iloc[0]
+    print(
+        f"Generated {BASELINE_PATH.relative_to(REPO_ROOT)} "
+        f"using HI method '{hi_method}': "
+        f"{SAMPLE_YEAR} OASDI={sample['tob_oasdi_billions']:.4f} "
+        f"HI={sample['tob_hi_billions']:.4f} "
+        f"Total={sample['tob_total_billions']:.4f}"
+    )
 
 
 def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
@@ -75,6 +112,8 @@ def regenerate_combined_csv() -> None:
 
 
 def main() -> None:
+    args = parse_args()
+    generate_baseline(args.hi_method)
     baseline = load_baseline()
     for result_path in RESULT_PATHS:
         apply_override(result_path, baseline)
