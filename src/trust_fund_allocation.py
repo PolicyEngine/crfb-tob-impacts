@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-import json
 from functools import lru_cache
-from pathlib import Path
 from typing import Any, Mapping
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-ALLOCATION_RULES_PATH = (
-    REPO_ROOT / "dashboard" / "src" / "config" / "trustFundAllocationRules.json"
-)
 
 
 @lru_cache(maxsize=1)
 def load_allocation_rules() -> dict[str, set[str]]:
-    with ALLOCATION_RULES_PATH.open() as file:
-        raw_rules = json.load(file)
     return {
-        rule_name: set(option_ids)
-        for rule_name, option_ids in raw_rules.items()
+        "allocationEligibleOptions": {
+            "option1",
+            "option2",
+            "option8",
+            "option9",
+            "option10",
+        },
+        "baselineShareOptions": {"option3", "option4", "option11"},
+        "netImpactOptions": {"option5", "option6"},
+        "directBranchingOptions": {"option12", "option13"},
+        "generalRevenueOptions": {"option7"},
     }
 
 

@@ -25,8 +25,13 @@ import modal
 import pandas as pd
 
 
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
+LOCAL_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CONTAINER_PROJECT_ROOT = Path("/app")
+
+path_candidates = [LOCAL_PROJECT_ROOT / "src", CONTAINER_PROJECT_ROOT / "src"]
+for path in reversed(path_candidates):
+    if path.exists():
+        sys.path.insert(0, str(path))
 
 from runtime_config import resolve_policyengine_us_path, resolve_projected_datasets_path
 
@@ -34,8 +39,38 @@ from runtime_config import resolve_policyengine_us_path, resolve_projected_datas
 app = modal.App("crfb-ss-analysis")
 results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
 
-POLICYENGINE_US_PATH = resolve_policyengine_us_path()
-PROJECTED_DATASETS_PATH = resolve_projected_datasets_path()
+if (CONTAINER_PROJECT_ROOT / "policyengine-us").exists():
+    POLICYENGINE_US_PATH = CONTAINER_PROJECT_ROOT / "policyengine-us"
+else:
+    POLICYENGINE_US_PATH = resolve_policyengine_us_path()
+
+if (CONTAINER_PROJECT_ROOT / "projected_datasets").exists():
+    PROJECTED_DATASETS_PATH = CONTAINER_PROJECT_ROOT / "projected_datasets"
+else:
+    PROJECTED_DATASETS_PATH = resolve_projected_datasets_path()
+
+POLICYENGINE_US_IGNORE = [
+    ".claude",
+    ".claude/**",
+    ".git",
+    ".git/**",
+    ".github",
+    ".github/**",
+    ".pytest_cache",
+    ".pytest_cache/**",
+    ".venv",
+    ".venv/**",
+    ".vscode",
+    ".vscode/**",
+    "docs",
+    "docs/**",
+    "changelog.d",
+    "changelog.d/**",
+    "policyengine_us/tests",
+    "policyengine_us/tests/**",
+    "**/__pycache__",
+    "**/*.pyc",
+]
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -43,11 +78,21 @@ image = (
         "pandas>=2.0.0",
         "numpy>=1.24.0",
     )
-    .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
+    .add_local_dir(
+        POLICYENGINE_US_PATH,
+        "/app/policyengine-us",
+        copy=True,
+        ignore=POLICYENGINE_US_IGNORE,
+    )
     .run_commands("pip install -e /app/policyengine-us")
-    .add_local_dir(PROJECT_ROOT / "src", "/app/src", copy=True)
+    .add_local_dir(LOCAL_PROJECT_ROOT / "src", "/app/src", copy=True)
     .add_local_dir(PROJECTED_DATASETS_PATH, "/app/projected_datasets", copy=True)
 )
+
+
+def _stem_with_scoring(stem: str, scoring: str) -> str:
+    suffix = f"_{scoring}"
+    return stem if stem.endswith(suffix) else f"{stem}{suffix}"
 
 
 @app.function(
@@ -143,6 +188,13 @@ def compute_year(
             f"{time.time() - reform_start:.1f}s)"
         )
 
+        if save_path:
+            volume_path = Path("/results") / save_path / f"year_{year}.csv"
+            volume_path.parent.mkdir(parents=True, exist_ok=True)
+            pd.DataFrame(results).to_csv(volume_path, index=False)
+            results_volume.commit()
+            print(f"    SAVED PARTIAL RESULTS TO VOLUME: {volume_path}")
+
     print(f"\n{'=' * 60}")
     print(f"COMPLETE: {len(results)} reforms for year {year}")
     print(f"{'=' * 60}\n")
@@ -155,6 +207,93 @@ def compute_year(
         print(f"SAVED TO VOLUME: {volume_path}")
 
     return results
+
+
+@app.function(
+    image=image,
+    cpu=4,
+    memory=65536,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def compute_cell(
+    year: int,
+    reform_id: str,
+    scoring_type: str = "static",
+    save_path: str | None = None,
+) -> dict:
+    import gc
+    import time
+    import warnings
+
+    warnings.filterwarnings("ignore")
+    os.environ.setdefault("CRFB_DATASET_TEMPLATE", "/app/projected_datasets/{year}.h5")
+
+    sys.path.insert(0, "/app/src")
+
+    from runtime_config import dataset_path
+    from year_runner import (
+        MODAL_EMPLOYER_NET_REFORMS,
+        MODAL_UNSUPPORTED_REFORMS,
+        compute_reform_result,
+        get_reform_lookups,
+        load_baseline,
+    )
+
+    if reform_id in MODAL_UNSUPPORTED_REFORMS:
+        raise ValueError(
+            f"Unsupported reform for modal_batch/compute.py: {reform_id}. "
+            "Use batch/run_option13_modal.py for option13/balanced_fix."
+        )
+
+    print(f"\n{'=' * 60}")
+    print(f"MODAL CELL: {reform_id} for year {year} ({scoring_type.upper()} scoring)")
+    print(f"{'=' * 60}\n")
+
+    dataset_name = dataset_path(year)
+    reform_functions, dynamic_functions = get_reform_lookups(MODAL_UNSUPPORTED_REFORMS)
+
+    baseline_start = time.time()
+    baseline = load_baseline(year, dataset_name)
+    gc.collect()
+
+    print(f"[1] Dataset: {dataset_name}")
+    print(
+        f"[2] Baseline: ${baseline.revenue / 1e9:.2f}B "
+        f"(TOB OASDI: ${baseline.tob_oasdi / 1e9:.2f}B, "
+        f"HI: ${baseline.tob_medicare_hi / 1e9:.2f}B, "
+        f"{time.time() - baseline_start:.1f}s)"
+    )
+
+    reform_start = time.time()
+    result = compute_reform_result(
+        reform_id=reform_id,
+        year=year,
+        scoring_type=scoring_type,
+        dataset_name=dataset_name,
+        baseline=baseline,
+        reform_functions=reform_functions,
+        dynamic_functions=dynamic_functions,
+        employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
+        default_net_impact_mode="direct",
+    )
+    gc.collect()
+
+    print(
+        f"[3] Impact: ${float(result['revenue_impact']) / 1e9:+.2f}B "
+        f"(OASDI: ${float(result['tob_oasdi_impact']) / 1e9:+.2f}B, "
+        f"HI: ${float(result['tob_medicare_hi_impact']) / 1e9:+.2f}B, "
+        f"{time.time() - reform_start:.1f}s)"
+    )
+
+    if save_path:
+        volume_path = Path("/results") / save_path
+        volume_path.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame([result]).to_csv(volume_path, index=False)
+        results_volume.commit()
+        print(f"SAVED TO VOLUME: {volume_path}")
+
+    return result
 
 
 @app.local_entrypoint()
@@ -229,11 +368,12 @@ def run_reforms(
         year_list = [int(year.strip()) for year in years.split(",")]
 
     output_path = Path(output)
-    output_dir = output_path.parent / f"{output_path.stem}_{scoring}"
+    stem = _stem_with_scoring(output_path.stem, scoring)
+    output_dir = output_path.parent / stem
     output_dir.mkdir(parents=True, exist_ok=True)
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    volume_save_path = f"{output_path.stem}_{scoring}_{run_id}"
+    volume_save_path = f"{stem}_{run_id}"
     print(f"Volume save path: /results/{volume_save_path}/")
 
     completed_years = set()
@@ -288,11 +428,101 @@ def run_reforms(
     _combine_results(output_dir, output_path, reform_list)
 
 
+@app.local_entrypoint()
+def run_cells(
+    reforms: str = "option9,option10,option11",
+    scoring: str = "dynamic",
+    years: str = "2026-2100",
+    output: str = "results/modal_results.csv",
+    resume: bool = True,
+):
+    """
+    Run one reform x one year per task.
+
+    This isolates failures to individual cells and writes every completed cell
+    to the Modal volume immediately.
+    """
+    reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
+
+    if "-" in years:
+        start, end = years.split("-")
+        year_list = list(range(int(start), int(end) + 1))
+    else:
+        year_list = [int(year.strip()) for year in years.split(",") if year.strip()]
+
+    output_path = Path(output)
+    stem = _stem_with_scoring(output_path.stem, scoring)
+    output_dir = output_path.parent / stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    volume_save_path = f"{stem}_{run_id}"
+    print(f"Volume save path: /results/{volume_save_path}/")
+
+    pending_cells: list[tuple[str, int, Path]] = []
+    for reform_id in reform_list:
+        for year in year_list:
+            local_file = output_dir / reform_id / f"year_{year}.csv"
+            if resume and local_file.exists():
+                continue
+            pending_cells.append((reform_id, year, local_file))
+
+    if not pending_cells:
+        print("All cells already completed locally.")
+        _combine_results_recursive(output_dir, output_path, reform_list)
+        return
+
+    print(f"\nRunning {len(pending_cells)} cells")
+    print(f"Reforms: {reform_list}")
+    print(f"Years: {year_list[0]} to {year_list[-1]}")
+    print(f"Scoring: {scoring}")
+    print(f"Intermediate results: {output_dir}/")
+    print(f"Volume backup: /results/{volume_save_path}/")
+
+    calls = []
+    for reform_id, year, local_file in pending_cells:
+        volume_file = f"{volume_save_path}/{reform_id}/year_{year}.csv"
+        call = compute_cell.spawn(year, reform_id, scoring, volume_file)
+        calls.append((reform_id, year, local_file, call))
+
+    failures: list[tuple[str, int, str]] = []
+    for index, (reform_id, year, local_file, call) in enumerate(calls, start=1):
+        try:
+            result = call.get(timeout=15000)
+            local_file.parent.mkdir(parents=True, exist_ok=True)
+            pd.DataFrame([result]).to_csv(local_file, index=False)
+            print(
+                f"  [{index}/{len(calls)}] Saved {reform_id} {year} to {local_file}"
+            )
+        except Exception as error:
+            failures.append((reform_id, year, str(error)))
+            print(f"  [{index}/{len(calls)}] FAILED {reform_id} {year}: {error}")
+
+    _download_from_volume(volume_save_path, output_dir)
+    _combine_results_recursive(output_dir, output_path, reform_list)
+
+    if failures:
+        print("\nFailures:")
+        for reform_id, year, message in failures:
+            print(f"  - {reform_id} {year}: {message}")
+
+
 def _download_from_volume(volume_path: str, output_dir: Path) -> None:
     print(f"\nDownloading from volume: {volume_path}")
 
     result = subprocess.run(
-        ["modal", "volume", "ls", "crfb-results", volume_path],
+        [
+            "uvx",
+            "--from",
+            "modal",
+            "--with",
+            "pandas",
+            "modal",
+            "volume",
+            "ls",
+            "crfb-results",
+            volume_path,
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -301,6 +531,11 @@ def _download_from_volume(volume_path: str, output_dir: Path) -> None:
 
     result = subprocess.run(
         [
+            "uvx",
+            "--from",
+            "modal",
+            "--with",
+            "pandas",
             "modal",
             "volume",
             "get",
@@ -317,7 +552,7 @@ def _download_from_volume(volume_path: str, output_dir: Path) -> None:
     else:
         print(f"Download error: {result.stderr}")
 
-    downloaded = list(output_dir.glob("year_*.csv"))
+    downloaded = list(output_dir.rglob("year_*.csv"))
     print(f"Downloaded {len(downloaded)} year files")
 
 
@@ -336,6 +571,40 @@ def _combine_results(
     df.to_csv(output_path, index=False)
 
     print(f"\nCombined {len(all_files)} year files into {output_path}")
+    print(f"Total results: {len(df)} rows")
+
+    print("\n" + "=" * 60)
+    print("SUMMARY (totals across computed years)")
+    print("=" * 60)
+    for reform_id in reform_list:
+        reform_df = df[df["reform_name"] == reform_id]
+        if len(reform_df) == 0:
+            continue
+
+        total_impact = reform_df["revenue_impact"].sum() / 1e9
+        oasdi_impact = reform_df["tob_oasdi_impact"].sum() / 1e9
+        hi_impact = reform_df["tob_medicare_hi_impact"].sum() / 1e9
+        print(
+            f"{reform_id}: ${total_impact:+,.1f}B total "
+            f"(OASDI: ${oasdi_impact:+,.1f}B, HI: ${hi_impact:+,.1f}B)"
+        )
+
+
+def _combine_results_recursive(
+    output_dir: Path,
+    output_path: Path,
+    reform_list: list[str],
+) -> None:
+    all_files = sorted(output_dir.rglob("year_*.csv"))
+    if not all_files:
+        print("No results to combine!")
+        return
+
+    df = pd.concat([pd.read_csv(file_path) for file_path in all_files], ignore_index=True)
+    df = df.sort_values(["reform_name", "year"])
+    df.to_csv(output_path, index=False)
+
+    print(f"\nCombined {len(all_files)} cell files into {output_path}")
     print(f"Total results: {len(df)} rows")
 
     print("\n" + "=" * 60)

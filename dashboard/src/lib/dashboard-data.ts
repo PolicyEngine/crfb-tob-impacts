@@ -121,7 +121,7 @@ async function loadEconomicProjections(): Promise<Map<number, EconomicProjection
 
       for (const row of parsed.data) {
         const year = asNumber(row.year);
-        const oasdiTaxablePayroll = asNumber(row.oasdi_taxable_payroll);
+        const oasdiTaxablePayroll = asNumber(row.taxable_payroll);
         projections.set(year, {
           year,
           oasdiTaxablePayroll,

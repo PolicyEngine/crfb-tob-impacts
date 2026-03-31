@@ -63,6 +63,17 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_SNAPSHOT_PATH,
         help="Stable snapshot directory copied into the Modal image.",
     )
+    parser.add_argument(
+        "--detach",
+        action="store_true",
+        help="Launch the Modal run in detached mode so it survives client disconnects.",
+    )
+    parser.add_argument(
+        "--modal-target",
+        default="run_reforms",
+        choices=["run_reforms", "run_cells"],
+        help="Which modal_batch/compute.py entrypoint to run.",
+    )
     return parser.parse_args()
 
 
@@ -78,12 +89,39 @@ def sync_snapshot(source: Path, snapshot: Path) -> None:
     for stale_name, stale_path in snapshot_files.items():
         if stale_name not in source_files:
             stale_path.unlink()
+            stale_metadata = snapshot / f"{stale_name}.metadata.json"
+            if stale_metadata.exists():
+                stale_metadata.unlink()
 
     for name, source_path in sorted(source_files.items()):
         target_path = snapshot / name
         if not target_path.exists() or source_path.stat().st_mtime > target_path.stat().st_mtime:
             shutil.copy2(source_path, target_path)
             print(f"Snapshotted {name}")
+
+        source_metadata = source / f"{name}.metadata.json"
+        target_metadata = snapshot / f"{name}.metadata.json"
+        if source_metadata.exists():
+            if (
+                not target_metadata.exists()
+                or source_metadata.stat().st_mtime > target_metadata.stat().st_mtime
+            ):
+                shutil.copy2(source_metadata, target_metadata)
+                print(f"Snapshotted {source_metadata.name}")
+        elif target_metadata.exists():
+            target_metadata.unlink()
+
+    source_manifest = source / "calibration_manifest.json"
+    target_manifest = snapshot / "calibration_manifest.json"
+    if source_manifest.exists():
+        if (
+            not target_manifest.exists()
+            or source_manifest.stat().st_mtime > target_manifest.stat().st_mtime
+        ):
+            shutil.copy2(source_manifest, target_manifest)
+            print("Snapshotted calibration_manifest.json")
+    elif target_manifest.exists():
+        target_manifest.unlink()
 
 
 def launch_modal(args: argparse.Namespace) -> int:
@@ -100,7 +138,14 @@ def launch_modal(args: argparse.Namespace) -> int:
         "pandas",
         "modal",
         "run",
-        str(REPO_ROOT / "modal_batch" / "compute.py::run_reforms"),
+    ]
+
+    if args.detach:
+        command.append("--detach")
+
+    command.extend(
+        [
+        str(REPO_ROOT / f"modal_batch/compute.py::{args.modal_target}"),
         "--reforms",
         args.reforms,
         "--scoring",
@@ -109,7 +154,8 @@ def launch_modal(args: argparse.Namespace) -> int:
         args.years,
         "--output",
         args.output,
-    ]
+        ]
+    )
 
     print(f"Launching: {' '.join(command)}")
     completed = subprocess.run(command, cwd=REPO_ROOT, env=env)
