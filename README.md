@@ -14,19 +14,36 @@ uv pip install -e .
 python scripts/generate_policy_impacts.py
 
 # Build Jupyter Book documentation
-cd jupyterbook && jupyter-book build .
+cd jupyterbook && myst build --html
 
-# Run React dashboard
-cd policy-impact-dashboard && npm install && npm start
+# Run Next dashboard
+cd dashboard && npm ci && npm run dev
 ```
 
 ## Project Structure
 
 - `src/` - Core Python modules (reforms, calculations)
 - `jupyterbook/` - Jupyter Book documentation
-- `policy-impact-dashboard/` - React visualization dashboard
+- `dashboard/` - Next.js visualization dashboard
 - `data/` - Generated CSV data files
 - `tests/` - Test suite
+
+## Deployment
+
+The production site is deployed on Vercel as a combined static build:
+
+- documentation at `/`
+- dashboard at `/dashboard`
+
+Local production-style build:
+
+```bash
+python3 -m pip install -e .
+npm --prefix dashboard ci
+./scripts/build_vercel_site.sh
+```
+
+That writes the combined output to `.vercel-site/`.
 
 ## Data Generation
 

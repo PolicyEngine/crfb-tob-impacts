@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "@policyengine/design-system/tokens.css";
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --color-background: var(--pe-color-bg-primary);
+  --color-foreground: var(--pe-color-text-primary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--pe-color-bg-secondary);
+  color: var(--pe-color-text-primary);
+  font-family: var(--font-inter);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: var(--pe-color-primary-alpha-40);
+}
