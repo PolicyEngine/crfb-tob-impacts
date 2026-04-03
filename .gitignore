@@ -5,6 +5,10 @@ _build/
 .idea/
 .ipynb_checkpoints/
 .pytest_cache/
+.env*.local
+.tmp-python-bin/
+.vercel/
+.vercel-python/
 .venv/
 .vscode/
 *.log
@@ -13,6 +17,7 @@ _build/
 *.tempresults/
 *.tmp
 jupyterbook/_build/
+.vercel-site/
 results/
 settings.local.json
 Thumbs.db

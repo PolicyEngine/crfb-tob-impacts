@@ -23,9 +23,9 @@ NEXT_PUBLIC_BASE_PATH=/crfb-tob-impacts/dashboard npm run build
 
 Vercel preview builds should leave `NEXT_PUBLIC_BASE_PATH` empty.
 
-## Vercel preview CI
+## Vercel deployment
 
-PR previews are driven by `.github/workflows/vercel-preview.yml`.
+Repo-level Vercel deploys are driven by `.github/workflows/deploy-vercel.yml`.
 
 Required GitHub repository secrets:
 
@@ -33,4 +33,4 @@ Required GitHub repository secrets:
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
 
-Those secrets should point to a Vercel project for this dashboard. The workflow deploys from the `dashboard/` directory, builds with `vercel build`, and publishes a preview with `vercel deploy --prebuilt`.
+Those secrets should point to the combined-site Vercel project at repo root. The workflow builds the docs plus dashboard site together and deploys previews for pull requests and production on `main`.
