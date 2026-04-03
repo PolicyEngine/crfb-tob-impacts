@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard
 
-## Getting Started
+This directory contains the Next.js dashboard for `crfb-tob-impacts`.
 
-First, run the development server:
+## Local development
 
 ```bash
+cd dashboard
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dashboard runs at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production-style builds
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+GitHub Pages builds use a base path:
 
-## Learn More
+```bash
+cd dashboard
+NEXT_PUBLIC_BASE_PATH=/crfb-tob-impacts/dashboard npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Vercel preview builds should leave `NEXT_PUBLIC_BASE_PATH` empty.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Vercel preview CI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+PR previews are driven by `.github/workflows/vercel-preview.yml`.
 
-## Deploy on Vercel
+Required GitHub repository secrets:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Those secrets should point to a Vercel project for this dashboard. The workflow deploys from the `dashboard/` directory, builds with `vercel build`, and publishes a preview with `vercel deploy --prebuilt`.
