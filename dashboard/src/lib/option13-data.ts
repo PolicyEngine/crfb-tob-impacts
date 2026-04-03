@@ -54,10 +54,14 @@ function asNumber(value: unknown) {
   return 0;
 }
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 async function fetchCsv(path: string) {
-  const response = await fetch(path);
+  const resolvedPath =
+    path.startsWith("/") && basePath ? `${basePath}${path}` : path;
+  const response = await fetch(resolvedPath);
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${path}: ${response.status}`);
+    throw new Error(`Failed to fetch ${resolvedPath}: ${response.status}`);
   }
   return response.text();
 }

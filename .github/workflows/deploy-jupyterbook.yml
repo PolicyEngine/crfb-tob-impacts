@@ -81,14 +81,14 @@ jobs:
       run: |
         cd dashboard
         npm ci
-        npm run build
+        NEXT_PUBLIC_BASE_PATH=/crfb-tob-impacts/dashboard npm run build
         echo "Dashboard built successfully"
 
     - name: Combine outputs
       run: |
         # Copy dashboard build into jupyterbook output at /dashboard/
         mkdir -p jupyterbook/_build/html/dashboard
-        cp -r dashboard/dist/* jupyterbook/_build/html/dashboard/
+        cp -r dashboard/out/* jupyterbook/_build/html/dashboard/
         echo "Combined Jupyter Book and Dashboard outputs"
         ls -la jupyterbook/_build/html/
         ls -la jupyterbook/_build/html/dashboard/

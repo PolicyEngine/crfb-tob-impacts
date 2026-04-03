@@ -62,6 +62,7 @@ const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
 const directBranchingOptions = new Set(["option12", "option13"]);
 const generalRevenueOptions = new Set(["option7"]);
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const ALLOCATION_ELIGIBLE_OPTIONS = [...allocationEligibleOptions];
 
@@ -78,12 +79,14 @@ function asNumber(value: unknown): number {
 }
 
 async function fetchCsv(path: string): Promise<string> {
+  const resolvedPath =
+    path.startsWith("/") && basePath ? `${basePath}${path}` : path;
   if (!csvCache.has(path)) {
     csvCache.set(
       path,
-      fetch(path).then(async (response) => {
+      fetch(resolvedPath).then(async (response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch ${path}: ${response.status}`);
+          throw new Error(`Failed to fetch ${resolvedPath}: ${response.status}`);
         }
         return response.text();
       }),
