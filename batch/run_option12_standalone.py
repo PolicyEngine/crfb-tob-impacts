@@ -13,14 +13,16 @@ app = modal.App("option12-standalone")
 
 results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
 
+POLICYENGINE_US_PATH = os.environ.get(
+    "CRFB_POLICYENGINE_US_PATH", "/Users/pavelmakarchuk/policyengine-us"
+)
+
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install("pandas", "numpy", "h5py", "tables")
     .add_local_dir("data", "/app/data", copy=True)
     .add_local_dir("src", "/app/src", copy=True)
-    .add_local_dir(
-        "/Users/pavelmakarchuk/policyengine-us", "/app/policyengine-us", copy=True
-    )
+    .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
     .run_commands("pip install -e /app/policyengine-us")
 )
 
@@ -38,12 +40,13 @@ def compute_option12_standalone(year: int) -> dict:
 
     sys.path.insert(0, "/app/src")
     from reforms import get_option12_dict
+    from runtime_config import dataset_path
 
     print(f"\n{'=' * 60}")
     print(f"OPTION 12 STANDALONE: {year}")
     print(f"{'=' * 60}")
 
-    dataset = f"hf://policyengine/test/no-h6/{year}.h5"
+    dataset = dataset_path(year)
 
     # Get Option 12 reform dict
     option12_dict = get_option12_dict()
