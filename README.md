@@ -71,3 +71,53 @@ Notes:
 - The backing three-year local artifacts used for those tables are `results/local_oact_saved_h5_3year_checks.csv` and `results/local_oact_saved_h5_3year_checks_billions.csv`. Those are local runtime outputs, not tracked repo artifacts.
 - Completed `2090`/`2100` all-reforms summaries live in [analysis/saved_h5_all_reforms_2090_2100.md](/Users/maxghenis/PolicyEngine/crfb-tob-impacts/analysis/saved_h5_all_reforms_2090_2100.md).
 - A broader tracked findings note lives in [analysis/long_run_rescoring_findings.md](/Users/maxghenis/PolicyEngine/crfb-tob-impacts/analysis/long_run_rescoring_findings.md).
+
+### Household-Metrics First Workflow
+
+The saved-H5 scorer now exposes the lower-level pieces needed to parallelize
+`year x scenario` work before final aggregation.
+
+1. Materialize household-level scenario outputs:
+
+```bash
+uv run python scripts/materialize_household_metrics.py \
+  --year 2026 \
+  --dataset /absolute/path/to/support-or-h5-dataset.h5 \
+  --label oact2026 \
+  --include-baseline \
+  --reform option1 \
+  --reform option8 \
+  --output-dir /tmp/crfb_household_metrics
+```
+
+2. Aggregate those outputs later with calibrated weights:
+
+```bash
+uv run python scripts/aggregate_household_metrics.py \
+  --year 2026 \
+  --label oact2026 \
+  --weights-dataset /absolute/path/to/calibrated/2026.h5 \
+  --input-dir /tmp/crfb_household_metrics \
+  --reform option1 \
+  --reform option8 \
+  --output results/oact2026_household_metric_aggregate.csv
+```
+
+This keeps scenario simulation separate from weight application. Baseline is
+just another scenario file, and aggregation can happen later once calibrated
+weights are available.
+
+To fan out the materialization step across many `year x scenario` jobs locally,
+use [scripts/materialize_household_metrics_grid.py](/Users/maxghenis/PolicyEngine/crfb-tob-impacts/scripts/materialize_household_metrics_grid.py):
+
+```bash
+uv run python scripts/materialize_household_metrics_grid.py \
+  --dataset y2026=/absolute/path/to/2026.h5 \
+  --dataset y2027=/absolute/path/to/2027.h5 \
+  --include-baseline \
+  --reform option1 \
+  --reform option8 \
+  --reform option11 \
+  --jobs 6 \
+  --output-dir /tmp/crfb_household_metrics
+```

@@ -125,6 +125,7 @@ def compute_year(
         compute_reform_result,
         get_reform_lookups,
         load_baseline,
+        load_household_weights,
     )
 
     print(f"\n{'=' * 60}")
@@ -145,6 +146,7 @@ def compute_year(
 
     baseline_start = time.time()
     baseline = load_baseline(year, dataset_name)
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
     gc.collect()
 
     print(f"[1] Dataset: {dataset_name}")
@@ -172,6 +174,8 @@ def compute_year(
                 dynamic_functions=dynamic_functions,
                 employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
                 default_net_impact_mode="direct",
+                weight_household_ids=weight_household_ids,
+                household_weights=household_weights,
             )
         except Exception as error:
             print(f"    ERROR: {error}")
@@ -238,6 +242,7 @@ def compute_cell(
         compute_reform_result,
         get_reform_lookups,
         load_baseline,
+        load_household_weights,
     )
 
     if reform_id in MODAL_UNSUPPORTED_REFORMS:
@@ -255,6 +260,7 @@ def compute_cell(
 
     baseline_start = time.time()
     baseline = load_baseline(year, dataset_name)
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
     gc.collect()
 
     print(f"[1] Dataset: {dataset_name}")
@@ -276,6 +282,8 @@ def compute_cell(
         dynamic_functions=dynamic_functions,
         employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
         default_net_impact_mode="direct",
+        weight_household_ids=weight_household_ids,
+        household_weights=household_weights,
     )
     gc.collect()
 

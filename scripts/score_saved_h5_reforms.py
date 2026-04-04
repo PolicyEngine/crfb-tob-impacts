@@ -1,4 +1,5 @@
 from __future__ import annotations
+# ruff: noqa: E402
 
 import argparse
 import hashlib
@@ -16,6 +17,12 @@ from policyengine_core.data import Dataset
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from runtime_config import resolve_policyengine_us_path
+
+policyengine_us_path = resolve_policyengine_us_path()
+if str(policyengine_us_path) not in sys.path:
+    sys.path.insert(0, str(policyengine_us_path))
 
 
 DEFAULT_TAX_ASSUMPTION_FACTORY = "create_wage_indexed_core_thresholds_reform"
@@ -376,6 +383,7 @@ def build_rows(args: argparse.Namespace) -> pd.DataFrame:
         compute_reform_result,
         get_reform_lookups,
         load_baseline,
+        load_household_weights,
     )
     from runtime_config import validate_dataset_contract
 
@@ -410,6 +418,7 @@ def build_rows(args: argparse.Namespace) -> pd.DataFrame:
         )
         print(f"Dataset {label}: {dataset_path} (year {year})", flush=True)
         dataset = Dataset.from_file(str(dataset_path))
+        weight_household_ids, household_weights = load_household_weights(dataset)
         baseline_start = time.time()
         baseline = load_or_compute_baseline(
             year=year,
@@ -449,6 +458,8 @@ def build_rows(args: argparse.Namespace) -> pd.DataFrame:
                 employer_net_reforms=BATCH_EMPLOYER_NET_REFORMS,
                 default_net_impact_mode="direct",
                 baseline_reform=baseline_reform,
+                weight_household_ids=weight_household_ids,
+                household_weights=household_weights,
             )
             result["dataset_label"] = label
             result["dataset_path"] = str(dataset_path)

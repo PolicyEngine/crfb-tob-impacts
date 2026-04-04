@@ -57,6 +57,7 @@ from year_runner import (
     compute_reform_result,
     get_reform_lookups,
     load_baseline,
+    load_household_weights,
 )
 
 
@@ -105,6 +106,7 @@ def main() -> None:
 
     baseline_start = time.time()
     baseline = load_baseline(year, dataset_name)
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
     gc.collect()
     print(
         f"Baseline: ${baseline.revenue / 1e9:.2f}B "
@@ -138,6 +140,8 @@ def main() -> None:
                 dynamic_functions=dynamic_functions,
                 employer_net_reforms=BATCH_EMPLOYER_NET_REFORMS,
                 default_net_impact_mode="direct",
+                weight_household_ids=weight_household_ids,
+                household_weights=household_weights,
             )
         except Exception as error:
             print(f"Failed to compute {reform_id}: {error}")
