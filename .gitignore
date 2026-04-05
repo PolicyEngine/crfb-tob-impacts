@@ -1,3 +1,5 @@
+.cache/
+.playwright-cli/
 __pycache__/
 _build/
 .DS_Store
@@ -17,6 +19,10 @@ _build/
 *.tempresults/
 *.tmp
 jupyterbook/_build/
+projected_datasets_snapshots/
+policy-impact-dashboard/build/
+policy-impact-dashboard/node_modules/
+reproducibility.lock.toml
 .vercel-site/
 results/
 settings.local.json
