@@ -641,6 +641,50 @@ def materialize_scenario_from_run(
     return _materialize_scenario_impl(spec, cell)
 
 
+@app.function(
+    image=image,
+    cpu=4,
+    memory=32768,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_from_run_medium(
+    run_id: str,
+    year: int,
+    scenario_name: str,
+    reform_id: str = "",
+) -> dict:
+    spec = _load_remote_run_manifest(run_id)
+    cell = {
+        "year": int(year),
+        "scenario_name": scenario_name,
+        "reform_id": reform_id or None,
+    }
+    return _materialize_scenario_impl(spec, cell)
+
+
+@app.function(
+    image=image,
+    cpu=2,
+    memory=16384,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_from_run_small(
+    run_id: str,
+    year: int,
+    scenario_name: str,
+    reform_id: str = "",
+) -> dict:
+    spec = _load_remote_run_manifest(run_id)
+    cell = {
+        "year": int(year),
+        "scenario_name": scenario_name,
+        "reform_id": reform_id or None,
+    }
+    return _materialize_scenario_impl(spec, cell)
+
+
 @app.local_entrypoint()
 def test_single(reform: str = "option9", year: int = 2030, scoring: str = "static"):
     """Test a single reform/year combination."""

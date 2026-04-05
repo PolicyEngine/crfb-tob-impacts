@@ -5,6 +5,25 @@ from pathlib import Path
 import shutil
 
 
+def resolve_uv_executable() -> str:
+    env_path = os.environ.get("CRFB_UV_PATH")
+    if env_path:
+        path = Path(env_path).expanduser().resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"CRFB_UV_PATH does not exist: {path}")
+        return str(path)
+
+    discovered = shutil.which("uv")
+    if discovered:
+        return discovered
+
+    fallback = Path.home() / ".local" / "bin" / "uv"
+    if fallback.exists():
+        return str(fallback)
+
+    raise FileNotFoundError("Could not resolve uv. Add it to PATH or set CRFB_UV_PATH.")
+
+
 def resolve_modal_profile() -> str | None:
     for key in ("CRFB_MODAL_PROFILE", "MODAL_PROFILE"):
         value = os.environ.get(key)
@@ -50,4 +69,16 @@ def modal_cli_prefix() -> list[str]:
         "--with",
         "pandas",
         "modal",
+    ]
+
+
+def modal_python_prefix() -> list[str]:
+    return [
+        resolve_uv_executable(),
+        "run",
+        "--with",
+        "modal",
+        "--with",
+        "pandas",
+        "python",
     ]

@@ -7,8 +7,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import re
-import selectors
 import subprocess
 import sys
 import tempfile
@@ -22,8 +20,7 @@ from modal_run_protocol import (
     run_paths,
     scenario_artifact_paths,
 )
-from modal_cli import modal_cli_prefix
-from modal_cli import modal_subprocess_env
+from modal_cli import modal_cli_prefix, modal_python_prefix, modal_subprocess_env
 from projected_dataset_snapshot import (
     prepare_snapshot_path,
     sync_projected_dataset_snapshot,
@@ -45,7 +42,17 @@ DEFAULT_REQUIRED_PROFILE = "ss-payroll-tob"
 DEFAULT_REQUIRED_TARGET_SOURCE = "oact_2025_08_05_provisional"
 DEFAULT_REQUIRED_TAX_ASSUMPTION = "trustees-core-thresholds-v1"
 DEFAULT_MIN_CALIBRATION_QUALITY = "exact"
-APP_ID_PATTERN = re.compile(r"\bap-[A-Za-z0-9]+\b")
+DEPLOYED_MODAL_APP_NAME = "crfb-ss-analysis"
+MODAL_WORKER_TARGETS = {
+    "large": "materialize_scenario_from_run",
+    "medium": "materialize_scenario_from_run_medium",
+    "small": "materialize_scenario_from_run_small",
+}
+MODAL_WORKER_RESOURCES = {
+    "large": {"cpu": 4, "memory_mb": 65536},
+    "medium": {"cpu": 4, "memory_mb": 32768},
+    "small": {"cpu": 2, "memory_mb": 16384},
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -151,6 +158,12 @@ def parse_args() -> argparse.Namespace:
             "Concurrent detached launch workers. Use 0 to launch all cells in "
             "parallel."
         ),
+    )
+    parser.add_argument(
+        "--modal-worker-profile",
+        default="large",
+        choices=sorted(MODAL_WORKER_TARGETS),
+        help="Modal worker size to use for each scenario materialization.",
     )
     return parser.parse_args()
 
@@ -281,6 +294,10 @@ def build_run_spec(args: argparse.Namespace) -> tuple[dict, Path]:
             },
             "projected_datasets_snapshot_path": str(snapshot_path),
         },
+        "execution": {
+            "modal_worker_profile": args.modal_worker_profile,
+            **MODAL_WORKER_RESOURCES[args.modal_worker_profile],
+        },
     }
 
     run_id = build_run_id(args.label, payload)
@@ -347,12 +364,38 @@ def upload_run_manifest(spec_path: Path, spec: dict) -> None:
     )
 
 
-def build_modal_command(cell: dict) -> list[str]:
-    command = [
+def modal_worker_target(profile: str) -> str:
+    return MODAL_WORKER_TARGETS[profile]
+
+
+def build_modal_deploy_command() -> list[str]:
+    return [
         *modal_cli_prefix(),
-        "run",
-        "--detach",
-        str(REPO_ROOT / "modal_batch/compute.py::materialize_scenario_from_run"),
+        "deploy",
+        str(REPO_ROOT / "modal_batch/compute.py"),
+        "--no-stream-logs",
+    ]
+
+
+def build_modal_probe_command(*, worker_profile: str) -> list[str]:
+    return [
+        *modal_python_prefix(),
+        str(REPO_ROOT / "src" / "modal_check_deployed_function.py"),
+        "--app-name",
+        DEPLOYED_MODAL_APP_NAME,
+        "--function-name",
+        modal_worker_target(worker_profile),
+    ]
+
+
+def build_modal_spawn_command(cell: dict, *, worker_profile: str) -> list[str]:
+    command = [
+        *modal_python_prefix(),
+        str(REPO_ROOT / "src" / "modal_spawn_deployed_call.py"),
+        "--app-name",
+        DEPLOYED_MODAL_APP_NAME,
+        "--function-name",
+        modal_worker_target(worker_profile),
         "--run-id",
         str(cell["run_id"]),
         "--year",
@@ -368,19 +411,22 @@ def build_modal_command(cell: dict) -> list[str]:
 
 def build_submitted_record(
     cell: dict,
-    app_id: str,
+    call_id: str,
     dashboard_url: str,
     launched_at: str,
     *,
     startup_confirmed: bool,
+    function_name: str,
 ) -> dict:
     return {
         "year": int(cell["year"]),
         "scenario_name": str(cell["scenario_name"]),
         "reform_id": cell.get("reform_id"),
         "launched_at": launched_at,
-        "app_id": app_id,
+        "call_id": call_id,
         "dashboard_url": dashboard_url,
+        "function_name": function_name,
+        "submission_mode": "deployed_function_spawn",
         "startup_confirmed": startup_confirmed,
     }
 
@@ -393,13 +439,6 @@ def build_launch_failure_record(cell: dict, launched_at: str, error: Exception) 
         "launched_at": launched_at,
         "error": f"{type(error).__name__}: {error}",
     }
-
-
-def parse_app_id(output: str) -> str | None:
-    match = APP_ID_PATTERN.search(output)
-    if match is None:
-        return None
-    return match.group(0)
 
 
 def remote_scenario_started(run_id: str, cell: dict) -> bool:
@@ -417,60 +456,129 @@ def remote_scenario_started(run_id: str, cell: dict) -> bool:
     )
 
 
-def launch_detached_modal_app(
+def wait_for_remote_scenario_start(
+    run_id: str,
+    cell: dict,
+    *,
+    timeout_seconds: float = 15.0,
+    interval_seconds: float = 1.0,
+) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if remote_scenario_started(run_id, cell):
+            return True
+        time.sleep(interval_seconds)
+    return remote_scenario_started(run_id, cell)
+
+
+def parse_spawn_record(output: str) -> dict | None:
+    for line in reversed(output.splitlines()):
+        candidate = line.strip()
+        if not candidate:
+            continue
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict) and payload.get("call_id"):
+            return payload
+    return None
+
+
+def launch_spawned_modal_call(
     command: list[str],
     env: dict[str, str],
-) -> tuple[str, str]:
-    process = subprocess.Popen(
+) -> dict:
+    completed = subprocess.run(
         command,
         cwd=REPO_ROOT,
         env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        capture_output=True,
         text=True,
-        bufsize=1,
+        check=False,
     )
+    output = "\n".join(
+        part.strip()
+        for part in (completed.stdout, completed.stderr)
+        if part and part.strip()
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(output or "Modal spawn helper failed")
+    record = parse_spawn_record(output)
+    if record is None:
+        raise RuntimeError(output or "Modal spawn helper did not emit call metadata")
+    return record
 
-    assert process.stdout is not None
-    selector = selectors.DefaultSelector()
-    selector.register(process.stdout, selectors.EVENT_READ)
-    lines: list[str] = []
-    app_id: str | None = None
-    deadline = time.monotonic() + 180
 
+def deployed_function_ready(env: dict[str, str], *, worker_profile: str) -> bool:
+    completed = subprocess.run(
+        build_modal_probe_command(worker_profile=worker_profile),
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.returncode == 0
+
+
+def _terminate_process(process: subprocess.Popen[str]) -> None:
+    if process.poll() is not None:
+        return
+    process.terminate()
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+
+
+def _read_process_output(process: subprocess.Popen[str]) -> str:
+    stdout = ""
+    stderr = ""
+    if process.stdout is not None:
+        stdout = process.stdout.read()
+    if process.stderr is not None:
+        stderr = process.stderr.read()
+    return "\n".join(part.strip() for part in (stdout, stderr) if part and part.strip())
+
+
+def ensure_deployed_modal_app(
+    env: dict[str, str],
+    *,
+    worker_profile: str,
+    wait_timeout_seconds: float = 300.0,
+    probe_interval_seconds: float = 5.0,
+) -> None:
+    process = subprocess.Popen(
+        build_modal_deploy_command(),
+        cwd=REPO_ROOT,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    deadline = time.monotonic() + wait_timeout_seconds
     while time.monotonic() < deadline:
         if process.poll() is not None:
-            remainder = process.stdout.read()
-            if remainder:
-                lines.append(remainder)
-            break
+            if process.returncode == 0:
+                return
+            if deployed_function_ready(env, worker_profile=worker_profile):
+                return
+            output = _read_process_output(process)
+            raise RuntimeError(output or "modal deploy failed")
+        if deployed_function_ready(env, worker_profile=worker_profile):
+            _terminate_process(process)
+            return
+        time.sleep(probe_interval_seconds)
 
-        events = selector.select(timeout=1)
-        if events:
-            for key, _ in events:
-                line = key.fileobj.readline()
-                if not line:
-                    continue
-                lines.append(line)
-                app_id = parse_app_id("".join(lines))
-                if app_id is not None:
-                    break
+    if deployed_function_ready(env, worker_profile=worker_profile):
+        _terminate_process(process)
+        return
 
-        if app_id is not None:
-            break
-
-    selector.close()
-    output = "".join(lines).strip()
-    if process.poll() is None:
-        try:
-            process.wait(timeout=30)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
-    if app_id is not None:
-        dashboard_url = f"https://modal.com/apps/policyengine/main/{app_id}"
-        return app_id, dashboard_url
-    raise RuntimeError(output or "Detached Modal app did not report an app id")
+    _terminate_process(process)
+    output = _read_process_output(process)
+    raise RuntimeError(output or "Timed out waiting for deployed Modal app")
 
 
 def effective_launch_jobs(args: argparse.Namespace, *, cell_count: int) -> int:
@@ -486,6 +594,7 @@ def launch_cell(
     spec: dict,
     raw_cell: dict,
     env: dict[str, str],
+    worker_profile: str,
     index: int,
     total: int,
 ) -> tuple[int, dict | None, dict | None]:
@@ -499,17 +608,19 @@ def launch_cell(
     )
     launched_at = datetime.now(UTC).isoformat()
     try:
-        app_id, dashboard_url = launch_detached_modal_app(
-            build_modal_command(cell),
+        function_name = modal_worker_target(worker_profile)
+        spawn_record = launch_spawned_modal_call(
+            build_modal_spawn_command(cell, worker_profile=worker_profile),
             env,
         )
-        startup_confirmed = remote_scenario_started(spec["run_id"], cell)
+        startup_confirmed = wait_for_remote_scenario_start(spec["run_id"], cell)
         record = build_submitted_record(
             cell,
-            app_id,
-            dashboard_url,
+            str(spawn_record["call_id"]),
+            str(spawn_record.get("dashboard_url") or ""),
             launched_at,
             startup_confirmed=startup_confirmed,
+            function_name=function_name,
         )
         upload_json(
             record,
@@ -542,6 +653,8 @@ def launch(spec_path: Path, spec: dict, args: argparse.Namespace) -> int:
     dispatch_records: list[dict] = []
     launch_failures: list[dict] = []
     env = modal_subprocess_env(os.environ.copy())
+    print(f"Deploying Modal app {DEPLOYED_MODAL_APP_NAME}...")
+    ensure_deployed_modal_app(env, worker_profile=args.modal_worker_profile)
     total = len(spec["cells"])
     launch_jobs = effective_launch_jobs(args, cell_count=total)
     results_by_index: dict[int, tuple[dict | None, dict | None]] = {}
@@ -552,6 +665,7 @@ def launch(spec_path: Path, spec: dict, args: argparse.Namespace) -> int:
                 spec=spec,
                 raw_cell=raw_cell,
                 env=env,
+                worker_profile=args.modal_worker_profile,
                 index=index,
                 total=total,
             )

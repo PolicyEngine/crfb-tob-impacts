@@ -11,17 +11,18 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 
-def test_build_submitted_record_captures_app_metadata():
+def test_build_submitted_record_captures_call_metadata():
     import modal_run_submit as module
 
     cell = {"year": 2026, "scenario_name": "option1", "reform_id": "option1"}
 
     record = module.build_submitted_record(
         cell,
-        "ap-abc",
-        "https://modal.com/apps/policyengine/main/ap-abc",
+        "fc-abc",
+        "https://modal.com/apps/policyengine/main/ap-abc?function=fc-abc",
         "2026-04-05T13:30:00+00:00",
         startup_confirmed=True,
+        function_name="materialize_scenario_from_run",
     )
 
     assert record == {
@@ -29,13 +30,15 @@ def test_build_submitted_record_captures_app_metadata():
         "scenario_name": "option1",
         "reform_id": "option1",
         "launched_at": "2026-04-05T13:30:00+00:00",
-        "app_id": "ap-abc",
-        "dashboard_url": "https://modal.com/apps/policyengine/main/ap-abc",
+        "call_id": "fc-abc",
+        "dashboard_url": "https://modal.com/apps/policyengine/main/ap-abc?function=fc-abc",
+        "function_name": "materialize_scenario_from_run",
+        "submission_mode": "deployed_function_spawn",
         "startup_confirmed": True,
     }
 
 
-def test_build_modal_command_targets_remote_function():
+def test_build_modal_spawn_command_targets_remote_function():
     import modal_run_submit as module
 
     cell = {
@@ -45,7 +48,58 @@ def test_build_modal_command_targets_remote_function():
         "reform_id": "option1",
     }
 
-    command = module.build_modal_command(cell)
+    command = module.build_modal_spawn_command(cell, worker_profile="large")
+
+    assert command[0].endswith("uv")
+    assert command[1:7] == [
+        "run",
+        "--with",
+        "modal",
+        "--with",
+        "pandas",
+        "python",
+    ]
+    assert any(entry.endswith("src/modal_spawn_deployed_call.py") for entry in command)
+    assert "--app-name" in command and "crfb-ss-analysis" in command
+    assert "--function-name" in command
+    assert "materialize_scenario_from_run" in command
+    assert "--run-id" in command and "run123" in command
+    assert "--year" in command and "2026" in command
+    assert "--scenario-name" in command and "option1" in command
+    assert "--reform-id" in command
+
+
+def test_build_modal_spawn_command_targets_small_profile():
+    import modal_run_submit as module
+
+    cell = {
+        "run_id": "run123",
+        "year": 2026,
+        "scenario_name": "baseline",
+        "reform_id": None,
+    }
+
+    command = module.build_modal_spawn_command(cell, worker_profile="small")
+
+    assert "materialize_scenario_from_run_small" in command
+    assert "--reform-id" not in command
+
+
+def test_modal_worker_target_profiles():
+    import modal_run_submit as module
+
+    assert module.modal_worker_target("large") == "materialize_scenario_from_run"
+    assert (
+        module.modal_worker_target("medium")
+        == "materialize_scenario_from_run_medium"
+    )
+    assert module.modal_worker_target("small") == "materialize_scenario_from_run_small"
+
+
+def test_build_modal_deploy_command_targets_compute_app():
+    import modal_run_submit as module
+
+    command = module.build_modal_deploy_command()
 
     assert command[0].endswith("uvx")
     assert command[1:6] == [
@@ -55,26 +109,24 @@ def test_build_modal_command_targets_remote_function():
         "pandas",
         "modal",
     ]
-    assert "run" in command
-    assert "--detach" in command
-    assert any(
-        entry.endswith("modal_batch/compute.py::materialize_scenario_from_run")
-        for entry in command
-    )
-    assert "--run-id" in command and "run123" in command
-    assert "--year" in command and "2026" in command
-    assert "--scenario-name" in command and "option1" in command
-    assert "--reform-id" in command
+    assert command[6] == "deploy"
+    assert command[7].endswith("modal_batch/compute.py")
+    assert command[8] == "--no-stream-logs"
 
 
-def test_parse_app_id_reads_modal_output():
+def test_parse_spawn_record_reads_json_payload_with_noise():
     import modal_run_submit as module
 
-    app_id = module.parse_app_id(
-        "Initialized.\nView run at https://modal.com/apps/policyengine/main/ap-abc\n"
+    payload = module.parse_spawn_record(
+        "Installed 39 packages in 327ms\n"
+        '{"call_id":"fc-123","dashboard_url":"https://modal.com/x","function_name":"materialize_scenario_from_run"}\n'
     )
 
-    assert app_id == "ap-abc"
+    assert payload == {
+        "call_id": "fc-123",
+        "dashboard_url": "https://modal.com/x",
+        "function_name": "materialize_scenario_from_run",
+    }
 
 
 def test_build_launch_failure_record_is_stable():
