@@ -46,6 +46,45 @@ modal run compute.py::run_reforms --reforms option9,option10,option11 --scoring 
 modal run compute.py::run_reforms --reforms option9 --years 2026-2035 --scoring static
 ```
 
+### Manifest-Driven Scenario Runs
+
+For robust long-running work, use the manifest-driven scenario submitter. It
+uploads a remote run manifest first, then launches one detached Modal app per
+`(year, scenario)` and records per-scenario `submitted/started/success/error`
+sentinels on the results volume. Baseline is currently mandatory for this
+workflow, and each year also persists a shared weight bundle so recovered runs
+can be aggregated without reopening the original H5s. By default, the submitter
+also creates a fresh immutable per-run H5 snapshot under
+`projected_datasets_snapshots/` before launch so one run cannot mix dataset
+vintages across detached cells.
+
+```bash
+uv run python scripts/submit_modal_scenario_run.py \
+  --reforms option1,option2,option3 \
+  --years 2026,2030 \
+  --scoring static
+```
+
+Recover the remote run tree and inspect status with:
+
+```bash
+uv run python scripts/recover_modal_run.py \
+  --run-id modal-scenarios_YYYYMMDD_HHMMSS_microseconds_hash_nonce \
+  --output-root results/modal_runs
+```
+
+Once scenario artifacts are recovered locally, aggregate them into reform
+tables with:
+
+```bash
+uv run python scripts/aggregate_modal_run.py \
+  --run-dir results/modal_runs/modal-scenarios_YYYYMMDD_HHMMSS_microseconds_hash_nonce \
+  --output results/modal_scenarios.csv
+```
+
+Aggregation is strict by default: it fails if the run still has pending or
+failed cells. Use `--allow-incomplete` only for explicit partial inspection.
+
 ## Comparison with GCP Batch
 
 | Aspect | GCP Batch (`batch/`) | Modal (`modal_batch/`) |
@@ -67,8 +106,11 @@ modal run compute.py::run_reforms --reforms option9 --years 2026-2035 --scoring 
   - `test_single()`: Test one reform/year
   - `sniff_test()`: Quick 3-year validation
   - `run_reforms()`: Full parallel run
-
-Results are returned directly to your local machine - no GCS download needed.
+  - `run_cells_detached()`: Detached fire-and-forget cell submission
+  - `materialize_scenario_from_run()`: One scenario per detached Modal app
+  - `submit_modal_scenario_run.py`: Manifest-driven submitter
+  - `recover_modal_run.py`: Download/summarize helper for manifest-backed runs
+  - `aggregate_modal_run.py`: Offline aggregation from recovered household metrics
 
 ## Monitoring
 

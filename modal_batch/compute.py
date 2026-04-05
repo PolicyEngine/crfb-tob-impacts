@@ -16,10 +16,13 @@ Usage:
 from __future__ import annotations
 
 from datetime import datetime
+import itertools
+import json
 import os
 from pathlib import Path
 import subprocess
 import sys
+import traceback
 
 import modal
 import pandas as pd
@@ -33,7 +36,14 @@ for path in reversed(path_candidates):
     if path.exists():
         sys.path.insert(0, str(path))
 
+from modal_run_protocol import (
+    run_paths,
+    year_artifact_paths,
+    scenario_artifact_paths,
+)
+from modal_cli import modal_cli_prefix, modal_subprocess_env
 from runtime_config import resolve_policyengine_us_path, resolve_projected_datasets_path
+from tax_assumption_loader import resolve_tax_assumption_module
 
 
 app = modal.App("crfb-ss-analysis")
@@ -48,6 +58,15 @@ if (CONTAINER_PROJECT_ROOT / "projected_datasets").exists():
     PROJECTED_DATASETS_PATH = CONTAINER_PROJECT_ROOT / "projected_datasets"
 else:
     PROJECTED_DATASETS_PATH = resolve_projected_datasets_path()
+
+TAX_ASSUMPTION_CONTAINER_DIR = CONTAINER_PROJECT_ROOT / "tax_assumptions"
+if TAX_ASSUMPTION_CONTAINER_DIR.exists():
+    TAX_ASSUMPTION_LOCAL_PATH = TAX_ASSUMPTION_CONTAINER_DIR / "tax_assumptions.py"
+else:
+    TAX_ASSUMPTION_LOCAL_PATH = resolve_tax_assumption_module(
+        os.environ.get("CRFB_TAX_ASSUMPTION_MODULE")
+    )
+TAX_ASSUMPTION_CONTAINER_PATH = TAX_ASSUMPTION_CONTAINER_DIR / TAX_ASSUMPTION_LOCAL_PATH.name
 
 POLICYENGINE_US_IGNORE = [
     ".claude",
@@ -87,12 +106,288 @@ image = (
     .run_commands("pip install -e /app/policyengine-us")
     .add_local_dir(LOCAL_PROJECT_ROOT / "src", "/app/src", copy=True)
     .add_local_dir(PROJECTED_DATASETS_PATH, "/app/projected_datasets", copy=True)
+    .add_local_dir(
+        TAX_ASSUMPTION_LOCAL_PATH.parent,
+        str(TAX_ASSUMPTION_CONTAINER_DIR),
+        copy=True,
+    )
 )
 
 
 def _stem_with_scoring(stem: str, scoring: str) -> str:
     suffix = f"_{scoring}"
     return stem if stem.endswith(suffix) else f"{stem}{suffix}"
+
+
+def _parse_years(years: str) -> list[int]:
+    if "-" in years:
+        start, end = years.split("-")
+        return list(range(int(start), int(end) + 1))
+    return [int(year.strip()) for year in years.split(",") if year.strip()]
+
+
+def _recursive_reform_list(output_dir: Path) -> list[str]:
+    return sorted(
+        path.name
+        for path in output_dir.iterdir()
+        if path.is_dir() and path.name.startswith("option")
+    )
+
+
+def _write_error_artifact(save_path: str, message: str) -> None:
+    error_path = Path("/results") / f"{save_path}.error.txt"
+    error_path.parent.mkdir(parents=True, exist_ok=True)
+    error_path.write_text(message, encoding="utf-8")
+    results_volume.commit()
+    print(f"SAVED ERROR TO VOLUME: {error_path}")
+
+
+def _absolute_volume_path(path: Path) -> Path:
+    return Path("/results") / path
+
+
+def _write_json_volume(path: Path, payload: dict) -> None:
+    volume_path = _absolute_volume_path(path)
+    volume_path.parent.mkdir(parents=True, exist_ok=True)
+    volume_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _tax_assumption_runtime_path() -> Path:
+    if TAX_ASSUMPTION_CONTAINER_PATH.exists():
+        return TAX_ASSUMPTION_CONTAINER_PATH
+    return TAX_ASSUMPTION_LOCAL_PATH
+
+
+def _load_remote_run_manifest(run_id: str) -> dict:
+    manifest_path = _absolute_volume_path(run_paths(run_id).manifest)
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"Remote manifest not found: {manifest_path}")
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
+def _scenario_metadata(
+    *,
+    spec: dict,
+    cell: dict,
+    dataset_name: str,
+) -> dict:
+    year = int(cell["year"])
+    reform_id = cell.get("reform_id")
+    return {
+        "run_id": spec["run_id"],
+        "year": year,
+        "scenario_name": str(cell["scenario_name"]),
+        "reform_id": reform_id,
+        "scoring": spec["scoring"],
+        "dataset": spec["datasets"][str(year)],
+        "dataset_name": dataset_name,
+        "tax_assumption": spec["tax_assumption"],
+        "provenance": spec["provenance"],
+    }
+
+
+def _write_metrics_bundle(
+    *,
+    path_map: dict[str, Path],
+    metrics,
+    metadata: dict,
+) -> None:
+    import numpy as np
+
+    metrics_path = _absolute_volume_path(path_map["metrics"])
+    metrics_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        metrics_path,
+        household_ids=metrics.household_ids,
+        income_tax=metrics.income_tax,
+        tob_medicare_hi=metrics.tob_medicare_hi,
+        tob_oasdi=metrics.tob_oasdi,
+        employer_ss_tax_revenue=metrics.employer_ss_tax_revenue,
+        employer_medicare_tax_revenue=metrics.employer_medicare_tax_revenue,
+    )
+    _write_json_volume(path_map["metadata"], metadata)
+
+
+def _ensure_year_weight_bundle(
+    *,
+    spec: dict,
+    year: int,
+    dataset_name,
+) -> None:
+    import numpy as np
+
+    sys.path.insert(0, "/app/src")
+
+    from year_runner import load_household_weights
+
+    path_map = year_artifact_paths(spec["run_id"], year)
+    weights_path = _absolute_volume_path(path_map["weights"])
+    if weights_path.exists():
+        return
+
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
+    weights_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        weights_path,
+        household_ids=weight_household_ids,
+        household_weights=household_weights,
+    )
+    _write_json_volume(
+        path_map["metadata"],
+        {
+            "run_id": spec["run_id"],
+            "year": year,
+            "dataset_name": str(dataset_name),
+            "dataset": spec["datasets"][str(year)],
+        },
+    )
+    results_volume.commit()
+
+
+def _materialize_scenario_impl(spec: dict, cell: dict) -> dict:
+    import gc
+    import time
+    import warnings
+
+    warnings.filterwarnings("ignore")
+    os.environ.setdefault("CRFB_DATASET_TEMPLATE", "/app/projected_datasets/{year}.h5")
+
+    sys.path.insert(0, "/app/src")
+
+    from runtime_config import dataset_path
+    from tax_assumption_loader import load_tax_assumption_reform
+    from year_runner import (
+        MODAL_UNSUPPORTED_REFORMS,
+        build_reform,
+        compute_scenario_household_metrics,
+        get_reform_lookups,
+    )
+
+    year = int(cell["year"])
+    scenario = str(cell["scenario_name"])
+    reform_id = cell.get("reform_id")
+    path_map = scenario_artifact_paths(spec["run_id"], year, scenario)
+    success_path = _absolute_volume_path(path_map["success"])
+    if success_path.exists():
+        print(
+            f"SKIP COMPLETED SCENARIO: run={spec['run_id']} year={year} "
+            f"scenario={scenario}"
+        )
+        return {
+            "run_id": spec["run_id"],
+            "year": year,
+            "scenario_name": scenario,
+            "status": "already_completed",
+        }
+
+    started_at = datetime.utcnow().isoformat() + "Z"
+
+    _write_json_volume(
+        path_map["started"],
+        {
+            "run_id": spec["run_id"],
+            "year": year,
+            "scenario_name": scenario,
+            "reform_id": reform_id,
+            "started_at": started_at,
+        },
+    )
+    results_volume.commit()
+
+    dataset_name = dataset_path(year)
+    start_time = time.time()
+
+    try:
+        _ensure_year_weight_bundle(
+            spec=spec,
+            year=year,
+            dataset_name=dataset_name,
+        )
+
+        baseline_reform = load_tax_assumption_reform(
+            _tax_assumption_runtime_path(),
+            spec["tax_assumption"]["factory"],
+            int(spec["tax_assumption"]["start_year"]),
+            int(spec["tax_assumption"]["end_year"]),
+        )
+
+        reform = baseline_reform
+        if reform_id is not None:
+            reform_functions, dynamic_functions = get_reform_lookups(
+                MODAL_UNSUPPORTED_REFORMS
+            )
+            reform = (
+                baseline_reform,
+                build_reform(
+                    reform_id,
+                    spec["scoring"],
+                    reform_functions,
+                    dynamic_functions,
+                ),
+            )
+
+        metrics = compute_scenario_household_metrics(
+            year=year,
+            dataset_name=dataset_name,
+            reform=reform,
+        )
+        gc.collect()
+
+        metadata = _scenario_metadata(
+            spec=spec,
+            cell=cell,
+            dataset_name=dataset_name,
+        )
+        _write_metrics_bundle(
+            path_map=path_map,
+            metrics=metrics,
+            metadata=metadata,
+        )
+        _write_json_volume(
+            path_map["success"],
+            {
+                "run_id": spec["run_id"],
+                "year": year,
+                "scenario_name": scenario,
+                "reform_id": reform_id,
+                "started_at": started_at,
+                "completed_at": datetime.utcnow().isoformat() + "Z",
+                "duration_seconds": round(time.time() - start_time, 3),
+                "artifact_paths": {
+                    key: str(value)
+                    for key, value in path_map.items()
+                    if key in {"metrics", "metadata"}
+                },
+            },
+        )
+        results_volume.commit()
+        print(
+            f"SAVED SCENARIO: run={spec['run_id']} year={year} "
+            f"scenario={scenario} -> {_absolute_volume_path(path_map['metrics'])}"
+        )
+        return {
+            "run_id": spec["run_id"],
+            "year": year,
+            "scenario_name": scenario,
+            "status": "success",
+        }
+    except Exception:
+        _write_json_volume(
+            path_map["error"],
+            {
+                "run_id": spec["run_id"],
+                "year": year,
+                "scenario_name": scenario,
+                "reform_id": reform_id,
+                "failed_at": datetime.utcnow().isoformat() + "Z",
+                "traceback": traceback.format_exc(),
+            },
+        )
+        results_volume.commit()
+        raise
 
 
 @app.function(
@@ -125,6 +420,7 @@ def compute_year(
         compute_reform_result,
         get_reform_lookups,
         load_baseline,
+        load_household_weights,
     )
 
     print(f"\n{'=' * 60}")
@@ -145,6 +441,7 @@ def compute_year(
 
     baseline_start = time.time()
     baseline = load_baseline(year, dataset_name)
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
     gc.collect()
 
     print(f"[1] Dataset: {dataset_name}")
@@ -172,6 +469,8 @@ def compute_year(
                 dynamic_functions=dynamic_functions,
                 employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
                 default_net_impact_mode="direct",
+                weight_household_ids=weight_household_ids,
+                household_weights=household_weights,
             )
         except Exception as error:
             print(f"    ERROR: {error}")
@@ -224,6 +523,7 @@ def compute_cell(
 ) -> dict:
     import gc
     import time
+    import traceback
     import warnings
 
     warnings.filterwarnings("ignore")
@@ -238,6 +538,7 @@ def compute_cell(
         compute_reform_result,
         get_reform_lookups,
         load_baseline,
+        load_household_weights,
     )
 
     if reform_id in MODAL_UNSUPPORTED_REFORMS:
@@ -255,6 +556,7 @@ def compute_cell(
 
     baseline_start = time.time()
     baseline = load_baseline(year, dataset_name)
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
     gc.collect()
 
     print(f"[1] Dataset: {dataset_name}")
@@ -266,17 +568,27 @@ def compute_cell(
     )
 
     reform_start = time.time()
-    result = compute_reform_result(
-        reform_id=reform_id,
-        year=year,
-        scoring_type=scoring_type,
-        dataset_name=dataset_name,
-        baseline=baseline,
-        reform_functions=reform_functions,
-        dynamic_functions=dynamic_functions,
-        employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
-        default_net_impact_mode="direct",
-    )
+    try:
+        result = compute_reform_result(
+            reform_id=reform_id,
+            year=year,
+            scoring_type=scoring_type,
+            dataset_name=dataset_name,
+            baseline=baseline,
+            reform_functions=reform_functions,
+            dynamic_functions=dynamic_functions,
+            employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
+            default_net_impact_mode="direct",
+            weight_household_ids=weight_household_ids,
+            household_weights=household_weights,
+        )
+    except Exception:
+        if save_path:
+            _write_error_artifact(
+                save_path,
+                traceback.format_exc(),
+            )
+        raise
     gc.collect()
 
     print(
@@ -294,6 +606,83 @@ def compute_cell(
         print(f"SAVED TO VOLUME: {volume_path}")
 
     return result
+
+
+@app.function(
+    image=image,
+    cpu=4,
+    memory=65536,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_artifact(spec: dict, cell: dict) -> dict:
+    return _materialize_scenario_impl(spec, cell)
+
+
+@app.function(
+    image=image,
+    cpu=4,
+    memory=65536,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_from_run(
+    run_id: str,
+    year: int,
+    scenario_name: str,
+    reform_id: str = "",
+) -> dict:
+    spec = _load_remote_run_manifest(run_id)
+    cell = {
+        "year": int(year),
+        "scenario_name": scenario_name,
+        "reform_id": reform_id or None,
+    }
+    return _materialize_scenario_impl(spec, cell)
+
+
+@app.function(
+    image=image,
+    cpu=4,
+    memory=32768,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_from_run_medium(
+    run_id: str,
+    year: int,
+    scenario_name: str,
+    reform_id: str = "",
+) -> dict:
+    spec = _load_remote_run_manifest(run_id)
+    cell = {
+        "year": int(year),
+        "scenario_name": scenario_name,
+        "reform_id": reform_id or None,
+    }
+    return _materialize_scenario_impl(spec, cell)
+
+
+@app.function(
+    image=image,
+    cpu=2,
+    memory=16384,
+    timeout=14400,
+    volumes={"/results": results_volume},
+)
+def materialize_scenario_from_run_small(
+    run_id: str,
+    year: int,
+    scenario_name: str,
+    reform_id: str = "",
+) -> dict:
+    spec = _load_remote_run_manifest(run_id)
+    cell = {
+        "year": int(year),
+        "scenario_name": scenario_name,
+        "reform_id": reform_id or None,
+    }
+    return _materialize_scenario_impl(spec, cell)
 
 
 @app.local_entrypoint()
@@ -361,11 +750,7 @@ def run_reforms(
     """
     reform_list = [reform.strip() for reform in reforms.split(",")]
 
-    if "-" in years:
-        start, end = years.split("-")
-        year_list = list(range(int(start), int(end) + 1))
-    else:
-        year_list = [int(year.strip()) for year in years.split(",")]
+    year_list = _parse_years(years)
 
     output_path = Path(output)
     stem = _stem_with_scoring(output_path.stem, scoring)
@@ -444,11 +829,7 @@ def run_cells(
     """
     reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
 
-    if "-" in years:
-        start, end = years.split("-")
-        year_list = list(range(int(start), int(end) + 1))
-    else:
-        year_list = [int(year.strip()) for year in years.split(",") if year.strip()]
+    year_list = _parse_years(years)
 
     output_path = Path(output)
     stem = _stem_with_scoring(output_path.stem, scoring)
@@ -491,9 +872,7 @@ def run_cells(
             result = call.get(timeout=15000)
             local_file.parent.mkdir(parents=True, exist_ok=True)
             pd.DataFrame([result]).to_csv(local_file, index=False)
-            print(
-                f"  [{index}/{len(calls)}] Saved {reform_id} {year} to {local_file}"
-            )
+            print(f"  [{index}/{len(calls)}] Saved {reform_id} {year} to {local_file}")
         except Exception as error:
             failures.append((reform_id, year, str(error)))
             print(f"  [{index}/{len(calls)}] FAILED {reform_id} {year}: {error}")
@@ -507,22 +886,94 @@ def run_cells(
             print(f"  - {reform_id} {year}: {message}")
 
 
+@app.local_entrypoint()
+def run_cells_detached(
+    reforms: str = "option9,option10,option11",
+    scoring: str = "dynamic",
+    years: str = "2026-2100",
+    output: str = "results/modal_results.csv",
+    resume: bool = True,
+):
+    """
+    Submit one reform x one year per task and return immediately.
+
+    This is the correct detached pattern for Modal batch work:
+    enqueue all cells, write results to the Modal volume, and recover them later.
+    It avoids keeping a local coordinator alive waiting on call.get().
+    """
+    reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
+    year_list = _parse_years(years)
+
+    output_path = Path(output)
+    stem = _stem_with_scoring(output_path.stem, scoring)
+    output_dir = output_path.parent / stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    volume_save_path = f"{stem}_{run_id}"
+
+    pending_cells: list[tuple[str, int]] = []
+    for reform_id in reform_list:
+        for year in year_list:
+            local_file = output_dir / reform_id / f"year_{year}.csv"
+            if resume and local_file.exists():
+                continue
+            pending_cells.append((reform_id, year))
+
+    if not pending_cells:
+        print("All cells already completed locally.")
+        _combine_results_recursive(output_dir, output_path, reform_list)
+        return
+
+    manifest = {
+        "mode": "run_cells_detached",
+        "created_at": datetime.now().isoformat(),
+        "scoring": scoring,
+        "output_csv": str(output_path),
+        "output_dir": str(output_dir),
+        "volume_path": volume_save_path,
+        "reforms": reform_list,
+        "years": year_list,
+        "pending_cells": [
+            {"reform_id": reform_id, "year": year} for reform_id, year in pending_cells
+        ],
+    }
+    manifest_path = output_dir / "_modal_detached_run.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    print(f"\nSubmitting {len(pending_cells)} detached cells")
+    print(f"Reforms: {reform_list}")
+    print(f"Years: {year_list[0]} to {year_list[-1]}")
+    print(f"Scoring: {scoring}")
+    print(f"Local manifest: {manifest_path}")
+    print(f"Volume backup: /results/{volume_save_path}/")
+    print("Recovery command:")
+    print(
+        "  uv run python scripts/recover_modal_results.py "
+        f"--volume-path {volume_save_path} --output-dir {output_dir}"
+    )
+
+    years_iter = (year for _, year in pending_cells)
+    reforms_iter = (reform_id for reform_id, _ in pending_cells)
+    scoring_iter = itertools.repeat(scoring, len(pending_cells))
+    volume_paths_iter = (
+        f"{volume_save_path}/{reform_id}/year_{year}.csv"
+        for reform_id, year in pending_cells
+    )
+    compute_cell.spawn_map(
+        years_iter,
+        reforms_iter,
+        scoring_iter,
+        volume_paths_iter,
+    )
+
+
 def _download_from_volume(volume_path: str, output_dir: Path) -> None:
     print(f"\nDownloading from volume: {volume_path}")
 
     result = subprocess.run(
-        [
-            "uvx",
-            "--from",
-            "modal",
-            "--with",
-            "pandas",
-            "modal",
-            "volume",
-            "ls",
-            "crfb-results",
-            volume_path,
-        ],
+        [*modal_cli_prefix(), "volume", "ls", "crfb-results", volume_path],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -531,18 +982,14 @@ def _download_from_volume(volume_path: str, output_dir: Path) -> None:
 
     result = subprocess.run(
         [
-            "uvx",
-            "--from",
-            "modal",
-            "--with",
-            "pandas",
-            "modal",
+            *modal_cli_prefix(),
             "volume",
             "get",
             "crfb-results",
             f"{volume_path}/",
             str(output_dir) + "/",
         ],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -566,7 +1013,9 @@ def _combine_results(
         print("No results to combine!")
         return
 
-    df = pd.concat([pd.read_csv(file_path) for file_path in all_files], ignore_index=True)
+    df = pd.concat(
+        [pd.read_csv(file_path) for file_path in all_files], ignore_index=True
+    )
     df = df.sort_values(["reform_name", "year"])
     df.to_csv(output_path, index=False)
 
@@ -600,7 +1049,9 @@ def _combine_results_recursive(
         print("No results to combine!")
         return
 
-    df = pd.concat([pd.read_csv(file_path) for file_path in all_files], ignore_index=True)
+    df = pd.concat(
+        [pd.read_csv(file_path) for file_path in all_files], ignore_index=True
+    )
     df = df.sort_values(["reform_name", "year"])
     df.to_csv(output_path, index=False)
 
@@ -658,7 +1109,18 @@ def recover_results(
 
     _download_from_volume(volume_path, output_dir)
 
-    files = sorted(output_dir.glob("year_*.csv"))
-    print(f"\nRecovered {len(files)} year files:")
+    files = sorted(output_dir.rglob("year_*.csv"))
+    print(f"\nRecovered {len(files)} result files:")
     for file_path in files:
         print(f"  {file_path.name}")
+
+    error_files = sorted(output_dir.rglob("*.error.txt"))
+    if error_files:
+        print(f"\nRecovered {len(error_files)} error files:")
+        for error_path in error_files:
+            print(f"  {error_path}")
+
+    reform_list = _recursive_reform_list(output_dir)
+    if reform_list:
+        combined_path = output_dir.with_suffix(".csv")
+        _combine_results_recursive(output_dir, combined_path, reform_list)

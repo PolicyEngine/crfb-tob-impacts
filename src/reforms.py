@@ -842,10 +842,14 @@ def get_option2_reform():
 
 
 def get_option3_reform():
-    """Option 3: 85% Taxation with Permanent Senior Deduction Extension.
+    """Option 3: 85% Taxation with Senior Deduction Extension.
 
-    Combines taxation of 85% of benefits with a permanent extension
-    of the senior deduction that would otherwise expire in 2028.
+    Intended policy: combine taxation of 85% of benefits with a permanent
+    extension of the senior deduction that would otherwise expire in 2028.
+
+    Caveat: the current `policyengine-us` implementation extends the senior
+    deduction only through `2099-12-31`, so `2100` results should not be
+    interpreted as a true permanent-policy endpoint.
     """
     return Reform.from_dict(get_option3_dict(), country_id="us")
 

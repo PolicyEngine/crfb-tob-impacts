@@ -9,7 +9,6 @@ from src.impact_calculator import (
     compute_baselines,
     calculate_household_impact,
 )
-from src.reforms import get_option1_reform
 
 
 class TestFiscalImpact:
@@ -36,13 +35,14 @@ class TestFiscalImpact:
             assert impact == -300
 
     def test_calculate_fiscal_impact_no_reform(self):
-        """Test fiscal impact calculation with no reform."""
+        """Test fiscal impact calculation rejects missing reforms."""
         baseline_income_tax = np.array([1000, 2000, 3000])
-        impact = calculate_fiscal_impact(None, 2026, baseline_income_tax)
-        assert impact == 0.0
+
+        with pytest.raises(ValueError, match="Reform is None"):
+            calculate_fiscal_impact(None, 2026, baseline_income_tax)
 
     def test_calculate_fiscal_impact_error_handling(self):
-        """Test error handling in fiscal impact calculation."""
+        """Test fiscal impact calculation re-raises underlying errors."""
         baseline_income_tax = np.array([1000, 2000, 3000])
 
         with patch("src.impact_calculator.Microsimulation") as MockMicrosim:
@@ -50,10 +50,8 @@ class TestFiscalImpact:
             MockMicrosim.side_effect = Exception("Test error")
 
             reform = Mock()
-            impact = calculate_fiscal_impact(reform, 2026, baseline_income_tax)
-
-            # Should return 0.0 on error
-            assert impact == 0.0
+            with pytest.raises(Exception, match="Test error"):
+                calculate_fiscal_impact(reform, 2026, baseline_income_tax)
 
 
 class TestComputeBaselines:

@@ -4,36 +4,66 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import AbstractSet, Any, Callable
 
+import numpy as np
+import pandas as pd
 from policyengine_core.data import Dataset
 from policyengine_core.reforms import Reform
 from policyengine_us import Microsimulation
 
-from reforms import (
-    get_option10_dynamic_dict,
-    get_option10_reform,
-    get_option11_dynamic_dict,
-    get_option11_reform,
-    get_option12_dynamic_dict,
-    get_option12_reform,
-    get_option1_dynamic_dict,
-    get_option1_reform,
-    get_option2_dynamic_dict,
-    get_option2_reform,
-    get_option3_dynamic_dict,
-    get_option3_reform,
-    get_option4_dynamic_dict,
-    get_option4_reform,
-    get_option5_dynamic_dict,
-    get_option5_reform,
-    get_option6_dynamic_dict,
-    get_option6_reform,
-    get_option7_dynamic_dict,
-    get_option7_reform,
-    get_option8_dynamic_dict,
-    get_option8_reform,
-    get_option9_dynamic_dict,
-    get_option9_reform,
-)
+try:
+    from .reforms import (
+        get_option10_dynamic_dict,
+        get_option10_reform,
+        get_option11_dynamic_dict,
+        get_option11_reform,
+        get_option12_dynamic_dict,
+        get_option12_reform,
+        get_option1_dynamic_dict,
+        get_option1_reform,
+        get_option2_dynamic_dict,
+        get_option2_reform,
+        get_option3_dynamic_dict,
+        get_option3_reform,
+        get_option4_dynamic_dict,
+        get_option4_reform,
+        get_option5_dynamic_dict,
+        get_option5_reform,
+        get_option6_dynamic_dict,
+        get_option6_reform,
+        get_option7_dynamic_dict,
+        get_option7_reform,
+        get_option8_dynamic_dict,
+        get_option8_reform,
+        get_option9_dynamic_dict,
+        get_option9_reform,
+    )
+except ImportError:  # pragma: no cover - script execution fallback
+    from reforms import (
+        get_option10_dynamic_dict,
+        get_option10_reform,
+        get_option11_dynamic_dict,
+        get_option11_reform,
+        get_option12_dynamic_dict,
+        get_option12_reform,
+        get_option1_dynamic_dict,
+        get_option1_reform,
+        get_option2_dynamic_dict,
+        get_option2_reform,
+        get_option3_dynamic_dict,
+        get_option3_reform,
+        get_option4_dynamic_dict,
+        get_option4_reform,
+        get_option5_dynamic_dict,
+        get_option5_reform,
+        get_option6_dynamic_dict,
+        get_option6_reform,
+        get_option7_dynamic_dict,
+        get_option7_reform,
+        get_option8_dynamic_dict,
+        get_option8_reform,
+        get_option9_dynamic_dict,
+        get_option9_reform,
+    )
 
 
 STATIC_REFORM_FUNCTIONS = {
@@ -90,6 +120,26 @@ class BaselineResult:
     tob_total: float
 
 
+@dataclass(frozen=True)
+class ScenarioHouseholdMetrics:
+    household_ids: np.ndarray
+    income_tax: np.ndarray
+    tob_medicare_hi: np.ndarray
+    tob_oasdi: np.ndarray
+    employer_ss_tax_revenue: np.ndarray
+    employer_medicare_tax_revenue: np.ndarray
+
+
+@dataclass(frozen=True)
+class ScenarioAggregate:
+    revenue: float
+    tob_medicare_hi: float
+    tob_oasdi: float
+    tob_total: float
+    employer_ss_tax_revenue: float
+    employer_medicare_tax_revenue: float
+
+
 def _normalize_dataset(dataset: Any) -> Any:
     if isinstance(dataset, Dataset):
         return dataset
@@ -98,6 +148,124 @@ def _normalize_dataset(dataset: Any) -> Any:
         if path.exists():
             return Dataset.from_file(str(path))
     return dataset
+
+
+def _float_array(values: Any) -> np.ndarray:
+    return np.asarray(values, dtype=float)
+
+
+def load_household_weights(
+    dataset_name: Any,
+) -> tuple[np.ndarray, np.ndarray]:
+    dataset = _normalize_dataset(dataset_name)
+    sim = Microsimulation(dataset=dataset)
+    household_microseries = sim.calculate("household_id", map_to="household")
+    household_ids = np.asarray(household_microseries.values)
+    household_weights = _float_array(household_microseries.weights.values)
+    del sim, household_microseries
+    return household_ids, household_weights
+
+
+def compute_scenario_household_metrics(
+    *,
+    year: int,
+    dataset_name: Any,
+    reform: Any | None = None,
+) -> ScenarioHouseholdMetrics:
+    dataset = _normalize_dataset(dataset_name)
+    sim = Microsimulation(dataset=dataset, reform=reform)
+
+    household_microseries = sim.calculate("household_id", map_to="household")
+    household_ids = np.asarray(household_microseries.values)
+    income_tax = _float_array(
+        sim.calculate("income_tax", map_to="household", period=year).values
+    )
+    tob_medicare_hi = _float_array(
+        sim.calculate("tob_revenue_medicare_hi", map_to="household", period=year).values
+    )
+    tob_oasdi = _float_array(
+        sim.calculate("tob_revenue_oasdi", map_to="household", period=year).values
+    )
+    employer_ss_tax_revenue = _float_array(
+        sim.calculate(
+            "employer_ss_tax_income_tax_revenue",
+            map_to="household",
+            period=year,
+        ).values
+    )
+    employer_medicare_tax_revenue = _float_array(
+        sim.calculate(
+            "employer_medicare_tax_income_tax_revenue",
+            map_to="household",
+            period=year,
+        ).values
+    )
+
+    del sim, household_microseries
+
+    return ScenarioHouseholdMetrics(
+        household_ids=household_ids,
+        income_tax=income_tax,
+        tob_medicare_hi=tob_medicare_hi,
+        tob_oasdi=tob_oasdi,
+        employer_ss_tax_revenue=employer_ss_tax_revenue,
+        employer_medicare_tax_revenue=employer_medicare_tax_revenue,
+    )
+
+
+def align_weights_to_households(
+    household_ids: np.ndarray,
+    weight_household_ids: np.ndarray,
+    household_weights: np.ndarray,
+) -> np.ndarray:
+    household_ids = np.asarray(household_ids)
+    weight_household_ids = np.asarray(weight_household_ids)
+    household_weights = _float_array(household_weights)
+
+    if (
+        household_ids.shape == weight_household_ids.shape
+        and np.array_equal(household_ids, weight_household_ids)
+    ):
+        return household_weights
+
+    weight_lookup = pd.Series(household_weights, index=pd.Index(weight_household_ids))
+    if not weight_lookup.index.is_unique:
+        raise ValueError("Household weight IDs must be unique for alignment")
+    aligned = weight_lookup.reindex(pd.Index(household_ids))
+    if aligned.isna().any():
+        missing = aligned.index[aligned.isna()].tolist()[:5]
+        raise ValueError(
+            "Missing calibrated weights for scenario households: "
+            + ", ".join(str(value) for value in missing)
+        )
+    return aligned.to_numpy(dtype=float)
+
+
+def aggregate_scenario_household_metrics(
+    metrics: ScenarioHouseholdMetrics,
+    *,
+    weight_household_ids: np.ndarray,
+    household_weights: np.ndarray,
+) -> ScenarioAggregate:
+    aligned_weights = align_weights_to_households(
+        metrics.household_ids,
+        weight_household_ids,
+        household_weights,
+    )
+    tob_medicare_hi = float(np.dot(metrics.tob_medicare_hi, aligned_weights))
+    tob_oasdi = float(np.dot(metrics.tob_oasdi, aligned_weights))
+    return ScenarioAggregate(
+        revenue=float(np.dot(metrics.income_tax, aligned_weights)),
+        tob_medicare_hi=tob_medicare_hi,
+        tob_oasdi=tob_oasdi,
+        tob_total=tob_oasdi + tob_medicare_hi,
+        employer_ss_tax_revenue=float(
+            np.dot(metrics.employer_ss_tax_revenue, aligned_weights)
+        ),
+        employer_medicare_tax_revenue=float(
+            np.dot(metrics.employer_medicare_tax_revenue, aligned_weights)
+        ),
+    )
 
 
 def get_reform_lookups(
@@ -121,36 +289,23 @@ def load_baseline(
     dataset_name: Any,
     baseline_reform: Any | None = None,
 ) -> BaselineResult:
-    dataset = _normalize_dataset(dataset_name)
-    baseline_sim = Microsimulation(dataset=dataset, reform=baseline_reform)
-
-    baseline_income_tax = baseline_sim.calculate(
-        "income_tax", map_to="household", period=year
+    metrics = compute_scenario_household_metrics(
+        year=year,
+        dataset_name=dataset_name,
+        reform=baseline_reform,
     )
-    baseline_tob_medicare = baseline_sim.calculate(
-        "tob_revenue_medicare_hi", map_to="household", period=year
+    weight_household_ids, household_weights = load_household_weights(dataset_name)
+    aggregate = aggregate_scenario_household_metrics(
+        metrics,
+        weight_household_ids=weight_household_ids,
+        household_weights=household_weights,
     )
-    baseline_tob_oasdi = baseline_sim.calculate(
-        "tob_revenue_oasdi", map_to="household", period=year
+    return BaselineResult(
+        revenue=aggregate.revenue,
+        tob_medicare_hi=aggregate.tob_medicare_hi,
+        tob_oasdi=aggregate.tob_oasdi,
+        tob_total=aggregate.tob_total,
     )
-    baseline_tob_medicare_revenue = float(baseline_tob_medicare.sum())
-    baseline_tob_oasdi_revenue = float(baseline_tob_oasdi.sum())
-
-    result = BaselineResult(
-        revenue=float(baseline_income_tax.sum()),
-        tob_medicare_hi=baseline_tob_medicare_revenue,
-        tob_oasdi=baseline_tob_oasdi_revenue,
-        tob_total=baseline_tob_oasdi_revenue + baseline_tob_medicare_revenue,
-    )
-
-    del (
-        baseline_sim,
-        baseline_income_tax,
-        baseline_tob_medicare,
-        baseline_tob_oasdi,
-    )
-
-    return result
 
 
 def build_reform(
@@ -218,38 +373,25 @@ def _calculate_option6_gains(
     return total_gain * oasdi_share, total_gain * (1 - oasdi_share)
 
 
-def calculate_employer_net_impacts(
+def calculate_employer_net_impacts_from_aggregates(
     reform_id: str,
     year: int,
-    reform_sim: Microsimulation,
-    reform_tob_oasdi_revenue: float,
-    reform_tob_medicare_revenue: float,
+    reform_totals: ScenarioAggregate,
     baseline: BaselineResult,
     employer_net_reforms: AbstractSet[str],
     default_net_impact_mode: str = "zero",
 ) -> dict[str, float]:
     impacts = _default_net_impacts(
-        tob_oasdi_impact=reform_tob_oasdi_revenue - baseline.tob_oasdi,
-        tob_medicare_impact=reform_tob_medicare_revenue - baseline.tob_medicare_hi,
+        tob_oasdi_impact=reform_totals.tob_oasdi - baseline.tob_oasdi,
+        tob_medicare_impact=reform_totals.tob_medicare_hi - baseline.tob_medicare_hi,
         default_net_impact_mode=default_net_impact_mode,
     )
 
     if reform_id not in employer_net_reforms:
         return impacts
 
-    emp_ss = reform_sim.calculate(
-        "employer_ss_tax_income_tax_revenue",
-        map_to="household",
-        period=year,
-    )
-    emp_medicare = reform_sim.calculate(
-        "employer_medicare_tax_income_tax_revenue",
-        map_to="household",
-        period=year,
-    )
-
-    employer_ss_revenue = float(emp_ss.sum())
-    employer_medicare_revenue = float(emp_medicare.sum())
+    employer_ss_revenue = reform_totals.employer_ss_tax_revenue
+    employer_medicare_revenue = reform_totals.employer_medicare_tax_revenue
 
     if reform_id in {"option5", "option12"}:
         oasdi_gain = employer_ss_revenue
@@ -261,8 +403,8 @@ def calculate_employer_net_impacts(
             employer_medicare_revenue,
         )
 
-    oasdi_loss = baseline.tob_oasdi - reform_tob_oasdi_revenue
-    hi_loss = baseline.tob_medicare_hi - reform_tob_medicare_revenue
+    oasdi_loss = baseline.tob_oasdi - reform_totals.tob_oasdi
+    hi_loss = baseline.tob_medicare_hi - reform_totals.tob_medicare_hi
 
     return {
         "employer_ss_tax_revenue": employer_ss_revenue,
@@ -273,6 +415,50 @@ def calculate_employer_net_impacts(
         "hi_loss": hi_loss,
         "oasdi_net_impact": oasdi_gain - oasdi_loss,
         "hi_net_impact": hi_gain - hi_loss,
+    }
+
+
+def build_reform_result_from_aggregates(
+    *,
+    reform_id: str,
+    year: int,
+    baseline: BaselineResult,
+    reform_totals: ScenarioAggregate,
+    employer_net_reforms: AbstractSet[str],
+    default_net_impact_mode: str = "zero",
+    scoring_type: str = "static",
+) -> dict[str, float | int | str]:
+    revenue_impact = reform_totals.revenue - baseline.revenue
+    tob_medicare_impact = reform_totals.tob_medicare_hi - baseline.tob_medicare_hi
+    tob_oasdi_impact = reform_totals.tob_oasdi - baseline.tob_oasdi
+    tob_total_impact = reform_totals.tob_total - baseline.tob_total
+
+    allocation_impacts = calculate_employer_net_impacts_from_aggregates(
+        reform_id=reform_id,
+        year=year,
+        reform_totals=reform_totals,
+        baseline=baseline,
+        employer_net_reforms=employer_net_reforms,
+        default_net_impact_mode=default_net_impact_mode,
+    )
+
+    return {
+        "reform_name": reform_id,
+        "year": year,
+        "baseline_revenue": baseline.revenue,
+        "reform_revenue": reform_totals.revenue,
+        "revenue_impact": revenue_impact,
+        "baseline_tob_medicare_hi": baseline.tob_medicare_hi,
+        "reform_tob_medicare_hi": reform_totals.tob_medicare_hi,
+        "tob_medicare_hi_impact": tob_medicare_impact,
+        "baseline_tob_oasdi": baseline.tob_oasdi,
+        "reform_tob_oasdi": reform_totals.tob_oasdi,
+        "tob_oasdi_impact": tob_oasdi_impact,
+        "baseline_tob_total": baseline.tob_total,
+        "reform_tob_total": reform_totals.tob_total,
+        "tob_total_impact": tob_total_impact,
+        "scoring_type": scoring_type,
+        **allocation_impacts,
     }
 
 
@@ -287,68 +473,32 @@ def compute_reform_result(
     employer_net_reforms: AbstractSet[str],
     default_net_impact_mode: str = "zero",
     baseline_reform: Any | None = None,
+    weight_household_ids: np.ndarray | None = None,
+    household_weights: np.ndarray | None = None,
 ) -> dict[str, float | int | str]:
     reform = build_reform(reform_id, scoring_type, reform_functions, dynamic_functions)
-    dataset = _normalize_dataset(dataset_name)
     combined_reform = (baseline_reform, reform) if baseline_reform is not None else reform
-    reform_sim = Microsimulation(reform=combined_reform, dataset=dataset)
-
-    reform_income_tax = reform_sim.calculate("income_tax", map_to="household", period=year)
-    reform_tob_medicare = reform_sim.calculate(
-        "tob_revenue_medicare_hi", map_to="household", period=year
+    metrics = compute_scenario_household_metrics(
+        year=year,
+        dataset_name=dataset_name,
+        reform=combined_reform,
     )
-    reform_tob_oasdi = reform_sim.calculate(
-        "tob_revenue_oasdi", map_to="household", period=year
+    if weight_household_ids is None or household_weights is None:
+        weight_household_ids, household_weights = load_household_weights(dataset_name)
+    reform_totals = aggregate_scenario_household_metrics(
+        metrics,
+        weight_household_ids=weight_household_ids,
+        household_weights=household_weights,
     )
-
-    reform_revenue = float(reform_income_tax.sum())
-    reform_tob_medicare_revenue = float(reform_tob_medicare.sum())
-    reform_tob_oasdi_revenue = float(reform_tob_oasdi.sum())
-    reform_tob_total_revenue = (
-        reform_tob_oasdi_revenue + reform_tob_medicare_revenue
-    )
-
-    revenue_impact = reform_revenue - baseline.revenue
-    tob_medicare_impact = reform_tob_medicare_revenue - baseline.tob_medicare_hi
-    tob_oasdi_impact = reform_tob_oasdi_revenue - baseline.tob_oasdi
-    tob_total_impact = reform_tob_total_revenue - baseline.tob_total
-
-    allocation_impacts = calculate_employer_net_impacts(
+    result = build_reform_result_from_aggregates(
         reform_id=reform_id,
         year=year,
-        reform_sim=reform_sim,
-        reform_tob_oasdi_revenue=reform_tob_oasdi_revenue,
-        reform_tob_medicare_revenue=reform_tob_medicare_revenue,
         baseline=baseline,
+        reform_totals=reform_totals,
         employer_net_reforms=employer_net_reforms,
         default_net_impact_mode=default_net_impact_mode,
+        scoring_type=scoring_type,
     )
-
-    result = {
-        "reform_name": reform_id,
-        "year": year,
-        "baseline_revenue": baseline.revenue,
-        "reform_revenue": reform_revenue,
-        "revenue_impact": revenue_impact,
-        "baseline_tob_medicare_hi": baseline.tob_medicare_hi,
-        "reform_tob_medicare_hi": reform_tob_medicare_revenue,
-        "tob_medicare_hi_impact": tob_medicare_impact,
-        "baseline_tob_oasdi": baseline.tob_oasdi,
-        "reform_tob_oasdi": reform_tob_oasdi_revenue,
-        "tob_oasdi_impact": tob_oasdi_impact,
-        "baseline_tob_total": baseline.tob_total,
-        "reform_tob_total": reform_tob_total_revenue,
-        "tob_total_impact": tob_total_impact,
-        "scoring_type": scoring_type,
-        **allocation_impacts,
-    }
-
-    del (
-        reform_sim,
-        reform_income_tax,
-        reform_tob_medicare,
-        reform_tob_oasdi,
-        reform,
-    )
+    del reform
 
     return result

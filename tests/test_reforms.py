@@ -2,6 +2,9 @@
 
 import pytest
 from src.reforms import (
+    get_option10_reform,
+    get_option11_reform,
+    get_option12_reform,
     get_option1_reform,
     get_option2_reform,
     get_option3_reform,
@@ -10,110 +13,152 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
+    get_option9_reform,
     REFORMS,
 )
 
 
-def test_option1_reform():
-    """Test Option 1 reform creation."""
-    reform = get_option1_reform()
-    assert reform is not None
-    # Check that base and additional rates are set to 0
-    params = reform.parameter_values
-    assert any("taxability.rate.base" in str(k) for k in params.keys())
-    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+def test_option1_reform_zeroes_all_ss_taxability_rates():
+    """Option 1 should zero all current-law Social Security taxability rates."""
+    params = get_option1_reform().parameter_values
+
+    expected = {
+        "gov.irs.social_security.taxability.rate.base.benefit_cap",
+        "gov.irs.social_security.taxability.rate.base.excess",
+        "gov.irs.social_security.taxability.rate.additional.benefit_cap",
+        "gov.irs.social_security.taxability.rate.additional.bracket",
+        "gov.irs.social_security.taxability.rate.additional.excess",
+    }
+    assert set(params) == expected
+    for key in expected:
+        assert params[key] == {"2026-01-01.2100-12-31": 0}
 
 
 def test_option2_reform():
-    """Test Option 2 reform creation."""
-    reform = get_option2_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Check that base rate is set to 0.85
-    assert any("taxability.rate.base" in str(k) for k in params.keys())
-    # Check that thresholds are set to 0
-    assert any("threshold.base.main" in str(k) for k in params.keys())
+    """Option 2 should set full combined-income inclusion and zero thresholds."""
+    params = get_option2_reform().parameter_values
+
+    assert params["gov.irs.social_security.taxability.combined_income_ss_fraction"] == {
+        "2026-01-01.2100-12-31": 1.0
+    }
+    threshold_keys = [
+        key
+        for key in params
+        if ".threshold.base.main." in key or ".threshold.adjusted_base.main." in key
+    ]
+    assert len(threshold_keys) == 10
+    for key in threshold_keys:
+        assert params[key] == {"2026-01-01.2100-12-31": 0}
+    assert not any(
+        key.startswith("gov.irs.social_security.taxability.rate.") for key in params
+    )
 
 
 def test_option3_reform():
-    """Test Option 3 reform creation."""
-    reform = get_option3_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Should have both 85% taxation and senior deduction extension
-    assert any("taxability.rate.base" in str(k) for k in params.keys())
-    assert any("senior_deduction_extension" in str(k) for k in params.keys())
+    """Option 3 should add the senior-deduction extension on top of option 2."""
+    params = get_option3_reform().parameter_values
+
+    assert params["gov.irs.social_security.taxability.combined_income_ss_fraction"] == {
+        "2026-01-01.2100-12-31": 1.0
+    }
+    assert params["gov.contrib.crfb.senior_deduction_extension.applies"] == {
+        "2026-01-01.2100-12-31": True
+    }
+    assert not any(
+        key.startswith("gov.irs.social_security.taxability.rate.") for key in params
+    )
 
 
 def test_option4_reform_default():
-    """Test Option 4 reform with default credit amount."""
-    reform = get_option4_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    assert any("ss_credit" in str(k) for k in params.keys())
+    """Option 4 should enable the SS credit with the default $500 amount."""
+    params = get_option4_reform().parameter_values
+
+    assert params["gov.contrib.crfb.ss_credit.in_effect"] == {
+        "2026-01-01.2100-12-31": True
+    }
+    assert params["gov.contrib.crfb.ss_credit.amount.JOINT"] == {
+        "2026-01-01.2100-12-31": 500
+    }
 
 
 def test_option4_reform_custom_amount():
-    """Test Option 4 reform with custom credit amount."""
-    reform = get_option4_reform(credit_amount=750)
-    assert reform is not None
-    params = reform.parameter_values
-    # Check that credit amount is set
-    credit_params = [v for k, v in params.items() if "ss_credit.amount" in str(k)]
-    assert len(credit_params) > 0
-    # The credit amount should be 750 for the time period
-    assert any(750 in v.values() for v in credit_params if hasattr(v, "values"))
+    """Option 4 should apply a caller-provided credit amount to all filing types."""
+    params = get_option4_reform(credit_amount=750).parameter_values
+
+    for filing_status in [
+        "JOINT",
+        "SINGLE",
+        "SEPARATE",
+        "SURVIVING_SPOUSE",
+        "HEAD_OF_HOUSEHOLD",
+    ]:
+        assert params[f"gov.contrib.crfb.ss_credit.amount.{filing_status}"] == {
+            "2026-01-01.2100-12-31": 750
+        }
 
 
 def test_option5_reform():
-    """Test Option 5 Roth-style swap reform."""
-    reform = get_option5_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Should have employer payroll tax inclusion
-    assert any("tax_employer_payroll_tax" in str(k) for k in params.keys())
+    """Option 5 should fully tax employer payroll contributions immediately."""
+    params = get_option5_reform().parameter_values
+
+    assert params["gov.contrib.crfb.tax_employer_payroll_tax.in_effect"] == {
+        "2026-01-01.2100-12-31": True
+    }
+    assert params["gov.contrib.crfb.tax_employer_payroll_tax.percentage"] == {
+        "2026-01-01.2100-12-31": 1.0
+    }
 
 
 def test_option6_reform():
-    """Test Option 6 phased Roth-style swap reform."""
-    reform = get_option6_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Should have phased parameters
-    assert any("tax_employer_payroll_tax.percentage" in str(k) for k in params.keys())
-    # Check that it has multiple year entries for phase-in
-    percentage_params = [
-        v for k, v in params.items() if "tax_employer_payroll_tax.percentage" in str(k)
-    ]
-    assert len(percentage_params) > 0
+    """Option 6 should phase in employer-tax inclusion and phase out benefit taxation."""
+    params = get_option6_reform().parameter_values
+    phase_in = params["gov.contrib.crfb.tax_employer_payroll_tax.percentage"]
+
+    assert phase_in["2026"] == pytest.approx(0.1307)
+    assert phase_in["2033-01-01.2100-12-31"] == 1.0
+    assert params["gov.irs.social_security.taxability.rate.additional.bracket"][
+        "2045-01-01.2100-12-31"
+    ] == 0
 
 
 def test_option7_reform():
-    """Test Option 7 eliminate senior deduction reform."""
-    reform = get_option7_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Should set senior deduction amount to 0
-    assert any("senior_deduction.amount" in str(k) for k in params.keys())
+    """Option 7 should eliminate the bonus senior deduction."""
+    params = get_option7_reform().parameter_values
+
+    assert params["gov.irs.deductions.senior_deduction.amount"] == {
+        "2026-01-01.2100-12-31": 0
+    }
 
 
-def test_option8_reform():
-    """Test Option 8 full taxation of Social Security benefits."""
-    reform = get_option8_reform()
-    assert reform is not None
-    params = reform.parameter_values
-    # Should have combined income SS fraction set to 1.0
-    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
-    # Should have taxability additional rate set to 1.0 (100%)
-    assert any("taxability.rate.additional" in str(k) for k in params.keys())
-    # Should have all thresholds set to 0
-    assert any("threshold.base.main" in str(k) for k in params.keys())
-    assert any("threshold.adjusted_base.main" in str(k) for k in params.keys())
+@pytest.mark.parametrize(
+    ("factory", "expected_rate"),
+    [
+        (get_option8_reform, 1.0),
+        (get_option9_reform, 0.9),
+        (get_option10_reform, 0.95),
+    ],
+)
+def test_high_taxability_reforms_set_expected_rates(factory, expected_rate):
+    """Options 8-10 should differ only by their taxability-rate target."""
+    params = factory().parameter_values
+
+    assert params["gov.irs.social_security.taxability.combined_income_ss_fraction"] == {
+        "2026-01-01.2100-12-31": 1.0
+    }
+    assert params["gov.irs.social_security.taxability.rate.base.benefit_cap"] == {
+        "2026-01-01.2100-12-31": expected_rate
+    }
+    assert params["gov.irs.social_security.taxability.rate.additional.benefit_cap"] == {
+        "2026-01-01.2100-12-31": expected_rate
+    }
+    assert params["gov.irs.social_security.taxability.rate.additional.bracket"] == {
+        "2026-01-01.2100-12-31": expected_rate
+    }
 
 
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 8
+    assert list(REFORMS) == [f"option{i}" for i in range(1, 13)]
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():
@@ -131,4 +176,37 @@ def test_reform_variants():
     # Test option 4 with different credit amounts
     for amount in [250, 500, 750, 900, 1000]:
         reform = option4["func"](amount)
-        assert reform is not None
+        assert reform.parameter_values["gov.contrib.crfb.ss_credit.amount.JOINT"] == {
+            "2026-01-01.2100-12-31": amount
+        }
+
+
+def test_option11_reform_enables_phase_out_credit():
+    """Option 11 should use a $700 credit with the phase-out enabled."""
+    params = get_option11_reform().parameter_values
+
+    assert params["gov.contrib.crfb.ss_credit.amount.JOINT"] == {
+        "2026-01-01.2100-12-31": 700
+    }
+    assert params["gov.contrib.crfb.ss_credit.phase_out.applies"] == {
+        "2026-01-01.2100-12-31": True
+    }
+
+
+def test_option12_reform_uses_extended_phase_out_schedule():
+    """Option 12 should fully tax employer payroll and phase out benefit taxation."""
+    params = get_option12_reform().parameter_values
+
+    assert params["gov.contrib.crfb.tax_employer_payroll_tax.percentage"] == {
+        "2026-01-01.2100-12-31": 1.0
+    }
+    assert params["gov.ssa.revenue.oasdi_share_of_gross_ss"]["2029"] == pytest.approx(
+        0.475
+    )
+    assert params["gov.ssa.revenue.oasdi_share_of_gross_ss"]["2048"] == 0.0
+    assert params["gov.ssa.revenue.oasdi_share_of_gross_ss"][
+        "2049-01-01.2100-12-31"
+    ] == 0
+    assert params["gov.irs.social_security.taxability.rate.additional.benefit_cap"][
+        "2063-01-01.2100-12-31"
+    ] == 0
