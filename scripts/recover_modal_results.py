@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 
 import pandas as pd
+from modal_cli import modal_subprocess_env
 
 
 def resolve_uvx_executable() -> str:
@@ -62,6 +63,7 @@ def modal_volume(*args: str) -> subprocess.CompletedProcess[str]:
             "volume",
             *args,
         ],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,

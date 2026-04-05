@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, UTC
 import hashlib
 import json
@@ -22,6 +23,7 @@ from modal_run_protocol import (
     scenario_artifact_paths,
 )
 from modal_cli import modal_cli_prefix
+from modal_cli import modal_subprocess_env
 from projected_dataset_snapshot import (
     prepare_snapshot_path,
     sync_projected_dataset_snapshot,
@@ -140,6 +142,15 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_MIN_CALIBRATION_QUALITY,
         choices=["aggregate", "approximate", "exact"],
         help="Minimum calibration quality required in H5 metadata.",
+    )
+    parser.add_argument(
+        "--launch-jobs",
+        type=int,
+        default=0,
+        help=(
+            "Concurrent detached launch workers. Use 0 to launch all cells in "
+            "parallel."
+        ),
     )
     return parser.parse_args()
 
@@ -286,6 +297,7 @@ def modal_volume(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [*modal_cli_prefix(), "volume", *args],
         cwd=REPO_ROOT,
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -408,10 +420,7 @@ def remote_scenario_started(run_id: str, cell: dict) -> bool:
 def launch_detached_modal_app(
     command: list[str],
     env: dict[str, str],
-    *,
-    run_id: str,
-    cell: dict,
-) -> tuple[str, str, bool]:
+) -> tuple[str, str]:
     process = subprocess.Popen(
         command,
         cwd=REPO_ROOT,
@@ -447,30 +456,78 @@ def launch_detached_modal_app(
                 if app_id is not None:
                     break
 
-        if app_id is not None and remote_scenario_started(run_id, cell):
-            dashboard_url = f"https://modal.com/apps/policyengine/main/{app_id}"
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=5)
-            selector.close()
-            return app_id, dashboard_url, True
+        if app_id is not None:
+            break
 
     selector.close()
     output = "".join(lines).strip()
     if process.poll() is None:
-        process.terminate()
         try:
-            process.wait(timeout=5)
+            process.wait(timeout=30)
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=5)
     if app_id is not None:
         dashboard_url = f"https://modal.com/apps/policyengine/main/{app_id}"
-        return app_id, dashboard_url, False
+        return app_id, dashboard_url
     raise RuntimeError(output or "Detached Modal app did not report an app id")
+
+
+def effective_launch_jobs(args: argparse.Namespace, *, cell_count: int) -> int:
+    if cell_count <= 0:
+        return 1
+    if args.launch_jobs <= 0:
+        return cell_count
+    return min(args.launch_jobs, cell_count)
+
+
+def launch_cell(
+    *,
+    spec: dict,
+    raw_cell: dict,
+    env: dict[str, str],
+    index: int,
+    total: int,
+) -> tuple[int, dict | None, dict | None]:
+    cell = {
+        **raw_cell,
+        "run_id": spec["run_id"],
+    }
+    print(
+        f"[{index}/{total}] Launching "
+        f"year={cell['year']} scenario={cell['scenario_name']}"
+    )
+    launched_at = datetime.now(UTC).isoformat()
+    try:
+        app_id, dashboard_url = launch_detached_modal_app(
+            build_modal_command(cell),
+            env,
+        )
+        startup_confirmed = remote_scenario_started(spec["run_id"], cell)
+        record = build_submitted_record(
+            cell,
+            app_id,
+            dashboard_url,
+            launched_at,
+            startup_confirmed=startup_confirmed,
+        )
+        upload_json(
+            record,
+            scenario_artifact_paths(
+                spec["run_id"],
+                int(cell["year"]),
+                str(cell["scenario_name"]),
+            )["submitted"],
+        )
+        return index, record, None
+    except Exception as error:
+        failure = build_launch_failure_record(cell, launched_at, error)
+        print(
+            f"Launch failed for year={cell['year']} "
+            f"scenario={cell['scenario_name']}: {error}",
+            file=sys.stderr,
+        )
+        return index, None, failure
 
 
 def launch(spec_path: Path, spec: dict, args: argparse.Namespace) -> int:
@@ -484,49 +541,32 @@ def launch(spec_path: Path, spec: dict, args: argparse.Namespace) -> int:
 
     dispatch_records: list[dict] = []
     launch_failures: list[dict] = []
-    env = os.environ.copy()
-    for index, raw_cell in enumerate(spec["cells"], start=1):
-        cell = {
-            **raw_cell,
-            "run_id": spec["run_id"],
-        }
-        print(
-            f"[{index}/{len(spec['cells'])}] Launching "
-            f"year={cell['year']} scenario={cell['scenario_name']}"
-        )
-        launched_at = datetime.now(UTC).isoformat()
-        try:
-            app_id, dashboard_url, startup_confirmed = launch_detached_modal_app(
-                build_modal_command(cell),
-                env,
-                run_id=spec["run_id"],
-                cell=cell,
+    env = modal_subprocess_env(os.environ.copy())
+    total = len(spec["cells"])
+    launch_jobs = effective_launch_jobs(args, cell_count=total)
+    results_by_index: dict[int, tuple[dict | None, dict | None]] = {}
+    with ThreadPoolExecutor(max_workers=launch_jobs) as executor:
+        futures = [
+            executor.submit(
+                launch_cell,
+                spec=spec,
+                raw_cell=raw_cell,
+                env=env,
+                index=index,
+                total=total,
             )
-            record = build_submitted_record(
-                cell,
-                app_id,
-                dashboard_url,
-                launched_at,
-                startup_confirmed=startup_confirmed,
-            )
-            upload_json(
-                record,
-                scenario_artifact_paths(
-                    spec["run_id"],
-                    int(cell["year"]),
-                    str(cell["scenario_name"]),
-                )["submitted"],
-            )
+            for index, raw_cell in enumerate(spec["cells"], start=1)
+        ]
+        for future in as_completed(futures):
+            index, record, failure = future.result()
+            results_by_index[index] = (record, failure)
+
+    for index in sorted(results_by_index):
+        record, failure = results_by_index[index]
+        if record is not None:
             dispatch_records.append(record)
-        except Exception as error:
-            launch_failures.append(
-                build_launch_failure_record(cell, launched_at, error)
-            )
-            print(
-                f"Launch failed for year={cell['year']} "
-                f"scenario={cell['scenario_name']}: {error}",
-                file=sys.stderr,
-            )
+        if failure is not None:
+            launch_failures.append(failure)
 
     dispatch_payload = {
         "run_id": spec["run_id"],

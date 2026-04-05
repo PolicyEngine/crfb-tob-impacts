@@ -48,15 +48,15 @@ def test_build_modal_command_targets_remote_function():
     command = module.build_modal_command(cell)
 
     assert command[0].endswith("uvx")
-    assert command[1:8] == [
+    assert command[1:6] == [
         "--from",
         "modal",
         "--with",
         "pandas",
         "modal",
-        "run",
-        "--detach",
     ]
+    assert "run" in command
+    assert "--detach" in command
     assert any(
         entry.endswith("modal_batch/compute.py::materialize_scenario_from_run")
         for entry in command

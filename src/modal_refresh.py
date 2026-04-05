@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 
-from modal_cli import modal_cli_prefix
+from modal_cli import modal_cli_prefix, modal_subprocess_env
 from projected_dataset_snapshot import (
     prepare_snapshot_path,
     sync_projected_dataset_snapshot,
@@ -85,7 +85,7 @@ def effective_modal_target(args: argparse.Namespace) -> str:
 
 
 def launch_modal(args: argparse.Namespace) -> int:
-    env = os.environ.copy()
+    env = modal_subprocess_env(os.environ.copy())
     env["CRFB_POLICYENGINE_US_PATH"] = str(args.policyengine_us_path)
     env["CRFB_PROJECTED_DATASETS_PATH"] = str(args.snapshot_path)
     env["CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH"] = str(args.snapshot_path)

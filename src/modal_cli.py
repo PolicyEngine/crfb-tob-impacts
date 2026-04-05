@@ -5,6 +5,22 @@ from pathlib import Path
 import shutil
 
 
+def resolve_modal_profile() -> str | None:
+    for key in ("CRFB_MODAL_PROFILE", "MODAL_PROFILE"):
+        value = os.environ.get(key)
+        if value:
+            return value
+    return None
+
+
+def modal_subprocess_env(base_env: dict[str, str] | None = None) -> dict[str, str]:
+    env = dict(os.environ if base_env is None else base_env)
+    profile = resolve_modal_profile()
+    if profile:
+        env["MODAL_PROFILE"] = profile
+    return env
+
+
 def resolve_uvx_executable() -> str:
     env_path = os.environ.get("CRFB_UVX_PATH")
     if env_path:

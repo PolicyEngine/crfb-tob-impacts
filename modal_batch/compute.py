@@ -41,7 +41,7 @@ from modal_run_protocol import (
     year_artifact_paths,
     scenario_artifact_paths,
 )
-from modal_cli import modal_cli_prefix
+from modal_cli import modal_cli_prefix, modal_subprocess_env
 from runtime_config import resolve_policyengine_us_path, resolve_projected_datasets_path
 from tax_assumption_loader import resolve_tax_assumption_module
 
@@ -929,6 +929,7 @@ def _download_from_volume(volume_path: str, output_dir: Path) -> None:
 
     result = subprocess.run(
         [*modal_cli_prefix(), "volume", "ls", "crfb-results", volume_path],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -944,6 +945,7 @@ def _download_from_volume(volume_path: str, output_dir: Path) -> None:
             f"{volume_path}/",
             str(output_dir) + "/",
         ],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,

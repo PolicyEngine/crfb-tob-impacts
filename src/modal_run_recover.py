@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import tempfile
 
-from modal_cli import modal_cli_prefix
+from modal_cli import modal_cli_prefix, modal_subprocess_env
 from modal_run_protocol import run_root, summarize_run_directory
 
 
@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
 def modal_volume(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [*modal_cli_prefix(), "volume", *args],
+        env=modal_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
