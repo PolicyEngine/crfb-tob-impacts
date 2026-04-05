@@ -38,6 +38,14 @@ def build_timing_rows(
     collected = collected_at or datetime.now(UTC)
     run_id = str(manifest["run_id"])
     execution = manifest.get("execution", {})
+    dispatch_path = run_dir / "dispatch.json"
+    dispatch_payload: dict[str, Any] = {}
+    if dispatch_path.exists():
+        dispatch_payload = json.loads(dispatch_path.read_text(encoding="utf-8"))
+    dispatch_submitted = {
+        (int(record["year"]), str(record["scenario_name"])): record
+        for record in dispatch_payload.get("submitted", [])
+    }
     rows: list[dict[str, Any]] = []
 
     for cell in manifest.get("cells", []):
@@ -49,6 +57,8 @@ def build_timing_rows(
         submitted = _load_json(
             run_dir / within_run_root(run_id, path_map["submitted"])
         )
+        if submitted is None:
+            submitted = dispatch_submitted.get((year, scenario_name))
         started = _load_json(run_dir / within_run_root(run_id, path_map["started"]))
         success = _load_json(run_dir / within_run_root(run_id, path_map["success"]))
         error = _load_json(run_dir / within_run_root(run_id, path_map["error"]))

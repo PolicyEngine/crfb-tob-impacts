@@ -130,6 +130,14 @@ def within_run_root(run_id: str, path: Path) -> Path:
 
 def summarize_run_directory(run_dir: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     cells = manifest.get("cells", [])
+    dispatch_path = run_dir / "dispatch.json"
+    dispatch_payload: dict[str, Any] = {}
+    if dispatch_path.exists():
+        dispatch_payload = json.loads(dispatch_path.read_text(encoding="utf-8"))
+    dispatched_cells = {
+        (int(record["year"]), str(record["scenario_name"])): record
+        for record in dispatch_payload.get("submitted", [])
+    }
     completed: list[dict[str, Any]] = []
     failed: list[dict[str, Any]] = []
     running: list[dict[str, Any]] = []
@@ -153,7 +161,10 @@ def summarize_run_directory(run_dir: Path, manifest: dict[str, Any]) -> dict[str
             failed.append(cell)
         elif started_path.exists():
             running.append(cell)
-        elif submitted_path.exists():
+        elif submitted_path.exists() or (
+            int(cell["year"]),
+            str(cell["scenario_name"]),
+        ) in dispatched_cells:
             submitted.append(cell)
         else:
             missing.append(cell)

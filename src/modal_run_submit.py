@@ -18,7 +18,6 @@ from modal_run_protocol import (
     parse_reforms,
     parse_years,
     run_paths,
-    scenario_artifact_paths,
 )
 from modal_cli import modal_cli_prefix, modal_python_prefix, modal_subprocess_env
 from projected_dataset_snapshot import (
@@ -322,18 +321,28 @@ def modal_volume(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def upload_volume_file(local_path: Path, remote_path: Path) -> None:
-    completed = modal_volume(
-        "put",
-        "--force",
-        "crfb-results",
-        str(local_path),
-        str(remote_path),
-    )
-    if completed.returncode != 0:
-        raise RuntimeError(
-            "modal volume put failed for "
-            f"{local_path} -> {remote_path}:\n{completed.stderr}"
+    max_attempts = 6
+    for attempt in range(1, max_attempts + 1):
+        completed = modal_volume(
+            "put",
+            "--force",
+            "crfb-results",
+            str(local_path),
+            str(remote_path),
         )
+        if completed.returncode == 0:
+            return
+        stderr = completed.stderr or ""
+        retryable = (
+            "rate limit exceeded" in stderr.lower()
+            or "too many layers" in stderr.lower()
+        )
+        if not retryable or attempt == max_attempts:
+            raise RuntimeError(
+                "modal volume put failed for "
+                f"{local_path} -> {remote_path}:\n{stderr}"
+            )
+        time.sleep(min(2**attempt, 15))
 
 
 def upload_json(payload: dict, remote_path: Path) -> None:
@@ -439,36 +448,6 @@ def build_launch_failure_record(cell: dict, launched_at: str, error: Exception) 
         "launched_at": launched_at,
         "error": f"{type(error).__name__}: {error}",
     }
-
-
-def remote_scenario_started(run_id: str, cell: dict) -> bool:
-    remote_root = scenario_artifact_paths(
-        run_id,
-        int(cell["year"]),
-        str(cell["scenario_name"]),
-    )["root"]
-    listed = modal_volume("ls", "crfb-results", str(remote_root))
-    if listed.returncode != 0:
-        return False
-    return any(
-        marker in listed.stdout
-        for marker in ("started.json", "success.json", "error.json")
-    )
-
-
-def wait_for_remote_scenario_start(
-    run_id: str,
-    cell: dict,
-    *,
-    timeout_seconds: float = 15.0,
-    interval_seconds: float = 1.0,
-) -> bool:
-    deadline = time.monotonic() + timeout_seconds
-    while time.monotonic() < deadline:
-        if remote_scenario_started(run_id, cell):
-            return True
-        time.sleep(interval_seconds)
-    return remote_scenario_started(run_id, cell)
 
 
 def parse_spawn_record(output: str) -> dict | None:
@@ -613,22 +592,13 @@ def launch_cell(
             build_modal_spawn_command(cell, worker_profile=worker_profile),
             env,
         )
-        startup_confirmed = wait_for_remote_scenario_start(spec["run_id"], cell)
         record = build_submitted_record(
             cell,
             str(spawn_record["call_id"]),
             str(spawn_record.get("dashboard_url") or ""),
             launched_at,
-            startup_confirmed=startup_confirmed,
+            startup_confirmed=False,
             function_name=function_name,
-        )
-        upload_json(
-            record,
-            scenario_artifact_paths(
-                spec["run_id"],
-                int(cell["year"]),
-                str(cell["scenario_name"]),
-            )["submitted"],
         )
         return index, record, None
     except Exception as error:
