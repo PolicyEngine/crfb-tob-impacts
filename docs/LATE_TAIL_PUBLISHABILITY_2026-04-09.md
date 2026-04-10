@@ -212,3 +212,52 @@ Remaining full-run blockers:
 - The dirty local tolerance relaxation in `policyengine-us-data` must not be used.
 - The production `policyengine-us` checkout must include the indefinite `non_refundable_ss_credit`, 2100-safe senior deduction endpoint, and Trustees economic-uprating path.
 - Dynamic remains separately blocked until the active `policyengine-us` checkout implements age-based labor-supply elasticities.
+
+## 2026-04-10 PE-US Integration Update
+
+A clean `policyengine-us` integration worktree was created at `/Users/maxghenis/.codex-worktrees/us-crfb-integration` on branch `codex/crfb-integrated-assumptions`.
+
+Integrated assumptions:
+
+- current `upstream/main` / package baseline at `policyengine-us==1.634.4`
+- Trustees uprating branch (`upstream/uprating`) merged for long-run SSA NAWI and SSA uprating inputs
+- indefinite CRFB `non_refundable_ss_credit` via commit `eb924e3d6d`
+- CRFB senior deduction extension made indefinite beyond `2099`
+- age-based labor-supply elasticity branch merged for dynamic runs
+
+Validation:
+
+- `uv run ruff check ...`: passed for touched PE-US reform, TOB-revenue, and labor-supply files
+- PE-US Python unit subset passed: `27 passed`
+- Lightweight integration smoke passed:
+  - `ss_credit` remains in non-refundable credits in `2100`
+  - `additional_senior_deduction` remains in both itemizing and non-itemizing deduction lists in `2100`
+  - SSA long-run inputs are active at `2100`
+  - age-based income and substitution elasticities double at age `65`
+
+Important merge finding:
+
+- The initial `-X theirs` merge of `upstream/uprating` partially spliced the older proportional TOB allocation code into current main's newer double-branch TOB files.
+- That created undefined names in `tob_revenue_oasdi` and `tob_revenue_medicare_hi`.
+- The integration branch now restores current main's double-branch formulas and updates the branch-added unit tests to match current behavior.
+
+Current long-run cap path from the integration checkout:
+
+- `2035=$254,400`
+- `2075=$1,030,411`
+- `2100=$2,469,329`
+
+This differs from the prior `policyengine-us==1.634.4` package-only sentinel cap path because the integration checkout now includes Trustees NAWI/uprating inputs from the unmerged uprating branch.
+
+Attempted local 2075 H5 sentinel:
+
+- command used strict validation, `target_source=trustees_2025_current_law`, `tax_assumption=trustees-core-thresholds-v1`, `donor-backed-composite-v1`, run-year alignment, and all-clone non-target-income sanitization
+- the process was CPU-active but still had not written `2075.h5` after about `30` minutes
+- RSS climbed to about `18.2GB`
+- the process was terminated intentionally to avoid another local desktop memory blow-up
+
+Decision:
+
+- The PE-US integration branch is ready for remote/constrained sentinel execution.
+- The local desktop is not a safe gate for full late-year H5 generation under the integrated Trustees path.
+- Next gate should run the bounded sentinel matrix remotely or with an explicit memory cap before any full static run.
