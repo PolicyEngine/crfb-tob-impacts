@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="/Users/maxghenis"
 CRFB_REPO="$ROOT/PolicyEngine/crfb-tob-impacts"
 USDATA_REPO="$ROOT/.codex-worktrees/us-data-clean-rerun"
-US_REPO="$ROOT/.codex-worktrees/us-clean-rerun"
+US_REPO="$ROOT/.codex-worktrees/us-crfb-integration"
 UV_BIN="$ROOT/.local/bin/uv"
 
 LONG_TERM_DIR="$USDATA_REPO/policyengine_us_data/datasets/cps/long_term"
