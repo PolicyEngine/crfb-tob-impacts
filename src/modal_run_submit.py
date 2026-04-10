@@ -38,7 +38,7 @@ from tax_assumption_loader import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = REPO_ROOT / "results" / "modal_runs"
 DEFAULT_REQUIRED_PROFILE = "ss-payroll-tob"
-DEFAULT_REQUIRED_TARGET_SOURCE = "oact_2025_08_05_provisional"
+DEFAULT_REQUIRED_TARGET_SOURCE = "trustees_2025_current_law"
 DEFAULT_REQUIRED_TAX_ASSUMPTION = "trustees-core-thresholds-v1"
 DEFAULT_MIN_CALIBRATION_QUALITY = "exact"
 DEPLOYED_MODAL_APP_NAME = "crfb-ss-analysis"

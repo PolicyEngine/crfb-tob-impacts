@@ -28,7 +28,7 @@ if str(policyengine_us_path) not in sys.path:
 DEFAULT_TAX_ASSUMPTION_FACTORY = "create_wage_indexed_core_thresholds_reform"
 DEFAULT_BASELINE_CACHE_DIR = REPO_ROOT / ".cache" / "saved_h5_baselines"
 DEFAULT_REQUIRED_PROFILE = "ss-payroll-tob"
-DEFAULT_REQUIRED_TARGET_SOURCE = "oact_2025_08_05_provisional"
+DEFAULT_REQUIRED_TARGET_SOURCE = "trustees_2025_current_law"
 DEFAULT_REQUIRED_TAX_ASSUMPTION = "trustees-core-thresholds-v1"
 DEFAULT_MIN_CALIBRATION_QUALITY = "aggregate"
 

@@ -89,7 +89,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--required-target-source",
-        default="oact_2025_08_05_provisional",
+        default="trustees_2025_current_law",
         help="Expected target source name recorded in the weights dataset metadata.",
     )
     parser.add_argument(

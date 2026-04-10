@@ -208,7 +208,7 @@ Interpretation:
 
 Remaining full-run blockers:
 
-- CRFB full-run wrapper still uses `oact_2025_08_05_provisional`; it must use `trustees_2025_current_law`.
+- CRFB full-run wrapper/defaults have been switched from `oact_2025_08_05_provisional` to `trustees_2025_current_law`, but the new wrapper path still needs a bounded sentinel matrix before use.
 - The dirty local tolerance relaxation in `policyengine-us-data` must not be used.
 - The production `policyengine-us` checkout must include the indefinite `non_refundable_ss_credit`, 2100-safe senior deduction endpoint, and Trustees economic-uprating path.
 - Dynamic remains separately blocked until the active `policyengine-us` checkout implements age-based labor-supply elasticities.
