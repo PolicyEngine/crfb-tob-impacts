@@ -240,6 +240,7 @@ Important merge finding:
 - The initial `-X theirs` merge of `upstream/uprating` partially spliced the older proportional TOB allocation code into current main's newer double-branch TOB files.
 - That created undefined names in `tob_revenue_oasdi` and `tob_revenue_medicare_hi`.
 - The integration branch now restores current main's double-branch formulas and updates the branch-added unit tests to match current behavior.
+- A second dynamic-only seam was fixed: `labor_supply_behavioral_response` still treated `elasticities.income` as a scalar even after the age-based branch changed it into a parameter node. The guard now checks `income.all`, `income.base`, and all substitution components explicitly.
 
 Current long-run cap path from the integration checkout:
 
