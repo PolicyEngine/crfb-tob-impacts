@@ -262,3 +262,5 @@ Decision:
 - The PE-US integration branch is ready for remote/constrained sentinel execution.
 - The local desktop is not a safe gate for full late-year H5 generation under the integrated Trustees path.
 - Next gate should run the bounded sentinel matrix remotely or with an explicit memory cap before any full static run.
+- The full-run wrapper now points at a clean `policyengine-us-data` worktree (`/Users/maxghenis/.codex-worktrees/us-data-crfb-integration`) rather than the dirty local probe checkout.
+- Late-year collection now requires `2075-2078` to be `exact`; later tail years may still be collected if `exact` or `approximate`.

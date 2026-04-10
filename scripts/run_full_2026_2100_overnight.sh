@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="/Users/maxghenis"
 CRFB_REPO="$ROOT/PolicyEngine/crfb-tob-impacts"
-USDATA_REPO="$ROOT/.codex-worktrees/us-data-clean-rerun"
+USDATA_REPO="$ROOT/.codex-worktrees/us-data-crfb-integration"
 US_REPO="$ROOT/.codex-worktrees/us-crfb-integration"
 UV_BIN="$ROOT/.local/bin/uv"
 
@@ -99,9 +99,13 @@ for meta_path in sorted(root.glob("*.h5.metadata.json")):
     data = json.loads(meta_path.read_text(encoding="utf-8"))
     audit = data.get("calibration_audit", {})
     quality = audit.get("calibration_quality")
-    if quality not in {"exact", "approximate"}:
+    year = int(data["year"])
+    if year in {2075, 2076, 2077, 2078}:
+        if quality != "exact":
+            continue
+    elif quality not in {"exact", "approximate"}:
         continue
-    years.append(str(int(data["year"])))
+    years.append(str(year))
 print(",".join(years))
 PY
 }
