@@ -10,6 +10,7 @@ We now have two concrete findings for `2075+`:
 
 1. The currently published late-band projected datasets rely on experimental donor-backed composite support augmentation.
 2. The non-experimental unaugmented `ss-payroll-tob` path fails the publishability contract at `2075`.
+3. The cleaner non-donor augmentation profiles tried so far also fail the same publishability contract by a wide margin.
 
 That means there is not yet a clean production-safe late-tail method for standard `option1-12` results beyond `2074`.
 
@@ -56,6 +57,39 @@ Important nuance:
 
 So the plain non-experimental route is also not good enough for `2075`.
 
+## Candidate Augmentation Probes
+
+I also ran one-year `2075` publishability probes for the cleaner support-augmentation profiles currently exposed by the long-run tooling:
+
+- `late-clone-v1`
+- `late-clone-v2`
+- `late-composite-v1`
+- `late-composite-v2`
+- `late-synthetic-grid-v1`
+- `late-synthetic-grid-v2`
+- `late-mixed-household-v1`
+
+Result:
+
+- none of those profiles came close to the current `ss-payroll-tob` support thresholds
+- the best of the set, `late-composite-v1`, still only reached `effective_sample_size = 35.53`
+- its `top_10_weight_share_pct = 45.74%`, still far above the allowed `25%`
+
+So the current clean profile family does not rescue `2075+`.
+
+By contrast, the currently published donor-backed composite `2075` dataset does solve the support-concentration side of the contract:
+
+- `effective_sample_size = 161.46`
+- `top_10_weight_share_pct = 16.41%`
+- `top_100_weight_share_pct = 58.23%`
+
+That isolates the remaining objection more precisely:
+
+- the donor-composite path is the only method we have seen that produces publishable support concentration for `2075`
+- but it is still experimental and appears to contaminate late-year capital-income inputs through clone inheritance
+
+So the late-tail problem is no longer "find any method that calibrates." It is "harden the donor-composite method enough that it is defensible."
+
 ## Current Decision Boundary
 
 As of this note, the standard package has two options:
@@ -72,4 +106,6 @@ What should not happen:
 
 The next work item is not a full rerun. It is method selection for `2075+`.
 
-That means evaluating candidate late-tail support approaches against the existing publishability contract, then explicitly choosing one before any new full standard static rerun.
+The cleaner published support profiles have now been checked and do not pass.
+
+So the next concrete work item is to harden and test the donor-composite method itself, especially by neutralizing non-target capital-income inheritance on clone rows, before any new full standard static rerun.
