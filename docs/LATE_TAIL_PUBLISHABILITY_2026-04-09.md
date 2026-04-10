@@ -215,40 +215,31 @@ Remaining full-run blockers:
 
 ## 2026-04-10 PE-US Integration Update
 
-A clean `policyengine-us` integration worktree was created at `/Users/maxghenis/.codex-worktrees/us-crfb-integration` on branch `codex/crfb-integrated-assumptions`.
+A clean `policyengine-us` integration worktree now lives at `/Users/maxghenis/.codex-worktrees/us-crfb-integration` on branch `codex/crfb-minimal-assumptions`.
 
-Integrated assumptions:
+Integrated differences from current `upstream/main`:
 
 - current `upstream/main` / package baseline at `policyengine-us==1.634.4`
-- Trustees uprating branch (`upstream/uprating`) merged for long-run SSA NAWI and SSA uprating inputs
-- indefinite CRFB `non_refundable_ss_credit` via commit `eb924e3d6d`
-- CRFB senior deduction extension made indefinite beyond `2099`
-- age-based labor-supply elasticity branch merged for dynamic runs
+- Trustees long-run uprating inputs and defaults, with main's existing statutory Social Security taxable-maximum helper preserved
+- CRFB `non_refundable_ss_credit` and senior-deduction extension stop dates removed because CRFB confirmed the policies are indefinite within and beyond the `2100` modeling window
+- age-based labor-supply elasticity parameters and formula handling for dynamic runs
+- no TOB revenue formula/test rewrites, SPM poverty tests, taxable-tier tests, or local taxable-maximum code remain on the cleaned branch
 
 Validation:
 
-- `uv run ruff check ...`: passed for touched PE-US reform, TOB-revenue, and labor-supply files
-- PE-US Python unit subset passed: `27 passed`
+- `uv run ruff check ...`: passed for touched PE-US Python files
+- Focused PE-US Python tests passed: `7 passed`
+- Policy YAML tests passed: `24 passed`
 - Lightweight integration smoke passed:
-  - `ss_credit` remains in non-refundable credits in `2100`
-  - `additional_senior_deduction` remains in both itemizing and non-itemizing deduction lists in `2100`
-  - SSA long-run inputs are active at `2100`
-  - age-based income and substitution elasticities double at age `65`
+  - statutory Social Security taxable maximum remains delegated to current main and evaluates to `$254,400` in `2035`, `$1,035,600` in `2075`, and `$2,483,100` in `2100`
+  - SSA long-run inputs are active at `2100`: `ssa.uprating=592.78`, `ssa.nawi=1,033,686.26`
+  - age-based income and substitution elasticity multipliers are both `2.0` in `2100`
 
-Important merge finding:
+Important cleanup finding:
 
-- The initial `-X theirs` merge of `upstream/uprating` partially spliced the older proportional TOB allocation code into current main's newer double-branch TOB files.
-- That created undefined names in `tob_revenue_oasdi` and `tob_revenue_medicare_hi`.
-- The integration branch now restores current main's double-branch formulas and updates the branch-added unit tests to match current behavior.
-- A second dynamic-only seam was fixed: `labor_supply_behavioral_response` still treated `elasticities.income` as a scalar even after the age-based branch changed it into a parameter node. The guard now checks `income.all`, `income.base`, and all substitution components explicitly.
-
-Current long-run cap path from the integration checkout:
-
-- `2035=$254,400`
-- `2075=$1,030,411`
-- `2100=$2,469,329`
-
-This differs from the prior `policyengine-us==1.634.4` package-only sentinel cap path because the integration checkout now includes Trustees NAWI/uprating inputs from the unmerged uprating branch.
+- The earlier `codex/crfb-integrated-assumptions` branch carried stale merge artifacts from `upstream/uprating`, including duplicated upstream-main TOB/test changes and a misleading local taxable-maximum patch.
+- The cleaned `codex/crfb-minimal-assumptions` branch was rebuilt from current `upstream/main`; the taxable-maximum logic is not a CRFB reform and remains current-main behavior.
+- The remaining dynamic-only seam is intentional: `labor_supply_behavioral_response` must treat `elasticities.income` as a parameter node after the age-based elasticity split, so the zero-response guard checks `income.all`, `income.base`, and all substitution components explicitly.
 
 Attempted local 2075 H5 sentinel:
 
