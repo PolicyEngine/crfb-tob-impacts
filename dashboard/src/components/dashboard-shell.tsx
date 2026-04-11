@@ -16,7 +16,7 @@ import {
   YAxis,
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header, logos } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
@@ -247,6 +247,11 @@ export function DashboardShell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isEmbedded = useMemo(
+    () => typeof window !== "undefined" && window.self !== window.top,
+    [],
+  );
+
   useEffect(() => {
     let active = true;
 
@@ -334,12 +339,14 @@ export function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
-      <Header
-        variant="dark"
-        logo={<img src={logos.whiteWordmark} alt="PolicyEngine" className="h-5" />}
-      >
-        <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
-      </Header>
+      {!isEmbedded && (
+        <Header
+          variant="dark"
+          logo={<img src={logos.whiteWordmark} alt="PolicyEngine" className="h-5" />}
+        >
+          <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
+        </Header>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
