@@ -1,0 +1,82 @@
+# Policy design
+
+The current reform menu spans three broad families: direct benefit-taxation
+changes, senior-relief redesigns, and employer-payroll-tax swaps. The standard
+series shares a common current-law baseline; the two special-case scenarios do
+not.
+
+## Standard options `1-12`
+
+### Direct taxability changes
+
+- **`option1`**: full repeal of Social Security benefit taxation beginning in
+  `2026`.
+- **`option2`**: tax 85 percent of all Social Security benefits by eliminating
+  the current-law thresholds and applying the top statutory inclusion rate to
+  all recipients.
+- **`option8`**: tax 100 percent of benefits.
+- **`option9`**: tax 90 percent of benefits.
+- **`option10`**: tax 95 percent of benefits.
+
+These options primarily change the size of the taxable-benefit base while
+preserving the current-law trust-fund accounting framework.
+
+### Senior-deduction and credit redesigns
+
+- **`option3`**: `option2` plus permanent extension of the temporary bonus
+  senior deduction.
+- **`option4`**: `option2`, repeal of the bonus senior deduction, and a `$500`
+  nonrefundable credit tied to Social Security tax liability.
+- **`option7`**: eliminate the bonus senior deduction without otherwise
+  changing the Social Security taxability structure.
+- **`option11`**: `option2`, repeal of the bonus senior deduction, and a `$700`
+  nonrefundable Social Security credit with a `6%` phase-out above `$150,000`
+  for joint filers and `$75,000` for other filers.
+
+This family matters because the baseline itself changes sharply once the bonus
+senior deduction expires after `2028`, and because a flat credit is more
+progressive than a deduction whose value rises with marginal tax rate.
+
+### Employer-payroll-tax swaps
+
+- **`option5`**: eliminate Social Security benefit taxation and instead treat
+  employer payroll-tax contributions as taxable compensation.
+- **`option6`**: phase in the employer-contribution inclusion while phasing out
+  benefit taxation over time.
+- **`option12`**: an extended Roth-style swap that taxes employer payroll
+  contributions immediately but phases out the OASDI share of benefit taxation
+  first and the HI share later.
+
+These options are structurally different from pure benefit-taxation reforms
+because they change the tax base itself, shifting burden from retirees toward
+workers while preserving trust-fund accounting through explicit OASDI/HI
+allocation rules.
+
+## Special-case scenarios
+
+### `option13`: balanced-fix baseline
+
+`option13` is a stylized solvency baseline rather than a standard reform scored
+against current law. Beginning in `2035`, it combines:
+
+- a proportional Social Security benefit reduction
+- a Social Security payroll-tax increase
+- a Medicare payroll-tax increase
+
+The purpose is not to model a single enacted bill, but to define a balanced-fix
+baseline that approximately closes the long-run OASDI and HI gaps using a
+simple benefit-and-tax split.
+
+### `option14_stacked`
+
+`option14_stacked` applies a structural reform on top of the `option13`
+balanced-fix baseline. Its baseline revenue and trust-fund context therefore
+differ intentionally from the standard series. In practical terms:
+
+- `option13` reform revenue becomes the baseline revenue for `option14_stacked`
+- `option12`-style structural deltas provide the stacked reform logic
+- `2026-2034` remain placeholders because the balanced-fix baseline does not
+  begin before `2035`
+
+That difference in baseline lineage is central to interpretation and must stay
+explicit in both the paper and the dashboard.

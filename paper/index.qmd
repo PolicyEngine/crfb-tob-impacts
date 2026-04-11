@@ -1,0 +1,43 @@
+---
+title: "Social Security Taxation Reform"
+subtitle: "Draft manuscript for long-run policy analysis and impact assessment"
+author:
+  - "Max Ghenis"
+  - "Ben Ogorek"
+  - "Pavel Makarchuk"
+  - "David Trimmer"
+date: 2026-04-10
+lang: en
+abstract: |
+  This draft manuscript is the narrative companion to the interactive Social
+  Security taxation-of-benefits dashboard. It documents the full reform menu,
+  the long-run microsimulation and calibration strategy, the validation and
+  benchmark framework, and the publication architecture for the current CRFB
+  analysis package. The dashboard remains the live current-results explorer;
+  this paper is the stable long-form surface intended for citation, SSRN-style
+  circulation, and formal external reference once shared exhibits are frozen.
+keywords:
+  - Social Security
+  - Taxation of benefits
+  - Trust funds
+  - Microsimulation
+  - PolicyEngine
+  - CRFB
+---
+
+{{< include sections/01-scope.qmd >}}
+
+{{< include sections/02-policy-design.qmd >}}
+
+{{< include sections/03-methods.qmd >}}
+
+{{< include sections/04-results-and-validation.qmd >}}
+
+{{< include sections/05-results-framework.qmd >}}
+
+{{< include sections/06-publication-boundary.qmd >}}
+
+# References
+
+::: {#refs}
+:::

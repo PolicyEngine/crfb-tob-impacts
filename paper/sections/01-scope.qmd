@@ -1,0 +1,54 @@
+# Scope and framing
+
+This manuscript is the long-form publication layer for the current Social
+Security taxation-of-benefits project. It sits alongside, but is intentionally
+separate from, two other project surfaces:
+
+- the **dashboard**, which is the live current-results explorer
+- the **operational docs**, which track rerun status, reproducibility, and audit decisions
+
+The current analysis extends the original eight-option report to a broader
+fourteen-scenario package over a `2026-2100` modeling window:
+
+- standard reforms `option1` through `option12`
+- `option13`, a balanced-fix baseline beginning in `2035`
+- `option14_stacked`, which layers a structural reform on top of the balanced-fix baseline
+
+## Current-law baseline
+
+Under current law, Social Security benefits become taxable once combined income
+exceeds statutory thresholds, with up to 50 percent of benefits taxable at the
+lower tier and up to 85 percent taxable at the higher tier [@irs2024pub915].
+Revenue from this taxation is split between the Social Security OASDI trust
+funds and the Medicare Hospital Insurance trust fund [@ssa2025trustees;
+@medicare2025trustees].
+
+The baseline also reflects the temporary bonus senior deduction enacted in the
+One Big Beautiful Bill Act and its scheduled expiration after `2028`
+[@jct2025bonus]. That matters for interpretation because several reform options
+either extend, repeal, or replace that temporary senior-specific tax relief.
+
+## Research questions
+
+The paper is organized around three questions:
+
+1. How do alternative Social Security benefit-taxation reforms alter trust-fund
+   revenue, household tax burdens, and long-run fiscal outcomes?
+2. What data and validation framework are required to make `2026-2100`
+   microsimulation estimates interpretable?
+3. How should the interactive dashboard, the citable paper, and the operational
+   audit record relate to one another without drifting?
+
+## Why a separate manuscript
+
+The dashboard is optimized for exploration rather than formal citation. A
+separate manuscript is useful because it can:
+
+- preserve the source and benchmark trail from the first report
+- carry fuller methodological exposition than the live app should contain
+- support SSRN-style circulation and external citation
+- freeze narrative interpretation even when the dashboard continues to evolve
+
+This draft therefore focuses on preserving substantive coverage and source
+structure ahead of final results, while reserving numerical exhibits for the
+shared artifact pipeline that will populate the release candidate.

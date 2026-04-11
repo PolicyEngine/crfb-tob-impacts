@@ -22,3 +22,9 @@ results/
 settings.local.json
 Thumbs.db
 venv/
+.vercel
+.cache/
+.playwright-cli/
+policy-impact-dashboard/build/
+policy-impact-dashboard/node_modules/
+projected_datasets_snapshots/

@@ -1,0 +1,53 @@
+# Publication boundary and companion surfaces
+
+This repo now has three distinct publication roles.
+
+## 1. Interactive dashboard
+
+The Next.js dashboard is the current-results explorer. It is the right place
+for:
+
+- reform-level comparison
+- current static and dynamic outputs
+- special-case baseline views
+- direct access to downloadable current data products
+
+It is not the right place to carry the full narrative burden of methods,
+bibliography, and citation framing.
+
+## 2. Citable manuscript
+
+This Quarto paper is the stable narrative layer intended for:
+
+- SSRN submission
+- CRFB citation and external reference
+- methods exposition
+- benchmark framing
+- appendices and bibliography
+
+The manuscript should preserve the source trail and substantive chapter
+coverage of the first report while updating scope to the current fourteen-option
+package.
+
+## 3. Operational documentation
+
+Operational documentation answers a different question: not “what does the
+analysis conclude?” but “what exactly did we run, validate, and decide?”
+
+Those materials include:
+
+- current methodology and pipeline notes
+- reproducibility details
+- audit findings and sentinel evidence
+- delivery rules governing dashboard versus spreadsheet outputs
+
+## Citation architecture
+
+The clean long-run setup is:
+
+- cite the paper for narrative interpretation and methods
+- use the dashboard to explore current scenario outputs
+- use the operational docs to audit provenance and rerun decisions
+
+That split keeps the public-facing interpretation surface stable and citable
+without forcing the dashboard to double as the full methodological record.

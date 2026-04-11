@@ -1,0 +1,47 @@
+# Results framework
+
+The original public report devoted separate space to household impacts, revenue
+effects, and external comparisons. The updated manuscript keeps that structure,
+but it binds those sections to generated exhibits so that the final release can
+use cleaned current artifacts without rewriting the paper body.
+
+## Release logic
+
+The publication rule is:
+
+- dashboard-facing files should contain **current** rerun values only
+- comparison spreadsheets may retain legacy reference columns
+- the manuscript should cite shared generated exhibits rather than duplicate
+  results manually in prose
+
+## Core exhibit families
+
+### Overview results placeholder
+
+Draft release note: replace this placeholder with the generated fragment in
+`paper/exhibits/results-overview.md`.
+
+### Household impacts placeholder
+
+Draft release note: replace this placeholder with the generated fragment in
+`paper/exhibits/household-impacts.md`.
+
+### Revenue and trust-fund impacts placeholder
+
+Draft release note: replace this placeholder with the generated fragment in
+`paper/exhibits/revenue-impacts.md`.
+
+### Balanced-fix and stacked-scenario placeholder
+
+Draft release note: replace this placeholder with the generated fragment in
+`paper/exhibits/balanced-fix.md`.
+
+## Interpretation boundary
+
+This pre-results draft is designed so that final numerical tables and figures
+can drop into place without restructuring the manuscript. Once the rebuilt
+artifacts are frozen, the remaining work should mainly be:
+
+1. regenerate the exhibit files from shared artifacts
+2. tighten the interpretation paragraphs around those exhibits
+3. finalize the abstract and conclusion language

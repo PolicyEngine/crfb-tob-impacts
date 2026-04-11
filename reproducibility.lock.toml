@@ -1,0 +1,46 @@
+[crfb_tob_impacts]
+repo = "PolicyEngine/crfb-tob-impacts"
+branch = "option_b"
+historical_results_commit = "dedecaa08e90517875f4a4085f869aace3c308d7"
+
+[policyengine_us.historical_static]
+pr = 6750
+branch = "add/tob-revenue-variables"
+head_sha = "2a170c3fa55d808be85b8e86a55cd12c7d485f90"
+merge_sha = "38b115860dde5640e0e750bd7c7cf5a619e99b0f"
+
+[policyengine_us.historical_dynamic_overlay]
+pr = 6830
+branch = "add-labor-supply-elasticity-age-heterogeneity"
+head_sha = "1902f30eef1a9c2f3c8e3e6b3b486f97e8063cca"
+merged_upstream = false
+
+[policyengine_us.statutory_allocation_fix]
+pr = 6999
+branch = "ss_tob_fix"
+head_sha = "0ef8eebf1a34592cf61c401306e51c5a7337e721"
+merge_sha = "29e11d0a2178493c70a15c816f809efeeb38e6ad"
+
+[policyengine_us_data.long_term_projection]
+pr = 443
+branch = "long-term"
+head_sha = "232bbcab39ca45b2e146515feb88a5e25f0c8ff1"
+merge_sha = "e2137590948d21d07423b6919a55ee513e0e3159"
+
+[policyengine_us_data.h6_calibration]
+pr = 448
+branch = "documentation-nov"
+head_sha = "96c2d9f1c616bf0a96f4f0d690157845ae252bfb"
+merge_sha = "ed6a0b48e33ac5c5a740f31b26a77c1f359f6a76"
+
+[policyengine_us_data.tob_calibration]
+pr = 460
+branch = "tob-calibrate"
+head_sha = "be4027f3f18031ca7a7212aaf50f1c671b23ef06"
+merge_sha = "9649e4b053daeeb2eba9e4dfbc72a20181423a36"
+
+[policyengine_us_data.time_period_fix]
+pr = 505
+branch = "fix-stale-calibration-targets-503"
+head_sha = "9a7a81be44cd6f8f6c27a0ff9c14ebc4de483518"
+merge_sha = "79c36cda160569ec7319bc71386ebfc0cbba9281"

@@ -12,12 +12,70 @@ Usage:
 """
 
 import os
+import json
 import modal
 import pandas as pd
+import numpy as np
 from pathlib import Path
+from datetime import datetime
 
 # Get the project root (parent of batch/)
 PROJECT_ROOT = Path(__file__).parent.parent
+CONTAINER_ROOT = Path("/app")
+
+
+def runtime_path(relative_name: str) -> Path:
+    """Prefer the container mount, but fall back to the local repo when available."""
+    container_path = CONTAINER_ROOT / relative_name
+    if container_path.exists():
+        return container_path
+    return PROJECT_ROOT / relative_name
+
+
+def resolve_local_env_path(env_name: str) -> Path | None:
+    raw = os.environ.get(env_name)
+    if not raw:
+        return None
+    path = Path(raw).expanduser().resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"{env_name} does not exist: {path}")
+    return path
+
+
+DATA_DIR = runtime_path("data")
+SRC_DIR = runtime_path("src")
+CONTAINER_SNAPSHOT_DIR = CONTAINER_ROOT / "projected_datasets_snapshot"
+LOCAL_PROJECTED_DATASETS_SNAPSHOT = resolve_local_env_path(
+    "CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH"
+)
+
+
+def results_root(output_prefix: str = "") -> Path:
+    prefix = output_prefix.strip("/")
+    root = Path("/results")
+    if prefix:
+        root = root / prefix
+    return root
+
+
+def configure_runtime_snapshot_env() -> None:
+    """Point runtime dataset resolution at the mounted exact snapshot when present."""
+    if not CONTAINER_SNAPSHOT_DIR.exists():
+        return
+
+    snapshot_path = str(CONTAINER_SNAPSHOT_DIR)
+    os.environ.setdefault("CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH", snapshot_path)
+    os.environ.setdefault("CRFB_PROJECTED_DATASETS_PATH", snapshot_path)
+
+
+def default_output_prefix() -> str:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"special_case_reruns/option13-14-{timestamp}"
+
+
+def default_submission_manifest_path(output_prefix: str) -> Path:
+    slug = output_prefix.strip("/").replace("/", "__")
+    return PROJECT_ROOT / "results" / "special_case_submissions" / f"{slug}.json"
 
 app = modal.App("option13-test")
 
@@ -41,11 +99,17 @@ image = (
     # Copy local policyengine-us and install (copy=True allows run_commands after)
     .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
     .run_commands("pip install -e /app/policyengine-us")
-    # Copy data directory for HI expenditures CSV
-    .add_local_dir(PROJECT_ROOT / "data", "/app/data")
-    # Copy src directory for reforms.py (Option 12 dict)
-    .add_local_dir(PROJECT_ROOT / "src", "/app/src")
+    # Copy supporting project files into the image so later image steps remain valid.
+    .add_local_dir(DATA_DIR, "/app/data", copy=True)
+    .add_local_dir(SRC_DIR, "/app/src", copy=True)
 )
+
+if LOCAL_PROJECTED_DATASETS_SNAPSHOT is not None:
+    image = image.add_local_dir(
+        LOCAL_PROJECTED_DATASETS_SNAPSHOT,
+        str(CONTAINER_SNAPSHOT_DIR),
+        copy=True,
+    )
 
 # Two-stage approach for "traditional fix" (no employer tax reform):
 # Stage 1: Apply benefit cuts only, measure remaining gaps
@@ -61,17 +125,36 @@ def get_hi_data():
     if HI_DATA is not None:
         return HI_DATA
 
-    import os
-
     # In Modal container, data is at /app/data/
-    paths = ["/app/data/hi_expenditures_tr2025.csv", "data/hi_expenditures_tr2025.csv"]
+    paths = [
+        str(DATA_DIR / "hi_expenditures_tr2025.csv"),
+        "/app/data/hi_expenditures_tr2025.csv",
+        "data/hi_expenditures_tr2025.csv",
+    ]
     for path in paths:
         if os.path.exists(path):
             df = pd.read_csv(path)
+            if 2100 not in set(df["year"].astype(int)):
+                tail = df[df["year"].between(2090, 2099)].copy()
+                if len(tail) != 10:
+                    raise ValueError(
+                        "Expected 2090-2099 HI data to extrapolate 2100."
+                    )
+
+                extrapolated = {"year": 2100}
+                years = tail["year"].to_numpy(dtype=float)
+                for column in ["cost_rate", "hi_taxable_payroll", "hi_expenditures"]:
+                    values = tail[column].to_numpy(dtype=float)
+                    slope, intercept = np.polyfit(years, values, 1)
+                    extrapolated[column] = float(slope * 2100 + intercept)
+
+                df = pd.concat([df, pd.DataFrame([extrapolated])], ignore_index=True)
+
             HI_DATA = {
                 int(row["year"]): {
                     "hi_taxable_payroll": row["hi_taxable_payroll"],
                     "hi_expenditures": row["hi_expenditures"],
+                    "cost_rate": row["cost_rate"],
                 }
                 for _, row in df.iterrows()
             }
@@ -88,7 +171,10 @@ def get_hi_data():
     volumes={"/results": results_volume},
 )
 def compute_option13_and_14_year(
-    year: int, skip_option13: bool = False, skip_option14: bool = False
+    year: int,
+    skip_option13: bool = False,
+    skip_option14: bool = False,
+    output_prefix: str = "",
 ) -> dict:
     """Compute Option 13 (Balanced Fix) and/or Option 14 (Option 12 vs Balanced Fix) for a single year.
 
@@ -96,6 +182,7 @@ def compute_option13_and_14_year(
         year: Year to compute
         skip_option13: If True, skip Option 13 save (still computes baseline for Option 14)
         skip_option14: If True, skip Option 14 computation
+        output_prefix: Results subdirectory under the shared Modal volume.
 
     Returns:
         Dict with 'option13' and/or 'option14' results (only keys for computed options)
@@ -105,8 +192,10 @@ def compute_option13_and_14_year(
     from policyengine_us import Microsimulation
     from policyengine_core.reforms import Reform
 
+    configure_runtime_snapshot_env()
+
     # Add src to path for imports
-    sys.path.insert(0, "/app/src")
+    sys.path.insert(0, str(SRC_DIR))
     from reforms import get_option12_dict
     from runtime_config import dataset_path
 
@@ -396,9 +485,8 @@ def compute_option13_and_14_year(
     )
     print(f"  Rate increase revenue: ${total_rate_increase_revenue / 1e9:.1f}B")
 
-    import os
-
     results = {}
+    output_root = results_root(output_prefix)
 
     # Option 13 result
     if not skip_option13:
@@ -438,9 +526,10 @@ def compute_option13_and_14_year(
         }
 
         # Save Option 13 result
-        os.makedirs("/results/option13", exist_ok=True)
+        option13_dir = output_root / "option13"
+        option13_dir.mkdir(parents=True, exist_ok=True)
         df = pd.DataFrame([option13_result])
-        df.to_csv(f"/results/option13/{year}_static_results.csv", index=False)
+        df.to_csv(option13_dir / f"{year}_static_results.csv", index=False)
         results_volume.commit()
         results["option13"] = option13_result
 
@@ -530,9 +619,10 @@ def compute_option13_and_14_year(
         }
 
         # Save Option 14 result
-        os.makedirs("/results/option14", exist_ok=True)
+        option14_dir = output_root / "option14"
+        option14_dir.mkdir(parents=True, exist_ok=True)
         df = pd.DataFrame([option14_result])
-        df.to_csv(f"/results/option14/{year}_static_results.csv", index=False)
+        df.to_csv(option14_dir / f"{year}_static_results.csv", index=False)
         results_volume.commit()
         results["option14"] = option14_result
 
@@ -548,6 +638,9 @@ def main(
     years: str = "2035,2036,2037",
     option13_only: bool = False,
     option14_only: bool = False,
+    output_prefix: str = "",
+    submit_only: bool = False,
+    submission_manifest: str = "",
 ):
     """Run Option 13 and/or Option 14 for specified years.
 
@@ -555,6 +648,9 @@ def main(
         years: Comma-separated years to compute
         option13_only: Only compute Option 13 (balanced fix baseline)
         option14_only: Only compute Option 14 (requires Option 13 already computed)
+        output_prefix: Optional results subdirectory within the Modal volume.
+        submit_only: Submit remote year jobs and exit without waiting for completion.
+        submission_manifest: Local JSON file to store submitted call metadata.
     """
     year_list = [int(y.strip()) for y in years.split(",")]
 
@@ -577,7 +673,56 @@ def main(
     option14_results = []
 
     # Pass flags to the compute function
-    args = [(year, not run_option13, not run_option14) for year in year_list]
+    if not output_prefix:
+        output_prefix = os.environ.get("CRFB_SPECIAL_CASE_OUTPUT_PREFIX", "")
+    if not output_prefix:
+        output_prefix = default_output_prefix()
+
+    args = [
+        (year, not run_option13, not run_option14, output_prefix)
+        for year in year_list
+    ]
+
+    if submit_only:
+        manifest_path = (
+            Path(submission_manifest)
+            if submission_manifest
+            else default_submission_manifest_path(output_prefix)
+        )
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+
+        submitted_calls = []
+        for year, skip_option13, skip_option14, prefix in args:
+            call = compute_option13_and_14_year.spawn(
+                year, skip_option13, skip_option14, prefix
+            )
+            submitted_calls.append(
+                {
+                    "year": year,
+                    "skip_option13": skip_option13,
+                    "skip_option14": skip_option14,
+                    "output_prefix": prefix,
+                    "call_id": call.object_id,
+                    "dashboard_url": call.get_dashboard_url(),
+                }
+            )
+            print(
+                f"Submitted year {year}: {call.object_id} -> {call.get_dashboard_url()}"
+            )
+
+        payload = {
+            "submitted_at": datetime.now().isoformat(),
+            "years": year_list,
+            "run_option13": run_option13,
+            "run_option14": run_option14,
+            "output_prefix": output_prefix,
+            "calls": submitted_calls,
+        }
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n")
+        print(f"\nSubmitted {len(submitted_calls)} year jobs.")
+        print(f"Volume output root: /results/{output_prefix}/")
+        print(f"Submission manifest: {manifest_path}")
+        return
 
     for result in compute_option13_and_14_year.starmap(args):
         if result.get("option13"):

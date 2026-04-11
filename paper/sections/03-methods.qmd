@@ -1,0 +1,117 @@
+# Data and methods
+
+## Microdata foundation
+
+The analysis uses PolicyEngine US microsimulation with long-run projected
+microdata derived from the Enhanced CPS. The Enhanced CPS begins with the CPS
+ASEC, constructs tax units, imputes missing tax-relevant fields, and reweights
+the microdata to administrative targets [@peusdata].
+
+## Long-run projection strategy
+
+The long-run analysis uses a two-stage process:
+
+1. **Economic uprating** projects incomes, benefits, and tax parameters into a
+   target year using Trustees-style macroeconomic assumptions.
+2. **Demographic and fiscal calibration** adjusts household weights so the
+   projected dataset matches official age, benefit, payroll, and
+   taxation-of-benefits benchmarks.
+
+This architecture is designed to preserve household-level tax logic while still
+matching long-run aggregate targets from official sources.
+
+## Calibration targets
+
+The clean long-run rerun calibrates to official sources for:
+
+- single-year age population counts [@ssa2024population]
+- OASDI benefit totals [@ssa2025trustees]
+- Social Security taxable payroll [@ssa2025trustees]
+- Medicare fiscal context and Hospital Insurance targets [@medicare2025trustees]
+
+The standard contract uses exact yearly projected datasets rather than a
+stitched or donor-augmented fallback. That exactness requirement is part of the
+publication standard for the delivered series, not a secondary implementation
+detail.
+
+## Trust-fund accounting
+
+The analysis tracks both total revenue impact and its allocation across OASDI
+and HI. Under current law, the taxation of Social Security benefits contributes
+to both trust-fund systems, so reforms can change:
+
+- total federal revenue
+- OASDI trust-fund revenue
+- HI trust-fund revenue
+- the combined taxation-of-benefits base used to support those allocations
+
+That split is essential for interpreting reforms that may look similar in
+total-revenue space but differ in which trust fund gains or loses revenue.
+
+## Current rerun contract
+
+For the current clean standard-series rebuild, the intended delivery contract is:
+
+- target source: `trustees_2025_current_law`
+- calibration profile: `ss-payroll-tob`
+- tax assumption: `trustees-core-thresholds-v1`
+- exact-calibration-only acceptance for delivered years
+- pinned local worktrees for `policyengine-us` and `policyengine-us-data`
+- no donor-backed support augmentation in the production delivery path
+
+This contract replaces the mixed-lineage historical runs that produced the
+legacy stitched standard file.
+
+## Static and dynamic scoring
+
+The **static** series isolates the mechanical tax and trust-fund effects of
+policy changes. The **dynamic** series extends the same baseline lineage by
+layering in labor-supply responses.
+
+For the current project, the intended dynamic differences from plain upstream
+`policyengine-us` main are:
+
+- Trustees long-run uprating behavior
+- age-based labor-supply elasticities for behavioral-response scoring
+
+That means the dynamic series is not an independent model family. It should be
+interpreted as the same long-run baseline contract plus behavioral response.
+
+## Special-case assembly
+
+`option13` and `option14_stacked` are assembled through a special-case path
+rather than the standard `year x scenario` rescoring path:
+
+- `option13` begins in `2035`, so `2026-2034` are current-law placeholders
+- `option13` uses balanced-fix raw outputs plus a corrected `2100` endpoint treatment
+- `option14_stacked` chains the structural reform on top of the `option13` baseline
+
+That separation is an intentional part of the methodology, not an
+implementation accident.
+
+## Validation ladder
+
+Before the standard series is treated as publishable, it must pass a sequence
+of checks:
+
+1. dataset metadata validation against the intended target source, calibration
+   profile, and tax-assumption module
+2. exact-calibration coverage checks for delivered years
+3. sentinel rescoring in representative early, middle, and late years
+4. comparison against known legacy anomalies to confirm they do not reappear
+5. special-case verification for `option13` and `option14_stacked`
+
+The audit record for those checks lives outside this manuscript in the
+operational findings note, but the paper treats that validation ladder as part
+of the substantive methodology rather than as an operational afterthought.
+
+## Limitations
+
+Even after the rebuild is clean, several limits remain important:
+
+- survey-based microsimulation still carries sampling and imputation error
+- Medicare expenditure modeling partly relies on Trustees-derived external
+  inputs rather than full microsimulation outgo
+- dynamic estimates are sensitive to the labor-supply elasticity specification
+- special-case balanced-fix endpoints, especially at `2100`, require dedicated
+  endpoint treatment rather than naive extrapolation
