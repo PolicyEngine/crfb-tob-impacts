@@ -64,3 +64,8 @@ That separation only works if each surface is honest about result status.
   the full validation ladder.
 - Operational notes should carry the detailed rerun state, launch identifiers,
   and recovery details needed to reconcile those two publication surfaces.
+
+For the current static package, that release discipline has been satisfied: the
+standard panel was rebuilt on the hardened exact-only path, and the special-case
+panel was recovered as a complete `2035-2100` artifact set before the delivery
+bundle was rebuilt.

@@ -31,19 +31,30 @@
   - `ss_rate_increase_pp = 2.395638807222844`
   - `hi_rate_increase_pp = -0.327139935898022`
 
-### Full rerun launch status
+### Full rerun recovery status
 
 - Detached full run app:
   `ap-tIe4zAyO65hgaVSlEqDxZ8`
-- This is the currently active full `2035-2100` rerun to monitor.
+- The app eventually stopped after writing recoverable outputs to the Modal
+  volume.
 - Submission-manifest run:
   `results/special_case_submissions/option13-14-exact-2035-2100-20260411.json`
   - contains 66 spawned call IDs under output prefix
     `special_case_reruns/option13-14-exact-2035-2100-20260411`
   - immediate `FunctionCall.from_id(...).get()` checks returned terminated/remote-error status, so this spawn-only path should not be treated as the authoritative live run until proven otherwise
+- Recovered volume output:
+  `results/recovered_special_case_runs/special_case_reruns__option13-14-exact-2035-2100-20260411`
+  - `option13`: 66 year files recovered for `2035-2100`
+  - `option14`: 66 year files recovered for `2035-2100`
+  - recovery required a fix in `src/modal_run_recover.py` because `modal volume get`
+    flattened the requested prefix one level deeper than the helper assumed
+  - some container logs ended with `Runner has been shutting down for too long`,
+    but the recovered artifact set is complete, so the rerun should be treated as
+    successful at the publication-artifact level
 
 ### Interpretation
 
 - Standard static `option1-12` remain the clean finished static series.
-- `option13/14` are now smoke-validated on the clean lineage.
-- The only remaining job is completion and recovery of the live full rerun.
+- `option13/14` are now fully rerun and recovered on the clean lineage.
+- The static 14-option delivery can now be treated as one unified Trustees-lineage
+  package rather than a clean standard block plus patched special-case endpoints.

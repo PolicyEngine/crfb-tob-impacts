@@ -94,8 +94,8 @@ implementation accident.
 The special-case correction matters substantively, not just operationally. The
 legacy provisional endpoint implied a negative HI payroll-tax rate at `2100`,
 which is not used in the clean publication path. The corrected special-case
-contract smoke-tests `2035` and `2100` directly before treating the full
-`2035-2100` panel as publishable.
+contract first smoke-tests `2035` and `2100`, then reruns and recovers the full
+`2035-2100` panel from the same clean Trustees-lineage setup before publication.
 
 ## Validation ladder
 
@@ -118,8 +118,9 @@ In the current workflow, that final special-case step has two layers:
 - smoke validation of key endpoint years such as `2035` and `2100`
 - full-panel rerun and recovery of the entire `2035-2100` special-case series
 
-The paper should only treat special-case point estimates as final after both
-layers have completed.
+The current static delivery satisfies both layers, so the manuscript can treat
+the recovered `option13` and `option14_stacked` point estimates as final static
+artifacts rather than provisional endpoint patches.
 
 ## Limitations
 

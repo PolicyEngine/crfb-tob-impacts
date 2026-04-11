@@ -80,3 +80,39 @@ def test_download_volume_prefix_returns_output_dir_when_manifest_missing(
 
     assert recovered == output_dir
     assert (output_dir / "option13").exists()
+
+
+def test_download_volume_prefix_handles_flattened_modal_get_layout(
+    tmp_path: Path, monkeypatch
+):
+    import modal_run_recover as module
+
+    prefix = "special_case_reruns/demo"
+    temp_root = tmp_path / "temp"
+    output_dir = tmp_path / "recovered"
+
+    class DummyTempDir:
+        def __enter__(self) -> str:
+            temp_root.mkdir(parents=True, exist_ok=True)
+            return str(temp_root)
+
+        def __exit__(self, exc_type, exc, tb) -> bool:
+            return False
+
+    def fake_modal_volume(*args: str) -> subprocess.CompletedProcess[str]:
+        if args[0] == "ls":
+            return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+        if args[0] == "get":
+            recovered_root = temp_root / "demo"
+            recovered_root.mkdir(parents=True, exist_ok=True)
+            (recovered_root / "manifest.json").write_text("{}", encoding="utf-8")
+            return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+        raise AssertionError(f"Unexpected modal_volume args: {args}")
+
+    monkeypatch.setattr(module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir())
+    monkeypatch.setattr(module, "modal_volume", fake_modal_volume)
+
+    recovered = module.download_volume_prefix(prefix, output_dir)
+
+    assert recovered == output_dir / "manifest.json"
+    assert (output_dir / "manifest.json").exists()

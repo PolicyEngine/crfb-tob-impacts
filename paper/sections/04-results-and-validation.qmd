@@ -29,8 +29,8 @@ validation tiers:
   rebuilt from the clean exact Trustees contract and cleared the known
   late-horizon anomaly checks
 - the special-case series (`option13` and `option14_stacked`), which has
-  already cleared smoke validation on `2035` and `2100` but remains subject to
-  full-panel rerun completion before the paper should treat every year as final
+  now cleared both endpoint smoke validation and recovered full-panel rerun
+  checks on `2035-2100`
 
 ## External benchmark framework
 
@@ -65,7 +65,7 @@ files may contain placeholders; before release they should be overwritten by
 generated content from the same checked artifacts that feed the dashboard and
 comparison spreadsheet.
 
-For the special-case panel, that artifact contract also includes run status. If
-the full `2035-2100` clean rerun is still in progress, the paper should cite
-only smoke-validated endpoint evidence and avoid presenting the unfinished
-special-case panel as fully settled.
+For the special-case panel, that artifact contract also includes run recovery.
+The release package should only cite the special-case panel as final when the
+full `2035-2100` rerun has been recovered as year-level artifacts. That
+condition is satisfied for the current static release.

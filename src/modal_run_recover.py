@@ -31,6 +31,24 @@ def run_root(run_id: str) -> str:
     return run_id.strip("/")
 
 
+def _resolve_recovered_root(temp_path: Path, prefix: str) -> Path:
+    candidates = [
+        temp_path / prefix,
+        temp_path / Path(prefix).name,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    direct_children = [path for path in temp_path.iterdir() if path.exists()]
+    if len(direct_children) == 1:
+        return direct_children[0]
+
+    raise FileNotFoundError(
+        f"Recovered root missing after modal volume get for prefix {prefix}: {temp_path}"
+    )
+
+
 def download_volume_prefix(prefix: str, output_dir: Path) -> Path:
     prefix = prefix.strip("/")
     output_dir = output_dir.resolve()
@@ -56,11 +74,7 @@ def download_volume_prefix(prefix: str, output_dir: Path) -> Path:
                 f"modal volume get failed for {prefix}: {get_result.stderr.strip()}"
             )
 
-        recovered_root = temp_path / prefix
-        if not recovered_root.exists():
-            raise FileNotFoundError(
-                f"Recovered root missing after modal volume get: {recovered_root}"
-            )
+        recovered_root = _resolve_recovered_root(temp_path, prefix)
 
         shutil.copytree(recovered_root, output_dir, dirs_exist_ok=True)
 

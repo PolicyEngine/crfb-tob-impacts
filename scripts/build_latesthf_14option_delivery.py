@@ -20,10 +20,15 @@ DASHBOARD_ALL_STATIC_WITH_PRIOR_XLSX = (
 )
 DASHBOARD_OPTION13 = REPO / "dashboard/public/data/option13_balanced_fix.csv"
 STANDARD_RESULTS = (
-    RESULTS / "oact_modal_2026_2100_all_reforms_small_deployed_latesthf_stitched_billions.csv"
+    RESULTS / "trustees_modal_2026_2100_all_reforms_small_deployed_latesthf_stitched_billions.csv"
 )
-DEFAULT_OPTION13_DIR = RESULTS / "option13_volume_dir/option13"
-DEFAULT_OPTION14_DIR = RESULTS / "option14_volume_dir/option14"
+LATEST_SPECIAL_CASE_ROOT = (
+    RESULTS
+    / "recovered_special_case_runs"
+    / "special_case_reruns__option13-14-exact-2035-2100-20260411"
+)
+DEFAULT_OPTION13_DIR = LATEST_SPECIAL_CASE_ROOT / "option13"
+DEFAULT_OPTION14_DIR = LATEST_SPECIAL_CASE_ROOT / "option14"
 DEFAULT_SPECIAL_START_YEAR = 2035
 YEARS = list(range(2026, 2101))
 
