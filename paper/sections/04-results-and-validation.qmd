@@ -17,10 +17,9 @@ The internal validation framework therefore tests:
 - special-case consistency for `option13` and `option14_stacked`
 - absence of known legacy anomalies in rebuilt standard outputs
 
-### Sentinel evidence placeholder
+### Sentinel evidence
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/validation-sentinels.md`.
+{{< include exhibits/validation-sentinels.md >}}
 
 As of the current rebuild state, the manuscript should distinguish between two
 validation tiers:
@@ -51,10 +50,9 @@ different budget windows, scoring conventions, and baseline assumptions. The
 paper therefore treats external comparisons as orientation rather than as a
 point-estimate horse race.
 
-### External comparison placeholder
+### External comparison
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/external-benchmarks.md`.
+{{< include exhibits/external-benchmarks.md >}}
 
 ## Artifact contract
 

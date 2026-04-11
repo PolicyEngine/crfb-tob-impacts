@@ -16,32 +16,27 @@ The publication rule is:
 
 ## Core exhibit families
 
-### Overview results placeholder
+### Overview results
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/results-overview.md`.
+{{< include exhibits/results-overview.md >}}
 
-### Household impacts placeholder
+### Household impacts
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/household-impacts.md`.
+{{< include exhibits/household-impacts.md >}}
 
-### Revenue and trust-fund impacts placeholder
+### Revenue and trust-fund impacts
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/revenue-impacts.md`.
+{{< include exhibits/revenue-impacts.md >}}
 
-### Balanced-fix and stacked-scenario placeholder
+### Balanced-fix and stacked-scenario
 
-Draft release note: replace this placeholder with the generated fragment in
-`paper/exhibits/balanced-fix.md`.
+{{< include exhibits/balanced-fix.md >}}
 
 ## Interpretation boundary
 
-This pre-results draft is designed so that final numerical tables and figures
-can drop into place without restructuring the manuscript. Once the rebuilt
-artifacts are frozen, the remaining work should mainly be:
+The paper structure is now wired to generated static exhibits rather than manual
+placeholder prose. The remaining manuscript work is narrower:
 
-1. regenerate the exhibit files from shared artifacts
-2. tighten the interpretation paragraphs around those exhibits
-3. finalize the abstract and conclusion language
+1. refresh the exhibit fragments as artifacts evolve
+2. regenerate household and dynamic exhibits once those tracks are clean
+3. tighten the abstract and conclusion around the frozen release package
