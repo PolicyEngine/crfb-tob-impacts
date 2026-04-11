@@ -372,9 +372,16 @@ def enable_ss_credit_phase_out():
 
 
 # CBO labor supply elasticities (for dynamic scoring)
+#
+# Use the age-based parameter structure supported by current policyengine-us.
+# Base elasticities apply below the built-in age threshold; workers above that
+# threshold receive the configured multipliers.
 CBO_ELASTICITIES = {
-    "gov.simulation.labor_supply_responses.elasticities.income.all": {
+    "gov.simulation.labor_supply_responses.elasticities.income.base": {
         "2024-01-01.2100-12-31": -0.05
+    },
+    "gov.simulation.labor_supply_responses.elasticities.income.age_multiplier_over_threshold": {
+        "2024-01-01.2100-12-31": 2.0
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.1": {
         "2024-01-01.2100-12-31": 0.31
@@ -398,13 +405,19 @@ CBO_ELASTICITIES = {
         "2024-01-01.2100-12-31": 0.22
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.8": {
-        "2024-01-01.2100-12-31": 0.19
+        "2024-01-01.2100-12-31": 0.22
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.9": {
-        "2024-01-01.2100-12-31": 0.15
+        "2024-01-01.2100-12-31": 0.22
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.10": {
-        "2024-01-01.2100-12-31": 0.10
+        "2024-01-01.2100-12-31": 0.22
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.secondary": {
+        "2024-01-01.2100-12-31": 0.27
+    },
+    "gov.simulation.labor_supply_responses.elasticities.substitution.age_multiplier_over_threshold": {
+        "2024-01-01.2100-12-31": 2.0
     },
 }
 
