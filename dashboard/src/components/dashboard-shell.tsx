@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { useEffect, useState } from "react";
+import { Header, logos } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -115,7 +116,7 @@ function MetricTile({
         : "text-[var(--pe-color-text-primary)]";
 
   return (
-    <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/85 px-5 py-4 shadow-[0_12px_28px_rgba(16,24,40,0.06)] backdrop-blur">
+    <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(16,24,40,0.06)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
         {label}
       </p>
@@ -332,23 +333,26 @@ export function DashboardShell() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(49,151,149,0.12),_transparent_32%),linear-gradient(180deg,_#f7fbfb_0%,_#eef3f7_100%)] text-[var(--pe-color-text-primary)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
+      <Header
+        variant="dark"
+        logo={<img src={logos.whiteWordmark} alt="PolicyEngine" className="h-5" />}
+      >
+        <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
+      </Header>
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="mx-auto flex min-h-screen max-w-[1600px] gap-6 px-4 py-4 sm:px-6"
+        className="mx-auto flex max-w-[1600px] gap-6 px-4 py-6 sm:px-6"
       >
-        <aside className="hidden w-[18.5rem] shrink-0 rounded-[var(--pe-radius-feature)] border border-white/60 bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_18px_48px_rgba(16,24,40,0.08)] backdrop-blur xl:block">
+        <aside className="hidden w-[18.5rem] shrink-0 self-start rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white p-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)] xl:sticky xl:top-4 xl:block">
           <div className="border-b border-[var(--pe-color-border-light)] pb-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--pe-color-primary-700)]">
-              PolicyEngine
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
-              Social Security TOB reform dashboard
+            <h1 className="text-xl font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
+              Reform options
             </h1>
-            <p className="mt-3 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-              Interactive estimates for Social Security taxation-of-benefits reform options through 2100.
+            <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+              Select a reform to explore its budgetary impacts through 2100.
             </p>
           </div>
 
@@ -368,7 +372,7 @@ export function DashboardShell() {
                   className={`w-full rounded-[var(--pe-radius-container)] px-3 py-3 text-left transition ${
                     active
                       ? "bg-[var(--pe-color-primary-50)] text-[var(--pe-color-primary-800)] shadow-[inset_0_0_0_1px_var(--pe-color-primary-200)]"
-                      : "bg-white/60 text-[var(--pe-color-text-secondary)] hover:bg-white"
+                      : "bg-white text-[var(--pe-color-text-secondary)] hover:bg-white"
                   }`}
                 >
                   <div className="text-sm font-medium">{option.shortName}</div>
@@ -380,19 +384,14 @@ export function DashboardShell() {
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col gap-6">
-          <section className="rounded-[var(--pe-radius-feature)] border border-white/70 bg-[rgba(255,255,255,0.74)] px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.08)] backdrop-blur">
+          <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--pe-color-text-tertiary)]">
-                  <span>CRFB analysis</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--pe-color-border-dark)]" />
-                  <span>Dashboard v2</span>
-                </div>
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)] sm:text-4xl">
-                  Social Security Taxation Reform
+                <h2 className="text-3xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)] sm:text-4xl">
+                  Social Security taxation reform
                 </h2>
                 <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
-                  This dashboard examines policy options for reforming Social Security, evaluating their budgetary impacts through 2100 using microsimulation modeling.
+                  This dashboard examines policy options for reforming the taxation of Social Security benefits, evaluating their budgetary impacts through 2100 using PolicyEngine microsimulation. Analysis commissioned by the Committee for a Responsible Federal Budget.
                 </p>
               </div>
 
@@ -512,7 +511,7 @@ export function DashboardShell() {
           {activeTab === "option13" ? (
             <Option13Tab />
           ) : loading ? (
-            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/80 shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
+            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
               <div className="flex items-center gap-3 text-[var(--pe-color-text-secondary)]">
                 <LoaderCircle className="h-5 w-5 animate-spin" />
                 <span>Loading policy impact data...</span>
@@ -654,13 +653,13 @@ export function DashboardShell() {
             </>
           )}
 
-          <footer className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/80 px-5 py-5 text-sm text-[var(--pe-color-text-secondary)] shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
+          <footer className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 text-sm text-[var(--pe-color-text-secondary)] shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
             <p>
               Analysis by{" "}
-              <a href="https://policyengine.org" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)]">
+              <a href="https://policyengine.org" target="_blank" rel="noreferrer" className="font-semibold text-[var(--pe-color-primary-700)] hover:underline">
                 PolicyEngine
-              </a>{" "}
-              for the Committee for a Responsible Federal Budget
+              </a>
+              , commissioned by the Committee for a Responsible Federal Budget
             </p>
             <p className="mt-2">
               Data: 2025 Social Security Trustees Report | Model: PolicyEngine US
@@ -671,6 +670,8 @@ export function DashboardShell() {
     </div>
   );
 }
+
+
 
 function Segment({
   label,

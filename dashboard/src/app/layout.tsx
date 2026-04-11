@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "PolicyEngine Social Security TOB Dashboard",
-  description: "Next.js rebuild of the CRFB Social Security taxation-of-benefits dashboard.",
+  title: "Taxation of benefits reforms | PolicyEngine",
+  description:
+    "Interactive estimates for Social Security taxation-of-benefits reform options through 2100, commissioned by the Committee for a Responsible Federal Budget.",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({
@@ -23,10 +14,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
