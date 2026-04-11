@@ -35,7 +35,7 @@ fi
 popd >/dev/null
 
 pushd "$repo_root/dashboard" >/dev/null
-NEXT_PUBLIC_BASE_PATH="$dashboard_base_path" npm run build
+NEXT_PUBLIC_BASE_PATH="$dashboard_base_path" bun run build
 popd >/dev/null
 
 cp -R "$repo_root/jupyterbook/$docs_output/." "$site_dir/"
