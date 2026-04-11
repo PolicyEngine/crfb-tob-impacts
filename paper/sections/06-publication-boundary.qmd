@@ -51,3 +51,16 @@ The clean long-run setup is:
 
 That split keeps the public-facing interpretation surface stable and citable
 without forcing the dashboard to double as the full methodological record.
+
+## Release discipline
+
+That separation only works if each surface is honest about result status.
+
+- If the standard static panel is clean but a special-case rerun is still in
+  flight, the paper should say so directly rather than implying a fully settled
+  fourteen-option package.
+- The dashboard may continue to expose the latest assembled special-case values,
+  but the manuscript should reserve “final” language for runs that have cleared
+  the full validation ladder.
+- Operational notes should carry the detailed rerun state, launch identifiers,
+  and recovery details needed to reconcile those two publication surfaces.

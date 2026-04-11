@@ -684,6 +684,10 @@ def main(
     ]
 
     if submit_only:
+        print(
+            "Submit-only mode records spawned year jobs and exits without waiting. "
+            "Use the recovered volume outputs, not just call-id state, as the publication artifact."
+        )
         manifest_path = (
             Path(submission_manifest)
             if submission_manifest

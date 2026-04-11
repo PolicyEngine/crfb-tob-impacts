@@ -22,6 +22,16 @@ The internal validation framework therefore tests:
 Draft release note: replace this placeholder with the generated fragment in
 `paper/exhibits/validation-sentinels.md`.
 
+As of the current rebuild state, the manuscript should distinguish between two
+validation tiers:
+
+- the standard static series (`option1` through `option12`), which has been
+  rebuilt from the clean exact Trustees contract and cleared the known
+  late-horizon anomaly checks
+- the special-case series (`option13` and `option14_stacked`), which has
+  already cleared smoke validation on `2035` and `2100` but remains subject to
+  full-panel rerun completion before the paper should treat every year as final
+
 ## External benchmark framework
 
 The original report compared selected reforms against outside estimates from the
@@ -54,3 +64,8 @@ artifact-derived Markdown files under `paper/exhibits/`. During drafting those
 files may contain placeholders; before release they should be overwritten by
 generated content from the same checked artifacts that feed the dashboard and
 comparison spreadsheet.
+
+For the special-case panel, that artifact contract also includes run status. If
+the full `2035-2100` clean rerun is still in progress, the paper should cite
+only smoke-validated endpoint evidence and avoid presenting the unfinished
+special-case panel as fully settled.

@@ -83,11 +83,19 @@ interpreted as the same long-run baseline contract plus behavioral response.
 rather than the standard `year x scenario` rescoring path:
 
 - `option13` begins in `2035`, so `2026-2034` are current-law placeholders
-- `option13` uses balanced-fix raw outputs plus a corrected `2100` endpoint treatment
+- `option13` uses balanced-fix raw outputs generated from the same exact
+  Trustees-lineage projected datasets as the standard rerun, with a dedicated
+  `2100` HI endpoint treatment based on extrapolated Trustees fiscal inputs
 - `option14_stacked` chains the structural reform on top of the `option13` baseline
 
 That separation is an intentional part of the methodology, not an
 implementation accident.
+
+The special-case correction matters substantively, not just operationally. The
+legacy provisional endpoint implied a negative HI payroll-tax rate at `2100`,
+which is not used in the clean publication path. The corrected special-case
+contract smoke-tests `2035` and `2100` directly before treating the full
+`2035-2100` panel as publishable.
 
 ## Validation ladder
 
@@ -104,6 +112,14 @@ of checks:
 The audit record for those checks lives outside this manuscript in the
 operational findings note, but the paper treats that validation ladder as part
 of the substantive methodology rather than as an operational afterthought.
+
+In the current workflow, that final special-case step has two layers:
+
+- smoke validation of key endpoint years such as `2035` and `2100`
+- full-panel rerun and recovery of the entire `2035-2100` special-case series
+
+The paper should only treat special-case point estimates as final after both
+layers have completed.
 
 ## Limitations
 
