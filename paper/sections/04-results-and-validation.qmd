@@ -27,6 +27,9 @@ validation tiers:
 - the standard static series (`option1` through `option12`), which has been
   rebuilt from the clean exact Trustees contract and cleared the known
   late-horizon anomaly checks
+- the standard dynamic series (`option1` through `option12`), which has now
+  cleared both sparse sentinel validation and full-panel recovery to a complete
+  `2026-2100` artifact
 - the special-case series (`option13` and `option14_stacked`), which has
   now cleared both endpoint smoke validation and recovered full-panel rerun
   checks on `2035-2100`

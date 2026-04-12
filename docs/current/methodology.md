@@ -66,9 +66,10 @@ Operationally, that means:
 
 ## Static Versus Dynamic
 
-The static rebuild path is the current priority and uses the contract above.
+The released static and dynamic series share the same cleaned Trustees baseline
+lineage for the standard reforms.
 
-When dynamic reruns are run, the intended differences from plain upstream
+For the current dynamic release, the intended differences from plain upstream
 `policyengine-us` main are:
 
 - Trustees long-run uprating behavior
@@ -76,6 +77,15 @@ When dynamic reruns are run, the intended differences from plain upstream
 
 Dynamic should therefore be interpreted as an extension of the same baseline
 lineage, not as a separate legacy workflow.
+
+Operationally:
+
+- the current public dynamic release covers standard reforms `option1`
+  through `option12`
+- it was validated first through sparse sentinel years and then through a full
+  `2026-2100` panel recovery
+- the exact-missing-cell repair path is part of the live toolchain, so dynamic
+  reruns do not require restarting a full panel when only a few cells fail
 
 ## Reproducibility Boundary
 

@@ -17,6 +17,7 @@ Expected files:
 - `household-impacts.md`
 - `revenue-impacts.md`
 - `balanced-fix.md`
+- `dynamic-results.md`
 
 During drafting these files may contain placeholders. Before publication they
 should be overwritten by generated content derived from the checked result
@@ -25,3 +26,4 @@ artifacts.
 Current generator:
 
 - `python ../scripts/generate_paper_static_exhibits.py`
+- `python ../scripts/generate_paper_dynamic_exhibits.py`

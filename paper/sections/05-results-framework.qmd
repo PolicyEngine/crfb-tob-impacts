@@ -28,6 +28,10 @@ The publication rule is:
 
 {{< include exhibits/revenue-impacts.md >}}
 
+### Dynamic standard-panel
+
+{{< include exhibits/dynamic-results.md >}}
+
 ### Balanced-fix and stacked-scenario
 
 {{< include exhibits/balanced-fix.md >}}
@@ -38,5 +42,5 @@ The paper structure is now wired to generated static exhibits rather than manual
 placeholder prose. The remaining manuscript work is narrower:
 
 1. refresh the exhibit fragments as artifacts evolve
-2. regenerate household and dynamic exhibits once those tracks are clean
+2. regenerate household exhibits once that track is clean
 3. tighten the abstract and conclusion around the frozen release package

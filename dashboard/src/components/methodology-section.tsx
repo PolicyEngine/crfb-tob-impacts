@@ -141,11 +141,14 @@ export function MethodologySection() {
             mechanical effect of policy changes.
           </p>
           <p className="mt-4">
-            <strong>Conventional scoring:</strong> incorporates labor-supply elasticities based
-            on CBO estimates, with older workers receiving larger responses in the historical stack.
+            <strong>Conventional scoring:</strong> extends the same Trustees baseline lineage
+            with age-based labor-supply elasticities for the standard reforms
+            `option1` through `option12`.
           </p>
           <p className="mt-4">
-            The biggest conventional/static differences typically show up for Roth-style swap options.
+            The largest conventional/static differences typically show up in the
+            long horizon for the structural swap options and the broad
+            tax-expansion options.
           </p>
         </AccordionItem>
 
