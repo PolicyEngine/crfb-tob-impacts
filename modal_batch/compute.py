@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 from datetime import datetime
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -33,6 +34,12 @@ for path in reversed(path_candidates):
     if path.exists():
         sys.path.insert(0, str(path))
 
+from modal_batch_helpers import (
+    cell_output_paths,
+    default_submission_manifest_path,
+    parse_years,
+    stem_with_scoring,
+)
 from runtime_config import resolve_policyengine_us_path, resolve_projected_datasets_path
 
 
@@ -88,11 +95,6 @@ image = (
     .add_local_dir(LOCAL_PROJECT_ROOT / "src", "/app/src", copy=True)
     .add_local_dir(PROJECTED_DATASETS_PATH, "/app/projected_datasets", copy=True)
 )
-
-
-def _stem_with_scoring(stem: str, scoring: str) -> str:
-    suffix = f"_{scoring}"
-    return stem if stem.endswith(suffix) else f"{stem}{suffix}"
 
 
 @app.function(
@@ -368,7 +370,7 @@ def run_reforms(
         year_list = [int(year.strip()) for year in years.split(",")]
 
     output_path = Path(output)
-    stem = _stem_with_scoring(output_path.stem, scoring)
+    stem = stem_with_scoring(output_path.stem, scoring)
     output_dir = output_path.parent / stem
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -443,17 +445,8 @@ def run_cells(
     to the Modal volume immediately.
     """
     reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
-
-    if "-" in years:
-        start, end = years.split("-")
-        year_list = list(range(int(start), int(end) + 1))
-    else:
-        year_list = [int(year.strip()) for year in years.split(",") if year.strip()]
-
-    output_path = Path(output)
-    stem = _stem_with_scoring(output_path.stem, scoring)
-    output_dir = output_path.parent / stem
-    output_dir.mkdir(parents=True, exist_ok=True)
+    year_list = parse_years(years)
+    output_path, stem, output_dir = cell_output_paths(output, scoring)
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     volume_save_path = f"{stem}_{run_id}"
@@ -505,6 +498,103 @@ def run_cells(
         print("\nFailures:")
         for reform_id, year, message in failures:
             print(f"  - {reform_id} {year}: {message}")
+
+
+@app.local_entrypoint()
+def submit_cells(
+    reforms: str = "option9,option10,option11",
+    scoring: str = "dynamic",
+    years: str = "2026-2100",
+    output: str = "results/modal_results.csv",
+    resume: bool = True,
+    submission_manifest: str = "",
+):
+    """
+    Submit one reform x one year per task and exit without waiting.
+
+    This is the durable launch path for long-running cell panels: it records the
+    spawned call IDs and the Modal volume prefix locally so results can be
+    recovered later without a live parent process.
+    """
+    reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
+    year_list = parse_years(years)
+    output_path, stem, output_dir = cell_output_paths(output, scoring)
+
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    volume_save_path = f"{stem}_{run_id}"
+    manifest_path = (
+        Path(submission_manifest)
+        if submission_manifest
+        else default_submission_manifest_path(LOCAL_PROJECT_ROOT, stem, run_id)
+    )
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+
+    pending_cells: list[tuple[str, int, Path]] = []
+    for reform_id in reform_list:
+        for year in year_list:
+            local_file = output_dir / reform_id / f"year_{year}.csv"
+            if resume and local_file.exists():
+                continue
+            pending_cells.append((reform_id, year, local_file))
+
+    if not pending_cells:
+        print("All cells already completed locally.")
+        payload = {
+            "submitted_at": datetime.now().isoformat(),
+            "reforms": reform_list,
+            "years": year_list,
+            "scoring": scoring,
+            "output": str(output_path.resolve()),
+            "output_dir": str(output_dir.resolve()),
+            "volume_prefix": volume_save_path,
+            "calls": [],
+        }
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n")
+        print(f"Submission manifest: {manifest_path}")
+        return
+
+    print(
+        "Submit-only mode records spawned cell jobs and exits without waiting. "
+        "Use the recovered volume outputs as the analysis artifact."
+    )
+    print(f"Submitting {len(pending_cells)} cells")
+    print(f"Reforms: {reform_list}")
+    print(f"Years: {year_list[0]} to {year_list[-1]}")
+    print(f"Scoring: {scoring}")
+    print(f"Intermediate results: {output_dir}/")
+    print(f"Volume backup: /results/{volume_save_path}/")
+
+    submitted_calls = []
+    for reform_id, year, local_file in pending_cells:
+        volume_file = f"{volume_save_path}/{reform_id}/year_{year}.csv"
+        call = compute_cell.spawn(year, reform_id, scoring, volume_file)
+        record = {
+            "reform_id": reform_id,
+            "year": year,
+            "local_file": str(local_file.resolve()),
+            "volume_file": volume_file,
+            "call_id": call.object_id,
+            "dashboard_url": call.get_dashboard_url(),
+        }
+        submitted_calls.append(record)
+        print(
+            f"Submitted {reform_id} {year}: {call.object_id} -> {call.get_dashboard_url()}"
+        )
+
+    payload = {
+        "submitted_at": datetime.now().isoformat(),
+        "reforms": reform_list,
+        "years": year_list,
+        "scoring": scoring,
+        "output": str(output_path.resolve()),
+        "output_dir": str(output_dir.resolve()),
+        "volume_prefix": volume_save_path,
+        "calls": submitted_calls,
+    }
+    manifest_path.write_text(json.dumps(payload, indent=2) + "\n")
+    print(f"\nSubmitted {len(submitted_calls)} cells.")
+    print(f"Volume output root: /results/{volume_save_path}/")
+    print(f"Submission manifest: {manifest_path}")
 
 
 def _download_from_volume(volume_path: str, output_dir: Path) -> None:

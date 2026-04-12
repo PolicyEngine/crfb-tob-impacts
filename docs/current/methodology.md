@@ -23,6 +23,8 @@ For the current clean static rerun, the intended contract is:
 - exact-calibration-only acceptance for delivered years
 - no donor-backed support augmentation in the production rebuild path
 - pinned local worktrees for both `policyengine-us` and `policyengine-us-data`
+- a run-level reproducibility bundle that records the exact code/data lineage,
+  including dirty sibling-repo overrides when present
 
 That contract replaces the older mixed lineage that produced the legacy stitched
 standard file.
@@ -74,6 +76,32 @@ When dynamic reruns are run, the intended differences from plain upstream
 
 Dynamic should therefore be interpreted as an extension of the same baseline
 lineage, not as a separate legacy workflow.
+
+## Reproducibility Boundary
+
+The repo-level standard now is:
+
+- `uv sync --frozen` for the Python environment
+- pinned local worktrees for `policyengine-us` and `policyengine-us-data`
+- calibrated H5 snapshots with machine-readable metadata
+- a launch-time reproducibility bundle under `results/repro_bundles/`
+
+That bundle records:
+
+- the exact git SHAs and dirty status for the three repos involved
+- the sibling `pyproject.toml` and `uv.lock` files that define the local model
+  and data worktree environments
+- the exact calibrated snapshot manifest
+- a complete per-file SHA256 inventory for the calibrated snapshot
+- the resolved enhanced CPS blob hash and path used by the recalibrated H5s
+- any tracked or untracked local overrides that were present in dirty sibling
+  repos
+
+So the reproducibility contract is no longer just “remember which worktree we
+used”; it is an artifact that travels with the run.
+
+For release-grade runs, that bundle can also be frozen into local snapshot and
+repo tar archives with `scripts/freeze_repro_bundle.py`.
 
 ## Interpretation Rules
 

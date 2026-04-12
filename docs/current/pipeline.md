@@ -9,12 +9,16 @@ This page describes how the current outputs are supposed to be built.
    `trustees-core-thresholds-v1`.
 2. Validate dataset metadata and exact coverage before any scoring run is
    submitted.
-3. Score standard reforms `option1` through `option12` against those saved H5
+3. Freeze a run-level reproducibility bundle that captures code SHAs, dirty
+   overrides, sibling dependency manifests, the full snapshot file inventory,
+   the snapshot calibration manifest, and the underlying enhanced CPS blob
+   hash.
+4. Score standard reforms `option1` through `option12` against those saved H5
    datasets.
-4. Assemble special-case `option13` and `option14_stacked` outputs with dataset
+5. Assemble special-case `option13` and `option14_stacked` outputs with dataset
    provenance attached.
-5. Build the combined 14-option delivery table.
-6. Push current results to dashboard artifacts and keep legacy values only in
+6. Build the combined 14-option delivery table.
+7. Push current results to dashboard artifacts and keep legacy values only in
    spreadsheet comparison outputs.
 
 ## Key Scripts
@@ -27,6 +31,11 @@ This page describes how the current outputs are supposed to be built.
   - submits standard `year x scenario` scoring to Modal
 - [scripts/recover_modal_run.py](../../scripts/recover_modal_run.py)
   - recovers Modal results to local artifacts
+- [scripts/write_repro_bundle.py](../../scripts/write_repro_bundle.py)
+  - writes the same reproducibility bundle for non-standard or local run paths
+- [scripts/freeze_repro_bundle.py](../../scripts/freeze_repro_bundle.py)
+  - archives the calibrated snapshot plus repo `HEAD` tarballs referenced by a
+    reproducibility bundle
 - [scripts/assemble_special_case_results.py](../../scripts/assemble_special_case_results.py)
   - assembles `option13` and `option14_stacked` with provenance
 - [scripts/build_latesthf_14option_delivery.py](../../scripts/build_latesthf_14option_delivery.py)
@@ -43,6 +52,10 @@ The rebuild is supposed to fail closed on these checks:
 - required tax assumption `trustees-core-thresholds-v1`
 - pinned `policyengine-us` worktree via `CRFB_POLICYENGINE_US_PATH`
 - no donor-backed support augmentation in the production rebuild path
+- a reproducibility bundle stamped before submission, including dirty sibling
+  repo overrides if they exist
+- launch-time env vars for required target source and tax assumption derived
+  from the snapshot contract itself, not just implicit runtime defaults
 
 If any of those checks fail, the right response is to stop and fix the run
 contract, not to patch the output table downstream.

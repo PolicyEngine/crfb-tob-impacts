@@ -5,7 +5,32 @@ single-repo workflow. The model and data dependencies lived in sibling repos and
 the batch scripts assumed unpublished Hugging Face dataset paths.
 
 This file records the exact PRs and SHAs that matter and the environment variables
-needed to rerun the analysis from local checkouts.
+needed to rerun the analysis from local checkouts. The repo now also writes a
+machine-readable reproducibility bundle for launches that go through
+`scripts/run_modal_refresh.py`, and the same bundle can be created manually with
+`scripts/write_repro_bundle.py`.
+
+## Current reproducibility standard
+
+For a run to count as reproducible in this repo, we want all of the following:
+
+- a locked Python environment from `uv.lock`
+- an explicit `policyengine-us` checkout path
+- an explicit calibrated dataset snapshot path
+- a machine-readable record of the exact enhanced CPS blob the calibrated H5s
+  were built from
+- a machine-readable record of the exact calibration contract
+- the exact git SHAs of this repo, `policyengine-us`, and `policyengine-us-data`
+- patch artifacts for any dirty sibling repo overrides that affected the run
+
+Use:
+
+```bash
+cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
+uv sync --frozen --extra dev
+```
+
+before local reruns so the Python environment matches the checked-in lockfile.
 
 ## What mattered historically
 
@@ -92,6 +117,70 @@ Point this repo at the generated datasets:
 export CRFB_POLICYENGINE_US_PATH=/Users/maxghenis/PolicyEngine/policyengine-us
 export CRFB_DATASET_TEMPLATE=/Users/maxghenis/PolicyEngine/policyengine-us-data/projected_datasets/{year}.h5
 ```
+
+### Automatic run bundles
+
+`scripts/run_modal_refresh.py` now writes a reproducibility bundle before it
+submits Modal work. The bundle lives under:
+
+- `results/repro_bundles/<output-stem>_<timestamp>/`
+
+and contains:
+
+- `run_manifest.json`
+- copies of `pyproject.toml`, `uv.lock`, and `reproducibility.lock.toml`
+- copies of `pyproject.toml` and `uv.lock` from the pinned
+  `policyengine-us` and `policyengine-us-data` worktrees
+- the snapshot `calibration_manifest.json`
+- the resolved enhanced CPS blob hash and path, extracted from the calibrated
+  H5 metadata when needed
+- a full per-file inventory for the calibrated snapshot, including SHA256 and
+  size for every `*.h5`, `*.h5.metadata.json`, and `calibration_manifest.json`
+- git SHAs and dirty status for this repo, `policyengine-us`, and
+  `policyengine-us-data`
+- patch artifacts for tracked and untracked local overrides in any dirty repo
+
+The launch path also now stamps the required target source, tax assumption,
+calibration profile, and minimum calibration quality into the Modal runtime
+environment from the snapshot contract itself, so detached reruns fail closed
+instead of relying on implicit defaults.
+
+If you need the same bundle for a local run or special-case flow that does not
+go through `run_modal_refresh.py`, use:
+
+```bash
+cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
+uv run python scripts/write_repro_bundle.py \
+  --output results/example.csv \
+  --scoring static \
+  --reforms option1,option2 \
+  --years 2026-2100 \
+  --modal-target run_cells \
+  --policyengine-us-path /absolute/path/to/policyengine-us \
+  --projected-datasets-path /absolute/path/to/projected_datasets \
+  --snapshot-path /absolute/path/to/projected_datasets_snapshot
+```
+
+For a release run that you want to freeze into self-contained local artifacts,
+archive the calibrated snapshot and the three repo heads referenced by the
+bundle:
+
+```bash
+cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
+uv run python scripts/freeze_repro_bundle.py \
+  --bundle-dir results/repro_bundles/<output-stem>_<timestamp>
+```
+
+That writes:
+
+- `freeze_manifest.json`
+- `archives/<snapshot-name>.tar`
+- `archives/crfb_tob_impacts.tar`
+- `archives/policyengine_us.tar`
+- `archives/policyengine_us_data.tar`
+
+If a repo was dirty at run time, the archived repo tar captures `HEAD` and the
+bundle's patch artifacts capture the local delta on top of that commit.
 
 ### Historical dynamic rerun
 
