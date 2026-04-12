@@ -37,6 +37,7 @@ for path in reversed(path_candidates):
 from modal_batch_helpers import (
     cell_output_paths,
     default_submission_manifest_path,
+    parse_cells_file,
     parse_years,
     stem_with_scoring,
 )
@@ -437,6 +438,7 @@ def run_cells(
     years: str = "2026-2100",
     output: str = "results/modal_results.csv",
     resume: bool = True,
+    cells_file: str = "",
 ):
     """
     Run one reform x one year per task.
@@ -444,8 +446,18 @@ def run_cells(
     This isolates failures to individual cells and writes every completed cell
     to the Modal volume immediately.
     """
-    reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
-    year_list = parse_years(years)
+    requested_cells = (
+        parse_cells_file(cells_file)
+        if cells_file
+        else [
+            (reform.strip(), year)
+            for reform in reforms.split(",")
+            if reform.strip()
+            for year in parse_years(years)
+        ]
+    )
+    reform_list = list(dict.fromkeys(reform_id for reform_id, _ in requested_cells))
+    year_list = sorted({year for _, year in requested_cells})
     output_path, stem, output_dir = cell_output_paths(output, scoring)
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -453,12 +465,11 @@ def run_cells(
     print(f"Volume save path: /results/{volume_save_path}/")
 
     pending_cells: list[tuple[str, int, Path]] = []
-    for reform_id in reform_list:
-        for year in year_list:
-            local_file = output_dir / reform_id / f"year_{year}.csv"
-            if resume and local_file.exists():
-                continue
-            pending_cells.append((reform_id, year, local_file))
+    for reform_id, year in requested_cells:
+        local_file = output_dir / reform_id / f"year_{year}.csv"
+        if resume and local_file.exists():
+            continue
+        pending_cells.append((reform_id, year, local_file))
 
     if not pending_cells:
         print("All cells already completed locally.")
@@ -469,6 +480,8 @@ def run_cells(
     print(f"Reforms: {reform_list}")
     print(f"Years: {year_list[0]} to {year_list[-1]}")
     print(f"Scoring: {scoring}")
+    if cells_file:
+        print(f"Cell list: {cells_file}")
     print(f"Intermediate results: {output_dir}/")
     print(f"Volume backup: /results/{volume_save_path}/")
 
@@ -508,6 +521,7 @@ def submit_cells(
     output: str = "results/modal_results.csv",
     resume: bool = True,
     submission_manifest: str = "",
+    cells_file: str = "",
 ):
     """
     Submit one reform x one year per task and exit without waiting.
@@ -516,8 +530,18 @@ def submit_cells(
     spawned call IDs and the Modal volume prefix locally so results can be
     recovered later without a live parent process.
     """
-    reform_list = [reform.strip() for reform in reforms.split(",") if reform.strip()]
-    year_list = parse_years(years)
+    requested_cells = (
+        parse_cells_file(cells_file)
+        if cells_file
+        else [
+            (reform.strip(), year)
+            for reform in reforms.split(",")
+            if reform.strip()
+            for year in parse_years(years)
+        ]
+    )
+    reform_list = list(dict.fromkeys(reform_id for reform_id, _ in requested_cells))
+    year_list = sorted({year for _, year in requested_cells})
     output_path, stem, output_dir = cell_output_paths(output, scoring)
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -530,12 +554,11 @@ def submit_cells(
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
 
     pending_cells: list[tuple[str, int, Path]] = []
-    for reform_id in reform_list:
-        for year in year_list:
-            local_file = output_dir / reform_id / f"year_{year}.csv"
-            if resume and local_file.exists():
-                continue
-            pending_cells.append((reform_id, year, local_file))
+    for reform_id, year in requested_cells:
+        local_file = output_dir / reform_id / f"year_{year}.csv"
+        if resume and local_file.exists():
+            continue
+        pending_cells.append((reform_id, year, local_file))
 
     if not pending_cells:
         print("All cells already completed locally.")
@@ -547,6 +570,11 @@ def submit_cells(
             "output": str(output_path.resolve()),
             "output_dir": str(output_dir.resolve()),
             "volume_prefix": volume_save_path,
+            "cells_file": cells_file,
+            "cells": [
+                {"reform_id": reform_id, "year": year}
+                for reform_id, year in requested_cells
+            ],
             "calls": [],
         }
         manifest_path.write_text(json.dumps(payload, indent=2) + "\n")
@@ -561,6 +589,8 @@ def submit_cells(
     print(f"Reforms: {reform_list}")
     print(f"Years: {year_list[0]} to {year_list[-1]}")
     print(f"Scoring: {scoring}")
+    if cells_file:
+        print(f"Cell list: {cells_file}")
     print(f"Intermediate results: {output_dir}/")
     print(f"Volume backup: /results/{volume_save_path}/")
 
@@ -589,6 +619,11 @@ def submit_cells(
         "output": str(output_path.resolve()),
         "output_dir": str(output_dir.resolve()),
         "volume_prefix": volume_save_path,
+        "cells_file": cells_file,
+        "cells": [
+            {"reform_id": reform_id, "year": year}
+            for reform_id, year in requested_cells
+        ],
         "calls": submitted_calls,
     }
     manifest_path.write_text(json.dumps(payload, indent=2) + "\n")

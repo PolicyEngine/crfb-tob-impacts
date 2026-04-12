@@ -322,6 +322,7 @@ def create_repro_bundle(
     projected_datasets_path: Path,
     snapshot_path: Path,
     bundle_root: Path | None = None,
+    cells_file: Path | None = None,
 ) -> BundlePaths:
     launched_at = datetime.now(timezone.utc)
     if bundle_root is None:
@@ -336,6 +337,11 @@ def create_repro_bundle(
             target = bundle_dir / file_name
             shutil.copy2(source, target)
             copied_files[file_name] = _relative_file(target, bundle_dir)
+    cells_file_record = None
+    if cells_file and cells_file.exists():
+        target = bundle_dir / cells_file.name
+        shutil.copy2(cells_file, target)
+        cells_file_record = _relative_file(target, bundle_dir)
 
     snapshot_manifest = snapshot_path / "calibration_manifest.json"
     if snapshot_manifest.exists():
@@ -392,6 +398,7 @@ def create_repro_bundle(
             "reforms": [value.strip() for value in reforms.split(",") if value.strip()],
             "years": years,
             "modal_target": modal_target,
+            "cells_file": cells_file_record,
         },
         "environment_contract": environment_contract,
         "snapshot": snapshot_info,

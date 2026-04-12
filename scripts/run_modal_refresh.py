@@ -47,6 +47,11 @@ def parse_args() -> argparse.Namespace:
         help="Output CSV path passed through to modal_batch/compute.py::run_reforms.",
     )
     parser.add_argument(
+        "--cells-file",
+        type=Path,
+        help="Optional CSV listing exact reform/year cells to run instead of the full reforms x years cross-product.",
+    )
+    parser.add_argument(
         "--policyengine-us-path",
         type=Path,
         default=DEFAULT_POLICYENGINE_US_PATH,
@@ -160,17 +165,19 @@ def launch_modal(args: argparse.Namespace) -> int:
 
     command.extend(
         [
-        str(REPO_ROOT / f"modal_batch/compute.py::{args.modal_target}"),
-        "--reforms",
-        args.reforms,
-        "--scoring",
-        args.scoring,
-        "--years",
-        args.years,
-        "--output",
-        args.output,
+            str(REPO_ROOT / f"modal_batch/compute.py::{args.modal_target}"),
+            "--reforms",
+            args.reforms,
+            "--scoring",
+            args.scoring,
+            "--years",
+            args.years,
+            "--output",
+            args.output,
         ]
     )
+    if args.cells_file:
+        command.extend(["--cells-file", str(args.cells_file)])
 
     print(f"Launching: {' '.join(command)}")
     completed = subprocess.run(command, cwd=REPO_ROOT, env=env)
@@ -192,6 +199,7 @@ def main() -> int:
         projected_datasets_path=args.projected_datasets_path,
         snapshot_path=args.snapshot_path,
         bundle_root=args.repro_bundle_root,
+        cells_file=args.cells_file,
     )
     print(f"Reproducibility bundle: {bundle.bundle_dir}")
     print(f"Run manifest: {bundle.manifest_path}")

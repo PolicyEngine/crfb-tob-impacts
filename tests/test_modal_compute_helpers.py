@@ -3,6 +3,7 @@ from pathlib import Path
 from src.modal_batch_helpers import (
     cell_output_paths,
     default_submission_manifest_path,
+    parse_cells_file,
     parse_years,
 )
 
@@ -32,3 +33,13 @@ def test_default_submission_manifest_path_uses_modal_submissions():
 
     assert manifest_path.name == "dynamic_probe_dynamic_demo.json"
     assert manifest_path.parent.name == "modal_submissions"
+
+
+def test_parse_cells_file_supports_reform_name_and_dedupes(tmp_path: Path):
+    cells_file = tmp_path / "cells.csv"
+    cells_file.write_text(
+        "reform_name,year\noption1,2026\noption1,2026\noption7,2100\n",
+        encoding="utf-8",
+    )
+
+    assert parse_cells_file(cells_file) == [("option1", 2026), ("option7", 2100)]

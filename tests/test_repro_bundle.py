@@ -150,6 +150,9 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
 
     snapshot_path = tmp_path / "snapshot"
     _write_snapshot(snapshot_path)
+    cells_file = repo_root / "results" / "missing_cells.csv"
+    cells_file.parent.mkdir(parents=True, exist_ok=True)
+    cells_file.write_text("reform_name,year\noption1,2026\n", encoding="utf-8")
 
     bundle = create_repro_bundle(
         repo_root=repo_root,
@@ -162,6 +165,7 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
         projected_datasets_path=projected,
         snapshot_path=snapshot_path,
         bundle_root=repo_root / "results" / "repro_bundles",
+        cells_file=cells_file,
     )
 
     manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
@@ -171,6 +175,8 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
     assert (bundle.bundle_dir / "calibration_manifest.json").exists()
     assert manifest["snapshot"]["base_dataset_snapshot"]["resolved_file_sha256"] == "abc123"
     assert manifest["repos"]["crfb_tob_impacts"]["git_dirty"] is True
+    assert manifest["run"]["cells_file"] == "missing_cells.csv"
+    assert (bundle.bundle_dir / manifest["run"]["cells_file"]).exists()
     patch_rel = manifest["override_artifacts"]["crfb_tob_impacts"]["tracked_patch"]
     assert patch_rel is not None
     assert (bundle.bundle_dir / patch_rel).exists()
