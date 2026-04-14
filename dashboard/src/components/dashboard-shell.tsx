@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Download,
   LoaderCircle,
@@ -349,7 +350,16 @@ export function DashboardShell() {
       {!isEmbedded && (
         <Header
           variant="dark"
-          logo={<img src={logos.whiteWordmark} alt="PolicyEngine" className="h-5" />}
+          logo={
+            <Image
+              src={logos.whiteWordmark}
+              alt="PolicyEngine"
+              width={140}
+              height={20}
+              className="h-5 w-auto"
+              priority
+            />
+          }
         >
           <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
         </Header>

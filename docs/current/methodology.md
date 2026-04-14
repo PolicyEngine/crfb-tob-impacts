@@ -82,6 +82,9 @@ Operationally:
 
 - the current public dynamic release covers standard reforms `option1`
   through `option12`
+- `option13` and `option14_stacked` remain static-only in the current release
+  because a balanced-fix dynamic version would require a separate iterative
+  post-response solve rather than the shipped standard dynamic pipeline
 - it was validated first through sparse sentinel years and then through a full
   `2026-2100` panel recovery
 - the exact-missing-cell repair path is part of the live toolchain, so dynamic

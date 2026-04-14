@@ -32,7 +32,12 @@ validation tiers:
   `2026-2100` artifact
 - the special-case series (`option13` and `option14_stacked`), which has
   now cleared both endpoint smoke validation and recovered full-panel rerun
-  checks on `2035-2100`
+  checks on `2035-2100` for the static package
+
+The manuscript does not publish special-case dynamic rows. Those scenarios
+would require a separate iterative post-response balanced-fix solve and were
+not part of the release contract for the current dashboard, spreadsheet, or
+paper.
 
 ## External benchmark framework
 

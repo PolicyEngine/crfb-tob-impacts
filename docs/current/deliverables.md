@@ -39,7 +39,9 @@ That means:
 
 For the current release, the public dynamic surface covers standard reforms
 `option1` through `option12`. Special-case dynamic rows are not part of the
-delivery bundle.
+delivery bundle. That omission is intentional: the balanced-fix special cases
+would require a separate iterative post-response solve and are not needed for
+the shipped dashboard, spreadsheet, or paper.
 
 ### Spreadsheet
 

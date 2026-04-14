@@ -146,6 +146,11 @@ export function MethodologySection() {
             `option1` through `option12`.
           </p>
           <p className="mt-4">
+            The special-case balanced-fix scenarios `option13` and `option14_stacked` remain
+            static-only in the current release. A conventional version would require a separate
+            iterative post-response solve rather than the published standard dynamic pipeline.
+          </p>
+          <p className="mt-4">
             The largest conventional/static differences typically show up in the
             long horizon for the structural swap options and the broad
             tax-expansion options.

@@ -77,6 +77,12 @@ For the current project, the intended dynamic differences from plain upstream
 That means the dynamic series is not an independent model family. It should be
 interpreted as the same long-run baseline contract plus behavioral response.
 
+For the current release, that behavioral layer is published only for the
+standard reforms `option1` through `option12`. A dynamic version of
+`option13` or `option14_stacked` would require a separate iterative
+balanced-fix solve after behavioral response, so those special cases remain
+static-only in the released package.
+
 ## Special-case assembly
 
 `option13` and `option14_stacked` are assembled through a special-case path
@@ -132,3 +138,6 @@ Even after the rebuild is clean, several limits remain important:
 - dynamic estimates are sensitive to the labor-supply elasticity specification
 - special-case balanced-fix endpoints, especially at `2100`, require dedicated
   endpoint treatment rather than naive extrapolation
+- special-case dynamic balanced-fix runs were not part of the shipped release
+  because their post-response solve is substantially more computationally
+  expensive than the standard dynamic panel

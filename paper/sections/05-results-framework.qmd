@@ -36,6 +36,10 @@ The publication rule is:
 
 {{< include exhibits/balanced-fix.md >}}
 
+In the current release, the dynamic exhibit is intentionally limited to the
+standard panel. The balanced-fix exhibit remains static because special-case
+dynamic scoring is outside the shipped release scope.
+
 ## Interpretation boundary
 
 The paper structure is now wired to generated static exhibits rather than manual

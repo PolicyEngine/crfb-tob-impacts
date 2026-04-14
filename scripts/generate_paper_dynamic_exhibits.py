@@ -138,7 +138,10 @@ def build_dynamic_results(dynamic_df: pd.DataFrame, static_df: pd.DataFrame) -> 
 The conventional dynamic release now covers the standard reforms `option1`
 through `option12` on the same Trustees baseline lineage as the cleaned static
 series. The main behavioral difference is the age-based labor-supply response
-layer, not a different baseline family.
+layer, not a different baseline family. The balanced-fix special cases
+`option13` and `option14_stacked` are intentionally omitted from the public
+dynamic release because they would require a separate iterative post-response
+solve rather than the shipped standard dynamic pipeline.
 
 ### Ten-year dynamic revenue effects
 

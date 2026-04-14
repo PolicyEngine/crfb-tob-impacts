@@ -72,5 +72,7 @@ bundle was rebuilt.
 
 For the current dynamic package, the release surface is narrower but now
 settled: the standard dynamic panel (`option1-12`) has been recovered to a
-complete `2026-2100` artifact, while special-case dynamic scenarios are not
-part of the current public delivery.
+complete `2026-2100` artifact, while special-case dynamic scenarios are
+intentionally excluded from the current public delivery. Those scenarios would
+require a separate iterative balanced-fix solve after behavioral response, and
+that extra compute path is not part of the release contract for this package.
