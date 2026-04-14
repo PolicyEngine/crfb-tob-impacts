@@ -18,6 +18,7 @@ solve rather than the shipped standard dynamic pipeline.
 | option11 | +230.7 | -0.2 |
 | option5 | +234.6 | -174.9 |
 | option2 | +361.8 | +4.7 |
+| option9 | +527.6 | -1.4 |
 | option10 | +697.0 | -6.3 |
 | option8 | +867.4 | -12.6 |
 | option6 | +1,121.8 | -174.0 |
@@ -41,6 +42,7 @@ smaller gain for `option12` and `option6`, and a less negative result for
 | option4 | +439.0 | +436.6 | +270.7 |
 | option11 | +505.4 | +500.8 | +282.5 |
 | option2 | +505.7 | +501.3 | +282.9 |
+| option9 | +926.3 | +915.2 | +405.5 |
 | option10 | +1,340.2 | +1,330.6 | +514.3 |
 | option8 | +1,754.4 | +1,750.0 | +616.4 |
 
