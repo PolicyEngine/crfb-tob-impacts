@@ -4,7 +4,9 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 site_dir="$repo_root/.vercel-site"
-dashboard_base_path="${NEXT_PUBLIC_BASE_PATH:-/dashboard}"
+dashboard_base_path="${NEXT_PUBLIC_BASE_PATH:-}"
+dashboard_target="$site_dir${dashboard_base_path:-/}"
+paper_output="$repo_root/paper/_build"
 
 if [ -f "$repo_root/.vercel-python/bin/activate" ]; then
   # Use the Vercel-local virtualenv when building via `vercel build`.
@@ -15,30 +17,37 @@ fi
 
 echo "Building CRFB site for Vercel"
 echo "  repo root: $repo_root"
-echo "  dashboard base path: $dashboard_base_path"
+echo "  dashboard base path: ${dashboard_base_path:-/}"
+echo "  paper path: /paper/"
 
 rm -rf "$site_dir"
-mkdir -p "$site_dir/dashboard"
+mkdir -p "$dashboard_target" "$site_dir/paper"
 
-pushd "$repo_root/jupyterbook" >/dev/null
-export BASE_URL=""
-myst build --html
-
-if [ -d "_build/html" ]; then
-  docs_output="_build/html"
-elif [ -d "_build/site/public" ]; then
-  docs_output="_build/site/public"
-else
-  echo "Could not find MyST build output." >&2
+if ! command -v quarto >/dev/null 2>&1; then
+  echo "Quarto is required to build the citable paper at /paper/." >&2
   exit 1
 fi
-popd >/dev/null
+
+rm -rf "$paper_output"
+quarto render "$repo_root/paper/index.qmd" --to html
+
+if [ ! -d "$paper_output" ]; then
+  echo "Could not find Quarto paper output." >&2
+  exit 1
+fi
+
+if quarto render "$repo_root/paper/index.qmd" --to pdf; then
+  echo "Rendered paper PDF."
+else
+  echo "Paper PDF render skipped; HTML paper is still available." >&2
+fi
+
+cp -R "$paper_output/." "$site_dir/paper/"
 
 pushd "$repo_root/dashboard" >/dev/null
 NEXT_PUBLIC_BASE_PATH="$dashboard_base_path" bun run build
 popd >/dev/null
 
-cp -R "$repo_root/jupyterbook/$docs_output/." "$site_dir/"
-cp -R "$repo_root/dashboard/out/." "$site_dir/dashboard/"
+cp -R "$repo_root/dashboard/out/." "$dashboard_target/"
 
 echo "Combined site output written to $site_dir"

@@ -16,7 +16,6 @@ _build/
 *.pyo
 *.tempresults/
 *.tmp
-jupyterbook/_build/
 .vercel-site/
 results/
 settings.local.json

@@ -120,8 +120,8 @@ repo tar archives with `scripts/freeze_repro_bundle.py`.
 
 - Current dashboard outputs should reflect only the current rerun results.
 - Prior or legacy values belong only in comparison spreadsheets.
-- The archival Jupyter Book is historical context, not the live methodology
-  spec.
+- The deleted legacy Jupyter Book is historical context, not the live
+  methodology spec.
 - The live anomaly and validation record is
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md).
 

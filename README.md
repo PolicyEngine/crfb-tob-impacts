@@ -13,18 +13,15 @@ uv pip install -e .
 # Generate policy impact data (takes 15-30 minutes)
 python scripts/generate_policy_impacts.py
 
-# Build Jupyter Book documentation
-cd jupyterbook && myst build --html
-
 # Run Next dashboard
-cd dashboard && npm ci && npm run dev
+cd dashboard && bun install && bun run dev
 ```
 
 ## Project Structure
 
 - `src/` - Core Python modules (reforms, calculations)
-- `jupyterbook/` - Jupyter Book documentation
-- `dashboard/` - Next.js visualization dashboard
+- `dashboard/` - Next.js current-results dashboard
+- `paper/` - Quarto manuscript for citation and formal review
 - `data/` - Generated CSV data files
 - `tests/` - Test suite
 
@@ -32,14 +29,14 @@ cd dashboard && npm ci && npm run dev
 
 The production site is deployed on Vercel as a combined static build:
 
-- documentation at `/`
-- dashboard at `/dashboard`
+- dashboard at `/`
+- citable Quarto paper at `/paper/`
 
 Local production-style build:
 
 ```bash
 python3 -m pip install -e .
-npm --prefix dashboard ci
+cd dashboard && bun install && cd ..
 ./scripts/build_vercel_site.sh
 ```
 

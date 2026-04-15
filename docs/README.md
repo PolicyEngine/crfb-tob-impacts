@@ -4,11 +4,11 @@ This repository now has three distinct documentation surfaces:
 
 - current operational documentation for the active CRFB `2026-2100`
   14-option rerun and delivery workflow
-- archival report material from the earlier eight-option package
 - a new citable manuscript track for formal publication and SSRN-style use
+- selected archival memos from the earlier eight-option package
 
 If you are trying to understand what we are doing now, start with the current
-handbook, not the archival Jupyter Book.
+handbook and paper, not the deleted legacy Jupyter Book.
 
 ## Start Here
 
@@ -41,8 +41,6 @@ handbook, not the archival Jupyter Book.
 
 ## Archival Material
 
-- [jupyterbook/README.md](../jupyterbook/README.md)
-  - archival eight-option report build notes
 - [docs/TRUST_FUND_REVENUE_METHODOLOGY.md](TRUST_FUND_REVENUE_METHODOLOGY.md)
   - archived Option 2 / 2026 methodology memo
 - [docs/LATE_TAIL_PUBLISHABILITY_2026-04-09.md](LATE_TAIL_PUBLISHABILITY_2026-04-09.md)
@@ -58,4 +56,4 @@ When documents disagree, use this order:
 3. the current handbook under [docs/current/](current/README.md)
 4. the manuscript track under [paper/](../paper/README.md) for citable narrative framing
 5. [REPRODUCIBILITY.md](../REPRODUCIBILITY.md)
-6. archival Jupyter Book and legacy memos
+6. legacy memos

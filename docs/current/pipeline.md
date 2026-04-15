@@ -87,4 +87,4 @@ The release process should include:
 - donor-augmented approximate late-year runs in the production delivery path
 - patching the stale stitched standard file into the dashboard as if it were a
   clean rebuild
-- using the archival Jupyter Book as the current operational guide
+- using the deleted legacy Jupyter Book as the current operational guide

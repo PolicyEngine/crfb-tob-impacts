@@ -90,6 +90,7 @@ Use this simple rule:
 
 ## Archive Boundary
 
-Anything under `jupyterbook/` or the older point-in-time memos is still useful
-for historical context, but it is not the release contract for the current
-delivery.
+The deleted Jupyter Book and older point-in-time memos are historical context,
+not the release contract for the current delivery. The public split is now the
+Next dashboard for current results and the Quarto paper for citation-grade
+methods.

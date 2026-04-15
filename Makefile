@@ -1,116 +1,68 @@
-.PHONY: all install data book dashboard test clean help
+.PHONY: all install data dashboard dashboard-dev paper site test lint format clean help
 
-# Default target
-all: install data book dashboard
+all: install dashboard paper
 
-# Install Python and Node dependencies
-install: install-python install-node
-
-install-python:
-	@echo "Installing Python dependencies with uv..."
+install:
+	@echo "Installing Python package and dashboard dependencies..."
 	uv venv --python 3.13 || true
 	uv pip install -e .
 	uv pip install -e .[dev]
+	cd dashboard && bun install
 
-install-node:
-	@echo "Installing Node dependencies..."
-	cd policy-impact-dashboard && npm ci
-
-# Generate policy impact data
 data:
 	@echo "Generating policy impact data..."
 	. .venv/bin/activate && python scripts/generate_policy_impacts.py
 
-data-quick:
-	@echo "Generating fiscal data only (skipping household)..."
-	. .venv/bin/activate && python scripts/generate_policy_impacts.py --skip-household
-
-# Build Jupyter Book documentation
-book:
-	@echo "Building Jupyter Book..."
-	cd jupyterbook && jupyter-book build .
-	@echo "Book built at: jupyterbook/_build/html/"
-
-book-clean:
-	@echo "Cleaning Jupyter Book build..."
-	cd jupyterbook && jupyter-book clean .
-
-# Build and run React dashboard
 dashboard:
-	@echo "Building React dashboard..."
-	cd policy-impact-dashboard && npm run build
+	@echo "Building Next dashboard..."
+	cd dashboard && bun run build
 
 dashboard-dev:
-	@echo "Starting React dashboard in development mode..."
-	cd policy-impact-dashboard && npm start
+	@echo "Starting Next dashboard..."
+	cd dashboard && bun run dev
 
-# Run tests
-test: test-python test-react
+paper:
+	@echo "Rendering Quarto paper..."
+	quarto render paper/index.qmd --to html
 
-test-python:
+site:
+	@echo "Building combined Vercel site..."
+	./scripts/build_vercel_site.sh
+
+test:
 	@echo "Running Python tests..."
 	pytest tests/ -v --cov=src --cov-report=term-missing
 
-test-react:
-	@echo "Running React tests..."
-	cd policy-impact-dashboard && npm test -- --watchAll=false
-
-# Lint and format code
-lint: lint-python lint-react
-
-lint-python:
-	@echo "Linting Python code..."
+lint:
+	@echo "Linting Python and dashboard code..."
 	ruff format --check src/ tests/ scripts/
-	pylint src/
+	cd dashboard && bun run lint
 
-lint-react:
-	@echo "Linting React code..."
-	cd policy-impact-dashboard && npm run lint
-
-format: format-python format-react
-
-format-python:
-	@echo "Formatting Python code..."
+format:
+	@echo "Formatting Python and dashboard code..."
 	ruff format src/ tests/ scripts/
+	cd dashboard && bun run lint -- --fix
 
-format-react:
-	@echo "Formatting React code..."
-	cd policy-impact-dashboard && npm run lint -- --fix && npx prettier --write .
-
-# Clean generated files
 clean:
 	@echo "Cleaning generated files..."
-	rm -rf jupyterbook/_build/
-	rm -rf policy-impact-dashboard/build/
+	rm -rf .vercel-site/
+	rm -rf dashboard/out dashboard/.next
+	rm -rf paper/_build paper/index_files paper/index.pdf
 	rm -rf data/*.csv
 	rm -rf __pycache__/ src/__pycache__/ tests/__pycache__/
-	rm -rf .pytest_cache/
-	rm -rf .coverage
-	rm -rf htmlcov/
+	rm -rf .pytest_cache/ .coverage htmlcov/
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} +
 
-# CI/CD commands (note: data generation takes ~30 min)
-ci: install lint test book dashboard
-	@echo "CI pipeline complete (skipped data generation for speed)!"
-
-# Deployment preparation
-deploy-prep: clean install data book dashboard
-	@echo "Deployment preparation complete!"
-
-# Help command
 help:
 	@echo "Available targets:"
-	@echo "  all           - Install deps, generate data, build book & dashboard (default)"
-	@echo "  install       - Install all dependencies (Python and Node)"
-	@echo "  data          - Generate all policy impact data"
-	@echo "  data-quick    - Generate fiscal data only (skip household)"
-	@echo "  book          - Build Jupyter Book documentation"
-	@echo "  dashboard     - Build React dashboard for production"
-	@echo "  dashboard-dev - Run React dashboard in development mode"
-	@echo "  test          - Run all tests (Python and React)"
-	@echo "  lint          - Check code formatting"
+	@echo "  install       - Install Python package and dashboard dependencies"
+	@echo "  data          - Generate policy impact data"
+	@echo "  dashboard     - Build the Next dashboard"
+	@echo "  dashboard-dev - Run the Next dashboard locally"
+	@echo "  paper         - Render the Quarto paper HTML"
+	@echo "  site          - Build dashboard at / and paper at /paper/"
+	@echo "  test          - Run Python tests"
+	@echo "  lint          - Check formatting/lint"
 	@echo "  format        - Auto-format code"
-	@echo "  clean         - Remove all generated files"
-	@echo "  ci            - Run full CI pipeline"
-	@echo "  help          - Show this help message"
+	@echo "  clean         - Remove generated files"

@@ -46,8 +46,8 @@ flowchart LR
 ## Operating Rules
 
 - Treat legacy stitched standard outputs as comparison artifacts only.
-- Treat the archival Jupyter Book as historical narrative, not as the current
-  methodology source of truth.
+- Treat the deleted legacy Jupyter Book as historical context only; the current
+  surfaces are the dashboard, Quarto paper, and operational docs.
 - Keep prior or legacy values in comparison spreadsheets only, not in the
   dashboard current-results path.
 - If a run artifact conflicts with a prose note, trust the artifact and update

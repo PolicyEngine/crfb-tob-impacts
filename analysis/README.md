@@ -1,6 +1,6 @@
 # Analysis Notebooks
 
-This folder contains notebooks used to **generate data files** for the project. These notebooks are **not part of the published Jupyter Book** and are not executed during CI builds due to their long execution times.
+This folder contains notebooks used to **generate data files** for the project. These notebooks are not part of the public dashboard or Quarto paper build and are not executed during CI because of their long execution times.
 
 ## Notebooks
 

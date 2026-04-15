@@ -106,8 +106,8 @@ export function MethodologySection() {
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
             <p>
-              <strong>Validation:</strong> the original dashboard claimed all calibration targets
-              were achieved within 0.1% of SSA and CMS projections across the 75-year horizon.
+              <strong>Validation:</strong> release artifacts are checked against the intended
+              Trustees calibration contract before they enter the dashboard.
             </p>
           </div>
         </AccordionItem>
@@ -176,6 +176,11 @@ export function MethodologySection() {
           External resources
         </h3>
         <ul className="mt-4 space-y-3 text-sm text-[var(--pe-color-primary-700)]">
+          <li>
+            <a href="/paper/" target="_blank" rel="noreferrer">
+              Citable paper and methodology
+            </a>
+          </li>
           <li>
             <a href="https://www.ssa.gov/oact/tr/2025/" target="_blank" rel="noreferrer">
               2025 Social Security Trustees Report

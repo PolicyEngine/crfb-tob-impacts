@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
+  BookOpenText,
   Download,
   LoaderCircle,
 } from "lucide-react";
@@ -38,6 +39,7 @@ import { useElementSize } from "@/lib/use-element-size";
 type DashboardTab = "reforms" | "option13";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+const PAPER_URL = process.env.NEXT_PUBLIC_PAPER_URL ?? "/paper/";
 
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
@@ -447,6 +449,15 @@ export function DashboardShell() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={PAPER_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
+                >
+                  <BookOpenText className="h-4 w-4" />
+                  Read paper
+                </a>
                 {activeTab === "reforms" ? (
                   <button
                     onClick={exportCsv}

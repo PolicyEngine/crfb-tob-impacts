@@ -41,16 +41,16 @@ Rendered output will be written to:
 
 ## Intended workflow
 
-1. keep the manuscript structure and source coverage current even before final
-   results land
+1. keep the manuscript structure and source coverage current as release
+   artifacts evolve
 2. generate Markdown exhibit fragments from shared artifacts into `exhibits/`
 3. update the small amount of interpretation text that depends on frozen values
 4. render and circulate the manuscript as the citable companion to the dashboard
 
 ## Current status
 
-This is a pre-results draft manuscript. It is no longer just a placeholder
-scaffold: it preserves the full option menu, methodology, validation framing,
-and publication architecture ahead of the final artifact freeze. The remaining
-release-critical work is mainly exhibit generation and final numerical
-interpretation.
+This is the citable manuscript track for the current release package. It
+preserves the full option menu, methodology, validation framing, exhibit
+contract, and source spine. Remaining work before journal-style circulation is
+primarily editorial: tighten the abstract/conclusion around the frozen release
+and copyedit the generated exhibits.
