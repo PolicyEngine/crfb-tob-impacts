@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "python3 -m venv .vercel-python && . .vercel-python/bin/activate && python -m pip install --upgrade pip && python -m pip install -e . && npm --prefix dashboard ci",
+  "installCommand": "python3 -m venv .vercel-python && . .vercel-python/bin/activate && python -m pip install --upgrade pip && python -m pip install -e . && cd dashboard && bun install",
   "buildCommand": "./scripts/build_vercel_site.sh",
   "outputDirectory": ".vercel-site"
 }

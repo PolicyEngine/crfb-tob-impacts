@@ -57,6 +57,14 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Setup Bun
+        if: steps.config.outputs.configured == 'true'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Quarto
+        if: steps.config.outputs.configured == 'true'
+        uses: quarto-dev/quarto-actions/setup@v2
+
       - name: Install Vercel CLI
         if: steps.config.outputs.configured == 'true'
         run: npm install --global vercel@latest
@@ -161,6 +169,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

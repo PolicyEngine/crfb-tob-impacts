@@ -14,14 +14,15 @@ The dashboard runs at `http://localhost:3000`.
 
 ## Production-style builds
 
-GitHub Pages builds use a base path:
+Optional subpath builds use a base path:
 
 ```bash
 cd dashboard
 NEXT_PUBLIC_BASE_PATH=/crfb-tob-impacts/dashboard npm run build
 ```
 
-Vercel preview builds should leave `NEXT_PUBLIC_BASE_PATH` empty.
+Vercel builds leave `NEXT_PUBLIC_BASE_PATH` empty so the dashboard is served at
+the site root. The Quarto paper is published separately at `/paper/`.
 
 ## Vercel deployment
 
@@ -33,4 +34,4 @@ Required GitHub repository secrets:
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
 
-Those secrets should point to the combined-site Vercel project at repo root. The workflow builds the docs plus dashboard site together and deploys previews for pull requests and production on `main`.
+Those secrets should point to the combined-site Vercel project at repo root. The workflow builds the dashboard plus Quarto paper together and deploys previews for pull requests and production on `main`.

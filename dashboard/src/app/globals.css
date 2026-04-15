@@ -1,11 +1,49 @@
 @import "tailwindcss";
-@import "@policyengine/design-system/tokens.css";
+@import "@policyengine/ui-kit/theme.css";
 
-@theme inline {
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
-  --color-background: var(--pe-color-bg-primary);
-  --color-foreground: var(--pe-color-text-primary);
+/*
+ * Backward-compat aliases: map the --pe-color-* names (used by existing
+ * component code) to the canonical ui-kit token names.
+ * New code should use the ui-kit names directly (e.g. var(--color-teal-700)).
+ */
+:root {
+  /* Primary palette */
+  --pe-color-primary-50: var(--color-teal-50);
+  --pe-color-primary-100: var(--color-teal-100);
+  --pe-color-primary-200: var(--color-teal-200);
+  --pe-color-primary-300: var(--color-teal-300);
+  --pe-color-primary-400: var(--color-teal-400);
+  --pe-color-primary-500: var(--color-teal-500);
+  --pe-color-primary-600: var(--color-teal-600);
+  --pe-color-primary-700: var(--color-teal-700);
+  --pe-color-primary-800: var(--color-teal-800);
+  --pe-color-primary-alpha-40: rgba(49, 151, 149, 0.4);
+
+  /* Gray palette */
+  --pe-color-gray-500: var(--color-gray-500);
+
+  /* Text */
+  --pe-color-text-primary: var(--text-primary);
+  --pe-color-text-secondary: var(--text-secondary);
+  --pe-color-text-tertiary: var(--text-tertiary);
+  --pe-color-text-title: var(--color-gray-900);
+  --pe-color-text-inverse: var(--text-inverse);
+
+  /* Background */
+  --pe-color-bg-primary: var(--background);
+  --pe-color-bg-secondary: var(--background-secondary);
+
+  /* Border */
+  --pe-color-border-light: var(--border-light);
+  --pe-color-border-medium: var(--border-medium);
+  --pe-color-border-dark: var(--border-dark);
+
+  /* Semantic */
+  --pe-color-error: var(--color-error);
+
+  /* Radius */
+  --pe-radius-feature: var(--radius-feature);
+  --pe-radius-container: var(--radius-container);
 }
 
 * {
@@ -18,9 +56,10 @@ html {
 
 body {
   margin: 0;
-  background: var(--pe-color-bg-secondary);
-  color: var(--pe-color-text-primary);
-  font-family: var(--font-inter);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
 }
 
 a {
@@ -35,5 +74,5 @@ select {
 }
 
 ::selection {
-  background: var(--pe-color-primary-alpha-40);
+  background: rgba(49, 151, 149, 0.22);
 }

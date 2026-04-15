@@ -1,0 +1,78 @@
+# Publication boundary and companion surfaces
+
+This repo now has three distinct publication roles.
+
+## 1. Interactive dashboard
+
+The Next.js dashboard is the current-results explorer. It is the right place
+for:
+
+- reform-level comparison
+- current static and dynamic outputs
+- special-case baseline views
+- direct access to downloadable current data products
+
+It is not the right place to carry the full narrative burden of methods,
+bibliography, and citation framing.
+
+## 2. Citable manuscript
+
+This Quarto paper is the stable narrative layer intended for:
+
+- SSRN submission
+- CRFB citation and external reference
+- methods exposition
+- benchmark framing
+- appendices and bibliography
+
+The manuscript should preserve the source trail and substantive chapter
+coverage of the first report while updating scope to the current fourteen-option
+package.
+
+## 3. Operational documentation
+
+Operational documentation answers a different question: not “what does the
+analysis conclude?” but “what exactly did we run, validate, and decide?”
+
+Those materials include:
+
+- current methodology and pipeline notes
+- reproducibility details
+- audit findings and sentinel evidence
+- delivery rules governing dashboard versus spreadsheet outputs
+
+## Citation architecture
+
+The clean long-run setup is:
+
+- cite the paper for narrative interpretation and methods
+- use the dashboard to explore current scenario outputs
+- use the operational docs to audit provenance and rerun decisions
+
+That split keeps the public-facing interpretation surface stable and citable
+without forcing the dashboard to double as the full methodological record.
+
+## Release discipline
+
+That separation only works if each surface is honest about result status.
+
+- If the standard static panel is clean but a special-case rerun is still in
+  flight, the paper should say so directly rather than implying a fully settled
+  fourteen-option package.
+- The dashboard may continue to expose the latest assembled special-case values,
+  but the manuscript should reserve “final” language for runs that have cleared
+  the full validation ladder.
+- Operational notes should carry the detailed rerun state, launch identifiers,
+  and recovery details needed to reconcile those two publication surfaces.
+
+For the current static package, that release discipline has been satisfied: the
+standard panel was rebuilt on the hardened exact-only path, and the special-case
+panel was recovered as a complete `2035-2100` artifact set before the delivery
+bundle was rebuilt.
+
+For the current dynamic package, the release surface is narrower but now
+settled: the standard dynamic panel (`option1-12`) has been recovered to a
+complete `2026-2100` artifact, while special-case dynamic scenarios are
+intentionally excluded from the current public delivery. Those scenarios would
+require a separate iterative balanced-fix solve after behavioral response, and
+that extra compute path is not part of the release contract for this package.

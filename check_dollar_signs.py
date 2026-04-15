@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Check and fix unescaped dollar signs in markdown files for MyST/LaTeX.
+Check and fix unescaped dollar signs in markdown files for Quarto/LaTeX.
 Identifies dollar signs used for currency that need escaping as \$
 """
 

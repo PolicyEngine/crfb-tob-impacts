@@ -1,0 +1,143 @@
+# Data and methods
+
+## Microdata foundation
+
+The analysis uses PolicyEngine US microsimulation with long-run projected
+microdata derived from the Enhanced CPS. The Enhanced CPS begins with the CPS
+ASEC, constructs tax units, imputes missing tax-relevant fields, and reweights
+the microdata to administrative targets [@peusdata].
+
+## Long-run projection strategy
+
+The long-run analysis uses a two-stage process:
+
+1. **Economic uprating** projects incomes, benefits, and tax parameters into a
+   target year using Trustees-style macroeconomic assumptions.
+2. **Demographic and fiscal calibration** adjusts household weights so the
+   projected dataset matches official age, benefit, payroll, and
+   taxation-of-benefits benchmarks.
+
+This architecture is designed to preserve household-level tax logic while still
+matching long-run aggregate targets from official sources.
+
+## Calibration targets
+
+The clean long-run rerun calibrates to official sources for:
+
+- single-year age population counts [@ssa2024population]
+- OASDI benefit totals [@ssa2025trustees]
+- Social Security taxable payroll [@ssa2025trustees]
+- Medicare fiscal context and Hospital Insurance targets [@medicare2025trustees]
+
+The standard contract uses exact yearly projected datasets rather than a
+stitched or donor-augmented fallback. That exactness requirement is part of the
+publication standard for the delivered series, not a secondary implementation
+detail.
+
+## Trust-fund accounting
+
+The analysis tracks both total revenue impact and its allocation across OASDI
+and HI. Under current law, the taxation of Social Security benefits contributes
+to both trust-fund systems, so reforms can change:
+
+- total federal revenue
+- OASDI trust-fund revenue
+- HI trust-fund revenue
+- the combined taxation-of-benefits base used to support those allocations
+
+That split is essential for interpreting reforms that may look similar in
+total-revenue space but differ in which trust fund gains or loses revenue.
+
+## Current rerun contract
+
+For the current clean standard-series rebuild, the intended delivery contract is:
+
+- target source: `trustees_2025_current_law`
+- calibration profile: `ss-payroll-tob`
+- tax assumption: `trustees-core-thresholds-v1`
+- exact-calibration-only acceptance for delivered years
+- pinned local worktrees for `policyengine-us` and `policyengine-us-data`
+- no donor-backed support augmentation in the production delivery path
+
+This contract replaces the mixed-lineage historical runs that produced the
+legacy stitched standard file.
+
+## Static and dynamic scoring
+
+The **static** series isolates the mechanical tax and trust-fund effects of
+policy changes. The **dynamic** series extends the same baseline lineage by
+layering in labor-supply responses.
+
+For the current project, the intended dynamic differences from plain upstream
+`policyengine-us` main are:
+
+- Trustees long-run uprating behavior
+- age-based labor-supply elasticities for behavioral-response scoring
+
+That means the dynamic series is not an independent model family. It should be
+interpreted as the same long-run baseline contract plus behavioral response.
+
+For the current release, that behavioral layer is published only for the
+standard reforms `option1` through `option12`. A dynamic version of
+`option13` or `option14_stacked` would require a separate iterative
+balanced-fix solve after behavioral response, so those special cases remain
+static-only in the released package.
+
+## Special-case assembly
+
+`option13` and `option14_stacked` are assembled through a special-case path
+rather than the standard `year x scenario` rescoring path:
+
+- `option13` begins in `2035`, so `2026-2034` are current-law placeholders
+- `option13` uses balanced-fix raw outputs generated from the same exact
+  Trustees-lineage projected datasets as the standard rerun, with a dedicated
+  `2100` HI endpoint treatment based on extrapolated Trustees fiscal inputs
+- `option14_stacked` chains the structural reform on top of the `option13` baseline
+
+That separation is an intentional part of the methodology, not an
+implementation accident.
+
+The special-case correction matters substantively, not just operationally. The
+legacy provisional endpoint implied a negative HI payroll-tax rate at `2100`,
+which is not used in the clean publication path. The corrected special-case
+contract first smoke-tests `2035` and `2100`, then reruns and recovers the full
+`2035-2100` panel from the same clean Trustees-lineage setup before publication.
+
+## Validation ladder
+
+Before the standard series is treated as publishable, it must pass a sequence
+of checks:
+
+1. dataset metadata validation against the intended target source, calibration
+   profile, and tax-assumption module
+2. exact-calibration coverage checks for delivered years
+3. sentinel rescoring in representative early, middle, and late years
+4. comparison against known legacy anomalies to confirm they do not reappear
+5. special-case verification for `option13` and `option14_stacked`
+
+The audit record for those checks lives outside this manuscript in the
+operational findings note, but the paper treats that validation ladder as part
+of the substantive methodology rather than as an operational afterthought.
+
+In the current workflow, that final special-case step has two layers:
+
+- smoke validation of key endpoint years such as `2035` and `2100`
+- full-panel rerun and recovery of the entire `2035-2100` special-case series
+
+The current static delivery satisfies both layers, so the manuscript can treat
+the recovered `option13` and `option14_stacked` point estimates as final static
+artifacts rather than provisional endpoint patches.
+
+## Limitations
+
+Even after the rebuild is clean, several limits remain important:
+
+- survey-based microsimulation still carries sampling and imputation error
+- Medicare expenditure modeling partly relies on Trustees-derived external
+  inputs rather than full microsimulation outgo
+- dynamic estimates are sensitive to the labor-supply elasticity specification
+- special-case balanced-fix endpoints, especially at `2100`, require dedicated
+  endpoint treatment rather than naive extrapolation
+- special-case dynamic balanced-fix runs were not part of the shipped release
+  because their post-response solve is substantially more computationally
+  expensive than the standard dynamic panel

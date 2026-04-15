@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
+  BookOpenText,
   Download,
-  LineChart,
   LoaderCircle,
 } from "lucide-react";
 import {
@@ -16,7 +17,8 @@ import {
   YAxis,
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Header, logos } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -37,6 +39,7 @@ import { useElementSize } from "@/lib/use-element-size";
 type DashboardTab = "reforms" | "option13";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+const PAPER_URL = process.env.NEXT_PUBLIC_PAPER_URL ?? "/paper/";
 
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
@@ -101,11 +104,13 @@ function MetricTile({
   value,
   tone = "neutral",
   caption,
+  accent = false,
 }: {
   label: string;
   value: string;
   tone?: "neutral" | "positive" | "negative";
   caption?: string;
+  accent?: boolean;
 }) {
   const toneClass =
     tone === "positive"
@@ -115,13 +120,19 @@ function MetricTile({
         : "text-[var(--pe-color-text-primary)]";
 
   return (
-    <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/85 px-5 py-4 shadow-[0_12px_28px_rgba(16,24,40,0.06)] backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
+    <div
+      className={`rounded-[var(--pe-radius-feature)] px-5 py-4 ${
+        accent
+          ? "border-l-[3px] border-l-[var(--pe-color-primary-500)] bg-white shadow-[0_12px_28px_rgba(16,24,40,0.06)]"
+          : "bg-[var(--pe-color-bg-secondary)]"
+      }`}
+    >
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
         {label}
       </p>
-      <p className={`mt-3 text-2xl font-semibold ${toneClass}`}>{value}</p>
+      <p className={`mt-2 text-2xl font-bold tracking-[-0.02em] ${toneClass}`}>{value}</p>
       {caption ? (
-        <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+        <p className="mt-1.5 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
           {caption}
         </p>
       ) : null}
@@ -146,23 +157,23 @@ function SeriesChart({
   }));
 
   return (
-    <div className="min-w-0 rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_40px_rgba(16,24,40,0.06)]">
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-            Revenue path
-          </p>
-          <h3 className="mt-2 text-xl font-semibold text-[var(--pe-color-text-title)]">
-            Total and trust-fund effects
-          </h3>
-        </div>
-        <p className="text-sm text-[var(--pe-color-text-secondary)]">
+    <div className="min-w-0 rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+        <h3 className="text-xl font-bold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
+          Revenue and trust-fund effects
+        </h3>
+        <p className="text-sm text-[var(--pe-color-text-tertiary)]">
           {displayUnit === "dollars"
             ? "Billions of nominal dollars"
             : displayUnit === "pctPayroll"
-              ? "Percent of taxable payroll"
-              : "Percent of GDP"}
+              ? "% of taxable payroll"
+              : "% of GDP"}
         </p>
+      </div>
+      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-[var(--pe-color-text-secondary)]">
+        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-text-primary)]" />Total</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-primary-500)]" />OASDI</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-gray-500)]" />HI</span>
       </div>
 
       <div ref={ref} className="h-[24rem]">
@@ -245,6 +256,11 @@ export function DashboardShell() {
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isEmbedded = useMemo(
+    () => typeof window !== "undefined" && window.self !== window.top,
+    [],
+  );
 
   useEffect(() => {
     let active = true;
@@ -332,71 +348,116 @@ export function DashboardShell() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(49,151,149,0.12),_transparent_32%),linear-gradient(180deg,_#f7fbfb_0%,_#eef3f7_100%)] text-[var(--pe-color-text-primary)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
+      {!isEmbedded && (
+        <Header
+          variant="dark"
+          logo={
+            <Image
+              src={logos.whiteWordmark}
+              alt="PolicyEngine"
+              width={140}
+              height={20}
+              className="h-5 w-auto"
+              priority
+            />
+          }
+        >
+          <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
+        </Header>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="mx-auto flex min-h-screen max-w-[1600px] gap-6 px-4 py-4 sm:px-6"
+        className="mx-auto flex max-w-[1600px] gap-6 px-4 py-6 sm:px-6"
       >
-        <aside className="hidden w-[18.5rem] shrink-0 rounded-[var(--pe-radius-feature)] border border-white/60 bg-[rgba(255,255,255,0.72)] p-5 shadow-[0_18px_48px_rgba(16,24,40,0.08)] backdrop-blur xl:block">
-          <div className="border-b border-[var(--pe-color-border-light)] pb-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--pe-color-primary-700)]">
-              PolicyEngine
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
-              Social Security TOB reform dashboard
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-              Interactive estimates for Social Security taxation-of-benefits reform options through 2100.
-            </p>
-          </div>
-
-          <div className="mt-6 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-              Reform options
-            </p>
-            {STANDARD_REFORMS.map((option) => {
-              const active = option.id === selectedReform;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    setActiveTab("reforms");
-                    setSelectedReform(option.id);
-                  }}
-                  className={`w-full rounded-[var(--pe-radius-container)] px-3 py-3 text-left transition ${
-                    active
-                      ? "bg-[var(--pe-color-primary-50)] text-[var(--pe-color-primary-800)] shadow-[inset_0_0_0_1px_var(--pe-color-primary-200)]"
-                      : "bg-white/60 text-[var(--pe-color-text-secondary)] hover:bg-white"
-                  }`}
-                >
-                  <div className="text-sm font-medium">{option.shortName}</div>
-                  <div className="mt-1 text-xs leading-5 opacity-80">{option.id}</div>
-                </button>
-              );
-            })}
-          </div>
+        <aside className="hidden w-[17rem] shrink-0 self-start xl:sticky xl:top-4 xl:block">
+          <nav className="space-y-5">
+            <div>
+              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+                Benefit tax rules
+              </h3>
+              <div className="mt-2 space-y-0.5">
+                {STANDARD_REFORMS.filter((r) =>
+                  ["option1", "option2", "option3", "option4", "option7", "option8", "option9", "option10", "option11"].includes(r.id),
+                ).map((option) => {
+                  const active = option.id === selectedReform && activeTab === "reforms";
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        setActiveTab("reforms");
+                        setSelectedReform(option.id);
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
+                        active
+                          ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
+                          : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
+                      }`}
+                    >
+                      {active && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
+                      <span>{option.shortName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+                Structural swaps
+              </h3>
+              <div className="mt-2 space-y-0.5">
+                {STANDARD_REFORMS.filter((r) =>
+                  ["option5", "option6", "option12", "option14_stacked"].includes(r.id),
+                ).map((option) => {
+                  const active = option.id === selectedReform && activeTab === "reforms";
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        setActiveTab("reforms");
+                        setSelectedReform(option.id);
+                      }}
+                      className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
+                        active
+                          ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
+                          : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
+                      }`}
+                    >
+                      {active && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
+                      <span>{option.shortName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </nav>
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col gap-6">
-          <section className="rounded-[var(--pe-radius-feature)] border border-white/70 bg-[rgba(255,255,255,0.74)] px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.08)] backdrop-blur">
+          {/* --- Editorial surface: no border, no shadow, whitespace-driven --- */}
+          <section className="px-1 py-2">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--pe-color-text-tertiary)]">
-                  <span>CRFB analysis</span>
-                  <span className="h-1 w-1 rounded-full bg-[var(--pe-color-border-dark)]" />
-                  <span>Dashboard v2</span>
-                </div>
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)] sm:text-4xl">
-                  Social Security Taxation Reform
+                <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-5xl">
+                  Social Security taxation reform
                 </h2>
-                <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
-                  This dashboard examines policy options for reforming Social Security, evaluating their budgetary impacts through 2100 using microsimulation modeling.
+                <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
+                  Policy options for reforming the taxation of Social Security benefits, with budgetary impacts through 2100. Analysis commissioned by the Committee for a Responsible Federal Budget.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={PAPER_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
+                >
+                  <BookOpenText className="h-4 w-4" />
+                  Read paper
+                </a>
                 {activeTab === "reforms" ? (
                   <button
                     onClick={exportCsv}
@@ -409,8 +470,8 @@ export function DashboardShell() {
               </div>
             </div>
 
-            <div className="mt-5 border-t border-[var(--pe-color-border-light)] pt-5">
-              <div className="inline-flex rounded-full border border-[var(--pe-color-border-medium)] bg-white p-1 shadow-[0_6px_18px_rgba(16,24,40,0.05)]">
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              <div className="inline-flex rounded-full border border-[var(--pe-color-border-medium)] bg-white p-1">
                 <button
                   onClick={() => setActiveTab("reforms")}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition ${
@@ -433,12 +494,15 @@ export function DashboardShell() {
                 </button>
               </div>
             </div>
+          </section>
 
-            {activeTab === "reforms" ? (
-            <div className="mt-5 xl:hidden">
+          {/* --- Controls surface: tinted bg, compact --- */}
+          {activeTab === "reforms" ? (
+          <section className="rounded-[var(--pe-radius-feature)] bg-[var(--pe-color-bg-secondary)] px-5 py-4">
+            <div className="xl:hidden">
               <label
                 htmlFor="reform-select"
-                className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]"
+                className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]"
               >
                 Reform option
               </label>
@@ -446,7 +510,7 @@ export function DashboardShell() {
                 id="reform-select"
                 value={selectedReform}
                 onChange={(event) => setSelectedReform(event.target.value)}
-                className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] shadow-[0_8px_24px_rgba(16,24,40,0.04)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
+                className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
               >
                 {STANDARD_REFORMS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -455,10 +519,8 @@ export function DashboardShell() {
                 ))}
               </select>
             </div>
-            ) : null}
 
-            {activeTab === "reforms" ? (
-            <div className="mt-5 flex flex-col gap-4 border-t border-[var(--pe-color-border-light)] pt-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="grid gap-3 sm:grid-cols-2 xl:flex">
                 <Segment
                   label="Scoring"
@@ -506,13 +568,13 @@ export function DashboardShell() {
                 />
               </div>
             </div>
-            ) : null}
           </section>
+          ) : null}
 
           {activeTab === "option13" ? (
             <Option13Tab />
           ) : loading ? (
-            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/80 shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
+            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
               <div className="flex items-center gap-3 text-[var(--pe-color-text-secondary)]">
                 <LoaderCircle className="h-5 w-5 animate-spin" />
                 <span>Loading policy impact data...</span>
@@ -536,7 +598,8 @@ export function DashboardShell() {
                     displayUnit,
                   )}
                   tone={isPositive(totals.tenYear) ? "positive" : "negative"}
-                  caption="2026-2035 cumulative effect"
+                  caption="2026-2035 cumulative"
+                  accent
                 />
                 <MetricTile
                   label="75-year effect"
@@ -545,12 +608,13 @@ export function DashboardShell() {
                     displayUnit,
                   )}
                   tone={isPositive(totals.total) ? "positive" : "negative"}
-                  caption="2026-2100 cumulative effect"
+                  caption="2026-2100 cumulative"
+                  accent
                 />
                 <MetricTile
                   label="2026 baseline TOB"
                   value={baseline2026 ? formatBillions(baseline2026.baselineTobTotal) : "n/a"}
-                  caption="Current baseline series loaded by the UI"
+                  caption="Current-law baseline"
                 />
                 <MetricTile
                   label="OASDI / HI split"
@@ -559,7 +623,7 @@ export function DashboardShell() {
                       ? `${Math.round((baseline2026.baselineTobOasdi / baseline2026.baselineTobTotal) * 100)} / ${Math.round((baseline2026.baselineTobMedicareHi / baseline2026.baselineTobTotal) * 100)}`
                       : "n/a"
                   }
-                  caption="2026 share of baseline TOB"
+                  caption="2026 baseline share"
                 />
               </section>
 
@@ -567,49 +631,45 @@ export function DashboardShell() {
                 <SeriesChart data={visibleData} displayUnit={displayUnit} />
 
                 <div className="min-w-0 space-y-6">
-                  <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
-                    <div className="flex items-center gap-2">
-                      <LineChart className="h-4 w-4 text-[var(--pe-color-primary-600)]" />
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-                        Spotlight years
-                      </p>
+                  {/* --- Dense data surface: table with minimal wrapping --- */}
+                  <div className="overflow-hidden rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)]">
+                    <div className="bg-[var(--pe-color-bg-secondary)] px-5 py-3">
+                      <h4 className="text-sm font-semibold text-[var(--pe-color-text-title)]">Spotlight years</h4>
                     </div>
-                    <div className="mt-4 overflow-hidden rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)]">
-                      <table className="min-w-full divide-y divide-[var(--pe-color-border-light)] text-sm">
-                        <thead className="bg-[var(--pe-color-bg-secondary)] text-[var(--pe-color-text-secondary)]">
-                          <tr>
-                            <th className="px-4 py-3">Year</th>
-                            <th className="px-4 py-3 text-right">Total</th>
-                            <th className="px-4 py-3 text-right">OASDI</th>
-                            <th className="px-4 py-3 text-right">HI</th>
+                    <table className="min-w-full divide-y divide-[var(--pe-color-border-light)] text-sm">
+                      <thead className="text-[var(--pe-color-text-secondary)]">
+                        <tr>
+                          <th className="px-5 py-2.5 text-left font-medium">Year</th>
+                          <th className="px-5 py-2.5 text-right font-medium">Total</th>
+                          <th className="px-5 py-2.5 text-right font-medium">OASDI</th>
+                          <th className="px-5 py-2.5 text-right font-medium">HI</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--pe-color-border-light)] bg-white">
+                        {spotlight.map((row) => (
+                          <tr key={row.year}>
+                            <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
+                              {row.year}
+                            </td>
+                            <td className="px-5 py-2.5 text-right font-semibold text-[var(--pe-color-text-primary)]">
+                              {formatValue(getSeriesValue(row, displayUnit, "total"), displayUnit)}
+                            </td>
+                            <td className="px-5 py-2.5 text-right text-[var(--pe-color-primary-700)]">
+                              {formatValue(getSeriesValue(row, displayUnit, "oasdi"), displayUnit)}
+                            </td>
+                            <td className="px-5 py-2.5 text-right text-[var(--pe-color-text-secondary)]">
+                              {formatValue(getSeriesValue(row, displayUnit, "hi"), displayUnit)}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[var(--pe-color-border-light)] bg-white">
-                          {spotlight.map((row) => (
-                            <tr key={row.year}>
-                              <td className="px-4 py-3 font-medium text-[var(--pe-color-text-primary)]">
-                                {row.year}
-                              </td>
-                              <td className="px-4 py-3 text-right text-[var(--pe-color-text-primary)]">
-                                {formatValue(getSeriesValue(row, displayUnit, "total"), displayUnit)}
-                              </td>
-                              <td className="px-4 py-3 text-right text-[var(--pe-color-primary-700)]">
-                                {formatValue(getSeriesValue(row, displayUnit, "oasdi"), displayUnit)}
-                              </td>
-                              <td className="px-4 py-3 text-right text-[var(--pe-color-text-secondary)]">
-                                {formatValue(getSeriesValue(row, displayUnit, "hi"), displayUnit)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
 
-                  <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
+                  <div className="rounded-[var(--pe-radius-feature)] bg-[var(--pe-color-bg-secondary)] px-5 py-5">
+                    <h4 className="text-sm font-semibold text-[var(--pe-color-text-title)]">
                       External checks
-                    </p>
+                    </h4>
                     {estimates.length > 0 ? (
                       <div className="mt-4 space-y-3">
                         {estimates.map((estimate) => (
@@ -654,16 +714,14 @@ export function DashboardShell() {
             </>
           )}
 
-          <footer className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white/80 px-5 py-5 text-sm text-[var(--pe-color-text-secondary)] shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
+          <footer className="border-t border-[var(--pe-color-border-light)] px-1 pt-6 pb-2 text-sm text-[var(--pe-color-text-tertiary)]">
             <p>
               Analysis by{" "}
-              <a href="https://policyengine.org" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)]">
+              <a href="https://policyengine.org" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)] hover:underline">
                 PolicyEngine
-              </a>{" "}
-              for the Committee for a Responsible Federal Budget
-            </p>
-            <p className="mt-2">
-              Data: 2025 Social Security Trustees Report | Model: PolicyEngine US
+              </a>
+              , commissioned by the Committee for a Responsible Federal Budget.
+              {" "}Data: 2025 Social Security Trustees Report.
             </p>
           </footer>
         </main>
@@ -671,6 +729,8 @@ export function DashboardShell() {
     </div>
   );
 }
+
+
 
 function Segment({
   label,

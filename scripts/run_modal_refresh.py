@@ -17,6 +17,7 @@ from runtime_config import (
     resolve_projected_datasets_path,
     resolve_projected_datasets_snapshot_path,
 )
+from repro_bundle import create_repro_bundle, resolved_environment_contract, snapshot_summary
 
 
 DEFAULT_POLICYENGINE_US_PATH = resolve_policyengine_us_path()
@@ -46,6 +47,11 @@ def parse_args() -> argparse.Namespace:
         help="Output CSV path passed through to modal_batch/compute.py::run_reforms.",
     )
     parser.add_argument(
+        "--cells-file",
+        type=Path,
+        help="Optional CSV listing exact reform/year cells to run instead of the full reforms x years cross-product.",
+    )
+    parser.add_argument(
         "--policyengine-us-path",
         type=Path,
         default=DEFAULT_POLICYENGINE_US_PATH,
@@ -71,8 +77,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--modal-target",
         default="run_reforms",
-        choices=["run_reforms", "run_cells"],
+        choices=["run_reforms", "run_cells", "submit_cells"],
         help="Which modal_batch/compute.py entrypoint to run.",
+    )
+    parser.add_argument(
+        "--repro-bundle-root",
+        type=Path,
+        default=REPO_ROOT / "results" / "repro_bundles",
+        help="Directory where run-level reproducibility bundles are written.",
     )
     return parser.parse_args()
 
@@ -126,9 +138,17 @@ def sync_snapshot(source: Path, snapshot: Path) -> None:
 
 def launch_modal(args: argparse.Namespace) -> int:
     env = os.environ.copy()
-    env["CRFB_POLICYENGINE_US_PATH"] = str(args.policyengine_us_path)
-    env["CRFB_PROJECTED_DATASETS_PATH"] = str(args.snapshot_path)
-    env["CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH"] = str(args.snapshot_path)
+    snapshot_info = snapshot_summary(args.snapshot_path)
+    contract_env = resolved_environment_contract(
+        policyengine_us_path=args.policyengine_us_path,
+        projected_datasets_path=args.snapshot_path,
+        snapshot_path=args.snapshot_path,
+        environ=env,
+        snapshot_info=snapshot_info,
+    )
+    for key, value in contract_env.items():
+        if value is not None:
+            env[key] = value
 
     command = [
         "uvx",
@@ -145,17 +165,19 @@ def launch_modal(args: argparse.Namespace) -> int:
 
     command.extend(
         [
-        str(REPO_ROOT / f"modal_batch/compute.py::{args.modal_target}"),
-        "--reforms",
-        args.reforms,
-        "--scoring",
-        args.scoring,
-        "--years",
-        args.years,
-        "--output",
-        args.output,
+            str(REPO_ROOT / f"modal_batch/compute.py::{args.modal_target}"),
+            "--reforms",
+            args.reforms,
+            "--scoring",
+            args.scoring,
+            "--years",
+            args.years,
+            "--output",
+            args.output,
         ]
     )
+    if args.cells_file:
+        command.extend(["--cells-file", str(args.cells_file)])
 
     print(f"Launching: {' '.join(command)}")
     completed = subprocess.run(command, cwd=REPO_ROOT, env=env)
@@ -166,6 +188,21 @@ def main() -> int:
     args = parse_args()
     sync_snapshot(args.projected_datasets_path, args.snapshot_path)
     print(f"Snapshot ready at {args.snapshot_path}")
+    bundle = create_repro_bundle(
+        repo_root=REPO_ROOT,
+        output_path=Path(args.output),
+        scoring=args.scoring,
+        reforms=args.reforms,
+        years=args.years,
+        modal_target=args.modal_target,
+        policyengine_us_path=args.policyengine_us_path,
+        projected_datasets_path=args.projected_datasets_path,
+        snapshot_path=args.snapshot_path,
+        bundle_root=args.repro_bundle_root,
+        cells_file=args.cells_file,
+    )
+    print(f"Reproducibility bundle: {bundle.bundle_dir}")
+    print(f"Run manifest: {bundle.manifest_path}")
     return launch_modal(args)
 
 

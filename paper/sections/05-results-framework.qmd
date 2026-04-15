@@ -1,0 +1,50 @@
+# Results framework
+
+The original public report devoted separate space to household impacts, revenue
+effects, and external comparisons. The updated manuscript keeps that structure,
+but it binds those sections to generated exhibits so that the final release can
+use cleaned current artifacts without rewriting the paper body.
+
+## Release logic
+
+The publication rule is:
+
+- dashboard-facing files should contain **current** rerun values only
+- comparison spreadsheets may retain legacy reference columns
+- the manuscript should cite shared generated exhibits rather than duplicate
+  results manually in prose
+
+## Core exhibit families
+
+### Overview results
+
+{{< include exhibits/results-overview.md >}}
+
+### Household impacts
+
+{{< include exhibits/household-impacts.md >}}
+
+### Revenue and trust-fund impacts
+
+{{< include exhibits/revenue-impacts.md >}}
+
+### Dynamic standard-panel
+
+{{< include exhibits/dynamic-results.md >}}
+
+### Balanced-fix and stacked-scenario
+
+{{< include exhibits/balanced-fix.md >}}
+
+In the current release, the dynamic exhibit is intentionally limited to the
+standard panel. The balanced-fix exhibit remains static because special-case
+dynamic scoring is outside the shipped release scope.
+
+## Interpretation boundary
+
+The paper structure is now wired to generated static exhibits rather than manual
+placeholder prose. The remaining manuscript work is narrower:
+
+1. refresh the exhibit fragments as artifacts evolve
+2. regenerate household exhibits once that track is clean
+3. tighten the abstract and conclusion around the frozen release package
