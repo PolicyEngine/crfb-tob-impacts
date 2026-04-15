@@ -245,6 +245,68 @@ function SeriesChart({
   );
 }
 
+function ReformBrief({
+  reform,
+  scoringType,
+}: {
+  reform: ReformMeta;
+  scoringType: ScoringType;
+}) {
+  return (
+    <motion.section
+      key={`${reform.id}-${scoringType}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]"
+    >
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        <div className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
+            Selected reform · {reform.category}
+          </p>
+          <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)]">
+            {reform.name}
+          </h3>
+          <p className="mt-3 text-base leading-7 text-[var(--pe-color-text-secondary)]">
+            {reform.description}
+          </p>
+        </div>
+        <div className="shrink-0 rounded-full bg-[var(--pe-color-primary-50)] px-4 py-2 text-sm font-semibold text-[var(--pe-color-primary-800)]">
+          {scoringType === "dynamic" ? "Conventional dynamic view" : "Static view"}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 border-t border-[var(--pe-color-border-light)] pt-5 lg:grid-cols-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
+            What changes
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+            {reform.mechanism}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
+            Baseline context
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+            {reform.baseline}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
+            How to read it
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+            {reform.interpretation} {reform.scoringNote}
+          </p>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
 export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("reforms");
   const [selectedReform, setSelectedReform] = useState("option1");
@@ -595,6 +657,10 @@ export function DashboardShell() {
               </div>
             </div>
           </section>
+          ) : null}
+
+          {activeTab === "reforms" ? (
+            <ReformBrief reform={reform} scoringType={scoringType} />
           ) : null}
 
           {activeTab === "paper" ? (
