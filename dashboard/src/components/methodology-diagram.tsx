@@ -6,7 +6,7 @@ export function MethodologyDiagram() {
         width="720"
         height="320"
         role="img"
-        aria-label="Two-stage projection methodology diagram showing economic uprating followed by GREG demographic calibration"
+        aria-label="Two-stage projection methodology diagram showing economic uprating followed by positive-entropy demographic and fiscal calibration"
         className="mx-auto h-auto max-w-full"
       >
         <rect x="0" y="0" width="720" height="320" fill="#f9fafb" rx="8" />
@@ -18,7 +18,7 @@ export function MethodologyDiagram() {
           STAGE 1: Economic Uprating
         </text>
         <text x="540" y="60" textAnchor="middle" fontSize="13" fontWeight="600" fill="#319795">
-          STAGE 2: GREG Calibration
+          STAGE 2: Entropy Calibration
         </text>
         <rect x="80" y="80" width="200" height="50" rx="6" fill="white" stroke="#d1d5db" strokeWidth="1" />
         <text x="180" y="100" textAnchor="middle" fontSize="12" fontWeight="500" fill="#374151">
@@ -59,10 +59,10 @@ export function MethodologyDiagram() {
         <path d="M520 170 L520 188 L515 183 M520 188 L525 183" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
         <rect x="420" y="195" width="200" height="50" rx="6" fill="#319795" stroke="#2c7a7b" strokeWidth="1" />
         <text x="520" y="215" textAnchor="middle" fontSize="12" fontWeight="600" fill="white">
-          GREG Calibration
+          Entropy Calibration
         </text>
         <text x="520" y="233" textAnchor="middle" fontSize="10" fill="#e6fffa">
-          &lt;0.1% error on all targets
+          Exact targets, non-negative weights
         </text>
         <path d="M520 245 L520 263 L515 258 M520 263 L525 258" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
         <rect x="420" y="268" width="200" height="42" rx="6" fill="#e6fffa" stroke="#319795" strokeWidth="1.5" />

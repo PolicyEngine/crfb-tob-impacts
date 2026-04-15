@@ -334,10 +334,19 @@ export function PaperTab() {
             <p>
               The analysis uses PolicyEngine US microsimulation with long-run
               projected microdata derived from the Enhanced CPS. The long-run
-              pipeline uses economic uprating followed by demographic and
-              fiscal calibration so household-level tax logic remains intact
-              while aggregate results match official targets.
+              pipeline uses Trustees-lineage economic uprating followed by
+              positive-entropy demographic and fiscal calibration so
+              household-level tax logic remains intact while aggregate results
+              match official targets.
             </p>
+            <Callout title="Formal methods">
+              <p>
+                The standalone paper contains the full estimator, scoring
+                equations, target matrix, dynamic elasticity schedule,
+                balanced-fix solve, and reproducibility contract. This tab is a
+                themed summary of that citable manuscript.
+              </p>
+            </Callout>
             <div className="grid gap-5 lg:grid-cols-2">
               <div>
                 <h3 className="text-base font-semibold text-[var(--pe-color-text-title)]">
@@ -357,6 +366,7 @@ export function PaperTab() {
                 <BulletList>
                   <li>Target source: trustees_2025_current_law.</li>
                   <li>Calibration profile: ss-payroll-tob.</li>
+                  <li>Calibration method: positive entropy with non-negative weights.</li>
                   <li>Tax assumption: trustees-core-thresholds-v1.</li>
                   <li>Exact-calibration-only acceptance for delivered years.</li>
                   <li>Pinned local worktrees for policyengine-us and policyengine-us-data.</li>

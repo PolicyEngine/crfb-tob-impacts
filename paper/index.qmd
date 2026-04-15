@@ -6,7 +6,7 @@ author:
   - "Ben Ogorek"
   - "Pavel Makarchuk"
   - "David Trimmer"
-date: 2026-04-10
+date: 2026-04-15
 lang: en
 abstract: |
   This draft manuscript is the narrative companion to the interactive Social

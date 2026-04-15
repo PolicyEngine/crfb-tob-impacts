@@ -6,7 +6,7 @@ export function MethodologyDiagram() {
         width="720"
         height="320"
         role="img"
-        aria-label="Two-stage projection methodology diagram showing economic uprating followed by GREG demographic calibration"
+        aria-label="Two-stage projection methodology diagram showing economic uprating followed by positive-entropy demographic and fiscal calibration"
       >
         {/* Background */}
         <rect x="0" y="0" width="720" height="320" fill="#f9fafb" rx="8" />
@@ -26,7 +26,7 @@ export function MethodologyDiagram() {
 
         {/* Stage 2 Header */}
         <text x="540" y="60" textAnchor="middle" fontSize="13" fontWeight="600" fill="#319795">
-          STAGE 2: GREG Calibration
+          STAGE 2: Entropy Calibration
         </text>
 
         {/* Stage 1 Boxes */}
@@ -82,13 +82,13 @@ export function MethodologyDiagram() {
         {/* Arrow down */}
         <path d="M520 170 L520 188 L515 183 M520 188 L525 183" stroke="#9ca3af" strokeWidth="1.5" fill="none" />
 
-        {/* GREG Calibration */}
+        {/* Positive-entropy calibration */}
         <rect x="420" y="195" width="200" height="50" rx="6" fill="#319795" stroke="#2c7a7b" strokeWidth="1" />
         <text x="520" y="215" textAnchor="middle" fontSize="12" fontWeight="600" fill="white">
-          GREG Calibration
+          Entropy Calibration
         </text>
         <text x="520" y="233" textAnchor="middle" fontSize="10" fill="#e6fffa">
-          {"<"}0.1% error on all targets
+          Exact targets, non-negative weights
         </text>
 
         {/* Arrow down */}
@@ -113,7 +113,7 @@ export function MethodologyDiagram() {
           markerEnd="url(#arrowhead)"
         />
 
-        {/* Arrow from Stage 1 bottom to Stage 2 GREG */}
+        {/* Arrow from Stage 1 bottom to Stage 2 calibration */}
         <path
           d="M280 255 Q350 255 350 220 L420 220"
           stroke="#319795"

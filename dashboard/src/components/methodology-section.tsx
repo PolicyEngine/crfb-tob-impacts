@@ -66,7 +66,7 @@ export function MethodologySection() {
       <div className="space-y-4">
         <AccordionItem
           title="Two-Stage Projection Methodology"
-          summary="75-year projections use economic uprating followed by GREG demographic calibration to match Trustees Report targets."
+          summary="75-year projections use economic uprating followed by positive-entropy calibration to match Trustees Report targets."
           defaultOpen
         >
           <p>
@@ -81,8 +81,9 @@ export function MethodologySection() {
             <li>Tax parameters are uprated according to statutory indexing rules.</li>
           </BulletList>
           <p className="mt-4">
-            <strong>Stage 2: Demographic Calibration</strong> — Household weights are adjusted
-            using GREG calibration to match SSA demographic and fiscal projections.
+            <strong>Stage 2: Demographic and fiscal calibration</strong> — Household weights
+            are adjusted using positive-entropy calibration to match SSA demographic
+            and fiscal projections while keeping weights non-negative.
           </p>
           <p className="mt-4">
             <strong>Key innovation:</strong> tax calculations happen at the household level
@@ -91,11 +92,15 @@ export function MethodologySection() {
         </AccordionItem>
 
         <AccordionItem
-          title="GREG Calibration Method"
+          title="Positive-Entropy Calibration Method"
           summary="Targets demographics, benefits, payroll, and trust-fund revenues."
         >
           <p>
-            <strong>GREG calibration</strong> simultaneously matches five official targets.
+            <strong>Positive-entropy calibration</strong> simultaneously matches five
+            official targets while minimizing divergence from the baseline
+            Enhanced CPS household weights. The current `ss-payroll-tob`
+            publication profile uses this entropy path; GREG is retained only
+            as a legacy flag-based option in the data pipeline.
           </p>
           <BulletList>
             <li><strong>Age distribution</strong> — 86 categories from SSA population projections.</li>

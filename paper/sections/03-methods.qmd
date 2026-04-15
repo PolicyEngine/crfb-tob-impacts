@@ -1,143 +1,297 @@
 # Data and methods
 
-## Microdata foundation
+## Estimand and unit of analysis
 
-The analysis uses PolicyEngine US microsimulation with long-run projected
-microdata derived from the Enhanced CPS. The Enhanced CPS begins with the CPS
-ASEC, constructs tax units, imputes missing tax-relevant fields, and reweights
-the microdata to administrative targets [@peusdata].
+The analysis estimates annual federal revenue and trust-fund effects of each
+reform from `2026` through `2100`. Let $i$ index households, $y$ index
+calendar years, $w_{iy}$ denote the calibrated household weight for year
+$y$, and $P_0$ and $P_s$ denote current law and reform scenario $s$.
+The static revenue effect reported for scenario $s$ in year $y$ is
 
-## Long-run projection strategy
+$$
+\Delta^{static}_{sy}
+= \sum_i w_{iy} R_i(P_s, D_{iy}) - \sum_i w_{iy} R_i(P_0, D_{iy}),
+$$
 
-The long-run analysis uses a two-stage process:
+where $D_{iy}$ is the projected household record and $R_i(\cdot)$ is the
+PolicyEngine federal income-tax liability calculation. Trust-fund effects are
+computed analogously for the OASDI and Hospital Insurance (HI) revenue
+components described below. The static estimand therefore holds the projected
+population, income, and benefit distribution fixed within a year and varies
+only the policy parameters.
 
-1. **Economic uprating** projects incomes, benefits, and tax parameters into a
-   target year using Trustees-style macroeconomic assumptions.
-2. **Demographic and fiscal calibration** adjusts household weights so the
-   projected dataset matches official age, benefit, payroll, and
-   taxation-of-benefits benchmarks.
+The dynamic, or conventional, estimand uses the same projected data and
+baseline contract but lets the policy reform trigger PolicyEngine labor-supply
+response variables before revenue is measured:
 
-This architecture is designed to preserve household-level tax logic while still
-matching long-run aggregate targets from official sources.
+$$
+\Delta^{dynamic}_{sy}
+= \sum_i w_{iy} R_i(P_s, D_{iy}, L_i(P_s))
+- \sum_i w_{iy} R_i(P_0, D_{iy}, L_i(P_0)).
+$$
+
+The behavioral component $L_i(\cdot)$ is limited to the conventional
+labor-supply response layer. The model does not endogenously reproject
+population, wage growth, interest rates, benefit claiming, mortality, or the
+Social Security trust-fund balance in response to a reform.
+
+## Base microdata
+
+The microdata foundation is PolicyEngine's Enhanced CPS 2024 file, loaded in
+the long-run data pipeline as
+`hf://policyengine/policyengine-us-data/enhanced_cps_2024.h5`. The Enhanced CPS
+starts from the CPS Annual Social and Economic Supplement [@census2024cpsasec],
+constructs tax units and households, imputes tax-relevant variables not
+directly observed in the survey, and attaches PolicyEngine weights and input
+variables [@peusdata]. PolicyEngine then applies the federal income-tax,
+payroll-tax, Social Security benefit-taxation, and benefit-program rules needed
+for this analysis.
+
+The projection and scoring stack uses households as the aggregation unit. For
+variables originally defined at person or tax-unit level, PolicyEngine maps
+values to households before calibration or national aggregation. This
+household-level contract matters because the taxation of Social Security
+benefits depends on tax-unit filing status, combined income, Social Security
+benefits, and other income sources, while the projection weights are stored on
+household records.
+
+## Long-run projection
+
+For each year $y$, the data pipeline starts from the Enhanced CPS and uses
+PolicyEngine's uprating system to calculate year-$y$ income, benefit, and tax
+variables. The current publication contract uses Trustees-lineage economic
+assumptions rather than the plain CBO-style assumptions in the upstream model.
+The named target source is `trustees_2025_current_law`, based on the 2025
+Social Security Trustees current-law projections [@ssa2025trustees], with
+Medicare HI context from the 2025 Medicare Trustees Report
+[@medicare2025trustees]. The policy parameter assumption for the project is
+`trustees-core-thresholds-v1`.
+
+The projection script builds a year-specific dataset only after it has
+calculated all calibration variables at household level. The saved H5 sidecar
+contains the year-$y$ household weights and year-$y$ input variables.
+Pseudo-input variables that are actually aggregates of calculated components
+are excluded before writing the H5, avoiding stale aggregate values in later
+rescoring. Each delivered dataset is accompanied by metadata recording the base
+dataset, calibration profile, target source, calibration audit, and validation
+status.
 
 ## Calibration targets
 
-The clean long-run rerun calibrates to official sources for:
+The current long-run profile is `ss-payroll-tob`. It calibrates household
+weights to official demographic and fiscal targets while preserving the
+household-level tax calculation. The profile includes five target families.
 
-- single-year age population counts [@ssa2024population]
-- OASDI benefit totals [@ssa2025trustees]
-- Social Security taxable payroll [@ssa2025trustees]
-- Medicare fiscal context and Hospital Insurance targets [@medicare2025trustees]
+**Age distribution.** The household age-composition matrix has 86 columns:
+single-year ages `0` through `84` and a top-coded `85+` category. Targets come
+from SSA single-year age population projections for the Social Security area
+[@ssa2024population]. This keeps the projected microdata aligned to official
+aging assumptions.
 
-The standard contract uses exact yearly projected datasets rather than a
-stitched or donor-augmented fallback. That exactness requirement is part of the
-publication standard for the delivered series, not a secondary implementation
-detail.
+**OASDI benefits.** The model aggregates the household-level `social_security`
+variable and calibrates the weighted total to the 2025 Social Security Trustees
+benefit projection [@ssa2025trustees]. This controls the benefit base affected
+by taxation reforms and benefit cuts.
 
-## Trust-fund accounting
+**OASDI taxable payroll.** The model combines household-level taxable wages and
+taxable self-employment income subject to the Social Security payroll-tax base
+and calibrates the weighted total to the Trustees taxable-payroll projection
+[@ssa2025trustees]. This controls the wage base for payroll-tax and solvency
+comparisons.
 
-The analysis tracks both total revenue impact and its allocation across OASDI
-and HI. Under current law, the taxation of Social Security benefits contributes
-to both trust-fund systems, so reforms can change:
+**OASDI taxation-of-benefits revenue.** The household-level `tob_revenue_oasdi`
+variable is calibrated to Trustees-lineage current-law taxation-of-benefits
+targets. This controls the Social Security trust-fund component of baseline
+benefit taxation.
 
-- total federal revenue
-- OASDI trust-fund revenue
-- HI trust-fund revenue
-- the combined taxation-of-benefits base used to support those allocations
+**HI taxation-of-benefits revenue.** The household-level
+`tob_revenue_medicare_hi` variable is calibrated to the Medicare/Trustees-lineage
+HI taxation-of-benefits target [@medicare2025trustees]. This controls the
+Medicare trust-fund component of baseline benefit taxation.
 
-That split is essential for interpreting reforms that may look similar in
-total-revenue space but differ in which trust fund gains or loses revenue.
+The production delivery path is exact-calibration only for delivered years. The
+runtime rejects aggregate-quality calibration, rejects IPF fallback, checks that
+the dataset metadata matches the required target source and profile, and
+requires all published files to come from validated year-level H5 artifacts.
 
-## Current rerun contract
+## Calibration estimator
 
-For the current clean standard-series rebuild, the intended delivery contract is:
+The current named profile uses positive entropy calibration, not the legacy
+GREG calibration path. Earlier internal notes used "GREG" as shorthand for the
+second-stage reweighting process, but the delivered `ss-payroll-tob` profile is
+implemented as positive entropy calibration. GREG remains in the data repo only
+as an explicit legacy option for flag-based runs.
 
-- target source: `trustees_2025_current_law`
-- calibration profile: `ss-payroll-tob`
-- tax assumption: `trustees-core-thresholds-v1`
-- exact-calibration-only acceptance for delivered years
-- pinned local worktrees for `policyengine-us` and `policyengine-us-data`
-- no donor-backed support augmentation in the production delivery path
+Let $w_i^0$ be the initial household weight, $a_i$ be the vector of
+calibration variables for household $i$, and $t_y$ be the target vector for
+year $y$. The estimator chooses strictly positive weights $w_i$ that solve
 
-This contract replaces the mixed-lineage historical runs that produced the
-legacy stitched standard file.
+$$
+\min_{w_i>0}
+\sum_i \left[
+w_i \log\left(\frac{w_i}{w_i^0}\right) - w_i + w_i^0
+\right]
+\quad\text{subject to}\quad
+\sum_i w_i a_i = t_y .
+$$
 
-## Static and dynamic scoring
+This is the entropy-balancing analogue of survey calibration
+[@deville1992calibration; @hainmueller2012entropy]. The implementation solves
+the dual problem. With scaled constraints $a_i^*$ and targets $t_y^*$, the
+dual implies
 
-The **static** series isolates the mechanical tax and trust-fund effects of
-policy changes. The **dynamic** series extends the same baseline lineage by
-layering in labor-supply responses.
+$$
+w_i(\beta) = w_i^0 \exp(a_i^{*\prime}\beta),
+$$
 
-For the current project, the intended dynamic differences from plain upstream
-`policyengine-us` main are:
+and the solver finds $\beta$ such that
+$$
+\sum_i w_i(\beta) a_i^* = t_y^*.
+$$
 
-- Trustees long-run uprating behavior
-- age-based labor-supply elasticities for behavioral-response scoring
+The implementation uses a Newton/root solve with line search, records the
+achieved target errors, and reports the maximum age-bin error, maximum fiscal
+constraint error, negative-weight share, effective sample size, and top-weight
+concentration. Because the entropy parameterization is strictly positive, the
+publication target is a zero negative-weight share. If exact positive
+calibration is infeasible under the available survey support, the data pipeline
+can diagnose approximate feasibility, but the CRFB runtime is configured to
+reject non-exact publication artifacts.
 
-That means the dynamic series is not an independent model family. It should be
-interpreted as the same long-run baseline contract plus behavioral response.
+## Policy simulation and trust-fund accounting
 
-For the current release, that behavioral layer is published only for the
-standard reforms `option1` through `option12`. A dynamic version of
-`option13` or `option14_stacked` would require a separate iterative
-balanced-fix solve after behavioral response, so those special cases remain
-static-only in the released package.
+For each standard scenario and year, the scoring code loads the calibrated
+year-$y$ dataset, runs a baseline PolicyEngine simulation, runs the reform
+simulation on the same calibrated records, and stores both levels and
+differences. The core output columns are:
 
-## Special-case assembly
+| Output | Definition |
+|---|---|
+| `revenue_impact` | Reform minus baseline federal income tax. |
+| `tob_oasdi_impact` | Reform minus baseline OASDI taxation-of-benefits revenue. |
+| `tob_medicare_hi_impact` | Reform minus baseline HI taxation-of-benefits revenue. |
+| `tob_total_impact` | Sum of the OASDI and HI taxation-of-benefits impacts. |
+| `oasdi_net_impact` | Net OASDI trust-fund impact after reform-specific gains and losses. |
+| `hi_net_impact` | Net HI trust-fund impact after reform-specific gains and losses. |
 
-`option13` and `option14_stacked` are assembled through a special-case path
-rather than the standard `year x scenario` rescoring path:
+The trust-fund allocation depends on reform design. Direct benefit-taxation
+components use the model's OASDI and HI taxation-of-benefits variables. Senior
+deduction or credit components change general income-tax liability; unless they
+also alter Social Security taxability, they do not create dedicated OASDI or HI
+revenue. Employer-payroll-tax swap options add the modeled income-tax revenue
+from taxing employer OASDI and Medicare contributions, then subtract lost
+baseline taxation-of-benefits revenue. For `option6`, the phase-in allocation
+assigns early employer-contribution gains to OASDI first until the OASDI share
+of the payroll-tax rate is filled, then to HI.
 
-- `option13` begins in `2035`, so `2026-2034` are current-law placeholders
-- `option13` uses balanced-fix raw outputs generated from the same exact
-  Trustees-lineage projected datasets as the standard rerun, with a dedicated
-  `2100` HI endpoint treatment based on extrapolated Trustees fiscal inputs
-- `option14_stacked` chains the structural reform on top of the `option13` baseline
+This allocation convention is why total federal revenue and trust-fund revenue
+do not always move one-for-one. A reform can raise individual income-tax
+revenue while weakening one trust fund, or it can replace taxation-of-benefits
+revenue with employer-contribution revenue allocated differently across OASDI
+and HI.
 
-That separation is an intentional part of the methodology, not an
-implementation accident.
+## Dynamic scoring
 
-The special-case correction matters substantively, not just operationally. The
-legacy provisional endpoint implied a negative HI payroll-tax rate at `2100`,
-which is not used in the clean publication path. The corrected special-case
-contract first smoke-tests `2035` and `2100`, then reruns and recovers the full
-`2035-2100` panel from the same clean Trustees-lineage setup before publication.
+The conventional dynamic series uses the same calibrated datasets as the static
+series but applies PolicyEngine's labor-supply response layer inside the reform
+simulation. The dynamic reform dictionaries merge the statutory reform
+parameters with the project's age-based elasticity schedule:
 
-## Validation ladder
+- income elasticity base: `-0.05`
+- income elasticity multiplier above the model's older-worker threshold: `2.0`
+- primary-earner substitution elasticities by decile: `0.31`, `0.28`, `0.27`,
+  `0.27`, `0.25`, `0.25`, `0.22`, `0.22`, `0.22`, and `0.22`
+- secondary-earner substitution elasticity: `0.27`
+- substitution elasticity multiplier above the older-worker threshold: `2.0`
 
-Before the standard series is treated as publishable, it must pass a sequence
-of checks:
+The doubled older-worker elasticity reflects the literature review judgment
+used for this project: near-retirement and retirement-age workers are more
+responsive on the labor-supply margin than prime-age workers. Dynamic results
+therefore should be interpreted as conventional revenue estimates under that
+specific elasticity schedule, not as macroeconomic forecasts.
 
-1. dataset metadata validation against the intended target source, calibration
-   profile, and tax-assumption module
-2. exact-calibration coverage checks for delivered years
-3. sentinel rescoring in representative early, middle, and late years
-4. comparison against known legacy anomalies to confirm they do not reappear
-5. special-case verification for `option13` and `option14_stacked`
+The public dynamic release covers only standard reforms `option1` through
+`option12`. A dynamic version of `option13` or `option14_stacked` would require
+re-solving the balanced-fix payroll-rate and benefit-cut parameters after the
+labor-supply response, because the response changes taxable payroll, income-tax
+revenue, and trust-fund gaps. That iterative special-case dynamic solve is not
+part of the current release contract.
 
-The audit record for those checks lives outside this manuscript in the
-operational findings note, but the paper treats that validation ladder as part
-of the substantive methodology rather than as an operational afterthought.
+## Balanced-fix special cases
 
-In the current workflow, that final special-case step has two layers:
+`option13` and `option14_stacked` are not ordinary reforms scored against
+current law. They are assembled through a special-case pipeline beginning in
+`2035`, with current-law placeholders for `2026-2034`.
 
-- smoke validation of key endpoint years such as `2035` and `2100`
-- full-panel rerun and recovery of the entire `2035-2100` special-case series
+For `option13`, the pipeline first calculates current-law OASDI income, OASDI
+benefits, HI income, and HI expenditures. OASDI income includes employee,
+employer, and self-employment Social Security taxes plus OASDI
+taxation-of-benefits revenue. HI income includes employee, employer,
+self-employment Medicare taxes, Additional Medicare Tax, and HI
+taxation-of-benefits revenue. HI expenditures are loaded from the Trustees HI
+series. Where the input file lacks a public annual `2100` value, the endpoint
+is extrapolated from the `2090-2099` observations.
 
-The current static delivery satisfies both layers, so the manuscript can treat
-the recovered `option13` and `option14_stacked` point estimates as final static
-artifacts rather than provisional endpoint patches.
+The balanced-fix solve then proceeds in two stages:
+
+1. Apply a proportional Social Security benefit cut equal to one-half of the
+   current-law OASDI shortfall, then recompute OASDI and HI income after the
+   benefit cut. This step captures the actual taxation-of-benefits feedback
+   from lower benefits rather than applying a fixed gross-up approximation.
+2. Close the remaining OASDI gap with a Social Security payroll-tax rate
+   increase on taxable OASDI payroll, and close the remaining HI gap with a
+   Medicare payroll-tax rate change on uncapped payroll. Each rate change is
+   split evenly between employee and employer rates. If the post-benefit-cut
+   HI system is in surplus, the HI payroll rate change is negative.
+
+The recorded `option13` result includes the benefit multiplier, payroll-rate
+changes, income-tax impact, taxation-of-benefits impacts, rate-increase
+revenue, and final OASDI and HI gaps.
+
+`option14_stacked` compares the `option12` structural swap against the
+`option13` balanced-fix baseline. Operationally, the `option13` reform output
+becomes the baseline for `option14_stacked`, while the reform side uses the
+`option12` structural parameters. The resulting estimate is therefore not
+comparable to standard `option12` as a current-law delta; it is the incremental
+effect of the structural swap relative to the balanced-fix baseline.
+
+## Reproducibility and validation
+
+The publication workflow treats reproducibility as part of the method rather
+than as a post hoc implementation detail. A run is publishable only if the
+result artifacts can be traced to:
+
+- a locked Python environment from `uv.lock`
+- explicit local `policyengine-us` and `policyengine-us-data` worktrees
+- a calibrated projected-dataset snapshot
+- a machine-readable calibration manifest and year-level metadata sidecars
+- the exact Enhanced CPS base dataset path and, when recorded, the resolved
+  blob hash
+- git SHAs and dirty-state records for this repo and both sibling repos
+- patch artifacts for any dirty local overrides that affected the run
+
+The Modal launch wrapper writes a run-level reproducibility bundle before
+submitting work. The runtime environment then requires the expected calibration
+profile, target source, tax assumption, and minimum calibration quality. That
+fail-closed design prevents a detached batch run from silently mixing lineages.
+
+Validation occurs at three levels. First, each projected H5 must satisfy the
+metadata and calibration-audit contract. Second, reform rescoring is smoke
+tested in representative early, middle, and late years before full-panel
+publication. Third, the assembled dashboard, spreadsheet, and manuscript
+exhibits are generated from shared result artifacts rather than hand-maintained
+tables. The validation chapter reports the current status of those checks.
 
 ## Limitations
 
-Even after the rebuild is clean, several limits remain important:
-
-- survey-based microsimulation still carries sampling and imputation error
-- Medicare expenditure modeling partly relies on Trustees-derived external
-  inputs rather than full microsimulation outgo
-- dynamic estimates are sensitive to the labor-supply elasticity specification
-- special-case balanced-fix endpoints, especially at `2100`, require dedicated
-  endpoint treatment rather than naive extrapolation
-- special-case dynamic balanced-fix runs were not part of the shipped release
-  because their post-response solve is substantially more computationally
-  expensive than the standard dynamic panel
+Several limitations remain even after the clean rerun. The base microdata are
+survey-derived and therefore carry sampling error, item nonresponse, and
+imputation error. Calibration matches selected aggregate margins, not the full
+joint distribution of age, earnings, Social Security benefits, filing status,
+health spending, and assets. Long-run HI expenditures enter the balanced-fix
+special case as an external Trustees-derived series rather than as a
+micro-simulated spending model. Dynamic estimates are sensitive to the chosen
+labor-supply elasticities and do not include macro feedback, portfolio
+responses, claiming responses, mortality changes, or political feedback from
+trust-fund exhaustion. Finally, special-case dynamic scoring is intentionally
+excluded because it would require a separate iterative solve.
