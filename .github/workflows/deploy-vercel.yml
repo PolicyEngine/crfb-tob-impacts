@@ -64,6 +64,8 @@ jobs:
       - name: Setup Quarto
         if: steps.config.outputs.configured == 'true'
         uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
 
       - name: Install Vercel CLI
         if: steps.config.outputs.configured == 'true'
@@ -175,6 +177,8 @@ jobs:
 
       - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
