@@ -23,6 +23,7 @@ import { Header, logos } from "@policyengine/ui-kit";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
 import { Option13Tab } from "@/components/option13-tab";
+import { PaperTab } from "@/components/paper-tab";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
   calculateTotals,
@@ -36,10 +37,9 @@ import {
 import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { useElementSize } from "@/lib/use-element-size";
 
-type DashboardTab = "reforms" | "option13";
+type DashboardTab = "reforms" | "option13" | "paper";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
-const PAPER_URL = process.env.NEXT_PUBLIC_PAPER_URL ?? "/paper/";
 
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
@@ -432,6 +432,24 @@ export function DashboardShell() {
                 })}
               </div>
             </div>
+            <div>
+              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+                Publication
+              </h3>
+              <div className="mt-2 space-y-0.5">
+                <button
+                  onClick={() => setActiveTab("paper")}
+                  className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
+                    activeTab === "paper"
+                      ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
+                      : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
+                  }`}
+                >
+                  {activeTab === "paper" && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
+                  <span>Citable paper</span>
+                </button>
+              </div>
+            </div>
           </nav>
         </aside>
 
@@ -449,15 +467,13 @@ export function DashboardShell() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <a
-                  href={PAPER_URL}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  onClick={() => setActiveTab("paper")}
                   className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
                 >
                   <BookOpenText className="h-4 w-4" />
                   Read paper
-                </a>
+                </button>
                 {activeTab === "reforms" ? (
                   <button
                     onClick={exportCsv}
@@ -491,6 +507,16 @@ export function DashboardShell() {
                   }`}
                 >
                   Balanced Fix baseline
+                </button>
+                <button
+                  onClick={() => setActiveTab("paper")}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    activeTab === "paper"
+                      ? "bg-[var(--pe-color-primary-600)] text-white"
+                      : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
+                  }`}
+                >
+                  Paper
                 </button>
               </div>
             </div>
@@ -571,7 +597,9 @@ export function DashboardShell() {
           </section>
           ) : null}
 
-          {activeTab === "option13" ? (
+          {activeTab === "paper" ? (
+            <PaperTab />
+          ) : activeTab === "option13" ? (
             <Option13Tab />
           ) : loading ? (
             <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
