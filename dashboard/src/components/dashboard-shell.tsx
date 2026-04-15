@@ -41,10 +41,10 @@ type DashboardTab = "reforms" | "option13" | "paper";
 type ViewMode = "10year" | "75year";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
-const LONG_RUN_X_AXIS_TICKS = Array.from(
-  { length: (2100 - 2030) / 5 + 1 },
-  (_, index) => 2030 + index * 5,
-);
+const LONG_RUN_X_AXIS_TICKS = [
+  2026,
+  ...Array.from({ length: (2100 - 2030) / 5 + 1 }, (_, index) => 2030 + index * 5),
+];
 
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
