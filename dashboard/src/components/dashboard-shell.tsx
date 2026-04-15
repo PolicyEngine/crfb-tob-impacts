@@ -38,8 +38,13 @@ import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { useElementSize } from "@/lib/use-element-size";
 
 type DashboardTab = "reforms" | "option13" | "paper";
+type ViewMode = "10year" | "75year";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+const LONG_RUN_X_AXIS_TICKS = [
+  2026,
+  ...Array.from({ length: (2100 - 2030) / 5 + 1 }, (_, index) => 2030 + index * 5),
+];
 
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
@@ -143,11 +148,15 @@ function MetricTile({
 function SeriesChart({
   data,
   displayUnit,
+  viewMode,
 }: {
   data: YearlyImpact[];
   displayUnit: DisplayUnit;
+  viewMode: ViewMode;
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
+  const xAxisTicks =
+    viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
 
   const chartData = data.map((row) => ({
     year: row.year,
@@ -192,6 +201,8 @@ function SeriesChart({
               <CartesianGrid stroke="var(--pe-color-border-light)" strokeDasharray="4 4" vertical={false} />
               <XAxis
                 dataKey="year"
+                ticks={xAxisTicks}
+                interval={viewMode === "75year" ? 0 : undefined}
                 tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
@@ -314,7 +325,7 @@ export function DashboardShell() {
   const [allocationMode, setAllocationMode] =
     useState<AllocationMode>("baselineShares");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("dollars");
-  const [viewMode, setViewMode] = useState<"10year" | "75year">("10year");
+  const [viewMode, setViewMode] = useState<ViewMode>("10year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -362,7 +373,7 @@ export function DashboardShell() {
     setAllocationMode(next);
   }
 
-  function handleViewModeChange(next: "10year" | "75year") {
+  function handleViewModeChange(next: ViewMode) {
     setViewMode(next);
     setDisplayUnit(next === "10year" ? "dollars" : "pctPayroll");
   }
@@ -648,7 +659,7 @@ export function DashboardShell() {
                 <Segment
                   label="Period"
                   value={viewMode}
-                  onChange={(next) => handleViewModeChange(next as "10year" | "75year")}
+                  onChange={(next) => handleViewModeChange(next as ViewMode)}
                   options={[
                     { label: "10-year", value: "10year" },
                     { label: "75-year", value: "75year" },
@@ -722,7 +733,11 @@ export function DashboardShell() {
               </section>
 
               <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.7fr)_minmax(22rem,0.9fr)]">
-                <SeriesChart data={visibleData} displayUnit={displayUnit} />
+                <SeriesChart
+                  data={visibleData}
+                  displayUnit={displayUnit}
+                  viewMode={viewMode}
+                />
 
                 <div className="min-w-0 space-y-6">
                   {/* --- Dense data surface: table with minimal wrapping --- */}
