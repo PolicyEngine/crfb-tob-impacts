@@ -18,26 +18,26 @@ function AccordionItem({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
+    <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
       <button
         onClick={() => setIsOpen((current) => !current)}
-        className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left"
+        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left"
         aria-expanded={isOpen}
       >
         <div>
-          <h3 className="text-lg font-semibold text-[var(--pe-color-text-title)]">
+          <h3 className="text-base font-semibold text-[var(--pe-color-text-title)]">
             {title}
           </h3>
-          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+          <p className="mt-1 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
             {summary}
           </p>
         </div>
-        <span className="mt-1 text-[var(--pe-color-text-tertiary)]">
+        <span className="mt-1 text-lg leading-none text-[var(--pe-color-text-tertiary)]">
           {isOpen ? "−" : "+"}
         </span>
       </button>
       {isOpen ? (
-        <div className="border-t border-[var(--pe-color-border-light)] px-5 py-5 text-sm leading-7 text-[var(--pe-color-text-secondary)]">
+        <div className="border-t border-[var(--pe-color-border-light)] px-5 py-4 text-sm leading-7 text-[var(--pe-color-text-secondary)]">
           {children}
         </div>
       ) : null}
@@ -51,14 +51,18 @@ function BulletList({ children }: { children: React.ReactNode }) {
 
 export function MethodologySection() {
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 border-t border-[var(--pe-color-border-light)] pt-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-          Methodology
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold text-[var(--pe-color-text-title)]">
-          Methods and external resources
+        <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
+          Methods and sources
         </h2>
+        <p className="mt-2 text-sm text-[var(--pe-color-text-secondary)]">
+          Summary methodology. See the{" "}
+          <a href="/paper/" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)] hover:underline">
+            citable paper
+          </a>{" "}
+          for the full methodology and bibliography.
+        </p>
       </div>
 
       <MethodologyDiagram />
@@ -176,28 +180,28 @@ export function MethodologySection() {
         </AccordionItem>
       </div>
 
-      <div className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
-        <h3 className="text-lg font-semibold text-[var(--pe-color-text-title)]">
+      <div className="rounded-[var(--pe-radius-feature)] bg-[var(--pe-color-bg-secondary)] px-5 py-4">
+        <h3 className="text-base font-semibold text-[var(--pe-color-text-title)]">
           External resources
         </h3>
-        <ul className="mt-4 space-y-3 text-sm text-[var(--pe-color-primary-700)]">
+        <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm text-[var(--pe-color-primary-700)] sm:grid-cols-2">
           <li>
-            <a href="/paper/" target="_blank" rel="noreferrer">
-              Citable paper and methodology
+            <a href="/paper/" target="_blank" rel="noreferrer" className="hover:underline">
+              Citable paper
             </a>
           </li>
           <li>
-            <a href="https://www.ssa.gov/oact/tr/2025/" target="_blank" rel="noreferrer">
+            <a href="https://www.ssa.gov/oact/tr/2025/" target="_blank" rel="noreferrer" className="hover:underline">
               2025 Social Security Trustees Report
             </a>
           </li>
           <li>
-            <a href="https://policyengine.github.io/policyengine-us-data" target="_blank" rel="noreferrer">
+            <a href="https://policyengine.github.io/policyengine-us-data" target="_blank" rel="noreferrer" className="hover:underline">
               PolicyEngine US Data Documentation
             </a>
           </li>
           <li>
-            <a href="https://github.com/PolicyEngine/crfb-tob-impacts" target="_blank" rel="noreferrer">
+            <a href="https://github.com/PolicyEngine/crfb-tob-impacts" target="_blank" rel="noreferrer" className="hover:underline">
               Analysis source code
             </a>
           </li>
