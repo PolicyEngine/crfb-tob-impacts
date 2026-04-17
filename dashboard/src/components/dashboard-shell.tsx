@@ -14,7 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Header, logos } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
@@ -188,7 +188,7 @@ function SeriesChart({
         <p className="text-xs text-[var(--pe-color-text-tertiary)]">{unitLabel}</p>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-[var(--pe-color-text-secondary)]">
-        <LegendSwatch color="var(--pe-color-text-primary)" label="Total" solid />
+        <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
         <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
         <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
       </div>
@@ -277,19 +277,11 @@ function SeriesChart({
   );
 }
 
-function LegendSwatch({
-  color,
-  label,
-  solid = false,
-}: {
-  color: string;
-  label: string;
-  solid?: boolean;
-}) {
+function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className={`inline-block h-[3px] w-4 rounded-full ${solid ? "" : ""}`}
+        className="inline-block h-[3px] w-4 rounded-full"
         style={{ backgroundColor: color }}
       />
       {label}
@@ -298,21 +290,29 @@ function LegendSwatch({
 }
 
 function Segment<T extends string>({
+  label,
   value,
   onChange,
   options,
 }: {
+  label: string;
   value: T;
   onChange: (value: T) => void;
   options: Array<{ label: string; value: T }>;
 }) {
   return (
-    <div className="inline-flex rounded-full bg-[var(--pe-color-bg-secondary)] p-1">
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="inline-flex rounded-full bg-[var(--pe-color-bg-secondary)] p-1"
+    >
       {options.map((option) => {
         const active = option.value === value;
         return (
           <button
             key={option.value}
+            role="radio"
+            aria-checked={active}
             onClick={() => onChange(option.value)}
             className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition ${
               active
@@ -390,10 +390,8 @@ export function DashboardShell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isEmbedded = useMemo(
-    () => typeof window !== "undefined" && window.self !== window.top,
-    [],
-  );
+  const isEmbedded =
+    typeof window !== "undefined" && window.self !== window.top;
 
   useEffect(() => {
     let active = true;
@@ -571,15 +569,27 @@ export function DashboardShell() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-[44px]">
-                  Social Security taxation reform
+                  {activeTab === "option13"
+                    ? "Balanced Fix baseline"
+                    : "Social Security taxation reform"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
-                  Budgetary impacts of reforming the taxation of Social Security
-                  benefits through 2100. Commissioned by the{" "}
-                  <span className="font-semibold text-[var(--pe-color-text-primary)]">
-                    Committee for a Responsible Federal Budget
-                  </span>
-                  .
+                  {activeTab === "option13" ? (
+                    <>
+                      A solvency baseline beginning in 2035 that combines
+                      proportional benefit reductions with payroll-tax increases.
+                      Context for interpreting the standard reform options.
+                    </>
+                  ) : (
+                    <>
+                      Budgetary impacts of reforming the taxation of Social
+                      Security benefits through 2100. Commissioned by the{" "}
+                      <span className="font-semibold text-[var(--pe-color-text-primary)]">
+                        Committee for a Responsible Federal Budget
+                      </span>
+                      .
+                    </>
+                  )}
                 </p>
               </div>
 
@@ -625,6 +635,41 @@ export function DashboardShell() {
             </section>
           ) : (
             <>
+              {/* Mobile reform picker — sidebar is xl-only */}
+              <section className="xl:hidden">
+                <label
+                  htmlFor="reform-select"
+                  className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]"
+                >
+                  Reform option
+                </label>
+                <select
+                  id="reform-select"
+                  value={selectedReform}
+                  onChange={(event) => setSelectedReform(event.target.value)}
+                  className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
+                >
+                  <optgroup label="Benefit tax rules">
+                    {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
+                      (option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.shortName}
+                        </option>
+                      ),
+                    )}
+                  </optgroup>
+                  <optgroup label="Structural swaps">
+                    {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
+                      (option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.shortName}
+                        </option>
+                      ),
+                    )}
+                  </optgroup>
+                </select>
+              </section>
+
               {/* Reform name + category band — a slim editorial surface, no card */}
               <section className="border-t border-[var(--pe-color-border-light)] pt-6">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
@@ -638,6 +683,9 @@ export function DashboardShell() {
                     <p className="mt-2 max-w-3xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
                       {reform.description}
                     </p>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--pe-color-text-tertiary)]">
+                      {reform.mechanism}
+                    </p>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
                     {scoringType === "dynamic" ? "Conventional dynamic" : "Static scoring"}
@@ -650,6 +698,7 @@ export function DashboardShell() {
                 <div className="flex items-center">
                   <ControlLabel>Scoring</ControlLabel>
                   <Segment
+                    label="Scoring"
                     value={scoringType}
                     onChange={handleScoringTypeChange}
                     options={[
@@ -661,6 +710,7 @@ export function DashboardShell() {
                 <div className="flex items-center">
                   <ControlLabel>Unit</ControlLabel>
                   <Segment
+                    label="Unit"
                     value={displayUnit}
                     onChange={setDisplayUnit}
                     options={[
@@ -673,6 +723,7 @@ export function DashboardShell() {
                 <div className="flex items-center">
                   <ControlLabel>Period</ControlLabel>
                   <Segment
+                    label="Period"
                     value={viewMode}
                     onChange={handleViewModeChange}
                     options={[
@@ -685,6 +736,7 @@ export function DashboardShell() {
                   <div className="flex items-center">
                     <ControlLabel>Trust fund split</ControlLabel>
                     <Segment
+                      label="Trust fund split"
                       value={allocationMode}
                       onChange={handleAllocationModeChange}
                       options={[

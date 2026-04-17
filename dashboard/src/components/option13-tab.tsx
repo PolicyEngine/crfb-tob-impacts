@@ -189,21 +189,14 @@ export function Option13Tab() {
   const firstYear = derived[0];
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[var(--pe-radius-feature)] border border-white/70 bg-[rgba(255,255,255,0.74)] px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.08)] backdrop-blur">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--pe-color-text-tertiary)]">
-          Balanced fix baseline
-        </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)]">
-          Option 13: Balanced Fix Baseline
-        </h2>
-        <p className="mt-3 max-w-4xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
-          This baseline scenario closes trust-fund gaps starting in 2035 using the traditional fix
-          approach: Social Security uses a 50/50 mix of benefit cuts and payroll-tax increases,
-          while HI is closed entirely with payroll-tax increases. Unlike Options 1-12, it does not
-          include the employer payroll tax reform.
-        </p>
-      </section>
+    <div className="space-y-6 border-t border-[var(--pe-color-border-light)] pt-6">
+      <p className="max-w-4xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
+        This baseline scenario closes trust-fund gaps starting in 2035 using the
+        traditional fix approach: Social Security uses a 50/50 mix of benefit
+        cuts and payroll-tax increases, while HI is closed entirely with
+        payroll-tax increases. Unlike Options 1–12, it does not include the
+        employer payroll tax reform.
+      </p>
 
       <section className="grid gap-4 xl:grid-cols-4">
         <Metric label="Benefit cut (2035)" value={`${firstYear.benefitCutPct.toFixed(1)}%`} tone="negative" />
