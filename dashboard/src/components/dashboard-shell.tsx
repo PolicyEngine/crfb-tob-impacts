@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { BookOpenText, Download, ExternalLink, LoaderCircle } from "lucide-react";
 import {
   Area,
@@ -15,7 +14,7 @@ import {
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { useEffect, useState } from "react";
-import { Header, logos } from "@policyengine/ui-kit";
+import { HomeHeader, logos, type NavItemConfig } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -37,6 +36,26 @@ type DashboardTab = "reforms" | "option13";
 type ViewMode = "10year" | "75year";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+
+const POLICYENGINE_BASE = "https://policyengine.org";
+
+// Mirror the nav from policyengine-app-v2 so standalone visitors get the
+// same site chrome as the embedded view at /us/taxation-of-benefits-reforms.
+const PE_NAV_ITEMS: NavItemConfig[] = [
+  { label: "Research", href: `${POLICYENGINE_BASE}/us/research` },
+  { label: "Model", href: `${POLICYENGINE_BASE}/us/model` },
+  { label: "API", href: `${POLICYENGINE_BASE}/us/api` },
+  {
+    label: "About",
+    href: `${POLICYENGINE_BASE}/us/about`,
+    children: [
+      { label: "Team", href: `${POLICYENGINE_BASE}/us/team` },
+      { label: "Supporters", href: `${POLICYENGINE_BASE}/us/supporters` },
+      { label: "Citations", href: `${POLICYENGINE_BASE}/us/citations` },
+    ],
+  },
+  { label: "Donate", href: `${POLICYENGINE_BASE}/us/donate` },
+];
 
 const BENEFIT_RULE_IDS = [
   "option1",
@@ -481,21 +500,11 @@ export function DashboardShell() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
       {!isEmbedded && (
-        <Header
-          variant="dark"
-          logo={
-            <Image
-              src={logos.whiteWordmark}
-              alt="PolicyEngine"
-              width={140}
-              height={20}
-              className="h-5 w-auto"
-              priority
-            />
-          }
-        >
-          <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
-        </Header>
+        <HomeHeader
+          navItems={PE_NAV_ITEMS}
+          logoSrc={logos.whiteWordmark}
+          logoHref={`${POLICYENGINE_BASE}/us`}
+        />
       )}
 
       <motion.div
