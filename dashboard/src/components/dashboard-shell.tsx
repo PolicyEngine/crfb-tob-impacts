@@ -1,29 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import {
-  BookOpenText,
-  Download,
-  LoaderCircle,
-} from "lucide-react";
+import { BookOpenText, Download, ExternalLink, LoaderCircle } from "lucide-react";
 import {
   Area,
   AreaChart,
   CartesianGrid,
   Line,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import { useEffect, useMemo, useState } from "react";
-import { Header, logos } from "@policyengine/ui-kit";
+import { useEffect, useState } from "react";
+import { HomeHeader, logos, type NavItemConfig } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
 import { Option13Tab } from "@/components/option13-tab";
-import { PaperTab } from "@/components/paper-tab";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
   calculateTotals,
@@ -37,10 +32,44 @@ import {
 import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { useElementSize } from "@/lib/use-element-size";
 
-type DashboardTab = "reforms" | "option13" | "paper";
+type DashboardTab = "reforms" | "option13";
 type ViewMode = "10year" | "75year";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+
+const POLICYENGINE_BASE = "https://policyengine.org";
+
+// Mirror the nav from policyengine-app-v2 so standalone visitors get the
+// same site chrome as the embedded view at /us/taxation-of-benefits-reforms.
+const PE_NAV_ITEMS: NavItemConfig[] = [
+  { label: "Research", href: `${POLICYENGINE_BASE}/us/research` },
+  { label: "Model", href: `${POLICYENGINE_BASE}/us/model` },
+  { label: "API", href: `${POLICYENGINE_BASE}/us/api` },
+  {
+    label: "About",
+    href: `${POLICYENGINE_BASE}/us/about`,
+    children: [
+      { label: "Team", href: `${POLICYENGINE_BASE}/us/team` },
+      { label: "Supporters", href: `${POLICYENGINE_BASE}/us/supporters` },
+      { label: "Citations", href: `${POLICYENGINE_BASE}/us/citations` },
+    ],
+  },
+  { label: "Donate", href: `${POLICYENGINE_BASE}/us/donate` },
+];
+
+const BENEFIT_RULE_IDS = [
+  "option1",
+  "option2",
+  "option3",
+  "option4",
+  "option7",
+  "option8",
+  "option9",
+  "option10",
+  "option11",
+];
+const STRUCTURAL_IDS = ["option5", "option6", "option12", "option14_stacked"];
+
 const LONG_RUN_X_AXIS_TICKS = [
   2026,
   ...Array.from({ length: (2100 - 2030) / 5 + 1 }, (_, index) => 2030 + index * 5),
@@ -76,32 +105,28 @@ function formatTooltipEntry(
     ? formatValue(numericValue, displayUnit)
     : "n/a";
 
-  const label =
-    name === "total" ? "Total" : name === "oasdi" ? "OASDI" : "HI";
-
+  const label = name === "total" ? "Total" : name === "oasdi" ? "OASDI" : "HI";
   return [formattedValue, label];
 }
 
-function getSeriesValue(row: YearlyImpact, displayUnit: DisplayUnit, key: "total" | "oasdi" | "hi") {
+function getSeriesValue(
+  row: YearlyImpact,
+  displayUnit: DisplayUnit,
+  key: "total" | "oasdi" | "hi",
+) {
   if (displayUnit === "dollars") {
     if (key === "total") return row.revenueImpact;
     if (key === "oasdi") return row.tobOasdiImpact;
     return row.tobMedicareHiImpact;
   }
-
   if (displayUnit === "pctPayroll") {
     if (key === "total") return row.pctOfOasdiPayroll;
     if (key === "oasdi") return row.oasdiPctOfPayroll;
     return row.hiPctOfPayroll;
   }
-
   if (key === "total") return row.pctOfGdp;
   if (key === "oasdi") return row.oasdiPctOfGdp;
   return row.hiPctOfGdp;
-}
-
-function isPositive(value: number) {
-  return value >= 0;
 }
 
 function MetricTile({
@@ -132,12 +157,14 @@ function MetricTile({
           : "bg-[var(--pe-color-bg-secondary)]"
       }`}
     >
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
         {label}
       </p>
-      <p className={`mt-2 text-2xl font-bold tracking-[-0.02em] ${toneClass}`}>{value}</p>
+      <p className={`mt-2 text-[28px] font-bold leading-none tracking-[-0.02em] ${toneClass}`}>
+        {value}
+      </p>
       {caption ? (
-        <p className="mt-1.5 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+        <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
           {caption}
         </p>
       ) : null}
@@ -155,8 +182,7 @@ function SeriesChart({
   viewMode: ViewMode;
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
-  const xAxisTicks =
-    viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
+  const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
 
   const chartData = data.map((row) => ({
     year: row.year,
@@ -165,156 +191,210 @@ function SeriesChart({
     hi: getSeriesValue(row, displayUnit, "hi"),
   }));
 
+  const unitLabel =
+    displayUnit === "dollars"
+      ? "Billions of nominal dollars"
+      : displayUnit === "pctPayroll"
+        ? "Percent of taxable payroll"
+        : "Percent of GDP";
+
   return (
-    <div className="min-w-0 rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-        <h3 className="text-xl font-bold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
-          Revenue and trust-fund effects
+    <div className="min-w-0 rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-6 py-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="text-lg font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
+          Annual revenue path
         </h3>
-        <p className="text-sm text-[var(--pe-color-text-tertiary)]">
-          {displayUnit === "dollars"
-            ? "Billions of nominal dollars"
-            : displayUnit === "pctPayroll"
-              ? "% of taxable payroll"
-              : "% of GDP"}
-        </p>
+        <p className="text-xs text-[var(--pe-color-text-tertiary)]">{unitLabel}</p>
       </div>
-      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-[var(--pe-color-text-secondary)]">
-        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-text-primary)]" />Total</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-primary-500)]" />OASDI</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-[3px] w-4 rounded-full bg-[var(--pe-color-gray-500)]" />HI</span>
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-[var(--pe-color-text-secondary)]">
+        <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
+        <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
+        <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
       </div>
 
-      <div ref={ref} className="h-[24rem]">
+      <div ref={ref} className="mt-4 h-[22rem]">
         {width > 0 && height > 0 ? (
-          <AreaChart width={width} height={height} data={chartData} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="oasdiFill" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="var(--pe-color-primary-500)" stopOpacity={0.34} />
-                  <stop offset="100%" stopColor="var(--pe-color-primary-500)" stopOpacity={0.04} />
-                </linearGradient>
-                <linearGradient id="hiFill" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="var(--pe-color-gray-500)" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="var(--pe-color-gray-500)" stopOpacity={0.04} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="var(--pe-color-border-light)" strokeDasharray="4 4" vertical={false} />
-              <XAxis
-                dataKey="year"
-                ticks={xAxisTicks}
-                interval={viewMode === "75year" ? 0 : undefined}
-                tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                type="number"
-                tickCount={5}
-                niceTicks="snap125"
-                tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value: number) =>
-                  displayUnit === "dollars" ? `$${Math.round(value)}` : `${value.toFixed(1)}%`
-                }
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: "12px",
-                  border: "1px solid var(--pe-color-border-light)",
-                  boxShadow: "0 18px 48px rgba(16, 24, 40, 0.12)",
-                }}
-                formatter={(value, name) =>
-                  formatTooltipEntry(value, name, displayUnit)
-                }
-              />
-              <Area
-                type="monotone"
-                dataKey="oasdi"
-                stroke="var(--pe-color-primary-500)"
-                fill="url(#oasdiFill)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="hi"
-                stroke="var(--pe-color-gray-500)"
-                fill="url(#hiFill)"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="total"
-                stroke="var(--pe-color-text-primary)"
-                strokeWidth={2.5}
-                dot={false}
-              />
-            </AreaChart>
+          <AreaChart
+            width={width}
+            height={height}
+            data={chartData}
+            margin={{ top: 8, right: 12, bottom: 0, left: 4 }}
+          >
+            <defs>
+              <linearGradient id="oasdiFill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="var(--pe-color-primary-500)" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="var(--pe-color-primary-500)" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="hiFill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="var(--pe-color-gray-500)" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="var(--pe-color-gray-500)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              stroke="var(--pe-color-border-light)"
+              strokeDasharray="3 5"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="year"
+              ticks={xAxisTicks}
+              interval={viewMode === "75year" ? 0 : undefined}
+              tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              type="number"
+              tickCount={5}
+              niceTicks="snap125"
+              tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value: number) =>
+                displayUnit === "dollars" ? `$${Math.round(value)}` : `${value.toFixed(1)}%`
+              }
+            />
+            <ReferenceLine
+              y={0}
+              stroke="var(--pe-color-border-medium)"
+              strokeWidth={1}
+            />
+            <Tooltip
+              contentStyle={{
+                borderRadius: "12px",
+                border: "1px solid var(--pe-color-border-light)",
+                boxShadow: "0 18px 48px rgba(16, 24, 40, 0.12)",
+                fontSize: "13px",
+              }}
+              formatter={(value, name) => formatTooltipEntry(value, name, displayUnit)}
+            />
+            <Area
+              type="monotone"
+              dataKey="oasdi"
+              stroke="var(--pe-color-primary-500)"
+              fill="url(#oasdiFill)"
+              strokeWidth={2}
+            />
+            <Area
+              type="monotone"
+              dataKey="hi"
+              stroke="var(--pe-color-gray-500)"
+              fill="url(#hiFill)"
+              strokeWidth={2}
+            />
+            <Line
+              type="monotone"
+              dataKey="total"
+              stroke="var(--pe-color-text-primary)"
+              strokeWidth={2.5}
+              dot={false}
+            />
+          </AreaChart>
         ) : null}
       </div>
     </div>
   );
 }
 
-function ReformBrief({
-  reform,
-  scoringType,
+function LegendSwatch({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        className="inline-block h-[3px] w-4 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
+  );
+}
+
+function Segment<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
 }: {
-  reform: ReformMeta;
-  scoringType: ScoringType;
+  label: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: Array<{ label: string; value: T }>;
 }) {
   return (
-    <motion.section
-      key={`${reform.id}-${scoringType}`}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]"
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="inline-flex rounded-full bg-[var(--pe-color-bg-secondary)] p-1"
     >
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-            Selected reform · {reform.category}
-          </p>
-          <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[var(--pe-color-text-title)]">
-            {reform.name}
-          </h3>
-          <p className="mt-3 text-base leading-7 text-[var(--pe-color-text-secondary)]">
-            {reform.description}
-          </p>
-        </div>
-        <div className="shrink-0 rounded-full bg-[var(--pe-color-primary-50)] px-4 py-2 text-sm font-semibold text-[var(--pe-color-primary-800)]">
-          {scoringType === "dynamic" ? "Conventional dynamic view" : "Static view"}
-        </div>
-      </div>
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <button
+            key={option.value}
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(option.value)}
+            className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition ${
+              active
+                ? "bg-white text-[var(--pe-color-primary-700)] shadow-[0_2px_6px_rgba(16,24,40,0.08)]"
+                : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
-      <div className="mt-5 grid gap-4 border-t border-[var(--pe-color-border-light)] pt-5 lg:grid-cols-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
-            What changes
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            {reform.mechanism}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
-            Baseline context
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            {reform.baseline}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--pe-color-text-tertiary)]">
-            How to read it
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            {reform.interpretation} {reform.scoringNote}
-          </p>
-        </div>
-      </div>
-    </motion.section>
+function ControlLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="mr-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+      {children}
+    </span>
+  );
+}
+
+function SidebarNavItem({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
+        active
+          ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
+          : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
+      }`}
+    >
+      {active && (
+        <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />
+      )}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function SidebarGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <h3 className="px-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+        {title}
+      </h3>
+      <div className="mt-2 space-y-0.5">{children}</div>
+    </div>
   );
 }
 
@@ -322,22 +402,18 @@ export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("reforms");
   const [selectedReform, setSelectedReform] = useState("option1");
   const [scoringType, setScoringType] = useState<ScoringType>("static");
-  const [allocationMode, setAllocationMode] =
-    useState<AllocationMode>("baselineShares");
+  const [allocationMode, setAllocationMode] = useState<AllocationMode>("baselineShares");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("dollars");
   const [viewMode, setViewMode] = useState<ViewMode>("10year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isEmbedded = useMemo(
-    () => typeof window !== "undefined" && window.self !== window.top,
-    [],
-  );
+  const isEmbedded =
+    typeof window !== "undefined" && window.self !== window.top;
 
   useEffect(() => {
     let active = true;
-
     loadDashboardData(scoringType, allocationMode)
       .then((result) => {
         if (!active) return;
@@ -355,7 +431,6 @@ export function DashboardShell() {
         if (!active) return;
         setLoading(false);
       });
-
     return () => {
       active = false;
     };
@@ -378,7 +453,9 @@ export function DashboardShell() {
     setDisplayUnit(next === "10year" ? "dollars" : "pctPayroll");
   }
 
-  const reform = STANDARD_REFORMS.find((candidate) => candidate.id === selectedReform) as ReformMeta;
+  const reform = STANDARD_REFORMS.find(
+    (candidate) => candidate.id === selectedReform,
+  ) as ReformMeta;
   const selectedData = data[selectedReform] ?? [];
   const visibleData =
     viewMode === "10year"
@@ -423,308 +500,304 @@ export function DashboardShell() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
       {!isEmbedded && (
-        <Header
-          variant="dark"
-          logo={
-            <Image
-              src={logos.whiteWordmark}
-              alt="PolicyEngine"
-              width={140}
-              height={20}
-              className="h-5 w-auto"
-              priority
-            />
-          }
-        >
-          <span className="ml-2 font-bold text-white">Taxation of benefits reforms</span>
-        </Header>
+        <HomeHeader
+          navItems={PE_NAV_ITEMS}
+          logoSrc={logos.whiteWordmark}
+          logoHref={`${POLICYENGINE_BASE}/us`}
+        />
       )}
+
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="mx-auto flex max-w-[1600px] gap-6 px-4 py-6 sm:px-6"
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="mx-auto flex max-w-[1500px] gap-8 px-4 py-8 sm:px-6"
       >
-        <aside className="hidden w-[17rem] shrink-0 self-start xl:sticky xl:top-4 xl:block">
+        {/* ------------ Sidebar ------------ */}
+        <aside className="hidden w-[16rem] shrink-0 self-start xl:sticky xl:top-4 xl:block">
           <nav className="space-y-5">
-            <div>
-              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
-                Benefit tax rules
-              </h3>
-              <div className="mt-2 space-y-0.5">
-                {STANDARD_REFORMS.filter((r) =>
-                  ["option1", "option2", "option3", "option4", "option7", "option8", "option9", "option10", "option11"].includes(r.id),
-                ).map((option) => {
-                  const active = option.id === selectedReform && activeTab === "reforms";
-                  return (
-                    <button
-                      key={option.id}
-                      onClick={() => {
-                        setActiveTab("reforms");
-                        setSelectedReform(option.id);
-                      }}
-                      className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
-                        active
-                          ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
-                          : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                      }`}
-                    >
-                      {active && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
-                      <span>{option.shortName}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
-                Structural swaps
-              </h3>
-              <div className="mt-2 space-y-0.5">
-                {STANDARD_REFORMS.filter((r) =>
-                  ["option5", "option6", "option12", "option14_stacked"].includes(r.id),
-                ).map((option) => {
-                  const active = option.id === selectedReform && activeTab === "reforms";
-                  return (
-                    <button
-                      key={option.id}
-                      onClick={() => {
-                        setActiveTab("reforms");
-                        setSelectedReform(option.id);
-                      }}
-                      className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
-                        active
-                          ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
-                          : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                      }`}
-                    >
-                      {active && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
-                      <span>{option.shortName}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <h3 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
-                Publication
-              </h3>
-              <div className="mt-2 space-y-0.5">
-                <button
-                  onClick={() => setActiveTab("paper")}
-                  className={`flex w-full items-center gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-left text-sm transition ${
-                    activeTab === "paper"
-                      ? "bg-[var(--pe-color-primary-50)] font-semibold text-[var(--pe-color-primary-800)]"
-                      : "text-[var(--pe-color-text-secondary)] hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                  }`}
-                >
-                  {activeTab === "paper" && <span className="h-4 w-0.5 shrink-0 rounded-full bg-[var(--pe-color-primary-500)]" />}
-                  <span>Citable paper</span>
-                </button>
-              </div>
-            </div>
+            <SidebarGroup title="Benefit tax rules">
+              {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
+                (option) => (
+                  <SidebarNavItem
+                    key={option.id}
+                    active={
+                      option.id === selectedReform && activeTab === "reforms"
+                    }
+                    label={option.shortName}
+                    onClick={() => {
+                      setActiveTab("reforms");
+                      setSelectedReform(option.id);
+                    }}
+                  />
+                ),
+              )}
+            </SidebarGroup>
+
+            <SidebarGroup title="Structural swaps">
+              {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
+                (option) => (
+                  <SidebarNavItem
+                    key={option.id}
+                    active={
+                      option.id === selectedReform && activeTab === "reforms"
+                    }
+                    label={option.shortName}
+                    onClick={() => {
+                      setActiveTab("reforms");
+                      setSelectedReform(option.id);
+                    }}
+                  />
+                ),
+              )}
+            </SidebarGroup>
+
+            <SidebarGroup title="Context">
+              <SidebarNavItem
+                active={activeTab === "option13"}
+                label="Balanced Fix baseline"
+                onClick={() => setActiveTab("option13")}
+              />
+              <a
+                href="/paper/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-between gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-sm text-[var(--pe-color-text-secondary)] transition hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
+              >
+                <span>Citable paper</span>
+                <ExternalLink className="h-3 w-3 opacity-60" />
+              </a>
+            </SidebarGroup>
           </nav>
         </aside>
 
-        <main className="flex min-w-0 flex-1 flex-col gap-6">
-          {/* --- Editorial surface: no border, no shadow, whitespace-driven --- */}
-          <section className="px-1 py-2">
+        {/* ------------ Main ------------ */}
+        <main className="flex min-w-0 flex-1 flex-col gap-8">
+          {/* Hero */}
+          <section>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-5xl">
-                  Social Security taxation reform
+                <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-[44px]">
+                  {activeTab === "option13"
+                    ? "Balanced Fix baseline"
+                    : "Social Security taxation reform"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
-                  Policy options for reforming the taxation of Social Security benefits, with budgetary impacts through 2100. Analysis commissioned by the Committee for a Responsible Federal Budget.
+                  {activeTab === "option13" ? (
+                    <>
+                      A solvency baseline beginning in 2035 that combines
+                      proportional benefit reductions with payroll-tax increases.
+                      Context for interpreting the standard reform options.
+                    </>
+                  ) : (
+                    <>
+                      Budgetary impacts of reforming the taxation of Social
+                      Security benefits through 2100. Commissioned by the{" "}
+                      <span className="font-semibold text-[var(--pe-color-text-primary)]">
+                        Committee for a Responsible Federal Budget
+                      </span>
+                      .
+                    </>
+                  )}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setActiveTab("paper")}
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href="/paper/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
                 >
                   <BookOpenText className="h-4 w-4" />
                   Read paper
-                </button>
-                {activeTab === "reforms" ? (
+                </a>
+                {activeTab === "reforms" && selectedData.length > 0 && (
                   <button
                     onClick={exportCsv}
-                    className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
+                    className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
                   >
                     <Download className="h-4 w-4" />
                     Export CSV
                   </button>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <div className="inline-flex rounded-full border border-[var(--pe-color-border-medium)] bg-white p-1">
-                <button
-                  onClick={() => setActiveTab("reforms")}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    activeTab === "reforms"
-                      ? "bg-[var(--pe-color-primary-600)] text-white"
-                      : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                  }`}
-                >
-                  TOB reform options
-                </button>
-                <button
-                  onClick={() => setActiveTab("option13")}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    activeTab === "option13"
-                      ? "bg-[var(--pe-color-primary-600)] text-white"
-                      : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                  }`}
-                >
-                  Balanced Fix baseline
-                </button>
-                <button
-                  onClick={() => setActiveTab("paper")}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    activeTab === "paper"
-                      ? "bg-[var(--pe-color-primary-600)] text-white"
-                      : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
-                  }`}
-                >
-                  Paper
-                </button>
+                )}
               </div>
             </div>
           </section>
 
-          {/* --- Controls surface: tinted bg, compact --- */}
-          {activeTab === "reforms" ? (
-          <section className="rounded-[var(--pe-radius-feature)] bg-[var(--pe-color-bg-secondary)] px-5 py-4">
-            <div className="xl:hidden">
-              <label
-                htmlFor="reform-select"
-                className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]"
-              >
-                Reform option
-              </label>
-              <select
-                id="reform-select"
-                value={selectedReform}
-                onChange={(event) => setSelectedReform(event.target.value)}
-                className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
-              >
-                {STANDARD_REFORMS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.shortName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div className="grid gap-3 sm:grid-cols-2 xl:flex">
-                <Segment
-                  label="Scoring"
-                  value={scoringType}
-                  onChange={(next) => handleScoringTypeChange(next as ScoringType)}
-                  options={[
-                    { label: "Static", value: "static" },
-                    { label: "Conventional", value: "dynamic" },
-                  ]}
-                />
-                {showAllocationToggle ? (
-                  <Segment
-                    label="Trust fund split"
-                    value={allocationMode}
-                    onChange={(next) =>
-                      handleAllocationModeChange(next as AllocationMode)
-                    }
-                    options={[
-                      { label: "Current law", value: "currentLaw" },
-                      { label: "Baseline shares", value: "baselineShares" },
-                    ]}
-                  />
-                ) : null}
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 xl:flex">
-                <Segment
-                  label="Unit"
-                  value={displayUnit}
-                  onChange={(next) => setDisplayUnit(next as DisplayUnit)}
-                  options={[
-                    { label: "$", value: "dollars" },
-                    { label: "% payroll", value: "pctPayroll" },
-                    { label: "% GDP", value: "pctGdp" },
-                  ]}
-                />
-                <Segment
-                  label="Period"
-                  value={viewMode}
-                  onChange={(next) => handleViewModeChange(next as ViewMode)}
-                  options={[
-                    { label: "10-year", value: "10year" },
-                    { label: "75-year", value: "75year" },
-                  ]}
-                />
-              </div>
-            </div>
-          </section>
-          ) : null}
-
-          {activeTab === "reforms" ? (
-            <ReformBrief reform={reform} scoringType={scoringType} />
-          ) : null}
-
-          {activeTab === "paper" ? (
-            <PaperTab />
-          ) : activeTab === "option13" ? (
+          {activeTab === "option13" ? (
             <Option13Tab />
           ) : loading ? (
-            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
+            <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
               <div className="flex items-center gap-3 text-[var(--pe-color-text-secondary)]">
                 <LoaderCircle className="h-5 w-5 animate-spin" />
-                <span>Loading policy impact data...</span>
+                <span>Loading policy impact data…</span>
               </div>
             </section>
           ) : error ? (
-            <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-error)] bg-white px-5 py-6 text-[var(--pe-color-error)] shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
+            <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-error)] bg-white px-5 py-6 text-[var(--pe-color-error)]">
               {error}
             </section>
           ) : selectedData.length === 0 ? (
-            <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-6 text-[var(--pe-color-text-secondary)] shadow-[0_18px_48px_rgba(16,24,40,0.08)]">
+            <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-6 text-[var(--pe-color-text-secondary)]">
               No {scoringType} results are available for {reform.shortName}.
             </section>
           ) : (
             <>
-              <section className="grid gap-4 xl:grid-cols-4">
+              {/* Mobile reform picker — sidebar is xl-only */}
+              <section className="xl:hidden">
+                <label
+                  htmlFor="reform-select"
+                  className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]"
+                >
+                  Reform option
+                </label>
+                <select
+                  id="reform-select"
+                  value={selectedReform}
+                  onChange={(event) => setSelectedReform(event.target.value)}
+                  className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
+                >
+                  <optgroup label="Benefit tax rules">
+                    {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
+                      (option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.shortName}
+                        </option>
+                      ),
+                    )}
+                  </optgroup>
+                  <optgroup label="Structural swaps">
+                    {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
+                      (option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.shortName}
+                        </option>
+                      ),
+                    )}
+                  </optgroup>
+                </select>
+              </section>
+
+              {/* Reform name + category band — a slim editorial surface, no card */}
+              <section className="border-t border-[var(--pe-color-border-light)] pt-6">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--pe-color-primary-700)]">
+                      {reform.category}
+                    </p>
+                    <h3 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
+                      {reform.name}
+                    </h3>
+                    <p className="mt-2 max-w-3xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
+                      {reform.description}
+                    </p>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--pe-color-text-tertiary)]">
+                      {reform.mechanism}
+                    </p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
+                    {scoringType === "dynamic" ? "Conventional dynamic" : "Static scoring"}
+                  </span>
+                </div>
+              </section>
+
+              {/* Controls — compact inline row */}
+              <section className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <div className="flex items-center">
+                  <ControlLabel>Scoring</ControlLabel>
+                  <Segment
+                    label="Scoring"
+                    value={scoringType}
+                    onChange={handleScoringTypeChange}
+                    options={[
+                      { label: "Static", value: "static" },
+                      { label: "Conventional", value: "dynamic" },
+                    ]}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <ControlLabel>Unit</ControlLabel>
+                  <Segment
+                    label="Unit"
+                    value={displayUnit}
+                    onChange={setDisplayUnit}
+                    options={[
+                      { label: "$", value: "dollars" },
+                      { label: "% payroll", value: "pctPayroll" },
+                      { label: "% GDP", value: "pctGdp" },
+                    ]}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <ControlLabel>Period</ControlLabel>
+                  <Segment
+                    label="Period"
+                    value={viewMode}
+                    onChange={handleViewModeChange}
+                    options={[
+                      { label: "10-year", value: "10year" },
+                      { label: "75-year", value: "75year" },
+                    ]}
+                  />
+                </div>
+                {showAllocationToggle && (
+                  <div className="flex items-center">
+                    <ControlLabel>Trust fund split</ControlLabel>
+                    <Segment
+                      label="Trust fund split"
+                      value={allocationMode}
+                      onChange={handleAllocationModeChange}
+                      options={[
+                        { label: "Current law", value: "currentLaw" },
+                        { label: "Baseline shares", value: "baselineShares" },
+                      ]}
+                    />
+                  </div>
+                )}
+              </section>
+
+              {/* Metrics */}
+              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <MetricTile
                   label="10-year effect"
                   value={formatValue(
-                    displayUnit === "dollars" ? totals.tenYear : displayUnit === "pctPayroll" ? totals.tenYearPctPayroll : totals.tenYearPctGdp,
+                    displayUnit === "dollars"
+                      ? totals.tenYear
+                      : displayUnit === "pctPayroll"
+                        ? totals.tenYearPctPayroll
+                        : totals.tenYearPctGdp,
                     displayUnit,
                   )}
-                  tone={isPositive(totals.tenYear) ? "positive" : "negative"}
-                  caption="2026-2035 cumulative"
+                  tone={totals.tenYear >= 0 ? "positive" : "negative"}
+                  caption="2026–2035 cumulative"
                   accent
                 />
                 <MetricTile
                   label="75-year effect"
                   value={formatValue(
-                    displayUnit === "dollars" ? totals.total : displayUnit === "pctPayroll" ? totals.totalPctPayroll : totals.totalPctGdp,
+                    displayUnit === "dollars"
+                      ? totals.total
+                      : displayUnit === "pctPayroll"
+                        ? totals.totalPctPayroll
+                        : totals.totalPctGdp,
                     displayUnit,
                   )}
-                  tone={isPositive(totals.total) ? "positive" : "negative"}
-                  caption="2026-2100 cumulative"
+                  tone={totals.total >= 0 ? "positive" : "negative"}
+                  caption="2026–2100 cumulative"
                   accent
                 />
                 <MetricTile
                   label="2026 baseline TOB"
-                  value={baseline2026 ? formatBillions(baseline2026.baselineTobTotal) : "n/a"}
+                  value={
+                    baseline2026 ? formatBillions(baseline2026.baselineTobTotal) : "n/a"
+                  }
                   caption="Current-law baseline"
                 />
                 <MetricTile
                   label="OASDI / HI split"
                   value={
-                    baseline2026
+                    baseline2026 && baseline2026.baselineTobTotal > 0
                       ? `${Math.round((baseline2026.baselineTobOasdi / baseline2026.baselineTobTotal) * 100)} / ${Math.round((baseline2026.baselineTobMedicareHi / baseline2026.baselineTobTotal) * 100)}`
                       : "n/a"
                   }
@@ -732,88 +805,98 @@ export function DashboardShell() {
                 />
               </section>
 
-              <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.7fr)_minmax(22rem,0.9fr)]">
+              {/* Chart + inline spotlight */}
+              <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.75fr)_minmax(20rem,0.75fr)]">
                 <SeriesChart
                   data={visibleData}
                   displayUnit={displayUnit}
                   viewMode={viewMode}
                 />
 
-                <div className="min-w-0 space-y-6">
-                  {/* --- Dense data surface: table with minimal wrapping --- */}
-                  <div className="overflow-hidden rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)]">
-                    <div className="bg-[var(--pe-color-bg-secondary)] px-5 py-3">
-                      <h4 className="text-sm font-semibold text-[var(--pe-color-text-title)]">Spotlight years</h4>
-                    </div>
-                    <table className="min-w-full divide-y divide-[var(--pe-color-border-light)] text-sm">
-                      <thead className="text-[var(--pe-color-text-secondary)]">
-                        <tr>
-                          <th className="px-5 py-2.5 text-left font-medium">Year</th>
-                          <th className="px-5 py-2.5 text-right font-medium">Total</th>
-                          <th className="px-5 py-2.5 text-right font-medium">OASDI</th>
-                          <th className="px-5 py-2.5 text-right font-medium">HI</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[var(--pe-color-border-light)] bg-white">
-                        {spotlight.map((row) => (
-                          <tr key={row.year}>
-                            <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
-                              {row.year}
-                            </td>
-                            <td className="px-5 py-2.5 text-right font-semibold text-[var(--pe-color-text-primary)]">
-                              {formatValue(getSeriesValue(row, displayUnit, "total"), displayUnit)}
-                            </td>
-                            <td className="px-5 py-2.5 text-right text-[var(--pe-color-primary-700)]">
-                              {formatValue(getSeriesValue(row, displayUnit, "oasdi"), displayUnit)}
-                            </td>
-                            <td className="px-5 py-2.5 text-right text-[var(--pe-color-text-secondary)]">
-                              {formatValue(getSeriesValue(row, displayUnit, "hi"), displayUnit)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="rounded-[var(--pe-radius-feature)] bg-[var(--pe-color-bg-secondary)] px-5 py-5">
+                <div className="overflow-hidden rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
+                  <div className="border-b border-[var(--pe-color-border-light)] px-5 py-3">
                     <h4 className="text-sm font-semibold text-[var(--pe-color-text-title)]">
-                      External checks
+                      Spotlight years
                     </h4>
-                    {estimates.length > 0 ? (
-                      <div className="mt-4 space-y-3">
+                  </div>
+                  <table className="min-w-full text-sm">
+                    <thead className="text-[var(--pe-color-text-secondary)]">
+                      <tr className="border-b border-[var(--pe-color-border-light)]">
+                        <th className="px-5 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                          Year
+                        </th>
+                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                          Total
+                        </th>
+                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                          OASDI
+                        </th>
+                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                          HI
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--pe-color-border-light)]">
+                      {spotlight.map((row) => (
+                        <tr key={row.year}>
+                          <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
+                            {row.year}
+                          </td>
+                          <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
+                            {formatValue(
+                              getSeriesValue(row, displayUnit, "total"),
+                              displayUnit,
+                            )}
+                          </td>
+                          <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-primary-700)]">
+                            {formatValue(
+                              getSeriesValue(row, displayUnit, "oasdi"),
+                              displayUnit,
+                            )}
+                          </td>
+                          <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-text-secondary)]">
+                            {formatValue(
+                              getSeriesValue(row, displayUnit, "hi"),
+                              displayUnit,
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {estimates.length > 0 && (
+                    <div className="border-t border-[var(--pe-color-border-light)] bg-[var(--pe-color-bg-secondary)] px-5 py-3">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
+                        External comparison
+                      </p>
+                      <div className="mt-2 space-y-1.5">
                         {estimates.map((estimate) => (
                           <a
                             key={`${estimate.source}-${estimate.budgetWindow}`}
-                            className="block rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] px-4 py-3 transition hover:border-[var(--pe-color-primary-300)] hover:bg-[var(--pe-color-primary-50)]"
                             href={estimate.url}
                             target="_blank"
                             rel="noreferrer"
+                            className="flex items-center justify-between gap-3 text-sm text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-primary-700)]"
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <p className="font-medium text-[var(--pe-color-text-primary)]">
-                                  {estimate.source}
-                                </p>
-                                <p className="mt-1 text-sm text-[var(--pe-color-text-secondary)]">
-                                  {estimate.scoringType} · {estimate.budgetWindow}
-                                </p>
-                              </div>
-                              <p className="text-sm font-semibold text-[var(--pe-color-text-primary)]">
-                                {formatBillions(estimate.tenYearImpact)}
-                              </p>
-                            </div>
+                            <span className="truncate">
+                              {estimate.source}{" "}
+                              <span className="text-[var(--pe-color-text-tertiary)]">
+                                · {estimate.budgetWindow}
+                              </span>
+                            </span>
+                            <span className="shrink-0 font-semibold tabular-nums">
+                              {formatBillions(estimate.tenYearImpact)}
+                            </span>
                           </a>
                         ))}
                       </div>
-                    ) : (
-                      <p className="mt-4 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                        No linked external estimate is attached to this reform yet.
-                      </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </section>
 
+              {/* Detailed external comparison table (if present) */}
               <ComparisonTable
                 reformId={selectedReform}
                 policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
@@ -823,58 +906,23 @@ export function DashboardShell() {
             </>
           )}
 
-          <footer className="border-t border-[var(--pe-color-border-light)] px-1 pt-6 pb-2 text-sm text-[var(--pe-color-text-tertiary)]">
+          <footer className="mt-4 border-t border-[var(--pe-color-border-light)] pt-6 pb-2 text-sm text-[var(--pe-color-text-tertiary)]">
             <p>
               Analysis by{" "}
-              <a href="https://policyengine.org" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)] hover:underline">
+              <a
+                href="https://policyengine.org"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--pe-color-primary-700)] hover:underline"
+              >
                 PolicyEngine
               </a>
-              , commissioned by the Committee for a Responsible Federal Budget.
-              {" "}Data: 2025 Social Security Trustees Report.
+              , commissioned by the Committee for a Responsible Federal Budget. Data:
+              2025 Social Security Trustees Report.
             </p>
           </footer>
         </main>
       </motion.div>
-    </div>
-  );
-}
-
-
-
-function Segment({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ label: string; value: string }>;
-}) {
-  return (
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--pe-color-text-tertiary)]">
-        {label}
-      </p>
-      <div className="inline-flex rounded-full border border-[var(--pe-color-border-medium)] bg-white p-1 shadow-[0_6px_18px_rgba(16,24,40,0.05)]">
-        {options.map((option) => {
-          const active = option.value === value;
-          return (
-            <button
-              key={option.value}
-              onClick={() => onChange(option.value)}
-              className={`rounded-full px-3.5 py-2 text-sm font-medium transition ${
-                active
-                  ? "bg-[var(--pe-color-primary-600)] text-white"
-                  : "text-[var(--pe-color-text-secondary)] hover:text-[var(--pe-color-text-primary)]"
-              }`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
