@@ -462,6 +462,17 @@ export function DashboardShell() {
   const showAllocationToggle = ALLOCATION_ELIGIBLE_OPTIONS.includes(selectedReform);
   const estimates = EXTERNAL_ESTIMATES[selectedReform] ?? [];
   const baseline2026 = selectedData.find((row) => row.year === 2026);
+  const mobileViewValue = activeTab === "option13" ? "option13" : selectedReform;
+
+  function handleMobileViewChange(nextValue: string) {
+    if (nextValue === "option13") {
+      setActiveTab("option13");
+      return;
+    }
+
+    setActiveTab("reforms");
+    setSelectedReform(nextValue);
+  }
 
   function exportCsv() {
     if (selectedData.length === 0) return;
@@ -621,6 +632,43 @@ export function DashboardShell() {
             </div>
           </section>
 
+          <section className="xl:hidden">
+            <label
+              htmlFor="mobile-view-select"
+              className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]"
+            >
+              Dashboard view
+            </label>
+            <select
+              id="mobile-view-select"
+              value={mobileViewValue}
+              onChange={(event) => handleMobileViewChange(event.target.value)}
+              className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
+            >
+              <optgroup label="Benefit tax rules">
+                {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
+                  (option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.shortName}
+                    </option>
+                  ),
+                )}
+              </optgroup>
+              <optgroup label="Structural swaps">
+                {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
+                  (option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.shortName}
+                    </option>
+                  ),
+                )}
+              </optgroup>
+              <optgroup label="Context">
+                <option value="option13">Balanced Fix baseline</option>
+              </optgroup>
+            </select>
+          </section>
+
           {activeTab === "option13" ? (
             <Option13Tab />
           ) : loading ? (
@@ -640,41 +688,6 @@ export function DashboardShell() {
             </section>
           ) : (
             <>
-              {/* Mobile reform picker — sidebar is xl-only */}
-              <section className="xl:hidden">
-                <label
-                  htmlFor="reform-select"
-                  className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]"
-                >
-                  Reform option
-                </label>
-                <select
-                  id="reform-select"
-                  value={selectedReform}
-                  onChange={(event) => setSelectedReform(event.target.value)}
-                  className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
-                >
-                  <optgroup label="Benefit tax rules">
-                    {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
-                      (option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.shortName}
-                        </option>
-                      ),
-                    )}
-                  </optgroup>
-                  <optgroup label="Structural swaps">
-                    {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
-                      (option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.shortName}
-                        </option>
-                      ),
-                    )}
-                  </optgroup>
-                </select>
-              </section>
-
               {/* Reform name + category band — a slim editorial surface, no card */}
               <section className="border-t border-[var(--pe-color-border-light)] pt-6">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
