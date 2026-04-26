@@ -30,6 +30,7 @@ import {
   type YearlyImpact,
 } from "@/lib/dashboard-data";
 import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
+import { sitePath } from "@/lib/site-path";
 import { useElementSize } from "@/lib/use-element-size";
 
 type DashboardTab = "reforms" | "option13";
@@ -38,6 +39,7 @@ type ViewMode = "10year" | "75year";
 const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
 
 const POLICYENGINE_BASE = "https://policyengine.org";
+const PAPER_HREF = sitePath("/paper/");
 
 // Mirror the nav from policyengine-app-v2 so standalone visitors get the
 // same site chrome as the embedded view at /us/taxation-of-benefits-reforms.
@@ -401,7 +403,7 @@ function SidebarGroup({
 export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("reforms");
   const [selectedReform, setSelectedReform] = useState("option1");
-  const [scoringType, setScoringType] = useState<ScoringType>("static");
+  const [scoringType] = useState<ScoringType>("static");
   const [allocationMode, setAllocationMode] = useState<AllocationMode>("baselineShares");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("dollars");
   const [viewMode, setViewMode] = useState<ViewMode>("10year");
@@ -435,12 +437,6 @@ export function DashboardShell() {
       active = false;
     };
   }, [allocationMode, scoringType]);
-
-  function handleScoringTypeChange(next: ScoringType) {
-    setLoading(true);
-    setError(null);
-    setScoringType(next);
-  }
 
   function handleAllocationModeChange(next: AllocationMode) {
     setLoading(true);
@@ -559,7 +555,7 @@ export function DashboardShell() {
                 onClick={() => setActiveTab("option13")}
               />
               <a
-                href="/paper/"
+                href={PAPER_HREF}
                 target="_blank"
                 rel="noreferrer"
                 className="flex w-full items-center justify-between gap-2 rounded-[var(--pe-radius-element)] px-3 py-2 text-sm text-[var(--pe-color-text-secondary)] transition hover:bg-[var(--pe-color-bg-secondary)] hover:text-[var(--pe-color-text-primary)]"
@@ -604,7 +600,7 @@ export function DashboardShell() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <a
-                  href="/paper/"
+                  href={PAPER_HREF}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-[var(--pe-color-border-medium)] bg-white px-4 py-2 text-sm font-medium text-[var(--pe-color-text-primary)] transition hover:border-[var(--pe-color-primary-300)] hover:text-[var(--pe-color-primary-700)]"
@@ -697,7 +693,7 @@ export function DashboardShell() {
                     </p>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
-                    {scoringType === "dynamic" ? "Conventional dynamic" : "Static scoring"}
+                    Static scoring
                   </span>
                 </div>
               </section>
@@ -706,15 +702,9 @@ export function DashboardShell() {
               <section className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <div className="flex items-center">
                   <ControlLabel>Scoring</ControlLabel>
-                  <Segment
-                    label="Scoring"
-                    value={scoringType}
-                    onChange={handleScoringTypeChange}
-                    options={[
-                      { label: "Static", value: "static" },
-                      { label: "Conventional", value: "dynamic" },
-                    ]}
-                  />
+                  <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
+                    Static only
+                  </span>
                 </div>
                 <div className="flex items-center">
                   <ControlLabel>Unit</ControlLabel>

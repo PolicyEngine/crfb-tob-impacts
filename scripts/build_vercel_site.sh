@@ -6,6 +6,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 site_dir="$repo_root/.vercel-site"
 dashboard_base_path="${NEXT_PUBLIC_BASE_PATH:-}"
 dashboard_target="$site_dir${dashboard_base_path:-/}"
+paper_target="$dashboard_target/paper"
 paper_output="$repo_root/paper/_build"
 
 if [ -f "$repo_root/.vercel-python/bin/activate" ]; then
@@ -18,10 +19,10 @@ fi
 echo "Building CRFB site for Vercel"
 echo "  repo root: $repo_root"
 echo "  dashboard base path: ${dashboard_base_path:-/}"
-echo "  paper path: /paper/"
+echo "  paper path: ${dashboard_base_path:-}/paper/"
 
 rm -rf "$site_dir"
-mkdir -p "$dashboard_target" "$site_dir/paper"
+mkdir -p "$dashboard_target" "$paper_target"
 
 if ! command -v quarto >/dev/null 2>&1; then
   echo "Quarto is required to build the citable paper at /paper/." >&2
@@ -42,7 +43,7 @@ else
   echo "Paper PDF render skipped; HTML paper is still available." >&2
 fi
 
-cp -R "$paper_output/." "$site_dir/paper/"
+cp -R "$paper_output/." "$paper_target/"
 
 pushd "$repo_root/dashboard" >/dev/null
 NEXT_PUBLIC_BASE_PATH="$dashboard_base_path" bun run build

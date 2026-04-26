@@ -1,7 +1,8 @@
 The cleaned static release is now a unified Trustees-lineage package for all
 fourteen scenarios. The dashboard and comparison spreadsheet both draw from the
-same rebuilt static artifact set. Dynamic behavioral results remain a separate
-track and are not summarized in these manuscript exhibits.
+same rebuilt static artifact set. Conventional behavioral results are
+quarantined pending a same-baseline rerun and are not summarized in these
+manuscript exhibits.
 
 ## Ten-year static revenue impacts
 
@@ -13,9 +14,9 @@ track and are not summarized in these manuscript exhibits.
 | option3 | +89.5 |
 | option4 | +184.5 |
 | option11 | +230.9 |
+| option14_stacked | +258.0 |
 | option2 | +357.1 |
 | option5 | +409.5 |
-| option14_stacked | +440.9 |
 | option9 | +529.0 |
 | option10 | +703.4 |
 | option8 | +880.0 |
@@ -26,16 +27,16 @@ In the ten-year window, the largest revenue raisers are `option12`
 (+2,197.2 $B), `option6` (+1,295.8 $B), and `option8`
 (+880.0 $B). The largest revenue reduction is `option1` (-1,974.2 $B).
 The clean special-case baseline `option13` is nearly revenue-neutral in the
-first decade, while `option14_stacked` raises +440.9 $B over the same
+first decade, while `option14_stacked` raises +258.0 $B over the same
 window.
 
 ## Terminal-year static impacts
 
 | Reform | 2100 Revenue Impact ($B) | 2100 TOB Impact ($B) |
 | --- | --- | --- |
-| option14_stacked | -23,120.5 | -3,179.9 |
 | option1 | -3,862.8 | -3,862.8 |
 | option13 | -682.9 | -682.9 |
+| option14_stacked | -432.5 | -5,016.0 |
 | option12 | -338.5 | -3,862.8 |
 | option5 | -338.5 | -3,862.8 |
 | option6 | -338.5 | -3,862.8 |

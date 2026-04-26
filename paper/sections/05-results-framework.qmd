@@ -28,17 +28,17 @@ The publication rule is:
 
 {{< include exhibits/revenue-impacts.md >}}
 
-### Dynamic standard-panel
+### Conventional standard-panel
 
-{{< include exhibits/dynamic-results.md >}}
+{{< include exhibits/conventional-results.md >}}
 
 ### Balanced-fix and stacked-scenario
 
 {{< include exhibits/balanced-fix.md >}}
 
-In the current release, the dynamic exhibit is intentionally limited to the
-standard panel. The balanced-fix exhibit remains static because special-case
-dynamic scoring is outside the shipped release scope.
+In the current release, the conventional exhibit is a quarantine note rather
+than a results table. The balanced-fix exhibit remains static because
+special-case conventional scoring is outside the shipped release scope.
 
 ## Interpretation boundary
 

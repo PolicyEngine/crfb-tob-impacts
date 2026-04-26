@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { MethodologyDiagram } from "@/components/methodology-diagram";
+import { sitePath } from "@/lib/site-path";
 
 function AccordionItem({
   title,
@@ -50,6 +51,8 @@ function BulletList({ children }: { children: React.ReactNode }) {
 }
 
 export function MethodologySection() {
+  const paperHref = sitePath("/paper/");
+
   return (
     <section className="space-y-4 border-t border-[var(--pe-color-border-light)] pt-8">
       <div>
@@ -58,7 +61,7 @@ export function MethodologySection() {
         </h2>
         <p className="mt-2 text-sm text-[var(--pe-color-text-secondary)]">
           Summary methodology. See the{" "}
-          <a href="/paper/" target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)] hover:underline">
+          <a href={paperHref} target="_blank" rel="noreferrer" className="text-[var(--pe-color-primary-700)] hover:underline">
             citable paper
           </a>{" "}
           for the full methodology and bibliography.
@@ -150,14 +153,14 @@ export function MethodologySection() {
             mechanical effect of policy changes.
           </p>
           <p className="mt-4">
-            <strong>Conventional scoring:</strong> extends the same Trustees baseline lineage
-            with age-based labor-supply elasticities for the standard reforms
-            `option1` through `option12`.
+            <strong>Conventional scoring:</strong> is not shown in the current public dashboard.
+            The prior conventional artifact is quarantined until it can be rerun on the same
+            baseline lineage as the static release.
           </p>
           <p className="mt-4">
             The special-case balanced-fix scenarios `option13` and `option14_stacked` remain
             static-only in the current release. A conventional version would require a separate
-            iterative post-response solve rather than the published standard dynamic pipeline.
+            iterative post-response solve rather than the published standard conventional pipeline.
           </p>
           <p className="mt-4">
             The largest conventional/static differences typically show up in the
@@ -186,7 +189,7 @@ export function MethodologySection() {
         </h3>
         <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm text-[var(--pe-color-primary-700)] sm:grid-cols-2">
           <li>
-            <a href="/paper/" target="_blank" rel="noreferrer" className="hover:underline">
+            <a href={paperHref} target="_blank" rel="noreferrer" className="hover:underline">
               Citable paper
             </a>
           </li>

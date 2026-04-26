@@ -59,6 +59,25 @@ def test_split_revenue_impacts_uses_direct_branching_for_option12():
     assert hi_impact == 75.0
 
 
+def test_split_revenue_impacts_uses_direct_branching_for_option14_stacked():
+    revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
+        {
+            "reform_name": "option14_stacked",
+            "revenue_impact": 100.0,
+            "baseline_tob_oasdi": 60.0,
+            "baseline_tob_medicare_hi": 40.0,
+            "tob_oasdi_impact": 30.0,
+            "tob_medicare_hi_impact": 70.0,
+            "oasdi_net_impact": 25.0,
+            "hi_net_impact": 75.0,
+        }
+    )
+
+    assert revenue_impact == 100.0
+    assert oasdi_impact == 25.0
+    assert hi_impact == 75.0
+
+
 def test_split_revenue_impacts_uses_net_impacts_for_option5():
     revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
         {

@@ -148,9 +148,15 @@ def current_law_row(year: int, reform_name: str, baseline: dict, run_id: str) ->
     }
 
 
-def option13_row(raw: dict, baseline: dict, fallback_run_id: str) -> dict:
+def option13_row(
+    raw: dict,
+    baseline: dict,
+    fallback_run_id: str,
+) -> dict:
+    revenue_impact = raw["income_tax_impact"] / 1e9
     tob_hi_impact = raw["tob_hi_impact"] / 1e9
     tob_oasdi_impact = raw["tob_oasdi_impact"] / 1e9
+    baseline_revenue = baseline["baseline_revenue"]
     baseline_tob_hi = baseline["baseline_tob_medicare_hi"]
     baseline_tob_oasdi = baseline["baseline_tob_oasdi"]
     reform_tob_hi = baseline_tob_hi + tob_hi_impact
@@ -158,9 +164,9 @@ def option13_row(raw: dict, baseline: dict, fallback_run_id: str) -> dict:
     return {
         "reform_name": "option13",
         "year": int(raw["year"]),
-        "baseline_revenue": raw["baseline_income_tax"] / 1e9,
-        "reform_revenue": raw["reform_income_tax"] / 1e9,
-        "revenue_impact": raw["income_tax_impact"] / 1e9,
+        "baseline_revenue": baseline_revenue,
+        "reform_revenue": baseline_revenue + revenue_impact,
+        "revenue_impact": revenue_impact,
         "baseline_tob_medicare_hi": baseline_tob_hi,
         "reform_tob_medicare_hi": reform_tob_hi,
         "tob_medicare_hi_impact": tob_hi_impact,
@@ -186,23 +192,23 @@ def option13_row(raw: dict, baseline: dict, fallback_run_id: str) -> dict:
     }
 
 
-def option14_row(option13: dict, option12_standard: dict, fallback_run_id: str) -> dict:
-    baseline_tob_hi = option13["reform_tob_medicare_hi"]
-    baseline_tob_oasdi = option13["reform_tob_oasdi"]
-    reform_tob_hi = option12_standard["reform_tob_medicare_hi"]
-    reform_tob_oasdi = option12_standard["reform_tob_oasdi"]
-    tob_hi_impact = reform_tob_hi - baseline_tob_hi
-    tob_oasdi_impact = reform_tob_oasdi - baseline_tob_oasdi
-    oasdi_gain = option12_standard["employer_ss_tax_revenue"]
-    hi_gain = option12_standard["employer_medicare_tax_revenue"]
-    oasdi_loss = baseline_tob_oasdi - reform_tob_oasdi
-    hi_loss = baseline_tob_hi - reform_tob_hi
+def option14_row(raw: dict, fallback_run_id: str) -> dict:
+    baseline_tob_hi = raw["baseline_tob_hi"] / 1e9
+    baseline_tob_oasdi = raw["baseline_tob_oasdi"] / 1e9
+    reform_tob_hi = raw["reform_tob_hi"] / 1e9
+    reform_tob_oasdi = raw["reform_tob_oasdi"] / 1e9
+    tob_hi_impact = raw["tob_hi_impact"] / 1e9
+    tob_oasdi_impact = raw["tob_oasdi_impact"] / 1e9
+    oasdi_gain = raw["oasdi_gain"] / 1e9
+    hi_gain = raw["hi_gain"] / 1e9
+    oasdi_loss = raw["oasdi_loss"] / 1e9
+    hi_loss = raw["hi_loss"] / 1e9
     return {
         "reform_name": "option14_stacked",
-        "year": int(option13["year"]),
-        "baseline_revenue": option13["reform_revenue"],
-        "reform_revenue": option12_standard["reform_revenue"],
-        "revenue_impact": option12_standard["reform_revenue"] - option13["reform_revenue"],
+        "year": int(raw["year"]),
+        "baseline_revenue": raw["baseline_income_tax"] / 1e9,
+        "reform_revenue": raw["reform_income_tax"] / 1e9,
+        "revenue_impact": raw["income_tax_impact"] / 1e9,
         "baseline_tob_medicare_hi": baseline_tob_hi,
         "reform_tob_medicare_hi": reform_tob_hi,
         "tob_medicare_hi_impact": tob_hi_impact,
@@ -219,9 +225,9 @@ def option14_row(option13: dict, option12_standard: dict, fallback_run_id: str) 
         "hi_gain": hi_gain,
         "oasdi_loss": oasdi_loss,
         "hi_loss": hi_loss,
-        "oasdi_net_impact": oasdi_gain - oasdi_loss,
-        "hi_net_impact": hi_gain - hi_loss,
-        "run_id": option13["run_id"] or fallback_run_id,
+        "oasdi_net_impact": raw["oasdi_net_impact"] / 1e9,
+        "hi_net_impact": raw["hi_net_impact"] / 1e9,
+        "run_id": run_id_for(raw, fallback_run_id),
     }
 
 
@@ -229,12 +235,13 @@ def build_special_cases(
     standard: pd.DataFrame,
     *,
     option13_dir: Path,
+    option14_dir: Path,
     special_start_year: int,
     fallback_run_id: str,
 ) -> pd.DataFrame:
     baseline = baseline_lookup(standard)
-    option12_standard = standard_reform_lookup(standard, "option12")
     option13_raw = load_raw_rows(option13_dir)
+    option14_raw = load_raw_rows(option14_dir)
 
     rows: list[dict] = []
     for year in YEARS:
@@ -259,12 +266,16 @@ def build_special_cases(
 
         if year not in option13_raw:
             raise FileNotFoundError(f"Missing option13 output for year {year} in {option13_dir}")
-        if year not in option12_standard:
-            raise FileNotFoundError(f"Missing option12 standard result for year {year}")
+        if year not in option14_raw:
+            raise FileNotFoundError(f"Missing option14 output for year {year} in {option14_dir}")
 
-        option13 = option13_row(option13_raw[year], baseline[year], fallback_run_id)
+        option13 = option13_row(
+            option13_raw[year],
+            baseline[year],
+            fallback_run_id,
+        )
         rows.append(option13)
-        rows.append(option14_row(option13, option12_standard[year], fallback_run_id))
+        rows.append(option14_row(option14_raw[year], fallback_run_id))
 
     return pd.DataFrame(rows)
 
@@ -340,7 +351,7 @@ def write_workbook(
         {
             "artifact": "special_option14_dir",
             "path": str(option14_dir),
-            "note": "Legacy raw option14 dir kept only for reference; stacked rows are rebuilt from option13 plus standard option12 outputs.",
+            "note": "Recovered option14 stacked outputs measured incrementally from the balanced-fix baseline.",
         },
         {
             "artifact": "prior_reference",
@@ -379,13 +390,19 @@ def main() -> None:
     fallback_run_id = "special-case-adhoc"
     if args.special_manifest is not None:
         special_manifest_data = json.loads(args.special_manifest.read_text(encoding="utf-8"))
-        fallback_run_id = str(special_manifest_data.get("run_id", fallback_run_id))
+        fallback_run_id = str(
+            special_manifest_data.get(
+                "run_id",
+                special_manifest_data.get("output_prefix", fallback_run_id),
+            )
+        )
 
     standard = load_standard(args.standard_results)
     prior = load_prior(args.prior_reference)
     special = build_special_cases(
         standard,
         option13_dir=args.option13_dir,
+        option14_dir=args.option14_dir,
         special_start_year=args.special_start_year,
         fallback_run_id=fallback_run_id,
     )
@@ -430,6 +447,9 @@ def main() -> None:
         "reforms": sorted(standard_and_special["reform_name"].unique().tolist()),
         "special_case_start_year": args.special_start_year,
         "special_case_manifest": str(args.special_manifest) if args.special_manifest else None,
+        "special_case_output_prefix": (
+            special_manifest_data.get("output_prefix") if special_manifest_data else None
+        ),
         "option14_active_years": sorted(
             with_prior.loc[
                 (with_prior["reform_name"] == "option14_stacked")

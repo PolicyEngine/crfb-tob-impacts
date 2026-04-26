@@ -90,8 +90,9 @@ def build_results_overview(df: pd.DataFrame) -> str:
     return f"""
 The cleaned static release is now a unified Trustees-lineage package for all
 fourteen scenarios. The dashboard and comparison spreadsheet both draw from the
-same rebuilt static artifact set. Dynamic behavioral results remain a separate
-track and are not summarized in these manuscript exhibits.
+same rebuilt static artifact set. Conventional behavioral results are
+quarantined pending a same-baseline rerun and are not summarized in these
+manuscript exhibits.
 
 ## Ten-year static revenue impacts
 
@@ -315,7 +316,7 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
             ["CBO [@cbo2024options]", "Full repeal", "Conventional", "2025-2034", "-1,600.0"],
             ["SSA Trustees [@ssa2024trustees]", "Full repeal", "Conventional", "2025-2034", "-1,800.0"],
             ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Conventional", "2025-2034", "-1,400.0"],
-            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Dynamic", "2025-2034", "-1,300.0"],
+            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Macroeconomic", "2025-2034", "-1,300.0"],
         ],
     )
 
@@ -359,7 +360,7 @@ The main comparability caveats remain unchanged from the first report:
 
 - our primary published window is `2026-2035`, while several outside estimates
   use `2025-2034` or other budget windows
-- outside scores often use conventional or dynamic methods rather than this
+- outside scores often use different scoring methods rather than this
   manuscript's cleaned static package
 - current-law baselines differ because the temporary senior deduction and other
   tax provisions change the taxable-benefit base in the early years

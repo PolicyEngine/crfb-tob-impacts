@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 
-export type ScoringType = "static" | "dynamic";
+export type ScoringType = "static";
 export type AllocationMode = "currentLaw" | "baselineShares";
 export type DisplayUnit = "dollars" | "pctPayroll" | "pctGdp";
 
@@ -60,7 +60,7 @@ const allocationEligibleOptions = new Set([
 ]);
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
-const directBranchingOptions = new Set(["option12", "option13"]);
+const directBranchingOptions = new Set(["option12", "option13", "option14_stacked"]);
 const generalRevenueOptions = new Set(["option7"]);
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -209,15 +209,11 @@ function splitRevenueImpacts(
 }
 
 export async function loadDashboardData(
-  scoringType: ScoringType,
+  _scoringType: ScoringType,
   allocationMode: AllocationMode,
 ): Promise<Record<string, YearlyImpact[]>> {
   const [csvContent, projections] = await Promise.all([
-    fetchCsv(
-      scoringType === "dynamic"
-        ? "/data/all_dynamic_results.csv"
-        : "/data/all_static_results.csv",
-    ),
+    fetchCsv("/data/all_static_results.csv"),
     loadEconomicProjections(),
   ]);
 

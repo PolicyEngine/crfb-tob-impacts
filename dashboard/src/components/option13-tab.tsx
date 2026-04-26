@@ -13,6 +13,10 @@ import {
 
 import { useElementSize } from "@/lib/use-element-size";
 import {
+  loadDashboardData,
+  type YearlyImpact,
+} from "@/lib/dashboard-data";
+import {
   loadOption13Data,
   loadTrusteesComparisonData,
   type Option13Data,
@@ -21,13 +25,26 @@ import {
 
 const CURRENT_SS_RATE = 0.062;
 const CURRENT_HI_RATE = 0.0145;
+const ROTH_COMPARISON_YEARS = [2035, 2050, 2075, 2100];
 
 function billions(value: number) {
-  return Math.abs(value / 1e9);
+  return value / 1e9;
 }
 
-function formatB(value: number) {
-  return `$${Math.round(value).toLocaleString()}B`;
+function formatSignedB(value: number) {
+  const sign = value < 0 ? "-" : "";
+  return `${sign}$${Math.round(Math.abs(value)).toLocaleString()}B`;
+}
+
+function formatAxisB(value: number) {
+  const sign = value < 0 ? "-" : "";
+  return `${sign}$${Math.round(Math.abs(value))}`;
+}
+
+function afterGapClass(value: number) {
+  if (value < 0) return "text-[var(--pe-color-error)]";
+  if (value > 0) return "text-[var(--pe-color-primary-700)]";
+  return "text-[var(--pe-color-text-secondary)]";
 }
 
 function Metric({
@@ -127,17 +144,23 @@ function Option13Chart({
 export function Option13Tab() {
   const [data, setData] = useState<Option13Data[]>([]);
   const [trusteesData, setTrusteesData] = useState<TrusteesComparisonData[]>([]);
+  const [impactData, setImpactData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
-    Promise.all([loadOption13Data(), loadTrusteesComparisonData()])
-      .then(([option13Data, trusteesComparisonData]) => {
+    Promise.all([
+      loadOption13Data(),
+      loadTrusteesComparisonData(),
+      loadDashboardData("static", "currentLaw"),
+    ])
+      .then(([option13Data, trusteesComparisonData, dashboardData]) => {
         if (!active) return;
         setData(option13Data);
         setTrusteesData(trusteesComparisonData);
+        setImpactData(dashboardData);
       })
       .catch((caughtError) => {
         if (!active) return;
@@ -169,6 +192,34 @@ export function Option13Tab() {
       currentHiRate: row.newEmployeeHiRate * 2 * 100,
     }));
   }, [data]);
+
+  const rothComparison = useMemo(() => {
+    const currentLawByYear = new Map(
+      (impactData.option12 ?? []).map((row) => [row.year, row])
+    );
+    const balancedFixByYear = new Map(
+      (impactData.option14_stacked ?? []).map((row) => [row.year, row])
+    );
+
+    return ROTH_COMPARISON_YEARS.flatMap((year) => {
+      const currentLaw = currentLawByYear.get(year);
+      const balancedFix = balancedFixByYear.get(year);
+      if (!currentLaw || !balancedFix) return [];
+
+      return [
+        {
+          year,
+          currentLaw: currentLaw.revenueImpact,
+          balancedFix: balancedFix.revenueImpact,
+          difference: balancedFix.revenueImpact - currentLaw.revenueImpact,
+          currentLawOasdi: currentLaw.tobOasdiImpact,
+          currentLawHi: currentLaw.tobMedicareHiImpact,
+          balancedFixOasdi: balancedFix.tobOasdiImpact,
+          balancedFixHi: balancedFix.tobMedicareHiImpact,
+        },
+      ];
+    });
+  }, [impactData]);
 
   if (loading) {
     return (
@@ -204,9 +255,80 @@ export function Option13Tab() {
         <Metric label="HI tax increase (2035)" value={`+${firstYear.hiRateIncrease.toFixed(2)}pp`} tone="positive" />
         <Metric
           label="Combined gap (2035)"
-          value={`${formatB(firstYear.combinedGapBefore)} → ${formatB(firstYear.combinedGapAfter)}`}
+          value={`${formatSignedB(firstYear.combinedGapBefore)} → ${formatSignedB(firstYear.combinedGapAfter)}`}
         />
       </section>
+
+      {rothComparison.length > 0 ? (
+        <section className="space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold text-[var(--pe-color-text-title)]">
+              Roth swap under current law and Balanced Fix
+            </h3>
+            <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+              Option 12 shows the extended Roth-style swap against current law.
+              Option 14 applies that same structural swap on top of the Balanced
+              Fix solvency baseline, where payroll-tax rates and benefit levels
+              have already changed.
+            </p>
+          </div>
+
+          <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(28rem,0.8fr)]">
+            <Option13Chart
+              title="Extended Roth swap comparison"
+              description="Revenue impact at selected years under current law and under the Balanced Fix solvency baseline."
+              data={rothComparison}
+              bars={[
+                { dataKey: "currentLaw", name: "Current law", color: "#319795" },
+                { dataKey: "balancedFix", name: "Balanced Fix", color: "#7c3aed" },
+              ]}
+              yFormatter={formatAxisB}
+            />
+
+            <div className="min-w-0 rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
+              <h4 className="text-lg font-semibold text-[var(--pe-color-text-title)]">
+                Selected-year detail
+              </h4>
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-[34rem] divide-y divide-[var(--pe-color-border-light)] text-sm">
+                  <thead className="text-[var(--pe-color-text-secondary)]">
+                    <tr>
+                      <th className="py-2 pr-4 text-left">Year</th>
+                      <th className="px-4 py-2 text-right">Current law</th>
+                      <th className="px-4 py-2 text-right">Balanced Fix</th>
+                      <th className="py-2 pl-4 text-right">Difference</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--pe-color-border-light)]">
+                    {rothComparison.map((row) => (
+                      <tr key={row.year}>
+                        <td className="py-3 pr-4 font-medium text-[var(--pe-color-text-primary)]">
+                          {row.year}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {formatSignedB(row.currentLaw)}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {formatSignedB(row.balancedFix)}
+                        </td>
+                        <td className="py-3 pl-4 text-right">
+                          {formatSignedB(row.difference)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+                Only the extended Roth swap has a stacked Balanced Fix run in
+                the current artifact. Immediate and phased Roth swaps remain
+                current-law comparisons until separate solvency-baseline runs
+                exist.
+              </p>
+            </div>
+          </section>
+        </section>
+      ) : null}
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Option13Chart
@@ -234,7 +356,7 @@ export function Option13Tab() {
             { dataKey: "ssGapBefore", name: "Before", color: "#ef4444" },
             { dataKey: "ssGapAfter", name: "After", color: "#319795" },
           ]}
-          yFormatter={(value) => `$${Math.round(value)}`}
+          yFormatter={formatAxisB}
         />
         <Option13Chart
           title="Medicare HI trust-fund gap"
@@ -244,7 +366,7 @@ export function Option13Tab() {
             { dataKey: "hiGapBefore", name: "Before", color: "#ef4444" },
             { dataKey: "hiGapAfter", name: "After", color: "#319795" },
           ]}
-          yFormatter={(value) => `$${Math.round(value)}`}
+          yFormatter={formatAxisB}
         />
       </section>
 
@@ -256,7 +378,7 @@ export function Option13Tab() {
           { dataKey: "combinedGapBefore", name: "Before", color: "#ef4444" },
           { dataKey: "combinedGapAfter", name: "After", color: "#319795" },
         ]}
-        yFormatter={(value) => `$${Math.round(value)}`}
+        yFormatter={formatAxisB}
       />
 
       <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-5 shadow-[0_18px_48px_rgba(16,24,40,0.06)]">
@@ -310,14 +432,14 @@ export function Option13Tab() {
                     <td className="px-4 py-3 text-right text-[var(--pe-color-error)]">{derived[index].benefitCutPct.toFixed(1)}%</td>
                     <td className="px-4 py-3 text-right">{derived[index].currentSsRate.toFixed(2)}%</td>
                     <td className="px-4 py-3 text-right">{derived[index].currentHiRate.toFixed(2)}%</td>
-                    <td className="px-4 py-3 text-right">-{formatB(trusteesRow?.trusteesOasdiGapB ?? 0)}</td>
-                    <td className="px-4 py-3 text-right">-{formatB(ssGap)}</td>
-                    <td className="px-4 py-3 text-right">{ssRatio ? `${ssRatio.toFixed(2)}x` : "—"}</td>
-                    <td className="px-4 py-3 text-right text-[var(--pe-color-primary-700)]">{formatB(derived[index].ssGapAfter)}</td>
-                    <td className="px-4 py-3 text-right">-{formatB(trusteesRow?.trusteesHiGapB ?? 0)}</td>
-                    <td className="px-4 py-3 text-right">-{formatB(hiGap)}</td>
-                    <td className="px-4 py-3 text-right">{hiRatio ? `${hiRatio.toFixed(2)}x` : "—"}</td>
-                    <td className="px-4 py-3 text-right text-[var(--pe-color-primary-700)]">{formatB(derived[index].hiGapAfter)}</td>
+                    <td className="px-4 py-3 text-right">{formatSignedB(-Math.abs(trusteesRow?.trusteesOasdiGapB ?? 0))}</td>
+                    <td className="px-4 py-3 text-right">{formatSignedB(ssGap)}</td>
+                    <td className="px-4 py-3 text-right">{ssRatio !== null ? `${ssRatio.toFixed(2)}x` : "—"}</td>
+                    <td className={`px-4 py-3 text-right ${afterGapClass(derived[index].ssGapAfter)}`}>{formatSignedB(derived[index].ssGapAfter)}</td>
+                    <td className="px-4 py-3 text-right">{formatSignedB(-Math.abs(trusteesRow?.trusteesHiGapB ?? 0))}</td>
+                    <td className="px-4 py-3 text-right">{formatSignedB(hiGap)}</td>
+                    <td className="px-4 py-3 text-right">{hiRatio !== null ? `${hiRatio.toFixed(2)}x` : "—"}</td>
+                    <td className={`px-4 py-3 text-right ${afterGapClass(derived[index].hiGapAfter)}`}>{formatSignedB(derived[index].hiGapAfter)}</td>
                   </tr>
                 );
               })}

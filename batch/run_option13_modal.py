@@ -13,11 +13,66 @@ Usage:
 
 import os
 import json
-import modal
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+
+try:
+    import modal
+except ModuleNotFoundError:
+
+    class _LocalModalFunction:
+        def __init__(self, fn):
+            self._fn = fn
+
+        def __call__(self, *args, **kwargs):
+            return self._fn(*args, **kwargs)
+
+        def starmap(self, args):
+            return [self._fn(*arg) for arg in args]
+
+        def spawn(self, *args, **kwargs):
+            raise RuntimeError("Modal is required to spawn remote Option 13 jobs.")
+
+    class _LocalApp:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def function(self, *_args, **_kwargs):
+            return lambda fn: _LocalModalFunction(fn)
+
+        def local_entrypoint(self, *_args, **_kwargs):
+            return lambda fn: fn
+
+    class _LocalVolume:
+        @staticmethod
+        def from_name(*_args, **_kwargs):
+            return _LocalVolume()
+
+        def commit(self):
+            pass
+
+    class _LocalImage:
+        @staticmethod
+        def debian_slim(*_args, **_kwargs):
+            return _LocalImage()
+
+        def pip_install(self, *_args, **_kwargs):
+            return self
+
+        def add_local_dir(self, *_args, **_kwargs):
+            return self
+
+        def run_commands(self, *_args, **_kwargs):
+            return self
+
+    class _LocalModal:
+        App = _LocalApp
+        Volume = _LocalVolume
+        Image = _LocalImage
+
+    modal = _LocalModal()
 
 # Get the project root (parent of batch/)
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -77,6 +132,7 @@ def default_submission_manifest_path(output_prefix: str) -> Path:
     slug = output_prefix.strip("/").replace("/", "__")
     return PROJECT_ROOT / "results" / "special_case_submissions" / f"{slug}.json"
 
+
 app = modal.App("option13-test")
 
 # Create volume for results
@@ -86,15 +142,20 @@ results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
 POLICYENGINE_US_PATH = Path(
     os.environ.get("CRFB_POLICYENGINE_US_PATH", "/Users/pavelmakarchuk/policyengine-us")
 )
+POLICYENGINE_CORE_VERSION = os.environ.get("CRFB_POLICYENGINE_CORE_VERSION", "3.23.6")
+NUMPY_VERSION = os.environ.get("CRFB_NUMPY_VERSION", "2.4.1")
+PANDAS_VERSION = os.environ.get("CRFB_PANDAS_VERSION", "3.0.0")
+H5PY_VERSION = os.environ.get("CRFB_H5PY_VERSION", "3.15.1")
 
 # Container image with local policyengine-us (includes TOB variables)
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "pandas",
-        "numpy",
-        "h5py",
+        f"pandas=={PANDAS_VERSION}",
+        f"numpy=={NUMPY_VERSION}",
+        f"h5py=={H5PY_VERSION}",
         "huggingface_hub",
+        f"policyengine-core=={POLICYENGINE_CORE_VERSION}",
     )
     # Copy local policyengine-us and install (copy=True allows run_commands after)
     .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
@@ -137,9 +198,7 @@ def get_hi_data():
             if 2100 not in set(df["year"].astype(int)):
                 tail = df[df["year"].between(2090, 2099)].copy()
                 if len(tail) != 10:
-                    raise ValueError(
-                        "Expected 2090-2099 HI data to extrapolate 2100."
-                    )
+                    raise ValueError("Expected 2090-2099 HI data to extrapolate 2100.")
 
                 extrapolated = {"year": 2100}
                 years = tail["year"].to_numpy(dtype=float)
@@ -188,6 +247,7 @@ def compute_option13_and_14_year(
         Dict with 'option13' and/or 'option14' results (only keys for computed options)
     """
     import sys
+    import time
     import numpy as np
     from policyengine_us import Microsimulation
     from policyengine_core.reforms import Reform
@@ -212,29 +272,53 @@ def compute_option13_and_14_year(
 
     dataset = dataset_path(year)
 
+    def calculate_sum(
+        simulation,
+        variable_name: str,
+        *,
+        label: str | None = None,
+        map_to: str | None = None,
+    ):
+        display_name = label or variable_name
+        start = time.time()
+        print(f"Calculating {display_name}...", flush=True)
+        if map_to is None:
+            result = simulation.calculate(variable_name, year).sum()
+        else:
+            result = simulation.calculate(
+                variable_name, map_to=map_to, period=year
+            ).sum()
+        print(
+            f"  {display_name}: ${result / 1e9:.3f}B ({time.time() - start:.1f}s)",
+            flush=True,
+        )
+        return result
+
     # Run baseline
     print("Running baseline simulation...")
     baseline = Microsimulation(dataset=dataset)
 
     # SS components
-    employee_ss_tax = baseline.calculate("employee_social_security_tax", year).sum()
-    employer_ss_tax = baseline.calculate("employer_social_security_tax", year).sum()
-    se_ss_tax = baseline.calculate("self_employment_social_security_tax", year).sum()
-    tob_oasdi = baseline.calculate("tob_revenue_oasdi", year).sum()
+    employee_ss_tax = calculate_sum(baseline, "employee_social_security_tax")
+    employer_ss_tax = calculate_sum(baseline, "employer_social_security_tax")
+    se_ss_tax = calculate_sum(baseline, "self_employment_social_security_tax")
+    tob_oasdi = calculate_sum(baseline, "tob_revenue_oasdi")
 
     ss_benefits_series = baseline.calculate("social_security", year)
     ss_benefits = ss_benefits_series.sum()
     ss_benefits_values = np.array(ss_benefits_series.values)
 
     # HI components
-    employee_hi_tax = baseline.calculate("employee_medicare_tax", year).sum()
-    employer_hi_tax = baseline.calculate("employer_medicare_tax", year).sum()
-    se_medicare_tax = baseline.calculate("self_employment_medicare_tax", year).sum()
-    additional_medicare_tax = baseline.calculate("additional_medicare_tax", year).sum()
-    tob_hi = baseline.calculate("tob_revenue_medicare_hi", year).sum()
+    employee_hi_tax = calculate_sum(baseline, "employee_medicare_tax")
+    employer_hi_tax = calculate_sum(baseline, "employer_medicare_tax")
+    se_medicare_tax = calculate_sum(baseline, "self_employment_medicare_tax")
+    additional_medicare_tax = calculate_sum(baseline, "additional_medicare_tax")
+    tob_hi = calculate_sum(baseline, "tob_revenue_medicare_hi")
 
     # Baseline income tax
-    baseline_income_tax = baseline.calculate("income_tax", year).sum()
+    baseline_income_tax = calculate_sum(
+        baseline, "income_tax", label="baseline income_tax"
+    )
 
     # Get current rates
     params = baseline.tax_benefit_system.parameters
@@ -285,10 +369,10 @@ def compute_option13_and_14_year(
 
     # Get taxable payroll directly from PolicyEngine variables
     # SS: capped at wage base, Medicare: no cap (all wages)
-    oasdi_taxable_payroll = baseline.calculate(
-        "taxable_earnings_for_social_security", year
-    ).sum()
-    hi_taxable_payroll = baseline.calculate("payroll_tax_gross_wages", year).sum()
+    oasdi_taxable_payroll = calculate_sum(
+        baseline, "taxable_earnings_for_social_security"
+    )
+    hi_taxable_payroll = calculate_sum(baseline, "payroll_tax_gross_wages")
 
     print(
         f"Taxable payroll: SS ${oasdi_taxable_payroll / 1e12:.2f}T, HI ${hi_taxable_payroll / 1e12:.2f}T"
@@ -315,26 +399,44 @@ def compute_option13_and_14_year(
     stage1_sim.set_input("social_security", year, reduced_ss_values)
 
     # Calculate Stage 1 results
-    stage1_ss_benefits = stage1_sim.calculate("social_security", year).sum()
-    stage1_employee_ss = stage1_sim.calculate(
-        "employee_social_security_tax", year
-    ).sum()
-    stage1_employer_ss = stage1_sim.calculate(
-        "employer_social_security_tax", year
-    ).sum()
-    stage1_se_ss = stage1_sim.calculate(
-        "self_employment_social_security_tax", year
-    ).sum()
-    stage1_tob_oasdi = stage1_sim.calculate("tob_revenue_oasdi", year).sum()
-    stage1_employee_hi = stage1_sim.calculate("employee_medicare_tax", year).sum()
-    stage1_employer_hi = stage1_sim.calculate("employer_medicare_tax", year).sum()
-    stage1_se_medicare = stage1_sim.calculate(
-        "self_employment_medicare_tax", year
-    ).sum()
-    stage1_additional_medicare = stage1_sim.calculate(
-        "additional_medicare_tax", year
-    ).sum()
-    stage1_tob_hi = stage1_sim.calculate("tob_revenue_medicare_hi", year).sum()
+    stage1_ss_benefits = calculate_sum(
+        stage1_sim, "social_security", label="stage1 social_security"
+    )
+    stage1_employee_ss = calculate_sum(
+        stage1_sim,
+        "employee_social_security_tax",
+        label="stage1 employee_social_security_tax",
+    )
+    stage1_employer_ss = calculate_sum(
+        stage1_sim,
+        "employer_social_security_tax",
+        label="stage1 employer_social_security_tax",
+    )
+    stage1_se_ss = calculate_sum(
+        stage1_sim,
+        "self_employment_social_security_tax",
+        label="stage1 self_employment_social_security_tax",
+    )
+    stage1_tob_oasdi = calculate_sum(
+        stage1_sim, "tob_revenue_oasdi", label="stage1 tob_revenue_oasdi"
+    )
+    stage1_employee_hi = calculate_sum(
+        stage1_sim, "employee_medicare_tax", label="stage1 employee_medicare_tax"
+    )
+    stage1_employer_hi = calculate_sum(
+        stage1_sim, "employer_medicare_tax", label="stage1 employer_medicare_tax"
+    )
+    stage1_se_medicare = calculate_sum(
+        stage1_sim,
+        "self_employment_medicare_tax",
+        label="stage1 self_employment_medicare_tax",
+    )
+    stage1_additional_medicare = calculate_sum(
+        stage1_sim, "additional_medicare_tax", label="stage1 additional_medicare_tax"
+    )
+    stage1_tob_hi = calculate_sum(
+        stage1_sim, "tob_revenue_medicare_hi", label="stage1 tob_revenue_medicare_hi"
+    )
 
     # Calculate remaining gaps AFTER benefit cuts (no employer tax revenue)
     stage1_ss_income = (
@@ -431,27 +533,47 @@ def compute_option13_and_14_year(
     reform_sim.set_input("social_security", year, reduced_ss_values)
 
     # Calculate
-    reform_income_tax = reform_sim.calculate("income_tax", year).sum()
-    reform_tob_oasdi = reform_sim.calculate("tob_revenue_oasdi", year).sum()
-    reform_tob_hi = reform_sim.calculate("tob_revenue_medicare_hi", year).sum()
-    reform_ss_benefits = reform_sim.calculate("social_security", year).sum()
-    reform_employee_ss = reform_sim.calculate(
-        "employee_social_security_tax", year
-    ).sum()
-    reform_employer_ss = reform_sim.calculate(
-        "employer_social_security_tax", year
-    ).sum()
-    reform_se_ss = reform_sim.calculate(
-        "self_employment_social_security_tax", year
-    ).sum()
-    reform_employee_hi = reform_sim.calculate("employee_medicare_tax", year).sum()
-    reform_employer_hi = reform_sim.calculate("employer_medicare_tax", year).sum()
-    reform_se_medicare = reform_sim.calculate(
-        "self_employment_medicare_tax", year
-    ).sum()
-    reform_additional_medicare = reform_sim.calculate(
-        "additional_medicare_tax", year
-    ).sum()
+    reform_income_tax = calculate_sum(
+        reform_sim, "income_tax", label="reform income_tax"
+    )
+    reform_tob_oasdi = calculate_sum(
+        reform_sim, "tob_revenue_oasdi", label="reform tob_revenue_oasdi"
+    )
+    reform_tob_hi = calculate_sum(
+        reform_sim, "tob_revenue_medicare_hi", label="reform tob_revenue_medicare_hi"
+    )
+    reform_ss_benefits = calculate_sum(
+        reform_sim, "social_security", label="reform social_security"
+    )
+    reform_employee_ss = calculate_sum(
+        reform_sim,
+        "employee_social_security_tax",
+        label="reform employee_social_security_tax",
+    )
+    reform_employer_ss = calculate_sum(
+        reform_sim,
+        "employer_social_security_tax",
+        label="reform employer_social_security_tax",
+    )
+    reform_se_ss = calculate_sum(
+        reform_sim,
+        "self_employment_social_security_tax",
+        label="reform self_employment_social_security_tax",
+    )
+    reform_employee_hi = calculate_sum(
+        reform_sim, "employee_medicare_tax", label="reform employee_medicare_tax"
+    )
+    reform_employer_hi = calculate_sum(
+        reform_sim, "employer_medicare_tax", label="reform employer_medicare_tax"
+    )
+    reform_se_medicare = calculate_sum(
+        reform_sim,
+        "self_employment_medicare_tax",
+        label="reform self_employment_medicare_tax",
+    )
+    reform_additional_medicare = calculate_sum(
+        reform_sim, "additional_medicare_tax", label="reform additional_medicare_tax"
+    )
 
     # Calculate rate increase revenue (manual calculation)
     rate_increase_ss_revenue = ss_rate_increase * oasdi_taxable_payroll
@@ -556,18 +678,34 @@ def compute_option13_and_14_year(
         # (don't call set_input for social_security)
 
         # Calculate Option 12 standalone results
-        option12_income_tax = option12_sim.calculate("income_tax", year).sum()
-        option12_tob_oasdi = option12_sim.calculate("tob_revenue_oasdi", year).sum()
-        option12_tob_hi = option12_sim.calculate("tob_revenue_medicare_hi", year).sum()
-        option12_ss_benefits = option12_sim.calculate("social_security", year).sum()
+        option12_income_tax = calculate_sum(
+            option12_sim, "income_tax", label="option12 income_tax"
+        )
+        option12_tob_oasdi = calculate_sum(
+            option12_sim, "tob_revenue_oasdi", label="option12 tob_revenue_oasdi"
+        )
+        option12_tob_hi = calculate_sum(
+            option12_sim,
+            "tob_revenue_medicare_hi",
+            label="option12 tob_revenue_medicare_hi",
+        )
+        option12_ss_benefits = calculate_sum(
+            option12_sim, "social_security", label="option12 social_security"
+        )
 
         # Option 12 specific: employer payroll tax revenue
-        option12_employer_ss_revenue = option12_sim.calculate(
-            "employer_ss_tax_income_tax_revenue", map_to="household", period=year
-        ).sum()
-        option12_employer_hi_revenue = option12_sim.calculate(
-            "employer_medicare_tax_income_tax_revenue", map_to="household", period=year
-        ).sum()
+        option12_employer_ss_revenue = calculate_sum(
+            option12_sim,
+            "employer_ss_tax_income_tax_revenue",
+            label="option12 employer_ss_tax_income_tax_revenue",
+            map_to="household",
+        )
+        option12_employer_hi_revenue = calculate_sum(
+            option12_sim,
+            "employer_medicare_tax_income_tax_revenue",
+            label="option12 employer_medicare_tax_income_tax_revenue",
+            map_to="household",
+        )
 
         # Compare to Option 13 baseline (balanced fix)
         option12_income_tax_impact = option12_income_tax - reform_income_tax
@@ -679,8 +817,7 @@ def main(
         output_prefix = default_output_prefix()
 
     args = [
-        (year, not run_option13, not run_option14, output_prefix)
-        for year in year_list
+        (year, not run_option13, not run_option14, output_prefix) for year in year_list
     ]
 
     if submit_only:

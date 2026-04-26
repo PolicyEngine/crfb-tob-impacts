@@ -64,31 +64,33 @@ Operationally, that means:
 - `2026-2034` are again current-law placeholders because the stacked baseline
   starts in `2035`
 
-## Static Versus Dynamic
+## Static Versus Conventional
 
-The released static and dynamic series share the same cleaned Trustees baseline
-lineage for the standard reforms.
+The released static series uses the cleaned Trustees baseline lineage. The
+conventional series is the labor-supply-response counterpart and must share the
+same baseline levels before it can be published alongside the static release.
 
-For the current dynamic release, the intended differences from plain upstream
+For the conventional release, the intended differences from plain upstream
 `policyengine-us` main are:
 
 - Trustees long-run uprating behavior
 - age-based labor-supply elasticities for behavioral-response scoring
 
-Dynamic should therefore be interpreted as an extension of the same baseline
-lineage, not as a separate legacy workflow.
+Conventional scoring should therefore be interpreted as an extension of the
+same baseline lineage, not as a separate legacy workflow.
 
 Operationally:
 
-- the current public dynamic release covers standard reforms `option1`
-  through `option12`
+- the current conventional artifact is quarantined pending a same-baseline
+  rerun
+- once cleared, the public conventional release should cover standard reforms
+  `option1` through `option12`
 - `option13` and `option14_stacked` remain static-only in the current release
-  because a balanced-fix dynamic version would require a separate iterative
-  post-response solve rather than the shipped standard dynamic pipeline
-- it was validated first through sparse sentinel years and then through a full
-  `2026-2100` panel recovery
-- the exact-missing-cell repair path is part of the live toolchain, so dynamic
-  reruns do not require restarting a full panel when only a few cells fail
+  because a balanced-fix conventional version would require a separate
+  iterative post-response solve rather than the standard conventional pipeline
+- the exact-missing-cell repair path is part of the live toolchain, so
+  conventional reruns do not require restarting a full panel when only a few
+  cells fail
 
 ## Reproducibility Boundary
 

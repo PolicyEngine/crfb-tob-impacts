@@ -11,7 +11,7 @@
 | option10 | +87.2 | +128.1 | +335.7 | +825.9 |
 | option12 | +243.2 | +175.2 | -155.7 | -338.5 |
 | option13 | -24.2 | -59.6 | -247.3 | -682.9 |
-| option14_stacked | +440.9 | -334.3 | -5,219.8 | -23,120.5 |
+| option14_stacked | +258.0 | +239.4 | -36.0 | -432.5 |
 
 The rebuilt standard series shows the expected late-horizon split: repeal or
 TOB-reducing options (`option1`, `option5`, `option6`, `option12`) become
@@ -27,7 +27,7 @@ balanced-fix baseline rather than plain current law.
 | option1 | -3,862.8 | -3,862.8 | -2,101.3 | -1,761.5 |
 | option12 | -338.5 | -3,862.8 | +523.5 | -845.5 |
 | option13 | -682.9 | -682.9 | +7,815.1 | -1,044.6 |
-| option14_stacked | -23,120.5 | -3,179.9 | +941.8 | -581.0 |
+| option14_stacked | -432.5 | -5,016.0 | +540.0 | -961.3 |
 | option2 | +222.8 | +222.8 | +14.5 | +208.4 |
 | option4 | +168.3 | +168.3 | -35.0 | +203.4 |
 | option8 | +1,138.0 | +1,138.0 | +14.5 | +1,123.5 |

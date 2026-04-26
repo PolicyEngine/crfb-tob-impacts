@@ -101,7 +101,7 @@ def test_default_submission_manifest_path_matches_output_prefix():
     )
 
 
-def test_option13_row_reconstructs_levels_from_balanced_fix_chain():
+def test_option13_row_reconstructs_levels_from_standard_baseline():
     module = _load_module("build_latesthf_14option_delivery_test", BUILDER_PATH)
 
     option13_raw = {
@@ -119,6 +119,7 @@ def test_option13_row_reconstructs_levels_from_balanced_fix_chain():
     }
     baseline = {
         "year": 2035,
+        "baseline_revenue": 5_317.543278196444,
         "baseline_tob_oasdi": 173.7881756511995,
         "baseline_tob_medicare_hi": 128.74066162906573,
         "baseline_tob_total": 302.52883728026523,
@@ -127,6 +128,15 @@ def test_option13_row_reconstructs_levels_from_balanced_fix_chain():
 
     row = module.option13_row(option13_raw, baseline, "fallback-run")
 
+    assert row["baseline_revenue"] == baseline["baseline_revenue"]
+    assert math.isclose(
+        row["reform_revenue"],
+        baseline["baseline_revenue"] + option13_raw["income_tax_impact"] / 1e9,
+        rel_tol=0,
+        abs_tol=1e-9,
+    )
+    assert row["baseline_tob_oasdi"] == baseline["baseline_tob_oasdi"]
+    assert row["baseline_tob_medicare_hi"] == baseline["baseline_tob_medicare_hi"]
     assert math.isclose(
         row["reform_tob_oasdi"],
         baseline["baseline_tob_oasdi"] + option13_raw["tob_oasdi_impact"] / 1e9,
@@ -154,33 +164,149 @@ def test_option13_row_reconstructs_levels_from_balanced_fix_chain():
     assert row["run_id"] == "fallback-run"
 
 
-def test_option14_row_preserves_balanced_fix_baseline_levels():
+def test_option13_row_enforces_standard_static_baseline():
+    module = _load_module("build_latesthf_14option_delivery_option13_baseline", BUILDER_PATH)
+
+    option13_raw = {
+        "year": 2035,
+        "baseline_income_tax": 5_144_104_641_973.289,
+        "reform_income_tax": 5_119_905_577_124.184,
+        "income_tax_impact": -24_199_064_849.10547,
+        "tob_oasdi_impact": -14_571_385_234.390778,
+        "tob_hi_impact": -9_627_055_030.69548,
+        "rate_increase_ss_revenue": 254_485_587_687.72977,
+        "rate_increase_hi_revenue": 165_263_786_900.198,
+        "tob_oasdi_loss": 14_571_385_234.390778,
+        "tob_hi_loss": 9_627_055_030.69548,
+        "benefit_cut": 239_914_188_899.12354,
+    }
+    standard_baseline = {
+        "baseline_revenue": 5_317.543278196444,
+        "baseline_tob_oasdi": 145.8450006894274,
+        "baseline_tob_medicare_hi": 111.68300042779506,
+        "baseline_tob_total": 257.52800111722246,
+        "scoring_type": "static",
+    }
+
+    row = module.option13_row(
+        option13_raw,
+        standard_baseline,
+        "fallback-run",
+    )
+
+    assert row["baseline_revenue"] == standard_baseline["baseline_revenue"]
+    assert row["baseline_tob_oasdi"] == standard_baseline["baseline_tob_oasdi"]
+    assert row["baseline_tob_medicare_hi"] == standard_baseline["baseline_tob_medicare_hi"]
+    assert math.isclose(
+        row["baseline_tob_oasdi"] + row["tob_oasdi_impact"],
+        row["reform_tob_oasdi"],
+        rel_tol=0,
+        abs_tol=1e-9,
+    )
+
+
+def test_option14_row_uses_recovered_special_case_levels():
     module = _load_module("build_latesthf_14option_delivery_test2", BUILDER_PATH)
 
-    option13 = {
+    raw = {
         "year": 2035,
-        "reform_revenue": 4707.518915505758,
-        "reform_tob_oasdi": 158.98836634821445,
-        "reform_tob_medicare_hi": 117.74843950619337,
-        "run_id": "option13-run",
-    }
-    option12_standard = {
-        "reform_revenue": 4958.376957408387,
-        "reform_tob_oasdi": 121.44483749185042,
-        "reform_tob_medicare_hi": 125.2073293076216,
-        "employer_ss_tax_revenue": 217.95501973196692,
-        "employer_medicare_tax_revenue": 66.57228487126358,
+        "baseline_income_tax": 5_119_905_577_124.184,
+        "reform_income_tax": 5_377_938_150_000.0,
+        "income_tax_impact": 258_032_572_875.816,
+        "baseline_tob_oasdi": 126_402_746_000.0,
+        "baseline_tob_hi": 91_951_161_000.0,
+        "reform_tob_oasdi": 90_601_452_000.0,
+        "reform_tob_hi": 99_963_805_000.0,
+        "tob_oasdi_impact": -35_801_294_000.0,
+        "tob_hi_impact": 8_012_644_000.0,
+        "employer_ss_tax_revenue": 220_782_793_000.0,
+        "employer_hi_tax_revenue": 68_717_378_000.0,
+        "oasdi_gain": 220_782_793_000.0,
+        "hi_gain": 68_717_378_000.0,
+        "oasdi_loss": 35_801_294_000.0,
+        "hi_loss": -8_012_644_000.0,
+        "oasdi_net_impact": 184_981_499_000.0,
+        "hi_net_impact": 76_730_022_000.0,
+        "special_case_run_id": "option14-run",
     }
 
-    row = module.option14_row(option13, option12_standard, "fallback-run")
+    row = module.option14_row(raw, "fallback-run")
 
-    assert row["baseline_revenue"] == option13["reform_revenue"]
-    assert row["reform_revenue"] == option12_standard["reform_revenue"]
-    assert row["baseline_tob_oasdi"] == option13["reform_tob_oasdi"]
-    assert row["reform_tob_oasdi"] == option12_standard["reform_tob_oasdi"]
-    assert row["baseline_tob_medicare_hi"] == option13["reform_tob_medicare_hi"]
-    assert (
-        row["reform_tob_medicare_hi"]
-        == option12_standard["reform_tob_medicare_hi"]
+    assert row["baseline_revenue"] == raw["baseline_income_tax"] / 1e9
+    assert row["reform_revenue"] == raw["reform_income_tax"] / 1e9
+    assert row["revenue_impact"] == raw["income_tax_impact"] / 1e9
+    assert row["baseline_tob_oasdi"] == raw["baseline_tob_oasdi"] / 1e9
+    assert row["reform_tob_oasdi"] == raw["reform_tob_oasdi"] / 1e9
+    assert row["baseline_tob_medicare_hi"] == raw["baseline_tob_hi"] / 1e9
+    assert row["reform_tob_medicare_hi"] == raw["reform_tob_hi"] / 1e9
+    assert row["oasdi_net_impact"] == raw["oasdi_net_impact"] / 1e9
+    assert row["hi_net_impact"] == raw["hi_net_impact"] / 1e9
+    assert row["run_id"] == "option14-run"
+
+
+def test_option14_raw_path_avoids_cross_lineage_standard_splice():
+    module = _load_module("build_latesthf_14option_delivery_test3", BUILDER_PATH)
+
+    option13_raw = {
+        "year": 2035,
+        "baseline_income_tax": 5_144_104_641_973.289,
+        "reform_income_tax": 5_119_905_577_124.184,
+        "income_tax_impact": -24_199_064_849.10547,
+        "tob_oasdi_impact": -14_571_385_234.390778,
+        "tob_hi_impact": -9_627_055_030.69548,
+        "rate_increase_ss_revenue": 254_485_587_687.72977,
+        "rate_increase_hi_revenue": 165_263_786_900.198,
+        "tob_oasdi_loss": 14_571_385_234.390778,
+        "tob_hi_loss": 9_627_055_030.69548,
+        "benefit_cut": 239_914_188_899.12354,
+    }
+    option14_raw = {
+        "year": 2035,
+        "baseline_income_tax": 5_119_905_577_124.184,
+        "reform_income_tax": 5_377_938_150_000.0,
+        "income_tax_impact": 258_032_572_875.816,
+        "baseline_tob_oasdi": 126_402_746_000.0,
+        "baseline_tob_hi": 91_951_161_000.0,
+        "reform_tob_oasdi": 90_601_452_000.0,
+        "reform_tob_hi": 99_963_805_000.0,
+        "tob_oasdi_impact": -35_801_294_000.0,
+        "tob_hi_impact": 8_012_644_000.0,
+        "employer_ss_tax_revenue": 220_782_793_000.0,
+        "employer_hi_tax_revenue": 68_717_378_000.0,
+        "oasdi_gain": 220_782_793_000.0,
+        "hi_gain": 68_717_378_000.0,
+        "oasdi_loss": 35_801_294_000.0,
+        "hi_loss": -8_012_644_000.0,
+        "oasdi_net_impact": 184_981_499_000.0,
+        "hi_net_impact": 76_730_022_000.0,
+    }
+    standard = {
+        "year": 2035,
+        "reform_name": "option1",
+        "baseline_revenue": 5_317.543278196444,
+        "baseline_tob_oasdi": 145.8450006894274,
+        "baseline_tob_medicare_hi": 111.68300042779506,
+        "baseline_tob_total": 257.52800111722246,
+        "scoring_type": "static",
+    }
+    option12_standard = dict(standard)
+    option12_standard.update(
+        {
+            "reform_name": "option12",
+            "reform_revenue": 5_560.776495863254,
+            "reform_tob_oasdi": 93.87973824189643,
+            "reform_tob_medicare_hi": 108.41530344717678,
+            "revenue_impact": 243.23321766680992,
+        }
     )
-    assert row["run_id"] == "option13-run"
+
+    option13 = module.option13_row(option13_raw, standard, "fallback-run")
+    option14 = module.option14_row(option14_raw, "fallback-run")
+
+    assert option13["baseline_revenue"] == standard["baseline_revenue"]
+    assert option14["baseline_revenue"] == option14_raw["baseline_income_tax"] / 1e9
+    assert option14["baseline_revenue"] != option13["reform_revenue"]
+    assert option14["reform_revenue"] != option12_standard["reform_revenue"]
+    assert option14["revenue_impact"] != (
+        option12_standard["reform_revenue"] - option13["reform_revenue"]
+    )

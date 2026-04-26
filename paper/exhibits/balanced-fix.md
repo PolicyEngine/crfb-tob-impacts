@@ -8,10 +8,10 @@ measured relative to that balanced-fix baseline rather than plain current law.
 | option13 | 2050 | -59.6 | -59.6 | +972.0 | +259.0 |
 | option13 | 2075 | -247.3 | -247.3 | +3,488.4 | +290.3 |
 | option13 | 2100 | -682.9 | -682.9 | +7,815.1 | -1,044.6 |
-| option14_stacked | 2035 | +440.9 | -31.0 | +194.7 | +77.7 |
-| option14_stacked | 2050 | -334.3 | -289.9 | +162.7 | +77.2 |
-| option14_stacked | 2075 | -5,219.8 | -1,255.9 | +359.1 | -261.7 |
-| option14_stacked | 2100 | -23,120.5 | -3,179.9 | +941.8 | -581.0 |
+| option14_stacked | 2035 | +258.0 | -27.8 | +185.0 | +76.7 |
+| option14_stacked | 2050 | +239.4 | -314.6 | +143.1 | +102.5 |
+| option14_stacked | 2075 | -36.0 | -1,639.7 | +251.5 | -282.3 |
+| option14_stacked | 2100 | -432.5 | -5,016.0 | +540.0 | -961.3 |
 
 At the corrected `2100` endpoint, the recovered `option13` row closes both
 modeled gaps while keeping the employee and employer HI rates positive:
