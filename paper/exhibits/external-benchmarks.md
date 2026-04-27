@@ -11,7 +11,7 @@ windows and policy baselines are not identical.
 | CBO [@cbo2024options] | Full repeal | Conventional | 2025-2034 | -1,600.0 |
 | SSA Trustees [@ssa2024trustees] | Full repeal | Conventional | 2025-2034 | -1,800.0 |
 | Tax Foundation [@taxfoundation2024trump] | Full repeal | Conventional | 2025-2034 | -1,400.0 |
-| Tax Foundation [@taxfoundation2024trump] | Full repeal | Dynamic | 2025-2034 | -1,300.0 |
+| Tax Foundation [@taxfoundation2024trump] | Full repeal | Macroeconomic | 2025-2034 | -1,300.0 |
 
 ## Options 2 and 8: broader taxation benchmark
 
@@ -33,7 +33,7 @@ The main comparability caveats remain unchanged from the first report:
 
 - our primary published window is `2026-2035`, while several outside estimates
   use `2025-2034` or other budget windows
-- outside scores often use conventional or dynamic methods rather than this
+- outside scores often use different scoring methods rather than this
   manuscript's cleaned static package
 - current-law baselines differ because the temporary senior deduction and other
   tax provisions change the taxable-benefit base in the early years

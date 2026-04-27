@@ -44,6 +44,7 @@
   /* Radius */
   --pe-radius-feature: var(--radius-feature);
   --pe-radius-container: var(--radius-container);
+  --pe-radius-element: var(--radius-element);
 }
 
 * {

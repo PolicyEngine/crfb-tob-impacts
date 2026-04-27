@@ -57,6 +57,10 @@ if (CONTAINER_PROJECT_ROOT / "projected_datasets").exists():
 else:
     PROJECTED_DATASETS_PATH = resolve_projected_datasets_path()
 
+POLICYENGINE_CORE_VERSION = os.environ.get("CRFB_POLICYENGINE_CORE_VERSION", "3.23.6")
+NUMPY_VERSION = os.environ.get("CRFB_NUMPY_VERSION", "2.4.1")
+PANDAS_VERSION = os.environ.get("CRFB_PANDAS_VERSION", "3.0.0")
+
 POLICYENGINE_US_IGNORE = [
     ".claude",
     ".claude/**",
@@ -83,8 +87,9 @@ POLICYENGINE_US_IGNORE = [
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "pandas>=2.0.0",
-        "numpy>=1.24.0",
+        f"pandas=={PANDAS_VERSION}",
+        f"numpy=={NUMPY_VERSION}",
+        f"policyengine-core=={POLICYENGINE_CORE_VERSION}",
     )
     .add_local_dir(
         POLICYENGINE_US_PATH,
@@ -497,9 +502,7 @@ def run_cells(
             result = call.get(timeout=15000)
             local_file.parent.mkdir(parents=True, exist_ok=True)
             pd.DataFrame([result]).to_csv(local_file, index=False)
-            print(
-                f"  [{index}/{len(calls)}] Saved {reform_id} {year} to {local_file}"
-            )
+            print(f"  [{index}/{len(calls)}] Saved {reform_id} {year} to {local_file}")
         except Exception as error:
             failures.append((reform_id, year, str(error)))
             print(f"  [{index}/{len(calls)}] FAILED {reform_id} {year}: {error}")
@@ -691,7 +694,9 @@ def _combine_results(
         print("No results to combine!")
         return
 
-    df = pd.concat([pd.read_csv(file_path) for file_path in all_files], ignore_index=True)
+    df = pd.concat(
+        [pd.read_csv(file_path) for file_path in all_files], ignore_index=True
+    )
     df = df.sort_values(["reform_name", "year"])
     df.to_csv(output_path, index=False)
 
@@ -725,7 +730,9 @@ def _combine_results_recursive(
         print("No results to combine!")
         return
 
-    df = pd.concat([pd.read_csv(file_path) for file_path in all_files], ignore_index=True)
+    df = pd.concat(
+        [pd.read_csv(file_path) for file_path in all_files], ignore_index=True
+    )
     df = df.sort_values(["reform_name", "year"])
     df.to_csv(output_path, index=False)
 

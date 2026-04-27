@@ -33,7 +33,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Negative values represent lost income-tax revenue currently credited to the OASDI and HI trust funds.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option2",
@@ -49,7 +49,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Positive values show the added revenue from expanding the taxable-benefit base below the current thresholds.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option3",
@@ -65,7 +65,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Results combine added taxable-benefit revenue with the offsetting cost of extending the senior deduction.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option4",
@@ -81,7 +81,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The credit targets relief more directly than a deduction, so revenue effects reflect both the broader tax base and the capped credit offset.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option5",
@@ -97,7 +97,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "This is a structural tax-base shift from retirees toward workers, not just a change in taxable-benefit inclusion.",
     scoringNote:
-      "Static and conventional dynamic results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option6",
@@ -113,7 +113,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The time path matters: early years show the phase-in, while later years converge toward the structural swap.",
     scoringNote:
-      "Static and conventional dynamic results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option7",
@@ -128,7 +128,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Positive values represent higher income-tax revenue from removing the temporary deduction.",
     scoringNote:
-      "Static and conventional dynamic results are available; this is treated as a general-revenue change rather than a direct OASDI/HI benefit-tax split.",
+      "Static results are available; this is treated as a general-revenue change rather than a direct OASDI/HI benefit-tax split. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option8",
@@ -144,7 +144,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "This is the broadest direct benefit-taxation option, so positive revenue effects are larger than under 85, 90, or 95 percent inclusion.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option9",
@@ -160,7 +160,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Revenue effects sit between uniform 85 percent taxation and broader 95 or 100 percent inclusion.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option10",
@@ -176,7 +176,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Revenue effects are larger than under 85 or 90 percent inclusion but smaller than taxing all benefits.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option11",
@@ -192,7 +192,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The larger credit provides more offset than the $500 design and phases out above higher incomes.",
     scoringNote:
-      "Static and conventional dynamic results are available for the full 2026-2100 window.",
+      "Static results are available for the full 2026-2100 window. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option12",
@@ -208,7 +208,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The late-horizon sign can differ from the first decade because the payroll-tax inclusion and benefit-tax phaseout operate on different bases.",
     scoringNote:
-      "Static and conventional dynamic results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static results are available; trust-fund allocation follows the explicit OASDI/HI net-impact logic. Conventional results are quarantined pending a same-baseline rerun.",
   },
   {
     id: "option13",
@@ -223,6 +223,22 @@ export const REFORMS: ReformMeta[] = [
       "This is a stylized solvency baseline, not a standard reform scored against current law.",
     interpretation:
       "Read the dedicated Balanced Fix tab rather than comparing it directly with Options 1-12.",
+    scoringNote:
+      "Only static special-case results are included in the public release.",
+  },
+  {
+    id: "option14_stacked",
+    name: "Extended Roth-Style Swap Relative to Balanced Fix",
+    shortName: "Stacked Roth",
+    description:
+      "Apply the extended employer-payroll-tax swap on top of the balanced-fix baseline.",
+    category: "Special case",
+    mechanism:
+      "Uses the Option 13 balanced-fix reform as the baseline, then layers the Option 12 structural swap on top.",
+    baseline:
+      "Unlike Options 1-12, this is not a current-law comparison; it measures the incremental structural swap effect relative to the balanced-fix baseline.",
+    interpretation:
+      "Read as the additional effect of the structural swap after the solvency baseline, not as a standalone current-law reform.",
     scoringNote:
       "Only static special-case results are included in the public release.",
   },

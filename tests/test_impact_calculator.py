@@ -38,8 +38,8 @@ class TestFiscalImpact:
     def test_calculate_fiscal_impact_no_reform(self):
         """Test fiscal impact calculation with no reform."""
         baseline_income_tax = np.array([1000, 2000, 3000])
-        impact = calculate_fiscal_impact(None, 2026, baseline_income_tax)
-        assert impact == 0.0
+        with pytest.raises(ValueError, match="Reform is None"):
+            calculate_fiscal_impact(None, 2026, baseline_income_tax)
 
     def test_calculate_fiscal_impact_error_handling(self):
         """Test error handling in fiscal impact calculation."""
@@ -50,10 +50,8 @@ class TestFiscalImpact:
             MockMicrosim.side_effect = Exception("Test error")
 
             reform = Mock()
-            impact = calculate_fiscal_impact(reform, 2026, baseline_income_tax)
-
-            # Should return 0.0 on error
-            assert impact == 0.0
+            with pytest.raises(Exception, match="Test error"):
+                calculate_fiscal_impact(reform, 2026, baseline_income_tax)
 
 
 class TestComputeBaselines:

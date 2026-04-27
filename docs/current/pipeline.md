@@ -23,14 +23,12 @@ This page describes how the current outputs are supposed to be built.
 
 ## Key Scripts
 
-- [scripts/run_full_2026_2100_overnight.sh](../../scripts/run_full_2026_2100_overnight.sh)
-  - orchestrates the hardened full static rebuild
-- [scripts/score_saved_h5_reforms.py](../../scripts/score_saved_h5_reforms.py)
-  - local saved-H5 rescoring for focused checks and sentinel work
-- [scripts/submit_modal_scenario_run.py](../../scripts/submit_modal_scenario_run.py)
-  - submits standard `year x scenario` scoring to Modal
-- [scripts/recover_modal_run.py](../../scripts/recover_modal_run.py)
-  - recovers Modal results to local artifacts
+- [scripts/run_modal_refresh.py](../../scripts/run_modal_refresh.py)
+  - snapshots calibrated H5 datasets, writes the reproducibility bundle, and
+    launches standard static or conventional reform panels on Modal
+- [scripts/recover_modal_cells_run.py](../../scripts/recover_modal_cells_run.py)
+  - recovers Modal cell-run outputs from the results volume and combines them
+    into local CSV artifacts
 - [scripts/write_repro_bundle.py](../../scripts/write_repro_bundle.py)
   - writes the same reproducibility bundle for non-standard or local run paths
 - [scripts/freeze_repro_bundle.py](../../scripts/freeze_repro_bundle.py)

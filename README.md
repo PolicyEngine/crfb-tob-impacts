@@ -32,6 +32,9 @@ The production site is deployed on Vercel as a combined static build:
 - dashboard at `/`
 - citable Quarto paper at `/paper/`
 
+When `NEXT_PUBLIC_BASE_PATH` is set, both the dashboard and paper are emitted
+under that base path.
+
 Local production-style build:
 
 ```bash

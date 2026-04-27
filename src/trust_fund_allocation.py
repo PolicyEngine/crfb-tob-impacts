@@ -16,7 +16,7 @@ def load_allocation_rules() -> dict[str, set[str]]:
         },
         "baselineShareOptions": {"option3", "option4", "option11"},
         "netImpactOptions": {"option5", "option6"},
-        "directBranchingOptions": {"option12", "option13"},
+        "directBranchingOptions": {"option12", "option13", "option14_stacked"},
         "generalRevenueOptions": {"option7"},
     }
 

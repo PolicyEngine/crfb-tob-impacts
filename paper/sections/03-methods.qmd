@@ -20,12 +20,12 @@ components described below. The static estimand therefore holds the projected
 population, income, and benefit distribution fixed within a year and varies
 only the policy parameters.
 
-The dynamic, or conventional, estimand uses the same projected data and
-baseline contract but lets the policy reform trigger PolicyEngine labor-supply
+The conventional estimand uses the same projected data and baseline contract
+but lets the policy reform trigger PolicyEngine labor-supply
 response variables before revenue is measured:
 
 $$
-\Delta^{dynamic}_{sy}
+\Delta^{conventional}_{sy}
 = \sum_i w_{iy} R_i(P_s, D_{iy}, L_i(P_s))
 - \sum_i w_{iy} R_i(P_0, D_{iy}, L_i(P_0)).
 $$
@@ -190,11 +190,11 @@ revenue while weakening one trust fund, or it can replace taxation-of-benefits
 revenue with employer-contribution revenue allocated differently across OASDI
 and HI.
 
-## Dynamic scoring
+## Conventional scoring
 
-The conventional dynamic series uses the same calibrated datasets as the static
+The conventional series uses the same calibrated datasets as the static
 series but applies PolicyEngine's labor-supply response layer inside the reform
-simulation. The dynamic reform dictionaries merge the statutory reform
+simulation. The conventional reform dictionaries merge the statutory reform
 parameters with the project's age-based elasticity schedule:
 
 - income elasticity base: `-0.05`
@@ -206,16 +206,18 @@ parameters with the project's age-based elasticity schedule:
 
 The doubled older-worker elasticity reflects the literature review judgment
 used for this project: near-retirement and retirement-age workers are more
-responsive on the labor-supply margin than prime-age workers. Dynamic results
-therefore should be interpreted as conventional revenue estimates under that
+responsive on the labor-supply margin than prime-age workers. Conventional
+results therefore should be interpreted as revenue estimates under that
 specific elasticity schedule, not as macroeconomic forecasts.
 
-The public dynamic release covers only standard reforms `option1` through
-`option12`. A dynamic version of `option13` or `option14_stacked` would require
-re-solving the balanced-fix payroll-rate and benefit-cut parameters after the
-labor-supply response, because the response changes taxable payroll, income-tax
-revenue, and trust-fund gaps. That iterative special-case dynamic solve is not
-part of the current release contract.
+The current conventional artifact is quarantined pending a same-baseline rerun.
+When cleared for release, conventional results should cover only standard
+reforms `option1` through `option12`. A conventional version of `option13` or
+`option14_stacked` would require re-solving the balanced-fix payroll-rate and
+benefit-cut parameters after the labor-supply response, because the response
+changes taxable payroll, income-tax revenue, and trust-fund gaps. That
+iterative special-case conventional solve is not part of the current release
+contract.
 
 ## Balanced-fix special cases
 
@@ -290,8 +292,8 @@ imputation error. Calibration matches selected aggregate margins, not the full
 joint distribution of age, earnings, Social Security benefits, filing status,
 health spending, and assets. Long-run HI expenditures enter the balanced-fix
 special case as an external Trustees-derived series rather than as a
-micro-simulated spending model. Dynamic estimates are sensitive to the chosen
+micro-simulated spending model. Conventional estimates are sensitive to the chosen
 labor-supply elasticities and do not include macro feedback, portfolio
 responses, claiming responses, mortality changes, or political feedback from
-trust-fund exhaustion. Finally, special-case dynamic scoring is intentionally
+trust-fund exhaustion. Finally, special-case conventional scoring is intentionally
 excluded because it would require a separate iterative solve.

@@ -29,8 +29,9 @@ def test_option2_reform():
     reform = get_option2_reform()
     assert reform is not None
     params = reform.parameter_values
-    # Check that base rate is set to 0.85
-    assert any("taxability.rate.base" in str(k) for k in params.keys())
+    # Option 2 uses the current-law 85% cap, but removes thresholds and
+    # includes all Social Security benefits in combined income.
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
     # Check that thresholds are set to 0
     assert any("threshold.base.main" in str(k) for k in params.keys())
 
@@ -41,7 +42,7 @@ def test_option3_reform():
     assert reform is not None
     params = reform.parameter_values
     # Should have both 85% taxation and senior deduction extension
-    assert any("taxability.rate.base" in str(k) for k in params.keys())
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
     assert any("senior_deduction_extension" in str(k) for k in params.keys())
 
 
@@ -113,7 +114,7 @@ def test_option8_reform():
 
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 8
+    assert len(REFORMS) == 12
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():

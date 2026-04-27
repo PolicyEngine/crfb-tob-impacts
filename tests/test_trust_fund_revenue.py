@@ -2,10 +2,17 @@
 Tests for trust fund revenue calculation from SS benefit taxation.
 """
 
+import os
+
 import pytest
 from policyengine_us import Microsimulation
 from src.trust_fund_revenue import calculate_trust_fund_revenue
 from src.reforms import get_option2_reform
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("CRFB_RUN_NETWORK_TESTS") != "1",
+    reason="Requires the default PolicyEngine-US Hugging Face dataset.",
+)
 
 
 class TestTrustFundRevenue:

@@ -108,11 +108,15 @@ export async function loadOption13Data(): Promise<Option13Data[]> {
 }
 
 export async function loadTrusteesComparisonData(): Promise<TrusteesComparisonData[]> {
-  const csvContent = await fetchCsv("/data/trustees_vs_pe_gaps_comparison.csv");
+  const [csvContent, option13Data] = await Promise.all([
+    fetchCsv("/data/trustees_vs_pe_gaps_comparison.csv"),
+    loadOption13Data(),
+  ]);
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true,
     skipEmptyLines: true,
   });
+  const option13ByYear = new Map(option13Data.map((row) => [row.year, row]));
 
   const nullableNumber = (value: unknown) => {
     if (value === "") return null;
@@ -121,18 +125,37 @@ export async function loadTrusteesComparisonData(): Promise<TrusteesComparisonDa
   };
 
   return parsed.data
-    .map((row) => ({
-      year: asNumber(row.year),
-      oasdiTaxablePayrollB: asNumber(row.oasdi_taxable_payroll_B),
-      hiTaxablePayrollB: asNumber(row.hi_taxable_payroll_B),
-      oasdiGapPct: asNumber(row.oasdi_gap_pct),
-      trusteesOasdiGapB: asNumber(row.trustees_oasdi_gap_B),
-      peOasdiGapB: nullableNumber(row.pe_oasdi_gap_B),
-      oasdiPeTrusteesRatio: nullableNumber(row.oasdi_pe_trustees_ratio),
-      hiGapPct: asNumber(row.hi_gap_pct),
-      trusteesHiGapB: asNumber(row.trustees_hi_gap_B),
-      peHiGapB: nullableNumber(row.pe_hi_gap_B),
-      hiPeTrusteesRatio: nullableNumber(row.hi_pe_trustees_ratio),
-    }))
+    .map((row) => {
+      const year = asNumber(row.year);
+      const trusteesOasdiGapB = asNumber(row.trustees_oasdi_gap_B);
+      const trusteesHiGapB = asNumber(row.trustees_hi_gap_B);
+      const option13 = option13ByYear.get(year);
+      const peOasdiGapB = option13
+        ? Math.abs(option13.baselineSsGap) / 1e9
+        : nullableNumber(row.pe_oasdi_gap_B);
+      const peHiGapB = option13
+        ? Math.abs(option13.baselineHiGap) / 1e9
+        : nullableNumber(row.pe_hi_gap_B);
+
+      return {
+        year,
+        oasdiTaxablePayrollB: asNumber(row.oasdi_taxable_payroll_B),
+        hiTaxablePayrollB: asNumber(row.hi_taxable_payroll_B),
+        oasdiGapPct: asNumber(row.oasdi_gap_pct),
+        trusteesOasdiGapB,
+        peOasdiGapB,
+        oasdiPeTrusteesRatio:
+          peOasdiGapB !== null && trusteesOasdiGapB !== 0
+            ? peOasdiGapB / trusteesOasdiGapB
+            : null,
+        hiGapPct: asNumber(row.hi_gap_pct),
+        trusteesHiGapB,
+        peHiGapB,
+        hiPeTrusteesRatio:
+          peHiGapB !== null && trusteesHiGapB !== 0
+            ? peHiGapB / trusteesHiGapB
+            : null,
+      };
+    })
     .sort((a, b) => a.year - b.year);
 }
