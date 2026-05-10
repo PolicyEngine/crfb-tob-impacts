@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Taxation of benefits reforms | PolicyEngine",
   description:
     "Interactive estimates for Social Security taxation-of-benefits reform options through 2100, commissioned by the Committee for a Responsible Federal Budget.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/favicon.svg` },
 };
 
 export default function RootLayout({
