@@ -96,7 +96,7 @@ async function fetchCsv(path: string): Promise<string> {
 }
 
 async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
-  const csvContent = await fetchCsv(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data/hi_taxable_payroll.csv`);
+  const csvContent = await fetchCsv(`/data/hi_taxable_payroll.csv`);
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true,
     skipEmptyLines: true,
@@ -113,7 +113,7 @@ async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
 async function loadEconomicProjections(): Promise<Map<number, EconomicProjection>> {
   if (!projectionCache) {
     projectionCache = Promise.all([
-      fetchCsv(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data/ssa_economic_projections.csv`),
+      fetchCsv(`/data/ssa_economic_projections.csv`),
       loadHiTaxablePayroll(),
     ]).then(([csvContent, hiTaxablePayroll]) => {
       const parsed = Papa.parse<Record<string, string>>(csvContent, {
@@ -213,7 +213,7 @@ export async function loadDashboardData(
   allocationMode: AllocationMode,
 ): Promise<Record<string, YearlyImpact[]>> {
   const [csvContent, projections] = await Promise.all([
-    fetchCsv(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data/all_static_results.csv`),
+    fetchCsv(`/data/all_static_results.csv`),
     loadEconomicProjections(),
   ]);
 

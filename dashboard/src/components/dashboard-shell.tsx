@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { useEffect, useState } from "react";
-import { Header, logos, type NavItemConfig } from "@policyengine/ui-kit";
+import { logos, type NavItemConfig } from "@policyengine/ui-kit";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -506,13 +506,8 @@ export function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
-      {!isEmbedded && (
-        <Header
-          navItems={PE_NAV_ITEMS}
-          logoSrc={logos.whiteWordmark}
-          logoHref={`${POLICYENGINE_BASE}/us`}
-        />
-      )}
+      {/* Site header is rendered by PolicyEngineShell in app/layout.tsx —
+          no need to render Header here. */}
 
       <motion.div
         initial={{ opacity: 0, y: 14 }}

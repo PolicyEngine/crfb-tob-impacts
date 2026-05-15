@@ -67,7 +67,7 @@ async function fetchCsv(path: string) {
 }
 
 export async function loadOption13Data(): Promise<Option13Data[]> {
-  const csvContent = await fetchCsv(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data/option13_balanced_fix.csv`);
+  const csvContent = await fetchCsv(`/data/option13_balanced_fix.csv`);
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true,
     skipEmptyLines: true,
@@ -109,7 +109,7 @@ export async function loadOption13Data(): Promise<Option13Data[]> {
 
 export async function loadTrusteesComparisonData(): Promise<TrusteesComparisonData[]> {
   const [csvContent, option13Data] = await Promise.all([
-    fetchCsv(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data/trustees_vs_pe_gaps_comparison.csv`),
+    fetchCsv(`/data/trustees_vs_pe_gaps_comparison.csv`),
     loadOption13Data(),
   ]);
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
