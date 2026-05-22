@@ -111,10 +111,10 @@ practice.
 
 Operationally:
 
-- the publication-facing dashboard defaults to static scoring and hides
-  labor-supply response estimates until they are generated from the current
-  full reform H5 contract
-- any future labor-supply response release must start from durable
+- the publication-facing dashboard defaults to static scoring and includes
+  supplemental behavioral rows only where generated from the current full
+  reform H5 contract
+- any labor-supply response release must start from durable
   `reform_full_h5/year=YYYY/reform=optionX/scenario.h5` artifacts; aggregate
   CSVs and non-contract sample panels are not production inputs
 

@@ -54,7 +54,7 @@ delivered year.
 
 - [scripts/run_modal_refresh.py](../../scripts/run_modal_refresh.py)
   - snapshots calibrated H5 datasets, writes the reproducibility bundle, and
-    launches standard static or conventional reform panels on Modal
+    launches standard static or behavioral reform panels on Modal
 - [scripts/recover_modal_cells_run.py](../../scripts/recover_modal_cells_run.py)
   - recovers Modal cell-run outputs from the results volume and combines them
     into local CSV artifacts

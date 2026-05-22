@@ -573,7 +573,7 @@ def test_validation_exhibit_uses_current_full_h5_contract_not_old_sentinel_csvs(
     assert "Older non-contract artifacts are not" in exhibit
 
 
-def test_labor_supply_response_exhibit_is_status_only():
+def test_labor_supply_response_exhibit_uses_current_contract():
     exhibit = (
         REPO_ROOT / "paper" / "exhibits" / "labor-supply-response-status.md"
     ).read_text(encoding="utf-8")

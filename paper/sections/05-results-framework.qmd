@@ -32,13 +32,13 @@ The publication rule is:
 
 {{< include exhibits/revenue-impacts.md >}}
 
-### Labor-supply response status
+### Supplemental labor-supply response
 
 {{< include exhibits/labor-supply-response-status.md >}}
 
-In the current release, the labor-supply response exhibit is a status note, not
-a results panel. Any response rows added later must be aggregated from saved
-full reform H5 artifacts produced under the current contract.
+In the current release, behavioral rows are supplemental to the static scoring
+surface. They are included only when generated from saved full reform H5
+artifacts produced under the current contract.
 
 ## Interpretation boundary
 
