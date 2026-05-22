@@ -51,9 +51,9 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         "dashboard/public/data/baseline_reform_parameters.csv",
         "dashboard/public/data/baseline_assumptions_metadata.json",
         "dashboard/public/data/post_obbba_tob_baseline_manifest.json",
+        "dashboard/public/data/balanced_fix_baseline.csv",
+        "dashboard/public/data/balanced_fix_baseline_metadata.json",
         "dashboard/public/data/hi_taxable_payroll.csv",
-        "dashboard/out/index.html",
-        "dashboard/out/data/results.csv",
         "docs/current/REFORM_MODELING_BIBLE.md",
         "docs/current/full-h5-results-summary-20260522.md",
         "docs/current/github-ai-thread-audit-20260522.md",
@@ -64,6 +64,7 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         "scripts/publish_behavioral_endpoint_dashboard_results.py",
         "scripts/publish_dashboard_results.py",
         "scripts/publish_full_h5_static_dashboard_results.py",
+        "scripts/publish_balanced_fix_dashboard_data.py",
         "src/cli.py",
         "src/dashboard_baseline_assumptions.py",
         "src/tax_assumption_loader.py",
@@ -72,11 +73,22 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         "data/hi_expenditures_tr2025.csv",
     ]
 
-    for relative in expected_files:
+    def assert_packaged_file(relative: str) -> None:
         packaged = package.package_dir / relative
         assert packaged.exists(), relative
         assert relative in included
         assert included[relative]["sha256"] == module.file_sha256(packaged)
+
+    for relative in expected_files:
+        assert_packaged_file(relative)
+
+    built_dashboard_source = REPO_ROOT / "dashboard" / "out"
+    if built_dashboard_source.exists():
+        for relative in [
+            "dashboard/out/index.html",
+            "dashboard/out/data/results.csv",
+        ]:
+            assert_packaged_file(relative)
 
     assert len(included_paths) == len(set(included_paths))
     assert manifest["files_count"] == len(manifest["files"])

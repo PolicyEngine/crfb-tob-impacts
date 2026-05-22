@@ -104,6 +104,14 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
         "dashboard_data",
         REPO / "dashboard" / "public" / "data" / "post_obbba_tob_baseline_manifest.json",
     ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_baseline.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_baseline_metadata.json",
+    ),
     ("root_compat", REPO / "results.csv"),
     ("docs", REPO / "docs" / "current" / "README.md"),
     ("docs", REPO / "docs" / "current" / "deliverables.md"),
@@ -123,6 +131,7 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("scripts", REPO / "scripts" / "publish_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_behavioral_endpoint_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_full_h5_static_dashboard_results.py"),
+    ("scripts", REPO / "scripts" / "publish_balanced_fix_dashboard_data.py"),
     ("package", REPO / "pyproject.toml"),
     ("package", REPO / "src" / "cli.py"),
     ("package", REPO / "src" / "dashboard_baseline_assumptions.py"),

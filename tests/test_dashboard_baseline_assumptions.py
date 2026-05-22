@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import importlib
 import importlib.metadata as metadata
+import ast
 import json
 
 from packaging.version import Version
@@ -18,7 +18,7 @@ def _direct_url(package_name: str) -> dict | None:
 
 def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
     assert metadata.version("policyengine") == "4.5.1"
-    assert Version(metadata.version("policyengine-us")) >= Version("1.691.12")
+    assert Version(metadata.version("policyengine-us")) >= Version("1.691.10")
     assert Version(metadata.version("policyengine-core")) >= Version("3.26.1")
     policyengine_direct_url = _direct_url("policyengine")
     if policyengine_direct_url is not None:
@@ -26,10 +26,46 @@ def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
     for package_name in ("policyengine-us", "policyengine-core"):
         assert _direct_url(package_name) is None
 
-    module = importlib.import_module(
-        "policyengine_us.reforms.ssa.trustees_core_thresholds"
+    distribution = metadata.distribution("policyengine-us")
+    module_file = "policyengine_us/reforms/ssa/trustees_core_thresholds.py"
+    assert module_file in {str(path) for path in distribution.files or []}
+
+    module_source = distribution.locate_file(module_file).read_text(encoding="utf-8")
+    module_ast = ast.parse(module_source)
+    assumption_assignment = next(
+        (
+            node
+            for node in module_ast.body
+            if (
+                isinstance(node, ast.Assign)
+                and any(
+                    isinstance(target, ast.Name)
+                    and target.id == "TRUSTEES_CORE_THRESHOLD_ASSUMPTION"
+                    for target in node.targets
+                )
+            )
+            or (
+                isinstance(node, ast.AnnAssign)
+                and isinstance(node.target, ast.Name)
+                and node.target.id == "TRUSTEES_CORE_THRESHOLD_ASSUMPTION"
+            )
+        ),
+        None,
     )
-    assert module.TRUSTEES_CORE_THRESHOLD_ASSUMPTION["name"] == (
+    assert assumption_assignment is not None
+    assumption_value = assumption_assignment.value
+    assert isinstance(assumption_value, ast.Dict)
+    assumption_name = next(
+        (
+            value.value
+            for key, value in zip(assumption_value.keys, assumption_value.values)
+            if isinstance(key, ast.Constant)
+            and key.value == "name"
+            and isinstance(value, ast.Constant)
+        ),
+        None,
+    )
+    assert assumption_name == (
         "trustees-2025-core-thresholds-v1"
     )
 

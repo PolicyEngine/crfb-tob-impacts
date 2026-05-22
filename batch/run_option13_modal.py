@@ -11,8 +11,8 @@ Usage:
     modal run batch/run_option13_modal.py --years 2035 --option14-only  # Skip option13 if already done
 """
 
-import os
 import json
+import os
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -61,6 +61,9 @@ except ModuleNotFoundError:
         def pip_install(self, *_args, **_kwargs):
             return self
 
+        def env(self, *_args, **_kwargs):
+            return self
+
         def add_local_dir(self, *_args, **_kwargs):
             return self
 
@@ -71,6 +74,7 @@ except ModuleNotFoundError:
         App = _LocalApp
         Volume = _LocalVolume
         Image = _LocalImage
+        Secret = _LocalVolume
 
     modal = _LocalModal()
 
@@ -115,6 +119,14 @@ def results_root(output_prefix: str = "") -> Path:
 
 def configure_runtime_snapshot_env() -> None:
     """Point runtime dataset resolution at the mounted exact snapshot when present."""
+    mounted_baselines = Path("/baselines/crfb-longrun-20260520-5a35713-annual")
+    if mounted_baselines.exists():
+        os.environ.setdefault(
+            "CRFB_DATASET_TEMPLATE",
+            "/baselines/crfb-longrun-20260520-5a35713-annual/{year}.h5",
+        )
+        return
+
     if not CONTAINER_SNAPSHOT_DIR.exists():
         return
 
@@ -133,37 +145,101 @@ def default_submission_manifest_path(output_prefix: str) -> Path:
     return PROJECT_ROOT / "results" / "special_case_submissions" / f"{slug}.json"
 
 
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 app = modal.App("option13-test")
 
 # Create volume for results
 results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
-
-# Path to local policyengine-us repo (contains TOB variables)
-POLICYENGINE_US_PATH = Path(
-    os.environ.get("CRFB_POLICYENGINE_US_PATH", "/Users/pavelmakarchuk/policyengine-us")
+BASELINE_VOLUME_NAME = os.environ.get(
+    "CRFB_REFORM_FULL_H5_BASELINE_VOLUME_NAME",
+    "policyengine-us-data-long-term",
 )
-POLICYENGINE_CORE_VERSION = os.environ.get("CRFB_POLICYENGINE_CORE_VERSION", "3.23.6")
-NUMPY_VERSION = os.environ.get("CRFB_NUMPY_VERSION", "2.4.1")
-PANDAS_VERSION = os.environ.get("CRFB_PANDAS_VERSION", "3.0.0")
-H5PY_VERSION = os.environ.get("CRFB_H5PY_VERSION", "3.15.1")
+BASELINE_VOLUME_MOUNT_PATH = os.environ.get(
+    "CRFB_REFORM_FULL_H5_BASELINE_VOLUME_MOUNT_PATH",
+    "/baselines",
+)
+baseline_volume = (
+    modal.Volume.from_name(BASELINE_VOLUME_NAME, create_if_missing=False)
+    if BASELINE_VOLUME_NAME
+    else None
+)
+function_volumes = {"/results": results_volume}
+if baseline_volume is not None:
+    function_volumes[BASELINE_VOLUME_MOUNT_PATH] = baseline_volume
 
-# Container image with local policyengine-us (includes TOB variables)
+RUNTIME_ENV = {
+    "CRFB_POLICYENGINE_VERSION": os.environ.get("CRFB_POLICYENGINE_VERSION", "4.5.1"),
+    "CRFB_POLICYENGINE_US_SPEC": os.environ.get(
+        "CRFB_POLICYENGINE_US_SPEC",
+        "policyengine-us==1.700.2",
+    ),
+    "CRFB_POLICYENGINE_CORE_SPEC": os.environ.get(
+        "CRFB_POLICYENGINE_CORE_SPEC",
+        "policyengine-core==3.26.1",
+    ),
+    "CRFB_PANDAS_SPEC": os.environ.get("CRFB_PANDAS_SPEC", "pandas==2.3.2"),
+    "CRFB_NUMPY_SPEC": os.environ.get("CRFB_NUMPY_SPEC", "numpy==2.1.3"),
+    "CRFB_H5PY_SPEC": os.environ.get("CRFB_H5PY_SPEC", "h5py==3.14.0"),
+    "CRFB_TABLES_SPEC": os.environ.get("CRFB_TABLES_SPEC", "tables==3.11.1"),
+    "CRFB_BOTO3_SPEC": os.environ.get("CRFB_BOTO3_SPEC", "boto3==1.35.99"),
+}
+for contract_env_name in (
+    "CRFB_SUPPORT_GATE_START_YEAR",
+    "CRFB_ALLOW_UNSAFE_LONG_RUN_ARTIFACT",
+    "CRFB_MIN_EFFECTIVE_SAMPLE_SIZE",
+    "CRFB_MIN_POSITIVE_HOUSEHOLD_COUNT",
+    "CRFB_MAX_TOP_10_WEIGHT_SHARE_PCT",
+    "CRFB_MAX_TOP_100_WEIGHT_SHARE_PCT",
+):
+    if os.environ.get(contract_env_name) is not None:
+        RUNTIME_ENV[contract_env_name] = os.environ[contract_env_name]
+POLICYENGINE_US_PATH = resolve_local_env_path("CRFB_POLICYENGINE_US_PATH")
+
+# Container image matching the live full-H5 CRFB reform runtime.
 image = (
     modal.Image.debian_slim(python_version="3.11")
+    .env(RUNTIME_ENV)
     .pip_install(
-        f"pandas=={PANDAS_VERSION}",
-        f"numpy=={NUMPY_VERSION}",
-        f"h5py=={H5PY_VERSION}",
+        RUNTIME_ENV["CRFB_PANDAS_SPEC"],
+        RUNTIME_ENV["CRFB_NUMPY_SPEC"],
+        RUNTIME_ENV["CRFB_H5PY_SPEC"],
+        RUNTIME_ENV["CRFB_TABLES_SPEC"],
+        RUNTIME_ENV["CRFB_BOTO3_SPEC"],
         "huggingface_hub",
-        f"policyengine-core=={POLICYENGINE_CORE_VERSION}",
+        RUNTIME_ENV["CRFB_POLICYENGINE_CORE_SPEC"],
+        RUNTIME_ENV["CRFB_POLICYENGINE_US_SPEC"],
+        f"policyengine=={RUNTIME_ENV['CRFB_POLICYENGINE_VERSION']}",
     )
-    # Copy local policyengine-us and install (copy=True allows run_commands after)
-    .add_local_dir(POLICYENGINE_US_PATH, "/app/policyengine-us", copy=True)
-    .run_commands("pip install -e /app/policyengine-us")
     # Copy supporting project files into the image so later image steps remain valid.
     .add_local_dir(DATA_DIR, "/app/data", copy=True)
     .add_local_dir(SRC_DIR, "/app/src", copy=True)
 )
+if POLICYENGINE_US_PATH is not None:
+    image = image.add_local_dir(
+        POLICYENGINE_US_PATH,
+        "/app/policyengine-us",
+        copy=True,
+    ).run_commands("pip install -e /app/policyengine-us")
+
+DEFAULT_R2_MODAL_SECRET_NAME = "crfb-reform-full-h5-r2-axiom"
+
+
+def modal_secret_names() -> list[str]:
+    names = [
+        os.environ.get("CRFB_REFORM_FULL_H5_OBJECT_STORE_MODAL_SECRET"),
+        os.environ.get("CRFB_R2_MODAL_SECRET_NAME"),
+        DEFAULT_R2_MODAL_SECRET_NAME,
+    ]
+    return list(dict.fromkeys(name for name in names if name))
+
+
+modal_secrets = [modal.Secret.from_name(name) for name in modal_secret_names()]
 
 if LOCAL_PROJECTED_DATASETS_SNAPSHOT is not None:
     image = image.add_local_dir(
@@ -225,9 +301,12 @@ def get_hi_data():
 
 @app.function(
     image=image,
-    timeout=7200,  # 2 hour timeout (increased for complex years)
-    memory=32768,
-    volumes={"/results": results_volume},
+    cpu=int(os.environ.get("CRFB_OPTION13_MODAL_CPU", "4")),
+    timeout=int(os.environ.get("CRFB_OPTION13_MODAL_TIMEOUT_SECONDS", "21600")),
+    memory=int(os.environ.get("CRFB_OPTION13_MODAL_MEMORY_MB", "65536")),
+    volumes=function_volumes,
+    secrets=modal_secrets,
+    nonpreemptible=env_bool("CRFB_OPTION13_MODAL_NONPREEMPTIBLE", False),
 )
 def compute_option13_and_14_year(
     year: int,
@@ -255,9 +334,166 @@ def compute_option13_and_14_year(
     configure_runtime_snapshot_env()
 
     # Add src to path for imports
+    sys.path.insert(0, str(SRC_DIR.parent))
     sys.path.insert(0, str(SRC_DIR))
     from reforms import get_option12_dict
     from runtime_config import dataset_path
+    from src.reform_full_h5_artifacts import (
+        file_sha256,
+        upload_artifact_pair_to_object_store,
+    )
+    from src.reform_full_h5_worker import (
+        _boto3_client,
+        object_store_completion_key,
+        object_store_config_from_env,
+        object_store_keys,
+        runtime_provenance_from_environment,
+        save_complete_microsimulation_h5,
+    )
+
+    def json_safe(value):
+        if isinstance(value, dict):
+            return {str(key): json_safe(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [json_safe(item) for item in value]
+        if isinstance(value, (np.integer, np.floating, np.bool_)):
+            return value.item()
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, Path):
+            return str(value)
+        return value
+
+    def write_json(path: Path, payload: dict) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(json_safe(payload), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    def save_full_h5_artifacts(
+        simulation,
+        *,
+        reform_id: str,
+        result_row: dict,
+        reform_description: str,
+    ) -> dict:
+        artifact_dir = (
+            output_root
+            / "reform_full_h5"
+            / f"year={year}"
+            / f"reform={reform_id}"
+        )
+        scenario_path = artifact_dir / "scenario.h5"
+        metadata_path = artifact_dir / "metadata.json"
+        h5_metadata = save_complete_microsimulation_h5(
+            simulation,
+            scenario_path,
+            year=year,
+        )
+        object_store_config = object_store_config_from_env()
+        object_store = None
+        if object_store_config is not None:
+            scenario_key, metadata_key = object_store_keys(
+                config=object_store_config,
+                run_prefix=output_prefix,
+                year=year,
+                reform_id=reform_id,
+            )
+            object_store = {
+                "bucket": object_store_config.bucket,
+                "scenario_key": scenario_key,
+                "metadata_key": metadata_key,
+                "completion_key": object_store_completion_key(
+                    metadata_key=metadata_key
+                ),
+            }
+        elif os.environ.get("CRFB_REQUIRE_R2_FULL_H5", "1").lower() not in {
+            "0",
+            "false",
+            "no",
+        }:
+            raise RuntimeError("R2 object-store config is required for this rerun.")
+
+        metadata = {
+            "schema": "crfb_balanced_fix_full_reform_h5_metadata/v1",
+            "created_at": datetime.now().isoformat(),
+            "year": int(year),
+            "reform_id": reform_id,
+            "scoring_type": "static",
+            "dataset_path": str(dataset),
+            "dataset_h5_sha256": file_sha256(dataset),
+            "dataset_h5_size_bytes": int(Path(dataset).stat().st_size),
+            "run_prefix": output_prefix,
+            "runtime_provenance": runtime_provenance_from_environment(
+                dataset_path=dataset
+            ),
+            "dataset_contract_environment": {
+                name: os.environ.get(name)
+                for name in (
+                    "CRFB_SUPPORT_GATE_START_YEAR",
+                    "CRFB_ALLOW_UNSAFE_LONG_RUN_ARTIFACT",
+                    "CRFB_MIN_EFFECTIVE_SAMPLE_SIZE",
+                    "CRFB_MIN_POSITIVE_HOUSEHOLD_COUNT",
+                    "CRFB_MAX_TOP_10_WEIGHT_SHARE_PCT",
+                    "CRFB_MAX_TOP_100_WEIGHT_SHARE_PCT",
+                )
+                if os.environ.get(name) is not None
+            },
+            "reform_description": reform_description,
+            "result_row": result_row,
+            "full_reform_output_h5_saved": True,
+            "baseline_aggregate_metrics_computed_before_h5_save": False,
+            "manual_weight_aggregation_used": False,
+            "output_h5_sha256": h5_metadata["sha256"],
+            "output_h5_size_bytes": h5_metadata["size_bytes"],
+            "modal_volume_path": str(scenario_path),
+            "scenario_h5": h5_metadata,
+            "object_store": object_store,
+        }
+        write_json(metadata_path, metadata)
+
+        object_store_validation = None
+        if object_store_config is not None and object_store is not None:
+            object_store_validation = upload_artifact_pair_to_object_store(
+                client=_boto3_client(object_store_config),
+                bucket=object_store_config.bucket,
+                scenario_path=scenario_path,
+                metadata_path=metadata_path,
+                scenario_key=object_store["scenario_key"],
+                metadata_key=object_store["metadata_key"],
+                completion_key=object_store["completion_key"],
+            )
+
+        artifact_record = {
+            "full_reform_output_h5_saved": True,
+            "scenario_h5_path": str(scenario_path),
+            "metadata_path": str(metadata_path),
+            "output_h5_sha256": h5_metadata["sha256"],
+            "output_h5_size_bytes": h5_metadata["size_bytes"],
+        }
+        if object_store is not None:
+            artifact_record.update(
+                {
+                    "scenario_h5_uri": (
+                        f"r2://{object_store_config.bucket}/"
+                        f"{object_store['scenario_key']}"
+                    ),
+                    "metadata_uri": (
+                        f"r2://{object_store_config.bucket}/"
+                        f"{object_store['metadata_key']}"
+                    ),
+                    "completion_uri": (
+                        f"r2://{object_store_config.bucket}/"
+                        f"{object_store['completion_key']}"
+                    ),
+                    "object_store_upload_validated": bool(
+                        object_store_validation
+                        and object_store_validation.get("validated")
+                    ),
+                }
+            )
+        return artifact_record
 
     print(f"\n{'=' * 60}")
     print(f"OPTION 13 (BALANCED FIX): {year}")
@@ -283,7 +519,7 @@ def compute_option13_and_14_year(
         start = time.time()
         print(f"Calculating {display_name}...", flush=True)
         if map_to is None:
-            result = simulation.calculate(variable_name, year).sum()
+            result = simulation.calculate(variable_name, period=year).sum()
         else:
             result = simulation.calculate(
                 variable_name, map_to=map_to, period=year
@@ -304,7 +540,7 @@ def compute_option13_and_14_year(
     se_ss_tax = calculate_sum(baseline, "self_employment_social_security_tax")
     tob_oasdi = calculate_sum(baseline, "tob_revenue_oasdi")
 
-    ss_benefits_series = baseline.calculate("social_security", year)
+    ss_benefits_series = baseline.calculate("social_security", period=year)
     ss_benefits = ss_benefits_series.sum()
     ss_benefits_values = np.array(ss_benefits_series.values)
 
@@ -314,11 +550,6 @@ def compute_option13_and_14_year(
     se_medicare_tax = calculate_sum(baseline, "self_employment_medicare_tax")
     additional_medicare_tax = calculate_sum(baseline, "additional_medicare_tax")
     tob_hi = calculate_sum(baseline, "tob_revenue_medicare_hi")
-
-    # Baseline income tax
-    baseline_income_tax = calculate_sum(
-        baseline, "income_tax", label="baseline income_tax"
-    )
 
     # Get current rates
     params = baseline.tax_benefit_system.parameters
@@ -336,7 +567,6 @@ def compute_option13_and_14_year(
     )
 
     print(f"Baseline SS Benefits: ${ss_benefits / 1e9:.1f}B")
-    print(f"Baseline Income Tax: ${baseline_income_tax / 1e9:.1f}B")
 
     # Calculate gaps (including SECA self-employment taxes)
     ss_income = employee_ss_tax + employer_ss_tax + se_ss_tax + tob_oasdi
@@ -502,6 +732,9 @@ def compute_option13_and_14_year(
     )
     print(f"Benefit multiplier: {benefit_multiplier:.4f}")
 
+    results = {}
+    output_root = results_root(output_prefix)
+
     # Build reform: rate increases only (no employer tax reform)
     # Option 13 is the "traditional fix" - benefit cuts + rate increases under current law
     reform_dict = {
@@ -531,6 +764,34 @@ def compute_option13_and_14_year(
 
     reduced_ss_values = ss_benefits_values * benefit_multiplier
     reform_sim.set_input("social_security", year, reduced_ss_values)
+
+    option13_artifact_record = {}
+    if not skip_option13:
+        option13_artifact_record = save_full_h5_artifacts(
+            reform_sim,
+            reform_id="balanced_fix",
+            result_row={
+                "year": year,
+                "baseline_ss_gap": float(ss_gap),
+                "baseline_hi_gap": float(hi_gap),
+                "benefit_multiplier": float(benefit_multiplier),
+                "new_employee_ss_rate": float(new_employee_ss_rate),
+                "new_employer_ss_rate": float(new_employer_ss_rate),
+                "new_employee_hi_rate": float(new_employee_hi_rate),
+                "new_employer_hi_rate": float(new_employer_hi_rate),
+                "post_h5_aggregation_deferred": True,
+            },
+            reform_description=(
+                "Balanced fix baseline: 50 percent Social Security benefit "
+                "gap closure through benefit reductions and remaining "
+                "OASDI/HI gaps through payroll rate changes."
+            ),
+        )
+
+    baseline_income_tax = calculate_sum(
+        baseline, "income_tax", label="baseline income_tax"
+    )
+    print(f"Baseline Income Tax: ${baseline_income_tax / 1e9:.1f}B")
 
     # Calculate
     reform_income_tax = calculate_sum(
@@ -607,9 +868,6 @@ def compute_option13_and_14_year(
     )
     print(f"  Rate increase revenue: ${total_rate_increase_revenue / 1e9:.1f}B")
 
-    results = {}
-    output_root = results_root(output_prefix)
-
     # Option 13 result
     if not skip_option13:
         option13_result = {
@@ -646,6 +904,7 @@ def compute_option13_and_14_year(
             "hi_gap_after": float(new_hi_gap),
             "total_gap_after": float(new_ss_gap + new_hi_gap),
         }
+        option13_result.update(option13_artifact_record)
 
         # Save Option 13 result
         option13_dir = output_root / "option13"
@@ -676,6 +935,20 @@ def compute_option13_and_14_year(
 
         # NO benefit cuts - use original baseline SS values
         # (don't call set_input for social_security)
+
+        option14_artifact_record = save_full_h5_artifacts(
+            option12_sim,
+            reform_id="option12_balanced_fix",
+            result_row={
+                "year": year,
+                "comparison_baseline": "balanced_fix",
+                "post_h5_aggregation_deferred": True,
+            },
+            reform_description=(
+                "Option 12 extended Roth-style swap measured against the "
+                "balanced-fix baseline for the same year."
+            ),
+        )
 
         # Calculate Option 12 standalone results
         option12_income_tax = calculate_sum(
@@ -755,6 +1028,7 @@ def compute_option13_and_14_year(
             "oasdi_net_impact": option12_oasdi_net,
             "hi_net_impact": option12_hi_net,
         }
+        option14_result.update(option14_artifact_record)
 
         # Save Option 14 result
         option14_dir = output_root / "option14"

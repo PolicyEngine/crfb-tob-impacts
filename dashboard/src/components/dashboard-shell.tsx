@@ -1,7 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpenText, Download, ExternalLink, LoaderCircle } from "lucide-react";
+import {
+  BookOpenText,
+  Download,
+  ExternalLink,
+  Info,
+  LoaderCircle,
+} from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -16,6 +22,7 @@ import type { NameType, ValueType } from "recharts/types/component/DefaultToolti
 import { useEffect, useState } from "react";
 
 import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
+import { BalancedFixSection } from "@/components/balanced-fix-section";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
 import {
@@ -32,7 +39,7 @@ import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { sitePath } from "@/lib/site-path";
 import { useElementSize } from "@/lib/use-element-size";
 
-type DashboardTab = "reforms" | "baseline";
+type DashboardTab = "reforms" | "baseline" | "balancedFix";
 type ViewMode = "10year" | "75year";
 type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
@@ -477,6 +484,8 @@ export function DashboardShell() {
   const mobileViewValue =
     activeTab === "baseline"
         ? "baseline"
+        : activeTab === "balancedFix"
+          ? "balancedFix"
         : selectedReform;
 
   function handleReformSelect(nextReform: string) {
@@ -487,6 +496,10 @@ export function DashboardShell() {
   function handleMobileViewChange(nextValue: string) {
     if (nextValue === "baseline") {
       setActiveTab("baseline");
+      return;
+    }
+    if (nextValue === "balancedFix") {
+      setActiveTab("balancedFix");
       return;
     }
 
@@ -578,6 +591,11 @@ export function DashboardShell() {
                 label="Baseline model"
                 onClick={() => setActiveTab("baseline")}
               />
+              <SidebarNavItem
+                active={activeTab === "balancedFix"}
+                label="Balanced fix baseline"
+                onClick={() => setActiveTab("balancedFix")}
+              />
               <a
                 href={PAPER_HREF}
                 target="_blank"
@@ -600,6 +618,8 @@ export function DashboardShell() {
                 <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-[44px]">
                   {activeTab === "baseline"
                     ? "Baseline model and assumptions"
+                    : activeTab === "balancedFix"
+                      ? "Balanced fix baseline"
                       : "Social Security taxation reform"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
@@ -608,6 +628,12 @@ export function DashboardShell() {
                       Microsimulation baseline outputs, Trustees-following
                       assumptions, calibration targets, and indexed tax
                       parameters used by the long-run model.
+                    </>
+                  ) : activeTab === "balancedFix" ? (
+                    <>
+                      A full-H5 reference case for closing annual OASDI and HI
+                      gaps with benefit cuts and payroll-rate increases, shown
+                      separately from the ordinary reform scorecards.
                     </>
                   ) : (
                     <>
@@ -678,12 +704,15 @@ export function DashboardShell() {
               </optgroup>
               <optgroup label="Context">
                 <option value="baseline">Baseline model</option>
+                <option value="balancedFix">Balanced fix baseline</option>
               </optgroup>
             </select>
           </section>
 
           {activeTab === "baseline" ? (
             <BaselineAssumptionsSection />
+          ) : activeTab === "balancedFix" ? (
+            <BalancedFixSection />
           ) : loading ? (
             <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
               <div className="flex items-center gap-3 text-[var(--pe-color-text-secondary)]">
@@ -774,6 +803,13 @@ export function DashboardShell() {
                 {showAllocationToggle && (
                   <div className="flex items-center">
                     <ControlLabel>Trust fund split</ControlLabel>
+                    <span
+                      title="OASDI is the Social Security trust fund. HI is the Medicare Hospital Insurance trust fund. Baseline shares use each year's modeled taxation-of-benefits split; current law uses the statutory allocation; all OASDI or all HI assigns the whole impact to one trust fund."
+                      aria-label="Trust fund split explanation"
+                      className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pe-color-border-light)] text-[var(--pe-color-text-tertiary)]"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </span>
                     <Segment
                       label="Trust fund split"
                       value={allocationMode}
