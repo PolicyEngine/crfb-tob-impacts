@@ -1,0 +1,42 @@
+{
+  "schema": "crfb_balanced_fix_dashboard_data/v1",
+  "generated_at": "2026-05-22T17:24:35.372681+00:00",
+  "source_path": "results/option13_results.csv",
+  "recovered_dir": "results/recovered_special_case_runs/balanced_fix_5a35713_option13_full_h5_selected_panel_20260522_115108",
+  "output_path": "dashboard/public/data/balanced_fix_baseline.csv",
+  "run_prefix": "balanced_fix_5a35713_option13_full_h5_selected_panel_20260522_115108",
+  "reform_id": "balanced_fix",
+  "source_result_count": 14,
+  "years": [
+    2035,
+    2040,
+    2045,
+    2050,
+    2055,
+    2060,
+    2065,
+    2070,
+    2075,
+    2080,
+    2085,
+    2090,
+    2095,
+    2100
+  ],
+  "full_reform_h5_saved": true,
+  "object_store_upload_validated": true,
+  "raw_h5_persistence": "scenario_h5_uri and metadata_uri point to R2 objects for every row",
+  "manual_weight_aggregation_used": false,
+  "baseline_aggregate_metrics_computed_before_h5_save": false,
+  "unit_conversion": "source dollars divided by 1e9 for billions and 1e6 for residual-gap millions; source rates multiplied by 100 for percentages",
+  "interpolation_used": false,
+  "support_gate_override": "CRFB_SUPPORT_GATE_START_YEAR=2101",
+  "max_abs_total_gap_after_millions": 1.01010287109375,
+  "runtime_packages": {
+    "policyengine": "4.5.1",
+    "policyengine-us": "1.700.2",
+    "policyengine-core": "3.26.1",
+    "policyengine-us-data": null,
+    "microdf-python": null
+  }
+}

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import subprocess
 
 import pandas as pd
 import pytest
@@ -49,6 +50,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/baseline_indexing_growth.csv",
     "dashboard/public/data/baseline_policy_parameters.csv",
     "dashboard/public/data/baseline_reform_parameters.csv",
+    "dashboard/public/data/balanced_fix_baseline.csv",
     "dashboard/public/data/hi_taxable_payroll.csv",
     "dashboard/public/data/live_baseline_results.csv",
     "dashboard/public/data/live_reform_status.csv",
@@ -206,17 +208,23 @@ def test_release_baseline_income_tax_comes_from_raw_full_h5():
 
 def test_csv_release_surface_contains_only_current_full_h5_artifacts_and_inputs():
     roots = [
-        REPO_ROOT,
         REPO_ROOT / "data",
         REPO_ROOT / "dashboard" / "public" / "data",
         REPO_ROOT / "results",
     ]
-    discovered = set()
-    for root in roots:
-        for path in root.glob("*.csv"):
-            discovered.add(path.relative_to(REPO_ROOT).as_posix())
-    for path in (REPO_ROOT / "results").rglob("*.csv"):
-        discovered.add(path.relative_to(REPO_ROOT).as_posix())
+    tracked_csvs = subprocess.run(
+        ["git", "ls-files", "*.csv"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    discovered = {
+        path
+        for path in tracked_csvs
+        if Path(path).parent == Path(".")
+        or any((REPO_ROOT / path).is_relative_to(root) for root in roots)
+    }
 
     stale = discovered - ALLOWED_CSV_ARTIFACTS
     missing = ALLOWED_CSV_ARTIFACTS - discovered
