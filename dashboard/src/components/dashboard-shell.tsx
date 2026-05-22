@@ -474,7 +474,6 @@ export function DashboardShell() {
   const showAllocationToggle = ALLOCATION_ELIGIBLE_OPTIONS.includes(effectiveReformId);
   const isStaticOnlyReform = false;
   const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
-  const baseline2026 = selectedData.find((row) => row.year === 2026);
   const mobileViewValue =
     activeTab === "baseline"
         ? "baseline"
@@ -791,7 +790,7 @@ export function DashboardShell() {
               </section>
 
               {/* Metrics */}
-              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <section className="grid gap-4 md:grid-cols-2">
                 <MetricTile
                   label="75-year effect"
                   value={formatValue(
@@ -818,13 +817,6 @@ export function DashboardShell() {
                   )}
                   tone={totals.tenYear >= 0 ? "positive" : "negative"}
                   caption="2026–2035 cumulative"
-                />
-                <MetricTile
-                  label="2026 baseline TOB"
-                  value={
-                    baseline2026 ? formatBillions(baseline2026.baselineTobTotal) : "n/a"
-                  }
-                  caption="Current-law baseline"
                 />
               </section>
 

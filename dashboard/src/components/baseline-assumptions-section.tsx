@@ -799,12 +799,7 @@ export function BaselineAssumptionsSection() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AssumptionMetric
-          label="2026 TOB baseline"
-          value={baseline2026 ? formatBillions(baseline2026.tobTotal) : "n/a"}
-          caption="Post-OBBBA OASDI plus HI benefit-tax revenue"
-        />
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <AssumptionMetric
           label="2100 TOB baseline"
           value={baseline2100 ? formatBillions(baseline2100.tobTotal) : "n/a"}

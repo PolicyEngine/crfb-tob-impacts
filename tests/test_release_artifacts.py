@@ -249,6 +249,26 @@ def test_public_dashboard_hides_income_tax_diagnostic_card():
     assert "IncomeTaxPlausibilityChart" not in source
 
 
+def test_public_dashboard_hides_2026_baseline_tob_cards():
+    dashboard_shell = (
+        REPO_ROOT
+        / "dashboard"
+        / "src"
+        / "components"
+        / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    baseline_section = (
+        REPO_ROOT
+        / "dashboard"
+        / "src"
+        / "components"
+        / "baseline-assumptions-section.tsx"
+    ).read_text(encoding="utf-8")
+
+    assert "2026 baseline TOB" not in dashboard_shell
+    assert "2026 TOB baseline" not in baseline_section
+
+
 def test_baseline_assumption_public_audit_files_exist_and_cover_core_contract():
     for path in BASELINE_AUDIT_PUBLIC_FILES:
         assert path.exists(), f"Missing dashboard baseline audit artifact: {path.name}"
