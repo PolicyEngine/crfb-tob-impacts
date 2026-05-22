@@ -148,7 +148,7 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Scoring Approach"
-          summary="Static scoring is primary; current-contract labor-supply response results are pending."
+          summary="Static scoring is primary; behavioral labor-response results are supplemental."
         >
           <p>
             <strong>Static scoring:</strong> holds taxpayer behavior constant and isolates the
@@ -159,10 +159,10 @@ export function MethodologySection() {
             selected-year H5 rows are preserved separately in the production results.
           </p>
           <p className="mt-4">
-            <strong>Supplemental labor-supply response:</strong> will be republished
-            only from current-contract full reform H5 artifacts. Earlier non-contract
-            response data are excluded from the dashboard because they were not generated
-            from the current full-H5 production lineage.
+            <strong>Supplemental labor-supply response:</strong> uses the same
+            current-contract full reform H5 lineage and is available from the Scoring
+            control. Earlier non-contract response data are excluded from the dashboard
+            because they were not generated from the current full-H5 production lineage.
           </p>
         </AccordionItem>
 
@@ -171,8 +171,8 @@ export function MethodologySection() {
           summary="Revenue allocation varies by reform type."
         >
           <BulletList>
-            <li><strong>Options 1-2 and 8-10</strong>: current-law style benefit-tax allocation.</li>
-            <li><strong>Options 3-4 and 11</strong>: baseline-share allocation.</li>
+            <li><strong>Options 1-2 and 8-10</strong>: default to baseline-share allocation, with toggles for current-law, all-OASDI, and all-HI allocation.</li>
+            <li><strong>Options 3-4 and 11</strong>: use baseline-share allocation.</li>
             <li><strong>Options 5-6</strong>: employer-contribution taxes directed to their trust funds.</li>
             <li><strong>Option 7</strong>: total is the full federal income-tax gain; OASDI, HI, and general fund show the accounting split.</li>
             <li><strong>Option 12</strong>: handled through direct branching for the structural swap.</li>

@@ -305,9 +305,11 @@ and HI.
 ## Supplemental labor-supply response scoring
 
 Static estimates are the primary scoring surface for the CRFB dashboard.
-Supplemental labor-supply response scoring is pending a current-contract full-H5
-rerun. Labor-supply response reform dictionaries merge the statutory reform
-parameters with the project's age-based elasticity schedule:
+Supplemental labor-supply response rows are included in the dashboard as a
+secondary scoring surface. They are generated from the same current-contract
+full-H5 reform lineage as the static rows, then aggregated from those durable
+H5 artifacts. Labor-supply response reform dictionaries merge the statutory
+reform parameters with the project's age-based elasticity schedule:
 
 - income elasticity base: `-0.05`
 - income elasticity multiplier above the model's older-worker threshold: `2.0`
@@ -323,11 +325,9 @@ response results therefore should be interpreted as partial-equilibrium revenue
 estimates under that specific elasticity schedule, not as macroeconomic
 forecasts. They are not official CBO or JCT scores.
 
-The public dashboard does not currently publish labor-supply response rows.
-Earlier response files were removed because they were not generated from the
-current full-H5 production lineage. New response rows must come from the same
-guarded full reform H5 contract as the static cells, then be aggregated from
-those durable H5 artifacts.
+The public dashboard labels these rows as behavioral. Earlier response files
+were removed because they were not generated from the current full-H5 production
+lineage; they are not part of the public release.
 
 ## Reproducibility and validation
 

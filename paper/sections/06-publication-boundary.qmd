@@ -61,15 +61,12 @@ That separation only works if each surface is honest about result status.
 - Operational notes should carry the detailed rerun state, launch identifiers,
   and recovery details needed to reconcile those two publication surfaces.
 
-For the current rebuild, that release discipline means the paper should not
-describe the dashboard package as final until the standard panel has been
-regenerated on the hardened exact-only path with the `2075+` donor-backed
-support supplement. The late-year support sentinels have cleared, but the
-publication result tables still need the sampled-year production run and reform
-rescoring pass before final language is appropriate.
+For the current rebuild, that release discipline means the dashboard-facing
+standard panel uses the hardened exact-only path, the `2075+` donor-backed
+support supplement, and saved full reform H5 artifacts before appearing in the
+public result surface.
 
 For the supplemental labor-supply response package, the standard `option1`
-through `option12` panel must be generated from durable full reform H5 artifacts
-under the current contract before it can be public. Multiplier-derived sample
-panels and other non-contract response artifacts are excluded from the release
-surface.
+through `option12` panel is public only where generated from durable full reform
+H5 artifacts under the current contract. Multiplier-derived sample panels and
+other non-contract response artifacts are excluded from the release surface.

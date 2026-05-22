@@ -33,7 +33,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Negative values represent lost income-tax revenue currently credited to the OASDI and HI trust funds.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option2",
@@ -49,7 +49,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Positive values show the added revenue from expanding the taxable-benefit base below the current thresholds.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option3",
@@ -65,7 +65,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Results combine added taxable-benefit revenue with the offsetting cost of extending the senior deduction.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option4",
@@ -81,7 +81,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The credit targets relief more directly than a deduction, so revenue effects reflect both the broader tax base and the capped credit offset.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option5",
@@ -97,7 +97,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "This is a structural tax-base shift from retirees toward workers, not just a change in taxable-benefit inclusion.",
     scoringNote:
-      "Static results are available; current-contract labor-supply response results are pending. trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },
   {
     id: "option6",
@@ -113,7 +113,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Use as a raw-data sensitivity rather than a primary publication-facing policy option.",
     scoringNote:
-      "Static results are available; current-contract labor-supply response results are pending. trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },
   {
     id: "option7",
@@ -128,7 +128,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Dashboard totals show the full federal income-tax gain; OASDI, HI, and general fund lines show where that gain is credited.",
     scoringNote:
-      "Static results are available; current-contract labor-supply response results are pending. TOB impacts are calculated from the saved marginal trust-fund revenue columns rather than from the full federal income-tax change.",
+      "Static and supplemental behavioral results are available. TOB impacts are calculated from the saved marginal trust-fund revenue columns rather than from the full federal income-tax change.",
   },
   {
     id: "option8",
@@ -144,7 +144,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "This is the broadest direct benefit-taxation option, so positive revenue effects are larger than under 85, 90, or 95 percent inclusion.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option9",
@@ -160,7 +160,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Revenue effects sit between uniform 85 percent taxation and broader 95 or 100 percent inclusion.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option10",
@@ -176,7 +176,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "Revenue effects are larger than under 85 or 90 percent inclusion but smaller than taxing all benefits.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option11",
@@ -192,7 +192,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The larger credit provides more offset than the $500 design and phases out above higher incomes.",
     scoringNote:
-      "Static results are available for the full 2026-2100 window; current-contract labor-supply response results are pending.",
+      "Static and supplemental behavioral results are available for the full 2026-2100 window.",
   },
   {
     id: "option12",
@@ -208,7 +208,7 @@ export const REFORMS: ReformMeta[] = [
     interpretation:
       "The late-horizon sign can differ from the first decade because the payroll-tax inclusion and benefit-tax phaseout operate on different bases.",
     scoringNote:
-      "Static results are available; current-contract labor-supply response results are pending. trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
+      "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },
 ];
 
