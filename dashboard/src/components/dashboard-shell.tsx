@@ -747,11 +747,6 @@ export function DashboardShell() {
                       {reform.mechanism}
                     </p>
                   </div>
-                  <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
-                    {scoringType === "behavioral"
-                      ? "Labor-supply response"
-                      : "Static scoring"}
-                  </span>
                 </div>
               </section>
 
