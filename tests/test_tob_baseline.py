@@ -5,8 +5,12 @@ import numpy as np
 from src.tob_baseline import (
     HI_METHOD_CURRENT_LAW,
     HI_METHOD_MATCH_OASDI_PCT_CHANGE,
+    POST_OBBBA_SCENARIO_ID,
     build_tob_baseline,
     validate_generated_baseline,
+    validate_tob_baseline_manifest,
+    write_tob_baseline,
+    write_tob_baseline_manifest,
 )
 
 
@@ -35,3 +39,19 @@ def test_hi_bridge_can_match_oasdi_percentage_change() -> None:
 def test_generated_baseline_validates() -> None:
     baseline = build_tob_baseline(HI_METHOD_MATCH_OASDI_PCT_CHANGE)
     validate_generated_baseline(baseline)
+
+
+def test_generated_baseline_manifest_marks_target_not_law(tmp_path) -> None:
+    baseline_path = tmp_path / "ssa_tob_baseline_75year.csv"
+    manifest_path = tmp_path / "ssa_tob_baseline_75year.manifest.json"
+    baseline = build_tob_baseline(HI_METHOD_MATCH_OASDI_PCT_CHANGE)
+    write_tob_baseline(baseline, baseline_path)
+
+    manifest = write_tob_baseline_manifest(baseline_path, manifest_path)
+    validated = validate_tob_baseline_manifest(baseline_path, manifest_path)
+
+    assert validated == manifest
+    assert manifest["scenario_id"] == POST_OBBBA_SCENARIO_ID
+    assert manifest["baseline_kind"] == "calibration_target"
+    assert manifest["not_law"] is True
+    assert manifest["artifact_contract"]["reject_raw_current_law_substitution"] is True

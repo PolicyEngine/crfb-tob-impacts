@@ -16,6 +16,7 @@ from src.tob_baseline import (
     build_tob_baseline,
     validate_generated_baseline,
     write_tob_baseline,
+    write_tob_baseline_manifest,
 )
 
 
@@ -43,6 +44,8 @@ def main() -> None:
     baseline = build_tob_baseline(args.hi_method)
     validate_generated_baseline(baseline)
     write_tob_baseline(baseline, args.output)
+    manifest_path = args.output.with_suffix(".manifest.json")
+    manifest = write_tob_baseline_manifest(args.output, manifest_path)
 
     sample = baseline.loc[baseline["year"] == 2026].iloc[0]
     print(
@@ -50,6 +53,10 @@ def main() -> None:
         f"HI={sample['tob_hi_billions']:.4f} "
         f"Total={sample['tob_total_billions']:.4f} "
         f"(HI method: {args.hi_method})"
+    )
+    print(
+        f"Wrote {manifest_path}: scenario={manifest['scenario_id']} "
+        f"sha256={manifest['baseline_sha256']}"
     )
 
 

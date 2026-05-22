@@ -10,7 +10,7 @@ use cleaned current artifacts without rewriting the paper body.
 The publication rule is:
 
 - dashboard-facing files should contain **current** rerun values only
-- comparison spreadsheets may retain legacy reference columns
+- comparison spreadsheets should not retain legacy rows on the public path
 - the manuscript should cite shared generated exhibits rather than duplicate
   results manually in prose
 
@@ -20,6 +20,10 @@ The publication rule is:
 
 {{< include exhibits/results-overview.md >}}
 
+### Full-H5 selected-panel results
+
+{{< include exhibits/full-h5-results-summary.md >}}
+
 ### Household impacts
 
 {{< include exhibits/household-impacts.md >}}
@@ -28,17 +32,13 @@ The publication rule is:
 
 {{< include exhibits/revenue-impacts.md >}}
 
-### Conventional standard-panel
+### Labor-supply response status
 
-{{< include exhibits/conventional-results.md >}}
+{{< include exhibits/labor-supply-response-status.md >}}
 
-### Balanced-fix and stacked-scenario
-
-{{< include exhibits/balanced-fix.md >}}
-
-In the current release, the conventional exhibit is a quarantine note rather
-than a results table. The balanced-fix exhibit remains static because
-special-case conventional scoring is outside the shipped release scope.
+In the current release, the labor-supply response exhibit is a status note, not
+a results panel. Any response rows added later must be aggregated from saved
+full reform H5 artifacts produced under the current contract.
 
 ## Interpretation boundary
 

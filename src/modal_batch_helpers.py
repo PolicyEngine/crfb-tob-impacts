@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import csv
+import os
 from pathlib import Path
+
+
+REFORM_HOUSEHOLD_METRICS_DIRNAME = "reform_household_metrics"
+REFORM_RAW_H5_DIRNAME = "reform_raw_h5"
+OBJECT_STORE_ROOT_PART = "results"
 
 
 def stem_with_scoring(stem: str, scoring: str) -> str:
@@ -10,10 +16,17 @@ def stem_with_scoring(stem: str, scoring: str) -> str:
 
 
 def parse_years(years: str) -> list[int]:
-    if "-" in years:
-        start, end = years.split("-")
-        return list(range(int(start), int(end) + 1))
-    return [int(year.strip()) for year in years.split(",") if year.strip()]
+    parsed: list[int] = []
+    for part in years.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            start, end = part.split("-", maxsplit=1)
+            parsed.extend(range(int(start), int(end) + 1))
+        else:
+            parsed.append(int(part))
+    return parsed
 
 
 def parse_cells_file(cells_file: str | Path) -> list[tuple[str, int]]:
@@ -56,3 +69,163 @@ def default_submission_manifest_path(
     run_id: str,
 ) -> Path:
     return repo_root / "results" / "modal_submissions" / f"{stem}_{run_id}.json"
+
+
+def reform_household_metrics_start_year(
+    raw: str | None,
+    *,
+    default: int | None = 2040,
+) -> int | None:
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if value in {"", "0", "false", "no", "off", "none"}:
+        return None
+    return int(value)
+
+
+def reform_household_metrics_requested(
+    year: int,
+    start_year: int | None,
+) -> bool:
+    return start_year is not None and year >= start_year
+
+
+def reform_household_metrics_artifact_dir(
+    save_path: str | Path,
+    *,
+    year: int,
+    reform_id: str,
+    volume_root: str | Path = "/results",
+) -> Path:
+    save_path_value = str(save_path).strip("/")
+    volume_path = Path(volume_root) / save_path_value
+    if volume_path.suffix:
+        root = (
+            volume_path.parent.parent
+            if volume_path.parent.name == reform_id
+            else volume_path.parent
+        )
+    else:
+        root = volume_path
+    return (
+        root
+        / REFORM_HOUSEHOLD_METRICS_DIRNAME
+        / f"year={year}"
+        / f"reform={reform_id}"
+    )
+
+
+def reform_raw_h5_start_year(
+    raw: str | None,
+    *,
+    default: int | None = 2026,
+) -> int | None:
+    return reform_household_metrics_start_year(raw, default=default)
+
+
+def reform_raw_h5_requested(
+    year: int,
+    start_year: int | None,
+) -> bool:
+    return reform_household_metrics_requested(year, start_year)
+
+
+def reform_raw_h5_artifact_dir(
+    save_path: str | Path,
+    *,
+    year: int,
+    reform_id: str,
+    volume_root: str | Path = "/results",
+) -> Path:
+    save_path_value = str(save_path).strip("/")
+    volume_path = Path(volume_root) / save_path_value
+    if volume_path.suffix:
+        root = (
+            volume_path.parent.parent
+            if volume_path.parent.name == reform_id
+            else volume_path.parent
+        )
+    else:
+        root = volume_path
+    return root / REFORM_RAW_H5_DIRNAME / f"year={year}" / f"reform={reform_id}"
+
+
+def reform_raw_h5_object_store_config(
+    env: dict[str, str] | None = None,
+) -> dict[str, str] | None:
+    values = env or os.environ
+    bucket = (
+        values.get("CRFB_REFORM_RAW_H5_OBJECT_STORE_BUCKET")
+        or values.get("CRFB_REFORM_RAW_H5_S3_BUCKET")
+        or values.get("CRFB_R2_BUCKET")
+    )
+    if not bucket:
+        return None
+
+    endpoint_url = (
+        values.get("CRFB_REFORM_RAW_H5_OBJECT_STORE_ENDPOINT_URL")
+        or values.get("CRFB_REFORM_RAW_H5_S3_ENDPOINT_URL")
+        or values.get("CRFB_R2_ENDPOINT_URL")
+    )
+    account_id = values.get("CRFB_R2_ACCOUNT_ID")
+    if not endpoint_url and account_id:
+        endpoint_url = f"https://{account_id}.r2.cloudflarestorage.com"
+
+    access_key_id = (
+        values.get("AWS_ACCESS_KEY_ID")
+        or values.get("CRFB_R2_ACCESS_KEY_ID")
+        or values.get("R2_ACCESS_KEY_ID")
+    )
+    secret_access_key = (
+        values.get("AWS_SECRET_ACCESS_KEY")
+        or values.get("CRFB_R2_SECRET_ACCESS_KEY")
+        or values.get("R2_SECRET_ACCESS_KEY")
+    )
+    missing = [
+        name
+        for name, value in {
+            "endpoint_url": endpoint_url,
+            "access_key_id": access_key_id,
+            "secret_access_key": secret_access_key,
+        }.items()
+        if not value
+    ]
+    if missing:
+        raise RuntimeError(
+            "Raw reform H5 object-store mirroring was requested, but these "
+            f"settings are missing: {', '.join(missing)}."
+        )
+
+    prefix = (
+        values.get("CRFB_REFORM_RAW_H5_OBJECT_STORE_PREFIX")
+        or values.get("CRFB_REFORM_RAW_H5_S3_PREFIX")
+        or "crfb/reform_raw_h5"
+    ).strip("/")
+    return {
+        "bucket": bucket,
+        "endpoint_url": endpoint_url,
+        "region_name": values.get("CRFB_REFORM_RAW_H5_S3_REGION")
+        or values.get("AWS_DEFAULT_REGION")
+        or "auto",
+        "access_key_id": access_key_id,
+        "secret_access_key": secret_access_key,
+        "prefix": prefix,
+    }
+
+
+def object_store_key_for_path(
+    path: str | Path,
+    *,
+    prefix: str,
+) -> str:
+    path_parts = Path(path).parts
+    if OBJECT_STORE_ROOT_PART in path_parts:
+        root_index = path_parts.index(OBJECT_STORE_ROOT_PART)
+        relative_parts = path_parts[root_index + 1 :]
+    else:
+        relative_parts = (Path(path).name,)
+
+    clean_prefix = prefix.strip("/")
+    relative_key = "/".join(part.strip("/") for part in relative_parts if part)
+    return f"{clean_prefix}/{relative_key}" if clean_prefix else relative_key

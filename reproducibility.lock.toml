@@ -9,7 +9,7 @@ branch = "add/tob-revenue-variables"
 head_sha = "2a170c3fa55d808be85b8e86a55cd12c7d485f90"
 merge_sha = "38b115860dde5640e0e750bd7c7cf5a619e99b0f"
 
-[policyengine_us.historical_dynamic_overlay]
+[policyengine_us.historical_conventional_overlay]
 pr = 6830
 branch = "add-labor-supply-elasticity-age-heterogeneity"
 head_sha = "1902f30eef1a9c2f3c8e3e6b3b486f97e8063cca"

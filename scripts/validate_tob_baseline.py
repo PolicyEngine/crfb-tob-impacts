@@ -12,7 +12,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.tob_baseline import GENERATED_BASELINE_PATH, validate_generated_baseline
+from src.tob_baseline import (
+    GENERATED_BASELINE_PATH,
+    validate_generated_baseline,
+    validate_tob_baseline_manifest,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,7 +36,11 @@ def parse_args() -> argparse.Namespace:
 def main(path: Path = GENERATED_BASELINE_PATH) -> None:
     baseline = pd.read_csv(path)
     validate_generated_baseline(baseline)
-    print(f"{path} passed baseline validation.")
+    manifest = validate_tob_baseline_manifest(path)
+    print(
+        f"{path} passed baseline validation "
+        f"(scenario={manifest['scenario_id']}, sha256={manifest['baseline_sha256']})."
+    )
 
 
 if __name__ == "__main__":

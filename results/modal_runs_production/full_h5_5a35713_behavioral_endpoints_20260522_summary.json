@@ -1,0 +1,11 @@
+{
+  "schema": "crfb_full_h5_post_aggregation_summary/v1",
+  "generated_at": "2026-05-22T12:21:09.498053+00:00",
+  "live_status_path": "results/modal_runs_production/behavioral_endpoint_full_h5_status_20260522.csv",
+  "completed_h5_cells_seen": 24,
+  "aggregated_rows": 24,
+  "skipped_rows": [],
+  "output_path": "results/modal_runs_production/full_h5_5a35713_behavioral_endpoints_20260522.csv",
+  "manual_weight_aggregation_used": false,
+  "aggregation_method": "microdf.MicroDataFrame weighted .sum() operations"
+}

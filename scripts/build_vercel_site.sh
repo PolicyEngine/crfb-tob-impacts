@@ -38,11 +38,14 @@ if command -v quarto >/dev/null 2>&1; then
   else
     echo "Paper PDF render skipped; HTML paper is still available." >&2
   fi
-
-  cp -R "$paper_output/." "$paper_target/"
+elif [ -d "$paper_output" ]; then
+  echo "Quarto is unavailable; using pre-rendered paper output from $paper_output."
 else
-  echo "Quarto unavailable; skipping paper build for dashboard-only Vercel deployment." >&2
+  echo "Quarto is unavailable and no pre-rendered paper output was found." >&2
+  exit 1
 fi
+
+cp -R "$paper_output/." "$paper_target/"
 
 pushd "$repo_root/dashboard" >/dev/null
 NEXT_PUBLIC_BASE_PATH="$dashboard_base_path" bun run build

@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className={`${inter.className} min-h-full flex flex-col`}>
-        <PolicyEngineShell country="us">{children}        </PolicyEngineShell>
+        <PolicyEngineShell country="us">{children}</PolicyEngineShell>
       </body>
     </html>
   );

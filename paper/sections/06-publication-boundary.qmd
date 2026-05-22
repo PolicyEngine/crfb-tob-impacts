@@ -8,9 +8,8 @@ The Next.js dashboard is the current-results explorer. It is the right place
 for:
 
 - reform-level comparison
-- current static outputs, with conventional outputs only after baseline-match
-  validation
-- special-case baseline views
+- current static outputs and supplemental labor-supply response outputs after
+  baseline-match validation and full-H5 generation
 - direct access to downloadable current data products
 
 It is not the right place to carry the full narrative burden of methods,
@@ -27,8 +26,8 @@ This Quarto paper is the stable narrative layer intended for:
 - appendices and bibliography
 
 The manuscript should preserve the source trail and substantive chapter
-coverage of the first report while updating scope to the current fourteen-option
-package.
+coverage of the first report while updating scope to the current CRFB-facing
+twelve-option menu.
 
 ## 3. Operational documentation
 
@@ -57,24 +56,20 @@ without forcing the dashboard to double as the full methodological record.
 
 That separation only works if each surface is honest about result status.
 
-- If the standard static panel is clean but a special-case rerun is still in
-  flight, the paper should say so directly rather than implying a fully settled
-  fourteen-option package.
-- The dashboard may continue to expose the latest assembled special-case values,
-  but the manuscript should reserve “final” language for runs that have cleared
-  the full validation ladder.
+- If a result track is not generated from the current full-H5 contract, the
+  paper should say so directly rather than implying it is part of the release.
 - Operational notes should carry the detailed rerun state, launch identifiers,
   and recovery details needed to reconcile those two publication surfaces.
 
-For the current static package, that release discipline has been satisfied: the
-standard panel was rebuilt on the hardened exact-only path, and the special-case
-panel was recovered as a complete `2035-2100` artifact set before the delivery
-bundle was rebuilt.
+For the current rebuild, that release discipline means the paper should not
+describe the dashboard package as final until the standard panel has been
+regenerated on the hardened exact-only path with the `2075+` donor-backed
+support supplement. The late-year support sentinels have cleared, but the
+publication result tables still need the sampled-year production run and reform
+rescoring pass before final language is appropriate.
 
-For the current conventional package, the release surface is not settled. The
-existing standard conventional artifact is quarantined until it can be rerun on
-the same baseline lineage as the static package. Special-case conventional
-scenarios remain intentionally excluded from the current public delivery. Those
-scenarios would require a separate iterative balanced-fix solve after
-behavioral response, and that extra compute path is not part of the release
-contract for this package.
+For the supplemental labor-supply response package, the standard `option1`
+through `option12` panel must be generated from durable full reform H5 artifacts
+under the current contract before it can be public. Multiplier-derived sample
+panels and other non-contract response artifacts are excluded from the release
+surface.

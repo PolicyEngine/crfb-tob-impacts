@@ -7,26 +7,25 @@ handled.
 
 The intended current delivery surface is:
 
-- one unified 14-option static results table
-- one unified standard-option conventional results table
+- one unified `results.csv`; it contains current-contract static rows and
+  behavioral rows built from current full-H5 endpoint artifacts
+- a `scoring_type` column that selects the scoring track
 - dashboard data built from the current results only
-- one spreadsheet that includes prior or legacy reference values for
-  comparison
+- release packages and dashboard data built from the current full-H5 results
 
-The main tracked output paths are:
+The public/release result paths are:
 
-- `results/all_static_results_latesthf_2026_2100_14options.csv`
-- `results/all_dynamic_results_latesthf_2026_2100_standard_options.csv`
-- `results/all_static_results_latesthf_2026_2100_14options_with_prior_reference.csv`
-- `results/all_static_results_latesthf_2026_2100_14options_with_prior_reference.xlsx`
-- `dashboard/public/data/all_static_results.csv`
-- `dashboard/public/data/option13_balanced_fix.csv`
+- `results/results_full_h5_selected_panel_display_20260522.csv`
+- `results/results_full_h5_selected_panel_display_20260522_metadata.json`
+- `results.csv`
+- `dashboard/public/data/results.csv`
+- `results/release_packages/crfb_tob_release_<timestamp>/`
 
-The `all_dynamic_*` filenames are historical compatibility names for the
-conventional-result artifact. Public-facing text should call this track
-conventional. While conventional results remain quarantined, no
-`all_dynamic_results.csv` copy belongs under `dashboard/public/data/`, built
-dashboard output, or `.vercel-site`.
+Behind the scenes, the builder combines static and labor-supply response source
+artifacts into the unified `results.csv`. Public-facing code and docs should
+not ask readers to choose between separate static and response artifact
+families. Labor-supply response rows are included only when regenerated from the
+current full-H5 production contract.
 
 ## Delivery Rules
 
@@ -37,28 +36,18 @@ The dashboard should show current rerun values only.
 That means:
 
 - no legacy standard rows in the dashboard current-results path
-- no stale conventional subset files from earlier runs
+- no stale response subset files from earlier runs
 - no stale stitched values carried forward for convenience
-- special cases should use the assembled current `option13` and
-  `option14_stacked` rows
 
-For the current release, conventional results are quarantined until their
-baseline levels match the static release. During quarantine, the internal
-`results/all_dynamic_*` artifact may exist as a rerun input, but public
-dashboard, built-site, paper, and spreadsheet outputs must not expose
-conventional point estimates. Special-case conventional rows are not part of
-the delivery bundle. That omission is intentional: the balanced-fix special
-cases would require a separate iterative post-response solve and are not needed
-for the shipped dashboard, spreadsheet, or paper.
+Labor-supply response results in the current delivery bundle must come from the
+current full-H5 production lineage. Earlier response rows remain stale and must
+not be stitched into the dashboard.
 
-### Spreadsheet
+### Legacy Comparisons
 
-The spreadsheet is where legacy values belong.
-
-Use it for:
-
-- old versus new comparisons
-- client-facing legacy-reference columns
+Legacy comparisons should live outside the production dashboard data path. The
+repository delivery bundle should not ship stale prior-reference CSV or XLSX
+artifacts as current results.
 - validation summaries during the audit period
 
 Do not treat spreadsheet legacy columns as a substitute for current dashboard
@@ -68,12 +57,20 @@ data.
 
 These scripts define the current delivery build:
 
-- [scripts/assemble_special_case_results.py](../../scripts/assemble_special_case_results.py)
-- [scripts/build_latesthf_14option_delivery.py](../../scripts/build_latesthf_14option_delivery.py)
-- [scripts/publish_conventional_results.py](../../scripts/publish_conventional_results.py)
+- [scripts/build_dashboard_payroll_denominators.py](../../scripts/build_dashboard_payroll_denominators.py)
+- [scripts/publish_full_h5_static_dashboard_results.py](../../scripts/publish_full_h5_static_dashboard_results.py)
+- [modal_batch/reform_full_h5.py](../../modal_batch/reform_full_h5.py)
+- [scripts/aggregate_reform_full_h5_results.py](../../scripts/aggregate_reform_full_h5_results.py)
+- [scripts/publish_dashboard_results.py](../../scripts/publish_dashboard_results.py)
+- [scripts/build_release_package.py](../../scripts/build_release_package.py)
 
 The spreadsheet-with-prior-reference output is the right place to preserve the
 old values while the dashboard moves to the rebuilt current values.
+
+`scripts/build_release_package.py` is the client/review package boundary. It
+copies the current results, dashboard data, source denominator files, relevant
+build scripts, paper sections, and release tests into `results/release_packages/`, then writes
+`release_manifest.json` with SHA-256 checksums and optionally a `.zip` archive.
 
 ## Publication Boundary
 
@@ -86,17 +83,16 @@ Use this simple rule:
 
 ## Release Checklist
 
-- standard results come from the hardened exact-only rerun path
-- special-case rows come from the assembled `option13` and `option14_stacked`
-  path, not ad hoc manual edits
+- standard results come from the current full-H5 selected-panel path
 - sentinel checks are clean in representative early, middle, and late years
 - dashboard artifacts use only current results
 - spreadsheet comparison artifacts are the only place where legacy values are
   carried forward
 - the live audit note reflects the final release state:
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md)
-- independent review should start from
-  [docs/current/fresh-review-brief.md](fresh-review-brief.md)
+- independent review should start from the controlling
+  [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md) and
+  [reform-modeling-progress.json](reform-modeling-progress.json)
 
 ## Archive Boundary
 

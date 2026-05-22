@@ -1,6 +1,7 @@
 "use client";
 
 import { EXTERNAL_ESTIMATES } from "@/lib/reforms";
+import type { ScoringType } from "@/lib/dashboard-data";
 
 function formatCurrency(value: number) {
   const prefix = value >= 0 ? "+" : "-";
@@ -10,9 +11,11 @@ function formatCurrency(value: number) {
 export function ComparisonTable({
   reformId,
   policyEngineEstimate,
+  scoringType,
 }: {
   reformId: string;
   policyEngineEstimate: number;
+  scoringType: ScoringType;
 }) {
   const externalEstimates = EXTERNAL_ESTIMATES[reformId] ?? [];
 
@@ -47,7 +50,7 @@ export function ComparisonTable({
                 PolicyEngine
               </td>
               <td className="px-4 py-3 text-[var(--pe-color-text-secondary)]">
-                Static
+                {scoringType === "behavioral" ? "Labor-supply response" : "Static"}
               </td>
               <td className="px-4 py-3 text-right font-semibold text-[var(--pe-color-text-primary)]">
                 {formatCurrency(policyEngineEstimate)}

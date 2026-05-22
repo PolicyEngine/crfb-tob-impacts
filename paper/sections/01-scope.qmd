@@ -8,11 +8,9 @@ separate from, two other project surfaces:
 - the **operational docs**, which track rerun status, reproducibility, and audit decisions
 
 The current analysis extends the original eight-option report to a broader
-fourteen-scenario package over a `2026-2100` modeling window:
-
-- standard reforms `option1` through `option12`
-- `option13`, a balanced-fix baseline beginning in `2035`
-- `option14_stacked`, which layers a structural reform on top of the balanced-fix baseline
+twelve-option package over a `2026-2100` modeling window. The live release
+surface is the standard reform set, `option1` through `option12`, generated
+from the current full-H5 contract.
 
 ## Current-law baseline
 

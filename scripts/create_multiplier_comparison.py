@@ -1,12 +1,12 @@
 """
-Create a comparison CSV showing static vs dynamic_multiplier and dynamic vs dynamic_multiplier
+Create a comparison CSV showing static vs conventional_multiplier and conventional vs conventional_multiplier
 """
 
 import pandas as pd
 
 # Read the input CSVs
 comparison_df = pd.read_csv("data/policy_impacts_comparison.csv")
-multiplier_df = pd.read_csv("data/policy_impacts_dynamic_multiplier.csv")
+multiplier_df = pd.read_csv("data/policy_impacts_conventional_multiplier.csv")
 
 # Merge on reform_id and year
 merged = comparison_df.merge(
@@ -16,28 +16,28 @@ merged = comparison_df.merge(
 )
 
 # Rename for clarity
-merged = merged.rename(columns={"revenue_impact": "dynamic_multiplier_impact"})
+merged = merged.rename(columns={"revenue_impact": "conventional_multiplier_impact"})
 
-# Calculate differences: static to dynamic (original feedback)
-merged["static_to_dynamic_diff"] = merged["dynamic_impact"] - merged["static_impact"]
-merged["static_to_dynamic_pct"] = (
-    merged["static_to_dynamic_diff"] / merged["static_impact"].abs()
+# Calculate differences: static to conventional (original feedback)
+merged["static_to_conventional_diff"] = merged["conventional_impact"] - merged["static_impact"]
+merged["static_to_conventional_pct"] = (
+    merged["static_to_conventional_diff"] / merged["static_impact"].abs()
 ) * 100
 
-# Calculate differences: static to dynamic_multiplier
+# Calculate differences: static to conventional_multiplier
 merged["static_to_multiplier_diff"] = (
-    merged["dynamic_multiplier_impact"] - merged["static_impact"]
+    merged["conventional_multiplier_impact"] - merged["static_impact"]
 )
 merged["static_to_multiplier_pct"] = (
     merged["static_to_multiplier_diff"] / merged["static_impact"].abs()
 ) * 100
 
-# Calculate differences: dynamic to dynamic_multiplier
-merged["dynamic_to_multiplier_diff"] = (
-    merged["dynamic_multiplier_impact"] - merged["dynamic_impact"]
+# Calculate differences: conventional to conventional_multiplier
+merged["conventional_to_multiplier_diff"] = (
+    merged["conventional_multiplier_impact"] - merged["conventional_impact"]
 )
-merged["dynamic_to_multiplier_pct"] = (
-    merged["dynamic_to_multiplier_diff"] / merged["dynamic_impact"].abs()
+merged["conventional_to_multiplier_pct"] = (
+    merged["conventional_to_multiplier_diff"] / merged["conventional_impact"].abs()
 ) * 100
 
 # Select and order columns
@@ -47,14 +47,14 @@ output_df = merged[
         "reform_name",
         "year",
         "static_impact",
-        "dynamic_impact",
-        "dynamic_multiplier_impact",
-        "static_to_dynamic_diff",
-        "static_to_dynamic_pct",
+        "conventional_impact",
+        "conventional_multiplier_impact",
+        "static_to_conventional_diff",
+        "static_to_conventional_pct",
         "static_to_multiplier_diff",
         "static_to_multiplier_pct",
-        "dynamic_to_multiplier_diff",
-        "dynamic_to_multiplier_pct",
+        "conventional_to_multiplier_diff",
+        "conventional_to_multiplier_pct",
     ]
 ]
 

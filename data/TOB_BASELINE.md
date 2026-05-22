@@ -12,6 +12,9 @@ This directory now separates the **raw current-law series** from the **generated
   - Covers 2025-2099.
 - `ssa_tob_baseline_75year.csv`
   - Generated output baseline used by downstream scripts.
+- `ssa_tob_baseline_75year.manifest.json`
+  - Canonical provenance and hash contract for the generated post-OBBBA TOB target.
+  - Marks the file as a calibration target, not law, and records the expected scenario id, source hashes, HI bridge method, and output SHA-256.
 
 ## Build
 
@@ -32,6 +35,8 @@ python3 scripts/build_tob_baseline.py --hi-method current_law
 ```bash
 python3 scripts/validate_tob_baseline.py
 ```
+
+Validation checks both the CSV values and the adjacent `.manifest.json` hash contract.
 
 or validate an explicit output file:
 

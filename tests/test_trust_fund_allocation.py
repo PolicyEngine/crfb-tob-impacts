@@ -59,25 +59,6 @@ def test_split_revenue_impacts_uses_direct_branching_for_option12():
     assert hi_impact == 75.0
 
 
-def test_split_revenue_impacts_uses_direct_branching_for_option14_stacked():
-    revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
-        {
-            "reform_name": "option14_stacked",
-            "revenue_impact": 100.0,
-            "baseline_tob_oasdi": 60.0,
-            "baseline_tob_medicare_hi": 40.0,
-            "tob_oasdi_impact": 30.0,
-            "tob_medicare_hi_impact": 70.0,
-            "oasdi_net_impact": 25.0,
-            "hi_net_impact": 75.0,
-        }
-    )
-
-    assert revenue_impact == 100.0
-    assert oasdi_impact == 25.0
-    assert hi_impact == 75.0
-
-
 def test_split_revenue_impacts_uses_net_impacts_for_option5():
     revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
         {
@@ -97,11 +78,11 @@ def test_split_revenue_impacts_uses_net_impacts_for_option5():
     assert hi_impact == 25.0
 
 
-def test_split_revenue_impacts_zeroes_trust_fund_impacts_for_option7():
+def test_split_revenue_impacts_uses_marginal_tob_impacts_for_option7():
     revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
         {
             "reform_name": "option7",
-            "revenue_impact": 100.0,
+            "revenue_impact": 500.0,
             "baseline_tob_oasdi": 60.0,
             "baseline_tob_medicare_hi": 40.0,
             "tob_oasdi_impact": 30.0,
@@ -111,16 +92,16 @@ def test_split_revenue_impacts_zeroes_trust_fund_impacts_for_option7():
         }
     )
 
-    assert revenue_impact == 100.0
-    assert oasdi_impact == 0.0
-    assert hi_impact == 0.0
+    assert revenue_impact == 500.0
+    assert oasdi_impact == 30.0
+    assert hi_impact == 70.0
 
 
-def test_split_revenue_impacts_falls_back_to_raw_tob_impacts_for_balanced_fix():
+def test_split_revenue_impacts_preserves_federal_total_for_raw_tob_fallback():
     revenue_impact, oasdi_impact, hi_impact = split_revenue_impacts(
         {
             "reform_name": "balanced_fix",
-            "revenue_impact": 100.0,
+            "revenue_impact": 500.0,
             "baseline_tob_oasdi": 60.0,
             "baseline_tob_medicare_hi": 40.0,
             "tob_oasdi_impact": 30.0,
@@ -130,7 +111,7 @@ def test_split_revenue_impacts_falls_back_to_raw_tob_impacts_for_balanced_fix():
         }
     )
 
-    assert revenue_impact == 100.0
+    assert revenue_impact == 500.0
     assert oasdi_impact == 30.0
     assert hi_impact == 70.0
 

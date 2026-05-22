@@ -12,6 +12,14 @@ import subprocess
 import sys
 from typing import Any
 
+from .runtime_config import (
+    _installed_policyengine_us_version,
+    _is_packaged_policyengine_us_path,
+    _policyengine_us_package_file,
+    _policyengine_us_package_file_sha256,
+    _policyengine_us_package_tree_sha256,
+)
+
 
 DEFAULT_UNTRACKED_IGNORE_PREFIXES = (
     "tmp/",
@@ -103,7 +111,9 @@ def git_repo_root(path: Path) -> Path:
     return current
 
 
-def write_repo_overrides(repo_path: Path, output_dir: Path, label: str) -> dict[str, Any]:
+def write_repo_overrides(
+    repo_path: Path, output_dir: Path, label: str
+) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     tracked_patch = _run_git(repo_path, "diff", "--binary", "HEAD")
@@ -215,12 +225,27 @@ def snapshot_summary(snapshot_path: Path) -> dict[str, Any]:
     file_inventory = snapshot_file_inventory(snapshot_path)
 
     base_snapshot = manifest.get("base_dataset_snapshot")
-    if base_snapshot is None:
-        for metadata_path in metadata_paths:
-            metadata = read_json(metadata_path)
-            base_snapshot = metadata.get("base_dataset_snapshot")
-            if base_snapshot is not None:
-                break
+    policyengine_us_versions: set[str] = set()
+    policyengine_us_git_shas: set[str] = set()
+    for metadata_path in metadata_paths:
+        metadata = read_json(metadata_path)
+        metadata_base_snapshot = metadata.get("base_dataset_snapshot")
+        if base_snapshot is None and metadata_base_snapshot is not None:
+            base_snapshot = metadata_base_snapshot
+        policyengine_us = metadata.get("policyengine_us") or {}
+        policyengine_us_version = policyengine_us.get("version")
+        if policyengine_us_version:
+            policyengine_us_versions.add(str(policyengine_us_version))
+        direct_url = policyengine_us.get("direct_url") or {}
+        vcs_info = direct_url.get("vcs_info") or {}
+        policyengine_us_git_sha = (
+            vcs_info.get("commit_id")
+            or policyengine_us.get("git_commit_id")
+            or policyengine_us.get("vcs_commit_id")
+            or policyengine_us.get("commit_id")
+        )
+        if policyengine_us_git_sha:
+            policyengine_us_git_shas.add(str(policyengine_us_git_sha))
 
     summary.update(
         {
@@ -237,6 +262,8 @@ def snapshot_summary(snapshot_path: Path) -> dict[str, Any]:
             "base_dataset_snapshot": base_snapshot,
             "file_inventory": file_inventory,
             "file_inventory_count": len(file_inventory),
+            "policyengine_us_versions": sorted(policyengine_us_versions),
+            "policyengine_us_git_shas": sorted(policyengine_us_git_shas),
         }
     )
     return summary
@@ -254,25 +281,115 @@ def _bundle_dir_name(output_path: Path, launched_at: datetime) -> str:
 
 def resolved_environment_contract(
     *,
-    policyengine_us_path: Path,
-    projected_datasets_path: Path,
-    snapshot_path: Path,
+    policyengine_us_path: Path | None,
+    projected_datasets_path: Path | None,
+    snapshot_path: Path | None,
+    use_policyengine_py_managed_datasets: bool = False,
+    policyengine_py_path: Path | None = None,
     environ: dict[str, str] | None = None,
     snapshot_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if environ is None:
         environ = os.environ
     if snapshot_info is None:
-        snapshot_info = snapshot_summary(snapshot_path)
+        snapshot_info = snapshot_summary(snapshot_path) if snapshot_path else {}
+
+    if use_policyengine_py_managed_datasets:
+        return {
+            "CRFB_USE_POLICYENGINE_PY_MANAGED_DATASETS": "1",
+            "CRFB_POLICYENGINE_PY_PATH": (
+                str(policyengine_py_path) if policyengine_py_path else None
+            ),
+            "CRFB_POLICYENGINE_PY_LONG_TERM_DATASET_NAME": environ.get(
+                "CRFB_POLICYENGINE_PY_LONG_TERM_DATASET_NAME"
+            ),
+            "CRFB_POLICYENGINE_PY_MANAGED_DATA_CACHE": environ.get(
+                "CRFB_POLICYENGINE_PY_MANAGED_DATA_CACHE"
+            ),
+            "CRFB_PROJECTED_DATASETS_PATH": None,
+            "CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH": None,
+            "CRFB_DATASET_TEMPLATE": None,
+            "CRFB_POLICYENGINE_US_PATH": None,
+            "CRFB_POLICYENGINE_US_DATA_REPO_PATH": None,
+            "POLICYENGINE_US_DATA_REPO": None,
+            "POLICYENGINE_LOCAL_DATA_REPO_ROOT": None,
+            "CRFB_REQUIRED_POLICYENGINE_US_VERSION": environ.get(
+                "CRFB_REQUIRED_POLICYENGINE_US_VERSION"
+            ),
+            "CRFB_REQUIRED_POLICYENGINE_US_GIT_SHA": environ.get(
+                "CRFB_REQUIRED_POLICYENGINE_US_GIT_SHA"
+            ),
+            "CRFB_REQUIRED_CALIBRATION_PROFILE": environ.get(
+                "CRFB_REQUIRED_CALIBRATION_PROFILE",
+                "ss-payroll-tob",
+            ),
+            "CRFB_MIN_CALIBRATION_QUALITY": environ.get(
+                "CRFB_MIN_CALIBRATION_QUALITY",
+                "exact",
+            ),
+            "CRFB_REQUIRED_TARGET_SOURCE": environ.get(
+                "CRFB_REQUIRED_TARGET_SOURCE",
+                "trustees_2025_current_law",
+            ),
+            "CRFB_REQUIRED_TAX_ASSUMPTION": environ.get(
+                "CRFB_REQUIRED_TAX_ASSUMPTION",
+                "trustees-2025-core-thresholds-v1",
+            ),
+        }
+
+    if (
+        policyengine_us_path is None
+        or projected_datasets_path is None
+        or snapshot_path is None
+    ):
+        raise ValueError(
+            "Raw-H5 Modal runs require policyengine_us_path, "
+            "projected_datasets_path, and snapshot_path."
+        )
 
     profile = snapshot_info.get("profile") or {}
     target_source = snapshot_info.get("target_source") or {}
     tax_assumption = snapshot_info.get("tax_assumption") or {}
+    policyengine_us_git_shas = snapshot_info.get("policyengine_us_git_shas") or []
+    policyengine_us_git_sha = (
+        policyengine_us_git_shas[0] if len(policyengine_us_git_shas) == 1 else None
+    )
+    using_packaged_policyengine_us = _is_packaged_policyengine_us_path(
+        Path(policyengine_us_path)
+    )
+    installed_policyengine_us_version = (
+        _installed_policyengine_us_version() if using_packaged_policyengine_us else None
+    )
+    installed_package_file_sha256 = (
+        _policyengine_us_package_file_sha256()
+        if using_packaged_policyengine_us
+        else None
+    )
+    installed_package_tree_sha256 = (
+        _policyengine_us_package_tree_sha256()
+        if using_packaged_policyengine_us
+        else None
+    )
 
     return {
-        "CRFB_POLICYENGINE_US_PATH": str(policyengine_us_path),
+        "CRFB_POLICYENGINE_US_PATH": (
+            None if using_packaged_policyengine_us else str(policyengine_us_path)
+        ),
+        "CRFB_USE_PACKAGED_POLICYENGINE_US_CONTRACT": (
+            "1" if using_packaged_policyengine_us else None
+        ),
+        "CRFB_PACKAGED_POLICYENGINE_US_VERSION": installed_policyengine_us_version,
+        "CRFB_PACKAGED_POLICYENGINE_US_PACKAGE_FILE_SHA256": installed_package_file_sha256,
+        "CRFB_PACKAGED_POLICYENGINE_US_PACKAGE_TREE_SHA256": installed_package_tree_sha256,
         "CRFB_PROJECTED_DATASETS_PATH": str(projected_datasets_path),
         "CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH": str(snapshot_path),
+        "CRFB_REQUIRED_POLICYENGINE_US_VERSION": environ.get(
+            "CRFB_REQUIRED_POLICYENGINE_US_VERSION"
+        ),
+        "CRFB_REQUIRED_POLICYENGINE_US_GIT_SHA": environ.get(
+            "CRFB_REQUIRED_POLICYENGINE_US_GIT_SHA",
+            policyengine_us_git_sha,
+        ),
         "CRFB_REQUIRED_CALIBRATION_PROFILE": environ.get(
             "CRFB_REQUIRED_CALIBRATION_PROFILE",
             profile.get("name") or "ss-payroll-tob",
@@ -318,9 +435,11 @@ def create_repro_bundle(
     reforms: str,
     years: str,
     modal_target: str,
-    policyengine_us_path: Path,
-    projected_datasets_path: Path,
-    snapshot_path: Path,
+    policyengine_us_path: Path | None,
+    projected_datasets_path: Path | None,
+    snapshot_path: Path | None,
+    use_policyengine_py_managed_datasets: bool = False,
+    policyengine_py_path: Path | None = None,
     bundle_root: Path | None = None,
     cells_file: Path | None = None,
 ) -> BundlePaths:
@@ -343,34 +462,45 @@ def create_repro_bundle(
         shutil.copy2(cells_file, target)
         cells_file_record = _relative_file(target, bundle_dir)
 
-    snapshot_manifest = snapshot_path / "calibration_manifest.json"
-    if snapshot_manifest.exists():
+    snapshot_manifest = (
+        snapshot_path / "calibration_manifest.json" if snapshot_path else None
+    )
+    if snapshot_manifest and snapshot_manifest.exists():
         shutil.copy2(snapshot_manifest, bundle_dir / "calibration_manifest.json")
 
-    policyengine_us_root = git_repo_root(policyengine_us_path)
-    policyengine_us_data_root = git_repo_root(projected_datasets_path)
+    repo_paths: dict[str, Path] = {"crfb_tob_impacts": repo_root}
+    if use_policyengine_py_managed_datasets:
+        if policyengine_py_path is not None:
+            repo_paths["policyengine_py"] = policyengine_py_path
+    else:
+        if policyengine_us_path is None or projected_datasets_path is None:
+            raise ValueError(
+                "Raw-H5 reproducibility bundles require policyengine_us_path "
+                "and projected_datasets_path."
+            )
+        using_packaged_policyengine_us = _is_packaged_policyengine_us_path(
+            Path(policyengine_us_path)
+        )
+        policyengine_us_package_file = _policyengine_us_package_file()
+        policyengine_us_root = (
+            policyengine_us_package_file.parents[1]
+            if using_packaged_policyengine_us
+            and policyengine_us_package_file is not None
+            else git_repo_root(policyengine_us_path)
+        )
+        policyengine_us_data_root = git_repo_root(projected_datasets_path)
+        repo_paths["policyengine_us"] = policyengine_us_root
+        repo_paths["policyengine_us_data"] = policyengine_us_data_root
 
-    repo_records = {
-        "crfb_tob_impacts": repo_state(repo_root),
-        "policyengine_us": repo_state(policyengine_us_root),
-        "policyengine_us_data": repo_state(policyengine_us_data_root),
-    }
+    repo_records = {label: repo_state(path) for label, path in repo_paths.items()}
     dependency_manifests = copy_dependency_manifests(
         bundle_dir=bundle_dir,
-        repo_paths={
-            "crfb_tob_impacts": repo_root,
-            "policyengine_us": policyengine_us_root,
-            "policyengine_us_data": policyengine_us_data_root,
-        },
+        repo_paths=repo_paths,
     )
 
     override_dir = bundle_dir / "overrides"
     override_records: dict[str, Any] = {}
-    for label, repo_path in {
-        "crfb_tob_impacts": repo_root,
-        "policyengine_us": policyengine_us_root,
-        "policyengine_us_data": policyengine_us_data_root,
-    }.items():
+    for label, repo_path in repo_paths.items():
         repo_record = repo_records[label]
         if repo_record.get("git_repo") and repo_record.get("git_dirty"):
             override_records[label] = write_repo_overrides(
@@ -379,12 +509,22 @@ def create_repro_bundle(
                 label,
             )
 
-    snapshot_info = snapshot_summary(snapshot_path)
+    snapshot_info = (
+        snapshot_summary(snapshot_path)
+        if snapshot_path
+        else {
+            "mode": "policyengine_py_managed",
+            "snapshot_path": None,
+            "exists": False,
+        }
+    )
     environment_contract = resolved_environment_contract(
         policyengine_us_path=policyengine_us_path,
         projected_datasets_path=projected_datasets_path,
         snapshot_path=snapshot_path,
         snapshot_info=snapshot_info,
+        use_policyengine_py_managed_datasets=use_policyengine_py_managed_datasets,
+        policyengine_py_path=policyengine_py_path,
     )
 
     manifest = {
@@ -399,6 +539,10 @@ def create_repro_bundle(
             "years": years,
             "modal_target": modal_target,
             "cells_file": cells_file_record,
+            "policyengine_py_managed_datasets": use_policyengine_py_managed_datasets,
+            "policyengine_py_path": (
+                str(policyengine_py_path) if policyengine_py_path else None
+            ),
         },
         "environment_contract": environment_contract,
         "snapshot": snapshot_info,

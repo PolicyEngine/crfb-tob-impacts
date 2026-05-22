@@ -1,0 +1,42 @@
+{
+  "submitted_at": "2026-05-21T00:00:59.527632",
+  "reforms": [
+    "option1",
+    "option2",
+    "option3",
+    "option4",
+    "option5",
+    "option6",
+    "option7",
+    "option8",
+    "option9",
+    "option10",
+    "option11",
+    "option12"
+  ],
+  "years": [
+    2060
+  ],
+  "scoring": "static",
+  "output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2060_2060_20260520_235953.csv",
+  "output_dir": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2060_2060_20260520_235953_static",
+  "volume_prefix": "rolling_static_5a35713_standard_2060_2060_20260520_235953_static_20260521_000059",
+  "sample_fraction": 0.0,
+  "sample_seed": 0,
+  "sample_min_households": 0,
+  "drop_zero_weight_households": false,
+  "skip_tax_assumption_contract": false,
+  "use_baseline_artifacts": false,
+  "minimum_calibration_quality": "exact",
+  "required_calibration_profile": "ss-payroll-tob",
+  "allow_unsafe_long_run_artifact": false,
+  "calls": [
+    {
+      "year": 2060,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2060_2060_20260520_235953_static/year_2060.csv",
+      "volume_file": "rolling_static_5a35713_standard_2060_2060_20260520_235953_static_20260521_000059/year_2060.csv",
+      "call_id": "fc-01KS4B36MWVZ484KJKPFM8B44C",
+      "dashboard_url": "https://modal.com/id/fc-01KS4B36MWVZ484KJKPFM8B44C"
+    }
+  ]
+}

@@ -2,8 +2,7 @@
 
 This repository now has three distinct documentation surfaces:
 
-- current operational documentation for the active CRFB `2026-2100`
-  14-option rerun and delivery workflow
+- current operational documentation for the CRFB `2026-2100` workflow
 - a new citable manuscript track for formal publication and SSRN-style use
 - selected archival memos from the earlier eight-option package
 
@@ -12,6 +11,9 @@ handbook and paper, not the deleted legacy Jupyter Book.
 
 ## Start Here
 
+- [docs/current/REFORM_MODELING_BIBLE.md](current/REFORM_MODELING_BIBLE.md)
+  - controlling command-center document for the CRFB reform-modeling relaunch;
+    read before any paid Modal reform work
 - [paper/README.md](../paper/README.md)
   - citable manuscript track, separate from the live dashboard
 - [docs/current/README.md](current/README.md)
@@ -50,6 +52,15 @@ handbook and paper, not the deleted legacy Jupyter Book.
 ## Source Of Truth Order
 
 When documents disagree, use this order:
+
+For CRFB reform modeling and any paid Modal reform launch:
+
+1. [docs/current/REFORM_MODELING_BIBLE.md](current/REFORM_MODELING_BIBLE.md)
+2. [docs/current/reform-modeling-progress.json](current/reform-modeling-progress.json)
+3. validated artifacts explicitly referenced by that ledger
+4. other current docs only when they do not conflict with the Bible or ledger
+
+For non-reform documentation and manuscript cleanup:
 
 1. live run artifacts and validation metadata
 2. [analysis/long_run_rescoring_findings.md](../analysis/long_run_rescoring_findings.md)

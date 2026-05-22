@@ -46,7 +46,7 @@ def _write_snapshot(snapshot_path: Path) -> None:
         "base_dataset_snapshot": None,
         "profile": {"name": "ss-payroll-tob"},
         "target_source": {"name": "trustees_2025_current_law"},
-        "tax_assumption": {"name": "trustees-core-thresholds-v1"},
+        "tax_assumption": {"name": "trustees-2025-core-thresholds-v1"},
         "support_augmentation": None,
         "year_range": {"start": 2026, "end": 2027},
         "years": [2026, 2027],
@@ -67,7 +67,13 @@ def _write_snapshot(snapshot_path: Path) -> None:
             "resolved_file_sha256": "abc123",
             "resolved_path": "/cache/blob/abc123",
             "resolved_size": 42,
-        }
+        },
+        "policyengine_us": {
+            "version": "1.691.10",
+            "direct_url": {
+                "vcs_info": {"commit_id": "4fd79e6608bc2dac3a7fde0be37191cb4870bd85"}
+            },
+        },
     }
     (snapshot_path / "2026.h5.metadata.json").write_text(
         json.dumps(metadata),
@@ -86,13 +92,17 @@ def test_snapshot_summary_recovers_base_snapshot_from_metadata(tmp_path):
         "hf://policyengine/policyengine-us-data/enhanced_cps_2024.h5"
     )
     assert summary["base_dataset_snapshot"]["resolved_file_sha256"] == "abc123"
+    assert summary["policyengine_us_versions"] == ["1.691.10"]
+    assert summary["policyengine_us_git_shas"] == [
+        "4fd79e6608bc2dac3a7fde0be37191cb4870bd85"
+    ]
     assert summary["file_inventory_count"] == 4
     assert summary["file_inventory"]["2026.h5"]["sha256"] == file_sha256(
         snapshot_path / "2026.h5"
     )
-    assert summary["file_inventory"]["calibration_manifest.json"]["sha256"] == file_sha256(
-        snapshot_path / "calibration_manifest.json"
-    )
+    assert summary["file_inventory"]["calibration_manifest.json"][
+        "sha256"
+    ] == file_sha256(snapshot_path / "calibration_manifest.json")
 
 
 def test_resolved_environment_contract_uses_snapshot_defaults(tmp_path):
@@ -109,7 +119,37 @@ def test_resolved_environment_contract_uses_snapshot_defaults(tmp_path):
     assert contract["CRFB_REQUIRED_CALIBRATION_PROFILE"] == "ss-payroll-tob"
     assert contract["CRFB_MIN_CALIBRATION_QUALITY"] == "exact"
     assert contract["CRFB_REQUIRED_TARGET_SOURCE"] == "trustees_2025_current_law"
-    assert contract["CRFB_REQUIRED_TAX_ASSUMPTION"] == "trustees-core-thresholds-v1"
+    assert (
+        contract["CRFB_REQUIRED_TAX_ASSUMPTION"] == "trustees-2025-core-thresholds-v1"
+    )
+    assert contract["CRFB_REQUIRED_POLICYENGINE_US_VERSION"] is None
+    assert contract["CRFB_REQUIRED_POLICYENGINE_US_GIT_SHA"] == (
+        "4fd79e6608bc2dac3a7fde0be37191cb4870bd85"
+    )
+
+
+def test_resolved_environment_contract_managed_mode_clears_raw_h5_paths(tmp_path):
+    policyengine_py = tmp_path / "policyengine.py"
+    policyengine_py.mkdir()
+
+    contract = resolved_environment_contract(
+        policyengine_us_path=None,
+        projected_datasets_path=None,
+        snapshot_path=None,
+        environ={"CRFB_POLICYENGINE_PY_MANAGED_DATA_CACHE": "/tmp/managed-cache"},
+        use_policyengine_py_managed_datasets=True,
+        policyengine_py_path=policyengine_py,
+    )
+
+    assert contract["CRFB_USE_POLICYENGINE_PY_MANAGED_DATASETS"] == "1"
+    assert contract["CRFB_POLICYENGINE_PY_PATH"] == str(policyengine_py)
+    assert contract["CRFB_POLICYENGINE_PY_MANAGED_DATA_CACHE"] == "/tmp/managed-cache"
+    assert contract["CRFB_PROJECTED_DATASETS_PATH"] is None
+    assert contract["CRFB_DATASET_TEMPLATE"] is None
+    assert contract["CRFB_POLICYENGINE_US_PATH"] is None
+    assert contract["CRFB_REQUIRED_TAX_ASSUMPTION"] == (
+        "trustees-2025-core-thresholds-v1"
+    )
 
 
 def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path):
@@ -156,8 +196,8 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
 
     bundle = create_repro_bundle(
         repo_root=repo_root,
-        output_path=repo_root / "results" / "demo_dynamic.csv",
-        scoring="dynamic",
+        output_path=repo_root / "results" / "demo_conventional.csv",
+        scoring="conventional",
         reforms="option1,option2",
         years="2026-2027",
         modal_target="submit_cells",
@@ -173,7 +213,10 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
     assert (bundle.bundle_dir / "uv.lock").exists()
     assert (bundle.bundle_dir / "reproducibility.lock.toml").exists()
     assert (bundle.bundle_dir / "calibration_manifest.json").exists()
-    assert manifest["snapshot"]["base_dataset_snapshot"]["resolved_file_sha256"] == "abc123"
+    assert (
+        manifest["snapshot"]["base_dataset_snapshot"]["resolved_file_sha256"]
+        == "abc123"
+    )
     assert manifest["repos"]["crfb_tob_impacts"]["git_dirty"] is True
     assert manifest["run"]["cells_file"] == "missing_cells.csv"
     assert (bundle.bundle_dir / manifest["run"]["cells_file"]).exists()
@@ -189,3 +232,43 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
         bundle.bundle_dir
         / manifest["dependency_manifests"]["policyengine_us_data"]["uv.lock"]
     ).exists()
+
+
+def test_create_repro_bundle_managed_mode_records_policyengine_py_only(tmp_path):
+    repo_root = tmp_path / "crfb-tob-impacts"
+    repo_root.mkdir()
+    (repo_root / "pyproject.toml").write_text("[project]\nname='x'\n", encoding="utf-8")
+    (repo_root / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    _init_git_repo(repo_root)
+    _commit_all(repo_root, "init")
+
+    policyengine_py = tmp_path / "policyengine.py"
+    policyengine_py.mkdir()
+    (policyengine_py / "pyproject.toml").write_text(
+        "[project]\nname='policyengine'\n",
+        encoding="utf-8",
+    )
+    _init_git_repo(policyengine_py)
+    _commit_all(policyengine_py, "init")
+
+    bundle = create_repro_bundle(
+        repo_root=repo_root,
+        output_path=repo_root / "results" / "managed.csv",
+        scoring="static",
+        reforms="option1",
+        years="2026",
+        modal_target="submit_cells",
+        policyengine_us_path=None,
+        projected_datasets_path=None,
+        snapshot_path=None,
+        use_policyengine_py_managed_datasets=True,
+        policyengine_py_path=policyengine_py,
+        bundle_root=repo_root / "results" / "repro_bundles",
+    )
+
+    manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
+    assert manifest["run"]["policyengine_py_managed_datasets"] is True
+    assert manifest["snapshot"]["mode"] == "policyengine_py_managed"
+    assert set(manifest["repos"]) == {"crfb_tob_impacts", "policyengine_py"}
+    assert "policyengine_us" not in manifest["dependency_manifests"]
+    assert manifest["environment_contract"]["CRFB_PROJECTED_DATASETS_PATH"] is None

@@ -1,0 +1,78 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "validate-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python Guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: |
+          uv venv --python 3.13
+          uv pip install --no-sources -e ".[dev]" modal google-cloud-storage
+
+      - name: Ruff
+        run: |
+          .venv/bin/ruff check \
+            scripts/build_release_package.py \
+            src/reform_full_h5_output_manifest.py \
+            tests/test_release_artifacts.py \
+            tests/test_release_package.py
+
+      - name: Pytest critical guards
+        run: |
+          .venv/bin/pytest -q \
+            tests/test_release_artifacts.py \
+            tests/test_dashboard_baseline_assumptions.py \
+            tests/test_release_package.py
+
+  dashboard:
+    name: Dashboard Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Build
+        run: bun run build

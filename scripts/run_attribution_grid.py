@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--scoring",
         default="static",
-        choices=["static", "dynamic"],
+        choices=["static", "conventional"],
         help="Scoring mode to run.",
     )
     parser.add_argument(

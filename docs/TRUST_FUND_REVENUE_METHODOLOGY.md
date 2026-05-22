@@ -88,9 +88,9 @@ The average rate approach underestimates by $180 (5%) in this example.
 
 This uses the branching + neutralization approach described above.
 
-### Dynamic Calculation (In Progress)
+### Conventional Calculation (In Progress)
 
-The dynamic calculation with labor supply responses faces technical challenges:
+The conventional calculation with labor supply responses faces technical challenges:
 - Recursion errors when trying to preserve behavioral responses in the counterfactual
 - Issue: labor_supply_behavioral_response creates circular dependencies
 - Needs further investigation of how to properly override employment income while neutralizing LSR
@@ -154,6 +154,6 @@ class tob_revenue_social_security(Variable):
 ## Next Steps
 
 1. ✅ Static calculation working ($110.32B for Option 2)
-2. ⏳ Resolve dynamic calculation recursion issues
+2. ⏳ Resolve conventional calculation recursion issues
 3. 📝 Submit PR to policyengine-us to replace PR #6747's approach
 4. 🔧 May need to fix labor supply response architecture to avoid circular dependencies
