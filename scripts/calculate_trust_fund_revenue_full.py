@@ -1,6 +1,6 @@
 """
 Calculate trust fund revenue from SS benefit taxation for Option 2.
-Includes both static and dynamic (with labor supply responses) calculations.
+Includes both static and conventional (with labor supply responses) calculations.
 """
 
 import sys
@@ -9,7 +9,7 @@ sys.path.insert(0, "src")
 
 from trust_fund_revenue import (
     calculate_trust_fund_revenue,
-    calculate_trust_fund_revenue_dynamic,
+    calculate_trust_fund_revenue_conventional,
 )
 from reforms import get_option2_reform, tax_85_percent_ss
 from policyengine_core.reforms import Reform
@@ -67,27 +67,27 @@ print("-" * 80)
 revenue_static = calculate_trust_fund_revenue(reform=get_option2_reform(), year=2026)
 print(f"Trust fund revenue (static): ${revenue_static / 1e9:.2f}B")
 
-# Dynamic calculation
-print("\n2. DYNAMIC CALCULATION (With CBO labor supply elasticities)")
+# Conventional calculation
+print("\n2. CONVENTIONAL CALCULATION (With CBO labor supply elasticities)")
 print("-" * 80)
 option2_dict = tax_85_percent_ss()
-option2_dynamic_dict = {**option2_dict, **CBO_LABOR_PARAMS}
-option2_dynamic_reform = Reform.from_dict(option2_dynamic_dict, country_id="us")
+option2_conventional_dict = {**option2_dict, **CBO_LABOR_PARAMS}
+option2_conventional_reform = Reform.from_dict(option2_conventional_dict, country_id="us")
 
-revenue_dynamic = calculate_trust_fund_revenue_dynamic(
-    reform_with_labor_responses=option2_dynamic_reform, year=2026
+revenue_conventional = calculate_trust_fund_revenue_conventional(
+    reform_with_labor_responses=option2_conventional_reform, year=2026
 )
-print(f"Trust fund revenue (dynamic): ${revenue_dynamic / 1e9:.2f}B")
+print(f"Trust fund revenue (conventional): ${revenue_conventional / 1e9:.2f}B")
 
 # Comparison
 print("\n" + "=" * 80)
 print("COMPARISON")
 print("=" * 80)
-difference = revenue_dynamic - revenue_static
+difference = revenue_conventional - revenue_static
 pct_change = (difference / revenue_static) * 100
 
 print(f"\nStatic:  ${revenue_static / 1e9:.2f}B")
-print(f"Dynamic: ${revenue_dynamic / 1e9:.2f}B")
+print(f"Conventional: ${revenue_conventional / 1e9:.2f}B")
 print(f"\nDifference: ${difference / 1e9:.2f}B ({pct_change:+.1f}%)")
 
 if difference > 0:

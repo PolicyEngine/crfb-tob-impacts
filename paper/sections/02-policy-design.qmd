@@ -1,9 +1,8 @@
 # Policy design
 
 The current reform menu spans three broad families: direct benefit-taxation
-changes, senior-relief redesigns, and employer-payroll-tax swaps. The standard
-series shares a common current-law baseline; the two special-case scenarios do
-not.
+changes, senior-relief redesigns, and employer-payroll-tax swaps. The release
+series shares one common current-law baseline.
 
 ## Standard options `1-12`
 
@@ -36,14 +35,20 @@ preserving the current-law trust-fund accounting framework.
 This family matters because the baseline itself changes sharply once the bonus
 senior deduction expires after `2028`, and because a flat credit is more
 progressive than a deduction whose value rises with marginal tax rate.
+In the long-run estimates, the option11 credit phase-out thresholds are treated
+as fixed nominal parameters of the modeled policy. Combined with the Trustees
+wage-indexing treatment for federal deduction thresholds after `2034`, this
+means the remaining tax units with positive gross option11 credit in late years
+can have no pre-credit income-tax liability; the nonrefundable cap then makes
+the gross credit unavailable. This is why the far-horizon option11 revenue
+effect can converge to the option2 effect even though the gross credit variable
+is positive.
 
 ### Employer-payroll-tax swaps
 
 - **`option5`**: eliminate Social Security benefit taxation and instead treat
   employer payroll-tax contributions as taxable compensation.
-- **`option6`**: phase in the employer-contribution inclusion while phasing out
-  benefit taxation over time.
-- **`option12`**: an extended Roth-style swap that taxes employer payroll
+- **`option12`**: a phased Roth-style swap that taxes employer payroll
   contributions immediately but phases out the OASDI share of benefit taxation
   first and the HI share later.
 
@@ -52,31 +57,7 @@ because they change the tax base itself, shifting burden from retirees toward
 workers while preserving trust-fund accounting through explicit OASDI/HI
 allocation rules.
 
-## Special-case scenarios
-
-### `option13`: balanced-fix baseline
-
-`option13` is a stylized solvency baseline rather than a standard reform scored
-against current law. Beginning in `2035`, it combines:
-
-- a proportional Social Security benefit reduction
-- a Social Security payroll-tax increase
-- a Medicare payroll-tax increase
-
-The purpose is not to model a single enacted bill, but to define a balanced-fix
-baseline that approximately closes the long-run OASDI and HI gaps using a
-simple benefit-and-tax split.
-
-### `option14_stacked`
-
-`option14_stacked` applies a structural reform on top of the `option13`
-balanced-fix baseline. Its baseline revenue and trust-fund context therefore
-differ intentionally from the standard series. In practical terms:
-
-- `option13` reform revenue becomes the baseline revenue for `option14_stacked`
-- `option12`-style structural deltas provide the stacked reform logic
-- `2026-2034` remain placeholders because the balanced-fix baseline does not
-  begin before `2035`
-
-That difference in baseline lineage is central to interpretation and must stay
-explicit in both the paper and the dashboard.
+The raw artifact still retains `option6`, a shorter phase-in variant, for
+lineage and sensitivity checks. It is not shown as a separate CRFB-facing
+Roth option because the publication menu uses the longer `option12` design as
+the phased Roth option.

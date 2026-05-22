@@ -4,12 +4,9 @@ This page describes the live modeling contract for the current CRFB rerun.
 
 ## Scope
 
-The active package has three parts:
-
-- standard reforms `option1` through `option12`
-- the `option13` balanced-fix baseline that starts in `2035`
-- `option14_stacked`, which layers the structural reform on top of the
-  `option13` balanced-fix baseline
+The active package contains the standard reforms `option1` through `option12`.
+Legacy non-contract variants are not part of the current dashboard, release, or
+reform-modeling contract.
 
 The main delivery window is `2026-2100`.
 
@@ -19,15 +16,70 @@ For the current clean static rerun, the intended contract is:
 
 - target source: `trustees_2025_current_law`
 - calibration profile: `ss-payroll-tob`
-- tax assumption: `trustees-core-thresholds-v1`
+- tax assumption: `trustees-2025-core-thresholds-v1`
 - exact-calibration-only acceptance for delivered years
-- no donor-backed support augmentation in the production rebuild path
+- donor-backed composite support augmentation from `2075` onward, with exact
+  final calibration and late-year support gates
 - pinned local worktrees for both `policyengine-us` and `policyengine-us-data`
 - a run-level reproducibility bundle that records the exact code/data lineage,
   including dirty sibling-repo overrides when present
 
 That contract replaces the older mixed lineage that produced the legacy stitched
 standard file.
+
+## Trustees Tax-Threshold Assumption
+
+The named tax assumption `trustees-2025-core-thresholds-v1` operationalizes the
+Trustees/OACT long-run taxation-of-benefits assumption for microsimulation.
+SSA/OACT clarified by email to PolicyEngine on May 5, 2026 that the long-range
+assumption applies both to income-tax rate brackets and to federal income-tax
+thresholds such as standard deductions.
+
+Operationally, this means:
+
+- Social Security benefit-tax combined-income thresholds remain fixed in nominal
+  dollars.
+- Federal income-tax rate brackets and related federal income-tax thresholds
+  follow current-law C-CPI-U indexing for the first ten projection years, through
+  `2034`.
+- Beginning in `2035`, those federal income-tax brackets and thresholds rise
+  with average wages.
+
+The implemented core-threshold bundle covers ordinary income-tax brackets,
+standard deductions, aged/blind standard deduction additions, capital-gains
+thresholds, and AMT thresholds. This is a Trustees-lineage scoring assumption
+for the CRFB long-run TOB work, not default statutory current law.
+
+## Late-Year Support
+
+Starting in `2075`, the clean long-run path uses
+`donor-backed-composite-v1` support augmentation before the final entropy
+calibration. This addresses a far-horizon support problem: the original CPS
+records alone can force too much taxation-of-benefits weight onto a small set
+of households, even when aggregate calibration targets are technically
+feasible.
+
+The current sentinel recipe is:
+
+- fixed `2100` support supplement
+- top `120` synthetic target types
+- `20` real donor tax units per target
+- base-household prior scale `0.15`
+- support-solve tolerance `5%`
+- activation from `2075` onward
+
+The support supplement is donor-backed rather than free synthetic data. It maps
+synthetic late-year household targets to nearby real `2024` donor tax units,
+preserves entity structure, and retargets unstable tail components such as
+pension and dividend-like income. The support solve only determines feasible
+support and priors; the final delivered H5 still must exactly match the
+Trustees Social Security, taxable-payroll, OASDI TOB, and HI TOB targets.
+
+Publication gating therefore rejects approximate donor-augmented outputs but
+allows donor-backed support when the final calibration is exact, metadata is
+stamped, and late-year support gates pass. Those gates include separate
+taxation-of-benefits contributor checks documented in
+[late-year-support-gates.md](late-year-support-gates.md).
 
 ## Scenario Families
 
@@ -39,58 +91,32 @@ The important methodological point is that the current standard series is meant
 to come from exact yearly microdata plus direct reform rescoring, not from
 patching the old stitched CSVs in place.
 
-### `option13`
+## Static Versus Supplemental Labor-Supply Response
 
-`option13` is a special-case balanced-fix baseline beginning in `2035`.
+The released static series uses the cleaned Trustees baseline lineage and is
+the primary CRFB dashboard scoring surface. The supplemental labor-supply
+response series shares the same baseline levels before being published
+alongside the static release.
 
-Its construction is intentionally different from the standard options:
-
-- `2026-2034` are current-law placeholders because the balanced-fix baseline
-  does not start before `2035`
-- `2035-2099` come from the special-case balanced-fix raw outputs
-- the `2100` endpoint uses the corrected local rerun plus the HI Trustees
-  endpoint treatment documented in [data/README.md](../../data/README.md)
-
-### `option14_stacked`
-
-`option14_stacked` is built by chaining the structural reform on top of the
-`option13` balanced-fix baseline.
-
-Operationally, that means:
-
-- `option13` reform revenue becomes the baseline revenue for
-  `option14_stacked`
-- `option12` standard reform outputs provide the stacked structural deltas
-- `2026-2034` are again current-law placeholders because the stacked baseline
-  starts in `2035`
-
-## Static Versus Conventional
-
-The released static series uses the cleaned Trustees baseline lineage. The
-conventional series is the labor-supply-response counterpart and must share the
-same baseline levels before it can be published alongside the static release.
-
-For the conventional release, the intended differences from plain upstream
+For the labor-supply response release, the intended differences from plain upstream
 `policyengine-us` main are:
 
 - Trustees long-run uprating behavior
 - age-based labor-supply elasticities for behavioral-response scoring
 
-Conventional scoring should therefore be interpreted as an extension of the
-same baseline lineage, not as a separate legacy workflow.
+Labor-supply response scoring should therefore be interpreted as a
+partial-equilibrium estimate under PolicyEngine's elasticity assumptions, not
+as a separate legacy workflow or as an exact replica of JCT/CBO conventional
+practice.
 
 Operationally:
 
-- the current conventional artifact is quarantined pending a same-baseline
-  rerun
-- once cleared, the public conventional release should cover standard reforms
-  `option1` through `option12`
-- `option13` and `option14_stacked` remain static-only in the current release
-  because a balanced-fix conventional version would require a separate
-  iterative post-response solve rather than the standard conventional pipeline
-- the exact-missing-cell repair path is part of the live toolchain, so
-  conventional reruns do not require restarting a full panel when only a few
-  cells fail
+- the publication-facing dashboard defaults to static scoring and hides
+  labor-supply response estimates until they are generated from the current
+  full reform H5 contract
+- any future labor-supply response release must start from durable
+  `reform_full_h5/year=YYYY/reform=optionX/scenario.h5` artifacts; aggregate
+  CSVs and non-contract sample panels are not production inputs
 
 ## Reproducibility Boundary
 
@@ -129,8 +155,6 @@ repo tar archives with `scripts/freeze_repro_bundle.py`.
 
 ## What Still Lives Elsewhere
 
-- detailed balanced-fix gap-closing logic:
-  [data/README.md](../../data/README.md)
 - pinned dependency and environment notes:
   [REPRODUCIBILITY.md](../../REPRODUCIBILITY.md)
 - live audit trail and sentinel evidence:

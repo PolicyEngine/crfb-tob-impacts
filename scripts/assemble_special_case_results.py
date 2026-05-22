@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import shutil
 import sys
 from pathlib import Path
 
@@ -15,6 +14,7 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from runtime_config import dataset_path, load_dataset_metadata
+from tax_assumption_loader import DEFAULT_TAX_ASSUMPTION_FACTORY
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,6 +26,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--policy-start-year", type=int, default=2035)
+    parser.add_argument(
+        "--tax-assumption-factory",
+        default=DEFAULT_TAX_ASSUMPTION_FACTORY,
+    )
+    parser.add_argument("--tax-assumption-start-year", type=int, default=2035)
+    parser.add_argument("--tax-assumption-end-year", type=int, default=2100)
+    parser.add_argument("--option14-comparison-baseline", default="balanced_fix")
     return parser.parse_args()
 
 
@@ -33,12 +40,57 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def enrich_row(row: dict, *, year: int, run_id: str, policy_start_year: int) -> dict:
+def marker_value(row: dict, key: str) -> object | None:
+    value = row.get(key)
+    if value is None or pd.isna(value):
+        return None
+    return value
+
+
+def set_marker(row: dict, key: str, value: object) -> None:
+    existing = marker_value(row, key)
+    if existing is not None and str(existing).strip() != str(value):
+        raise ValueError(
+            f"Existing {key}={existing!r} conflicts with expected {value!r}"
+        )
+    row[key] = value
+
+
+def truthy(value: object) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes"}
+    if value is None or pd.isna(value):
+        return False
+    return bool(value)
+
+
+def enrich_row(
+    row: dict,
+    *,
+    year: int,
+    run_id: str,
+    policy_start_year: int,
+    tax_assumption_factory: str,
+    tax_assumption_start_year: int,
+    tax_assumption_end_year: int,
+    comparison_baseline: str,
+    stacked_reform: bool = False,
+) -> dict:
     dataset = Path(dataset_path(year))
     metadata_path = Path(f"{dataset}.metadata.json")
     metadata = load_dataset_metadata(dataset)
     row = dict(row)
-    row.setdefault("comparison_baseline", "current_law")
+    set_marker(row, "tax_assumption_factory", tax_assumption_factory)
+    set_marker(row, "tax_assumption_start_year", tax_assumption_start_year)
+    set_marker(row, "tax_assumption_end_year", tax_assumption_end_year)
+    set_marker(row, "comparison_baseline", comparison_baseline)
+    if stacked_reform:
+        existing = marker_value(row, "stacked_reform")
+        if existing is not None and not truthy(existing):
+            raise ValueError(
+                f"Existing stacked_reform={existing!r} conflicts with expected True"
+            )
+        row["stacked_reform"] = True
     row["special_case_run_id"] = run_id
     row["dataset_file"] = str(dataset)
     row["dataset_metadata_file"] = str(metadata_path)
@@ -60,6 +112,11 @@ def rewrite_with_provenance(
     year: int,
     run_id: str,
     policy_start_year: int,
+    tax_assumption_factory: str,
+    tax_assumption_start_year: int,
+    tax_assumption_end_year: int,
+    comparison_baseline: str,
+    stacked_reform: bool = False,
 ) -> None:
     row = pd.read_csv(source_csv).iloc[0].to_dict()
     enriched = enrich_row(
@@ -67,6 +124,11 @@ def rewrite_with_provenance(
         year=year,
         run_id=run_id,
         policy_start_year=policy_start_year,
+        tax_assumption_factory=tax_assumption_factory,
+        tax_assumption_start_year=tax_assumption_start_year,
+        tax_assumption_end_year=tax_assumption_end_year,
+        comparison_baseline=comparison_baseline,
+        stacked_reform=stacked_reform,
     )
     dest_csv.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame([enriched]).to_csv(dest_csv, index=False)
@@ -88,6 +150,10 @@ def main() -> None:
             year=year,
             run_id=args.run_id,
             policy_start_year=args.policy_start_year,
+            tax_assumption_factory=args.tax_assumption_factory,
+            tax_assumption_start_year=args.tax_assumption_start_year,
+            tax_assumption_end_year=args.tax_assumption_end_year,
+            comparison_baseline="current_law",
         )
         rewrite_with_provenance(
             args.source_option14_dir / f"{year}_static_results.csv",
@@ -95,16 +161,47 @@ def main() -> None:
             year=year,
             run_id=args.run_id,
             policy_start_year=args.policy_start_year,
+            tax_assumption_factory=args.tax_assumption_factory,
+            tax_assumption_start_year=args.tax_assumption_start_year,
+            tax_assumption_end_year=args.tax_assumption_end_year,
+            comparison_baseline=args.option14_comparison_baseline,
+            stacked_reform=True,
         )
         copied_years.append(year)
 
-    shutil.copy2(args.endpoint_option13, option13_out / "2100_static_results.csv")
-    shutil.copy2(args.endpoint_option14, option14_out / "2100_static_results.csv")
+    rewrite_with_provenance(
+        args.endpoint_option13,
+        option13_out / "2100_static_results.csv",
+        year=2100,
+        run_id=args.run_id,
+        policy_start_year=args.policy_start_year,
+        tax_assumption_factory=args.tax_assumption_factory,
+        tax_assumption_start_year=args.tax_assumption_start_year,
+        tax_assumption_end_year=args.tax_assumption_end_year,
+        comparison_baseline="current_law",
+    )
+    rewrite_with_provenance(
+        args.endpoint_option14,
+        option14_out / "2100_static_results.csv",
+        year=2100,
+        run_id=args.run_id,
+        policy_start_year=args.policy_start_year,
+        tax_assumption_factory=args.tax_assumption_factory,
+        tax_assumption_start_year=args.tax_assumption_start_year,
+        tax_assumption_end_year=args.tax_assumption_end_year,
+        comparison_baseline=args.option14_comparison_baseline,
+        stacked_reform=True,
+    )
     copied_years.append(2100)
 
     manifest = {
         "run_id": args.run_id,
         "policy_start_year": args.policy_start_year,
+        "tax_assumption_factory": args.tax_assumption_factory,
+        "tax_assumption_start_year": args.tax_assumption_start_year,
+        "tax_assumption_end_year": args.tax_assumption_end_year,
+        "option14_comparison_baseline": args.option14_comparison_baseline,
+        "option14_stacked_reform": True,
         "option13_dir": str(option13_out),
         "option14_dir": str(option14_out),
         "source_option13_dir": str(args.source_option13_dir),

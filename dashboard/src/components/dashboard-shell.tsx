@@ -14,11 +14,10 @@ import {
 } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { useEffect, useState } from "react";
-import { logos, type NavItemConfig } from "@policyengine/ui-kit";
 
+import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
-import { Option13Tab } from "@/components/option13-tab";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
   calculateTotals,
@@ -33,31 +32,15 @@ import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { sitePath } from "@/lib/site-path";
 import { useElementSize } from "@/lib/use-element-size";
 
-type DashboardTab = "reforms" | "option13";
+type DashboardTab = "reforms" | "baseline";
 type ViewMode = "10year" | "75year";
+type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
-const STANDARD_REFORMS = REFORMS.filter((reform) => reform.id !== "option13");
+const STANDARD_REFORMS = REFORMS.filter((reform) =>
+  /^option(?:[1-9]|1[0-2])$/.test(reform.id),
+);
 
-const POLICYENGINE_BASE = "https://policyengine.org";
 const PAPER_HREF = sitePath("/paper/");
-
-// Mirror the nav from policyengine-app-v2 so standalone visitors get the
-// same site chrome as the embedded view at /us/taxation-of-benefits-reforms.
-const PE_NAV_ITEMS: NavItemConfig[] = [
-  { label: "Research", href: `${POLICYENGINE_BASE}/us/research` },
-  { label: "Model", href: `${POLICYENGINE_BASE}/us/model` },
-  { label: "API", href: `${POLICYENGINE_BASE}/us/api` },
-  {
-    label: "About",
-    href: `${POLICYENGINE_BASE}/us/about`,
-    children: [
-      { label: "Team", href: `${POLICYENGINE_BASE}/us/team` },
-      { label: "Supporters", href: `${POLICYENGINE_BASE}/us/supporters` },
-      { label: "Citations", href: `${POLICYENGINE_BASE}/us/citations` },
-    ],
-  },
-  { label: "Donate", href: `${POLICYENGINE_BASE}/us/donate` },
-];
 
 const BENEFIT_RULE_IDS = [
   "option1",
@@ -70,7 +53,7 @@ const BENEFIT_RULE_IDS = [
   "option10",
   "option11",
 ];
-const STRUCTURAL_IDS = ["option5", "option6", "option12", "option14_stacked"];
+const STRUCTURAL_IDS = ["option5", "option12"];
 
 const LONG_RUN_X_AXIS_TICKS = [
   2026,
@@ -80,6 +63,11 @@ const LONG_RUN_X_AXIS_TICKS = [
 function formatBillions(value: number) {
   const rounded = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(1);
   return `${value >= 0 ? "$" : "-$"}${Math.abs(Number(rounded)).toLocaleString()}B`;
+}
+
+function formatAxisDollars(value: number) {
+  const rounded = Math.round(Math.abs(value)).toLocaleString();
+  return `${value >= 0 ? "$" : "-$"}${rounded}`;
 }
 
 function formatPercent(value: number) {
@@ -107,28 +95,38 @@ function formatTooltipEntry(
     ? formatValue(numericValue, displayUnit)
     : "n/a";
 
-  const label = name === "total" ? "Total" : name === "oasdi" ? "OASDI" : "HI";
+  const label =
+    name === "total"
+      ? "Total"
+      : name === "oasdi"
+        ? "OASDI"
+        : name === "hi"
+          ? "HI"
+          : "General fund";
   return [formattedValue, label];
 }
 
 function getSeriesValue(
   row: YearlyImpact,
   displayUnit: DisplayUnit,
-  key: "total" | "oasdi" | "hi",
+  key: SeriesKey,
 ) {
   if (displayUnit === "dollars") {
     if (key === "total") return row.revenueImpact;
     if (key === "oasdi") return row.tobOasdiImpact;
-    return row.tobMedicareHiImpact;
+    if (key === "hi") return row.tobMedicareHiImpact;
+    return row.generalFundImpact;
   }
   if (displayUnit === "pctPayroll") {
     if (key === "total") return row.pctOfOasdiPayroll;
     if (key === "oasdi") return row.oasdiPctOfPayroll;
-    return row.hiPctOfPayroll;
+    if (key === "hi") return row.hiPctOfPayroll;
+    return row.generalFundPctOfPayroll;
   }
   if (key === "total") return row.pctOfGdp;
   if (key === "oasdi") return row.oasdiPctOfGdp;
-  return row.hiPctOfGdp;
+  if (key === "hi") return row.hiPctOfGdp;
+  return row.generalFundPctOfGdp;
 }
 
 function MetricTile({
@@ -185,12 +183,14 @@ function SeriesChart({
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
+  const showGeneralFund = data.some((row) => Math.abs(row.generalFundImpact) > 0.005);
 
   const chartData = data.map((row) => ({
     year: row.year,
     total: getSeriesValue(row, displayUnit, "total"),
     oasdi: getSeriesValue(row, displayUnit, "oasdi"),
     hi: getSeriesValue(row, displayUnit, "hi"),
+    generalFund: getSeriesValue(row, displayUnit, "generalFund"),
   }));
 
   const unitLabel =
@@ -212,6 +212,7 @@ function SeriesChart({
         <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
         <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
         <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
+        {showGeneralFund ? <LegendSwatch color="#2563eb" label="General fund" /> : null}
       </div>
 
       <div ref={ref} className="mt-4 h-[22rem]">
@@ -253,7 +254,7 @@ function SeriesChart({
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) =>
-                displayUnit === "dollars" ? `$${Math.round(value)}` : `${value.toFixed(1)}%`
+                displayUnit === "dollars" ? formatAxisDollars(value) : `${value.toFixed(1)}%`
               }
             />
             <ReferenceLine
@@ -284,6 +285,16 @@ function SeriesChart({
               fill="url(#hiFill)"
               strokeWidth={2}
             />
+            {showGeneralFund ? (
+              <Line
+                type="monotone"
+                dataKey="generalFund"
+                stroke="#2563eb"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+            ) : null}
             <Line
               type="monotone"
               dataKey="total"
@@ -403,16 +414,13 @@ function SidebarGroup({
 export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("reforms");
   const [selectedReform, setSelectedReform] = useState("option1");
-  const [scoringType] = useState<ScoringType>("static");
+  const [scoringType, setScoringType] = useState<ScoringType>("static");
   const [allocationMode, setAllocationMode] = useState<AllocationMode>("baselineShares");
-  const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("dollars");
-  const [viewMode, setViewMode] = useState<ViewMode>("10year");
+  const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("pctPayroll");
+  const [viewMode, setViewMode] = useState<ViewMode>("75year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const isEmbedded =
-    typeof window !== "undefined" && window.self !== window.top;
 
   useEffect(() => {
     let active = true;
@@ -449,29 +457,47 @@ export function DashboardShell() {
     setDisplayUnit(next === "10year" ? "dollars" : "pctPayroll");
   }
 
+  const effectiveReformId = selectedReform;
   const reform = STANDARD_REFORMS.find(
-    (candidate) => candidate.id === selectedReform,
+    (candidate) => candidate.id === effectiveReformId,
   ) as ReformMeta;
-  const selectedData = data[selectedReform] ?? [];
+  const selectedData = data[effectiveReformId] ?? [];
   const visibleData =
     viewMode === "10year"
       ? selectedData.filter((row) => row.year >= 2026 && row.year <= 2035)
       : selectedData;
   const totals = calculateTotals(selectedData);
-  const spotlight = spotlightRows(selectedData);
-  const showAllocationToggle = ALLOCATION_ELIGIBLE_OPTIONS.includes(selectedReform);
-  const estimates = EXTERNAL_ESTIMATES[selectedReform] ?? [];
+  const spotlight = spotlightRows(selectedData, viewMode);
+  const showGeneralFundResidual = selectedData.some(
+    (row) => Math.abs(row.generalFundImpact) > 0.005,
+  );
+  const showAllocationToggle = ALLOCATION_ELIGIBLE_OPTIONS.includes(effectiveReformId);
+  const isStaticOnlyReform = false;
+  const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
   const baseline2026 = selectedData.find((row) => row.year === 2026);
-  const mobileViewValue = activeTab === "option13" ? "option13" : selectedReform;
+  const mobileViewValue =
+    activeTab === "baseline"
+        ? "baseline"
+        : selectedReform;
+
+  function handleReformSelect(nextReform: string) {
+    setActiveTab("reforms");
+    setSelectedReform(nextReform);
+  }
 
   function handleMobileViewChange(nextValue: string) {
-    if (nextValue === "option13") {
-      setActiveTab("option13");
+    if (nextValue === "baseline") {
+      setActiveTab("baseline");
       return;
     }
 
-    setActiveTab("reforms");
-    setSelectedReform(nextValue);
+    handleReformSelect(nextValue);
+  }
+
+  function handleScoringTypeChange(next: ScoringType) {
+    setLoading(true);
+    setError(null);
+    setScoringType(next);
   }
 
   function exportCsv() {
@@ -482,6 +508,7 @@ export function DashboardShell() {
       "Revenue Impact ($B)",
       "OASDI Impact ($B)",
       "HI Impact ($B)",
+      "General Fund Impact ($B)",
       "Total TOB Impact ($B)",
     ];
     const rows = selectedData.map((row) => [
@@ -490,6 +517,7 @@ export function DashboardShell() {
       row.revenueImpact.toFixed(2),
       row.tobOasdiImpact.toFixed(2),
       row.tobMedicareHiImpact.toFixed(2),
+      row.generalFundImpact.toFixed(2),
       row.tobTotalImpact.toFixed(2),
     ]);
     const content = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -497,7 +525,7 @@ export function DashboardShell() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${selectedReform}_impact_data.csv`;
+    link.download = `${effectiveReformId}_${scoringType}_impact_data.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -506,9 +534,6 @@ export function DashboardShell() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--pe-color-text-primary)]">
-      {/* Site header is rendered by PolicyEngineShell in app/layout.tsx —
-          no need to render Header here. */}
-
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -527,10 +552,7 @@ export function DashboardShell() {
                       option.id === selectedReform && activeTab === "reforms"
                     }
                     label={option.shortName}
-                    onClick={() => {
-                      setActiveTab("reforms");
-                      setSelectedReform(option.id);
-                    }}
+                    onClick={() => handleReformSelect(option.id)}
                   />
                 ),
               )}
@@ -545,10 +567,7 @@ export function DashboardShell() {
                       option.id === selectedReform && activeTab === "reforms"
                     }
                     label={option.shortName}
-                    onClick={() => {
-                      setActiveTab("reforms");
-                      setSelectedReform(option.id);
-                    }}
+                    onClick={() => handleReformSelect(option.id)}
                   />
                 ),
               )}
@@ -556,9 +575,9 @@ export function DashboardShell() {
 
             <SidebarGroup title="Context">
               <SidebarNavItem
-                active={activeTab === "option13"}
-                label="Balanced Fix baseline"
-                onClick={() => setActiveTab("option13")}
+                active={activeTab === "baseline"}
+                label="Baseline model"
+                onClick={() => setActiveTab("baseline")}
               />
               <a
                 href={PAPER_HREF}
@@ -580,16 +599,16 @@ export function DashboardShell() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-[44px]">
-                  {activeTab === "option13"
-                    ? "Balanced Fix baseline"
-                    : "Social Security taxation reform"}
+                  {activeTab === "baseline"
+                    ? "Baseline model and assumptions"
+                      : "Social Security taxation reform"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
-                  {activeTab === "option13" ? (
+                  {activeTab === "baseline" ? (
                     <>
-                      A solvency baseline beginning in 2035 that combines
-                      proportional benefit reductions with payroll-tax increases.
-                      Context for interpreting the standard reform options.
+                      Microsimulation baseline outputs, Trustees-following
+                      assumptions, calibration targets, and indexed tax
+                      parameters used by the long-run model.
                     </>
                   ) : (
                     <>
@@ -659,13 +678,13 @@ export function DashboardShell() {
                 )}
               </optgroup>
               <optgroup label="Context">
-                <option value="option13">Balanced Fix baseline</option>
+                <option value="baseline">Baseline model</option>
               </optgroup>
             </select>
           </section>
 
-          {activeTab === "option13" ? (
-            <Option13Tab />
+          {activeTab === "baseline" ? (
+            <BaselineAssumptionsSection />
           ) : loading ? (
             <section className="flex min-h-[24rem] items-center justify-center rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
               <div className="flex items-center gap-3 text-[var(--pe-color-text-secondary)]">
@@ -701,7 +720,9 @@ export function DashboardShell() {
                     </p>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
-                    Static scoring
+                    {scoringType === "behavioral"
+                      ? "Labor-supply response"
+                      : "Static scoring"}
                   </span>
                 </div>
               </section>
@@ -710,9 +731,21 @@ export function DashboardShell() {
               <section className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <div className="flex items-center">
                   <ControlLabel>Scoring</ControlLabel>
-                  <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
-                    Static only
-                  </span>
+                  {isStaticOnlyReform ? (
+                    <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
+                      Static only
+                    </span>
+                  ) : (
+                    <Segment
+                      label="Scoring"
+                      value={scoringType}
+                      onChange={handleScoringTypeChange}
+                      options={[
+                        { label: "Static", value: "static" },
+                        { label: "Labor response", value: "behavioral" },
+                      ]}
+                    />
+                  )}
                 </div>
                 <div className="flex items-center">
                   <ControlLabel>Unit</ControlLabel>
@@ -747,8 +780,10 @@ export function DashboardShell() {
                       value={allocationMode}
                       onChange={handleAllocationModeChange}
                       options={[
-                        { label: "Current law", value: "currentLaw" },
                         { label: "Baseline shares", value: "baselineShares" },
+                        { label: "Current law", value: "currentLaw" },
+                        { label: "All OASDI", value: "allOasdi" },
+                        { label: "All HI", value: "allHi" },
                       ]}
                     />
                   </div>
@@ -756,21 +791,7 @@ export function DashboardShell() {
               </section>
 
               {/* Metrics */}
-              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <MetricTile
-                  label="10-year effect"
-                  value={formatValue(
-                    displayUnit === "dollars"
-                      ? totals.tenYear
-                      : displayUnit === "pctPayroll"
-                        ? totals.tenYearPctPayroll
-                        : totals.tenYearPctGdp,
-                    displayUnit,
-                  )}
-                  tone={totals.tenYear >= 0 ? "positive" : "negative"}
-                  caption="2026–2035 cumulative"
-                  accent
-                />
+              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <MetricTile
                   label="75-year effect"
                   value={formatValue(
@@ -786,20 +807,24 @@ export function DashboardShell() {
                   accent
                 />
                 <MetricTile
+                  label="10-year effect"
+                  value={formatValue(
+                    displayUnit === "dollars"
+                      ? totals.tenYear
+                      : displayUnit === "pctPayroll"
+                        ? totals.tenYearPctPayroll
+                        : totals.tenYearPctGdp,
+                    displayUnit,
+                  )}
+                  tone={totals.tenYear >= 0 ? "positive" : "negative"}
+                  caption="2026–2035 cumulative"
+                />
+                <MetricTile
                   label="2026 baseline TOB"
                   value={
                     baseline2026 ? formatBillions(baseline2026.baselineTobTotal) : "n/a"
                   }
                   caption="Current-law baseline"
-                />
-                <MetricTile
-                  label="OASDI / HI split"
-                  value={
-                    baseline2026 && baseline2026.baselineTobTotal > 0
-                      ? `${Math.round((baseline2026.baselineTobOasdi / baseline2026.baselineTobTotal) * 100)} / ${Math.round((baseline2026.baselineTobMedicareHi / baseline2026.baselineTobTotal) * 100)}`
-                      : "n/a"
-                  }
-                  caption="2026 baseline share"
                 />
               </section>
 
@@ -817,6 +842,7 @@ export function DashboardShell() {
                       Spotlight years
                     </h4>
                   </div>
+                  <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead className="text-[var(--pe-color-text-secondary)]">
                       <tr className="border-b border-[var(--pe-color-border-light)]">
@@ -832,6 +858,11 @@ export function DashboardShell() {
                         <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
                           HI
                         </th>
+                        {showGeneralFundResidual ? (
+                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                            General fund
+                          </th>
+                        ) : null}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--pe-color-border-light)]">
@@ -858,10 +889,19 @@ export function DashboardShell() {
                               displayUnit,
                             )}
                           </td>
+                          {showGeneralFundResidual ? (
+                            <td className="px-5 py-2.5 text-right tabular-nums text-[#2563eb]">
+                              {formatValue(
+                                getSeriesValue(row, displayUnit, "generalFund"),
+                                displayUnit,
+                              )}
+                            </td>
+                          ) : null}
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  </div>
 
                   {estimates.length > 0 && (
                     <div className="border-t border-[var(--pe-color-border-light)] bg-[var(--pe-color-bg-secondary)] px-5 py-3">
@@ -896,8 +936,9 @@ export function DashboardShell() {
 
               {/* Detailed external comparison table (if present) */}
               <ComparisonTable
-                reformId={selectedReform}
+                reformId={effectiveReformId}
                 policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
+                scoringType={scoringType}
               />
 
               <MethodologySection />

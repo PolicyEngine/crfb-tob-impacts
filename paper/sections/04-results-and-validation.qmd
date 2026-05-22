@@ -14,30 +14,33 @@ The internal validation framework therefore tests:
 - metadata conformance to the intended Trustees contract
 - exact-calibration coverage for delivered years
 - representative sentinel years across the horizon
-- special-case consistency for `option13` and `option14_stacked`
 - absence of known legacy anomalies in rebuilt standard outputs
 
 ### Sentinel evidence
 
 {{< include exhibits/validation-sentinels.md >}}
 
-As of the current rebuild state, the manuscript should distinguish between two
-validation tiers:
+The current late-year support validation separately checks the projected H5
+datasets before reform results are treated as publishable. Under the
+donor-backed-composite recipe, the `2075` and `2100` sentinel H5s both clear
+the exact-calibration and support-gate contract. The `2075` H5 has OASDI
+taxation-of-benefits contributor effective sample size `83.0`, HI
+taxation-of-benefits contributor effective sample size `59.0`, and max
+single-contributor shares of `8.7%` and `11.3%`. The `2100` H5 has OASDI and
+HI contributor effective sample sizes of `126.2` and `105.3`, with max
+single-contributor shares of `4.7%` and `5.4%`. In a local static reform smoke
+test, full repeal of benefit taxation reduced revenue by the baseline TOB
+amount in both years, and taxing all benefits increased TOB revenue with the
+expected sign in both years.
 
-- the standard static series (`option1` through `option12`), which has been
-  rebuilt from the clean exact Trustees contract and cleared the known
-  late-horizon anomaly checks
-- the standard conventional series (`option1` through `option12`), which is
-  quarantined pending a same-baseline rerun before it can be cited alongside
-  the static release
-- the special-case series (`option13` and `option14_stacked`), which has
-  now cleared both endpoint smoke validation and recovered full-panel rerun
-  checks on `2035-2100` for the static package
-
-The manuscript does not publish special-case conventional rows. Those scenarios
-would require a separate iterative post-response balanced-fix solve and were
-not part of the release contract for the current dashboard, spreadsheet, or
-paper.
+As of the May 22 full-H5 production run, the standard static selected panel
+(`option1` through `option12`) has complete durable reform H5s for `2026-2035`
+and every fifth year from `2040` through `2100`. Dashboard annual rows between
+long-run anchor years are display interpolations; the exact selected-year H5
+rows remain the cited microsimulation outputs. The standard labor-supply
+response series is excluded until it is generated from durable full reform H5s.
+Legacy special-case series are excluded from the current dashboard,
+spreadsheet, and paper release surface.
 
 ## External benchmark framework
 
@@ -71,7 +74,5 @@ files may contain placeholders; before release they should be overwritten by
 generated content from the same checked artifacts that feed the dashboard and
 comparison spreadsheet.
 
-For the special-case panel, that artifact contract also includes run recovery.
-The release package should only cite the special-case panel as final when the
-full `2035-2100` rerun has been recovered as year-level artifacts. That
-condition is satisfied for the current static release.
+The release package should only cite current-contract artifacts that can be
+traced to the full-H5 selected-panel manifest and dashboard metadata.

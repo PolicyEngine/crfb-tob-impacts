@@ -1,57 +1,48 @@
-The cleaned static release is now a unified Trustees-lineage package for all
-fourteen scenarios. The dashboard and comparison spreadsheet both draw from the
-same rebuilt static artifact set. Conventional behavioral results are
-quarantined pending a same-baseline rerun and are not summarized in these
-manuscript exhibits.
+The current release surface contains only the contract-standard reforms
+`option1` through `option12`. All rows come from the May 22 full-H5 selected
+panel or display interpolation between those exact selected-year H5 outputs.
+Legacy non-contract artifacts are excluded from the dashboard, paper exhibits,
+and release package.
 
 ## Ten-year static revenue impacts
 
 | Reform | 2026-2035 Revenue Impact ($B) |
 | --- | --- |
-| option1 | -1,974.2 |
-| option13 | -24.2 |
-| option7 | +75.0 |
-| option3 | +89.5 |
-| option4 | +184.5 |
-| option11 | +230.9 |
-| option14_stacked | +258.0 |
-| option2 | +357.1 |
-| option5 | +409.5 |
-| option9 | +529.0 |
-| option10 | +703.4 |
-| option8 | +880.0 |
-| option6 | +1,295.8 |
-| option12 | +2,197.2 |
+| option1 | -1,627.2 |
+| option3 | +52.1 |
+| option7 | +54.8 |
+| option4 | +103.6 |
+| option11 | +144.9 |
+| option2 | +208.4 |
+| option9 | +339.6 |
+| option10 | +472.0 |
+| option5 | +492.4 |
+| option8 | +605.7 |
+| option6 | +1,161.3 |
+| option12 | +1,959.7 |
 
 In the ten-year window, the largest revenue raisers are `option12`
-(+2,197.2 $B), `option6` (+1,295.8 $B), and `option8`
-(+880.0 $B). The largest revenue reduction is `option1` (-1,974.2 $B).
-The clean special-case baseline `option13` is nearly revenue-neutral in the
-first decade, while `option14_stacked` raises +258.0 $B over the same
-window.
+(+1,959.7 $B) and `option8` (+605.7 $B). The largest revenue
+reduction is `option1` (-1,627.2 $B).
 
 ## Terminal-year static impacts
 
 | Reform | 2100 Revenue Impact ($B) | 2100 TOB Impact ($B) |
 | --- | --- | --- |
-| option1 | -3,862.8 | -3,862.8 |
-| option13 | -682.9 | -682.9 |
-| option14_stacked | -432.5 | -5,016.0 |
-| option12 | -338.5 | -3,862.8 |
-| option5 | -338.5 | -3,862.8 |
-| option6 | -338.5 | -3,862.8 |
+| option1 | -3,841.1 | -3,841.1 |
+| option12 | -1,379.1 | -3,841.1 |
+| option5 | -1,379.1 | -3,841.1 |
+| option6 | -1,379.1 | -3,841.1 |
 | option7 | +0.0 | +0.0 |
-| option4 | +168.3 | +168.3 |
-| option11 | +222.8 | +222.8 |
-| option2 | +222.8 | +222.8 |
-| option3 | +222.8 | +222.8 |
-| option9 | +520.8 | +520.8 |
-| option10 | +825.9 | +825.9 |
-| option8 | +1,138.0 | +1,138.0 |
+| option4 | +344.9 | +344.9 |
+| option11 | +364.6 | +364.6 |
+| option2 | +364.6 | +364.6 |
+| option3 | +364.6 | +364.6 |
+| option9 | +654.2 | +654.2 |
+| option10 | +956.3 | +956.3 |
+| option8 | +1,268.6 | +1,268.6 |
 
-At `2100`, the strongest positive revenue effects come from `option8`,
-`option10`, and `option9`, while the largest revenue reductions are
-`option14_stacked`, `option1`, and `option13`. Late in the horizon, `option7`
-goes exactly to zero and `option11` converges numerically toward `option2`,
-which is consistent with the fixed nominal credit phase-out in the current
-policy specification.
+At `2100`, the strongest positive revenue effects come from broader benefit
+taxation options such as `option8` and `option10`. The largest revenue
+reductions are repeal or structural swap options such as `option1`, `option5`,
+and `option12`.

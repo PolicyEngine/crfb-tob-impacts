@@ -72,13 +72,13 @@ def calculate_trust_fund_revenue(
     return float(trust_fund_revenue)
 
 
-def calculate_trust_fund_revenue_dynamic(
+def calculate_trust_fund_revenue_conventional(
     reform_with_labor_responses, year: int, dataset: Optional[str] = None
 ) -> float:
     """
     Calculate trust fund revenue with labor supply responses.
 
-    This uses the correct methodology for dynamic models:
+    This uses the correct methodology for conventional models:
     1. Run simulation with reform + labor supply elasticities
     2. Extract behaviorally-adjusted employment income
     3. Create branch, neutralize taxable_social_security, override incomes

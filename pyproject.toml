@@ -5,12 +5,17 @@ description = "Social Security taxation reform impact analysis"
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "policyengine-us>=1.398.0",
-    "policyengine-core>=3.19.0",
+    "policyengine[us]==4.5.1",
     "pandas>=2.0.0",
     "numpy>=2.1.0",
     "plotly>=5.0.0",
 ]
+
+[project.scripts]
+crfb-tob = "src.cli:main"
+
+[tool.uv.sources]
+policyengine = { path = "../_worktrees/policyengine-py-crfb-longrun-full", editable = true }
 
 [project.optional-dependencies]
 dev = [

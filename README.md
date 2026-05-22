@@ -2,7 +2,20 @@
 
 Social Security taxation reform analysis with PolicyEngine.
 
+## Reform Modeling Stop Sign
+
+Before any paid CRFB reform Modal launch, read
+[`REFORM_MODELING_BIBLE.md`](REFORM_MODELING_BIBLE.md). It points to the
+controlling command-center plan and progress ledger. The required production
+artifact is a full reform output H5 in durable storage for each `(year, reform)`
+cell.
+
 ## Quick Start
+
+The quick-start commands below are legacy local-development guidance. They are
+not the CRFB reform-modeling relaunch path and must not be used to launch paid
+Modal reform work. For reform modeling, use
+[`REFORM_MODELING_BIBLE.md`](REFORM_MODELING_BIBLE.md).
 
 ```bash
 # Setup environment with uv and Python 3.13
@@ -47,8 +60,10 @@ That writes the combined output to `.vercel-site/`.
 
 ## Data Generation
 
-The project uses PolicyEngine to simulate fiscal and household impacts:
+The legacy local project uses PolicyEngine to simulate fiscal and household
+impacts:
 
 - **scripts/generate_policy_impacts.py** - Data generation using PolicyEngine simulations
 - Output saved to `data/` and dashboard `public/` directories
-- **PolicyEngine-US Version**: 1.398.0
+- Historical pinned examples may cite older PolicyEngine-US versions. Do not
+  treat those examples as the active reform relaunch contract.

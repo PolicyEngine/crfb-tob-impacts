@@ -16,8 +16,7 @@ Expected files:
 - `results-overview.md`
 - `household-impacts.md`
 - `revenue-impacts.md`
-- `balanced-fix.md`
-- `conventional-results.md`
+- `labor-supply-response-status.md`
 
 During drafting these files may contain placeholders. Before publication they
 should be overwritten by generated content derived from the checked result
@@ -26,4 +25,3 @@ artifacts.
 Current generator:
 
 - `python ../scripts/generate_paper_static_exhibits.py`
-- `python ../scripts/generate_paper_conventional_exhibits.py`

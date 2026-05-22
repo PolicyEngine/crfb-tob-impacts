@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import hashlib
+import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pandas as pd
@@ -11,6 +15,11 @@ CURRENT_LAW_PATH = REPO_ROOT / "data" / "tob_current_law_tr2025.csv"
 OACT_OASDI_DELTA_PATH = REPO_ROOT / "data" / "oasdi_oact_20250805_nominal_delta.csv"
 SSA_ECONOMIC_PROJECTIONS_PATH = REPO_ROOT / "data" / "ssa_economic_projections.csv"
 GENERATED_BASELINE_PATH = REPO_ROOT / "data" / "ssa_tob_baseline_75year.csv"
+GENERATED_BASELINE_MANIFEST_PATH = GENERATED_BASELINE_PATH.with_suffix(".manifest.json")
+
+POST_OBBBA_SCENARIO_ID = "crfb_post_obbba_tob_75y"
+POST_OBBBA_TARGET_ID = "post_obbba_calibrated_tob_75y"
+TRUSTEES_CORE_THRESHOLD_LAW_MODE = "trustees-2025-core-thresholds-v1"
 
 REQUIRED_CURRENT_LAW_COLUMNS = {
     "year",
@@ -33,6 +42,38 @@ SOURCE_CURRENT_LAW = "2025 Trustees current-law TOB baseline"
 SOURCE_HI_CMS_DIRECTION = (
     "CMS FY2025 Financial Report direction only; annual HI path bridged in code"
 )
+
+
+def _relative_to_repo(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _git_value(*args: str) -> str | None:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def _unique_values(df: pd.DataFrame, column: str) -> list[str]:
+    return sorted(str(value) for value in df[column].dropna().unique().tolist())
 
 
 def load_current_law_series() -> pd.DataFrame:
@@ -199,3 +240,140 @@ def validate_generated_baseline(df: pd.DataFrame) -> None:
 def write_tob_baseline(df: pd.DataFrame, output_path: Path = GENERATED_BASELINE_PATH) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False, float_format="%.10f")
+
+
+def build_tob_baseline_manifest(
+    baseline_path: Path = GENERATED_BASELINE_PATH,
+) -> dict[str, object]:
+    if not baseline_path.exists():
+        raise FileNotFoundError(f"Generated TOB baseline not found: {baseline_path}")
+
+    baseline = pd.read_csv(baseline_path)
+    validate_generated_baseline(baseline)
+
+    hi_methods = _unique_values(baseline, "hi_method")
+    if len(hi_methods) != 1:
+        raise ValueError(f"Expected exactly one HI bridge method, got {hi_methods}")
+
+    output_sha256 = file_sha256(baseline_path)
+    source_files = [
+        {
+            "role": "raw_trustees_current_law_tob_comparator",
+            "path": _relative_to_repo(CURRENT_LAW_PATH),
+            "sha256": file_sha256(CURRENT_LAW_PATH),
+        },
+        {
+            "role": "oact_post_obbba_oasdi_nominal_delta",
+            "path": _relative_to_repo(OACT_OASDI_DELTA_PATH),
+            "sha256": file_sha256(OACT_OASDI_DELTA_PATH),
+        },
+        {
+            "role": "ssa_economic_projection",
+            "path": _relative_to_repo(SSA_ECONOMIC_PROJECTIONS_PATH),
+            "sha256": file_sha256(SSA_ECONOMIC_PROJECTIONS_PATH),
+        },
+    ]
+
+    return {
+        "schema_version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "scenario_id": POST_OBBBA_SCENARIO_ID,
+        "calibration_target_id": POST_OBBBA_TARGET_ID,
+        "baseline_kind": "calibration_target",
+        "not_law": True,
+        "law_mode": TRUSTEES_CORE_THRESHOLD_LAW_MODE,
+        "baseline_path": _relative_to_repo(baseline_path),
+        "baseline_sha256": output_sha256,
+        "output": {
+            "path": _relative_to_repo(baseline_path),
+            "sha256": output_sha256,
+            "rows": int(len(baseline)),
+            "years": [
+                int(baseline["year"].min()),
+                int(baseline["year"].max()),
+            ],
+            "units": "billions_of_nominal_dollars",
+        },
+        "source_files": source_files,
+        "raw_current_law_comparator": source_files[0],
+        "target_source": {
+            "oasdi": SOURCE_OASDI,
+            "hi": SOURCE_HI_CMS_DIRECTION,
+            "current_law": SOURCE_CURRENT_LAW,
+        },
+        "bridge_methods": {
+            "oasdi_delta_methods": _unique_values(baseline, "oasdi_delta_method"),
+            "hi_method": hi_methods[0],
+            "hi_notes": _unique_values(baseline, "notes"),
+        },
+        "artifact_contract": {
+            "must_consume_baseline_sha256": output_sha256,
+            "must_expose_scenario_id": POST_OBBBA_SCENARIO_ID,
+            "reject_raw_current_law_substitution": True,
+        },
+        "builder": {
+            "module": _relative_to_repo(Path(__file__)),
+            "module_sha256": file_sha256(Path(__file__)),
+            "script": _relative_to_repo(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
+            "script_sha256": file_sha256(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
+            "git_head": _git_value("rev-parse", "HEAD"),
+            "git_dirty": bool(_git_value("status", "--short")),
+        },
+    }
+
+
+def write_tob_baseline_manifest(
+    baseline_path: Path = GENERATED_BASELINE_PATH,
+    manifest_path: Path = GENERATED_BASELINE_MANIFEST_PATH,
+) -> dict[str, object]:
+    manifest = build_tob_baseline_manifest(baseline_path)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return manifest
+
+
+def load_tob_baseline_manifest(
+    manifest_path: Path = GENERATED_BASELINE_MANIFEST_PATH,
+) -> dict[str, object]:
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"Generated TOB baseline manifest not found: {manifest_path}")
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
+def validate_tob_baseline_manifest(
+    baseline_path: Path = GENERATED_BASELINE_PATH,
+    manifest_path: Path | None = None,
+) -> dict[str, object]:
+    if manifest_path is None:
+        manifest_path = baseline_path.with_suffix(".manifest.json")
+    manifest = load_tob_baseline_manifest(manifest_path)
+    expected = {
+        "scenario_id": POST_OBBBA_SCENARIO_ID,
+        "baseline_kind": "calibration_target",
+        "not_law": True,
+        "law_mode": TRUSTEES_CORE_THRESHOLD_LAW_MODE,
+    }
+    for key, expected_value in expected.items():
+        actual = manifest.get(key)
+        if actual != expected_value:
+            raise ValueError(
+                f"Invalid generated TOB baseline manifest {manifest_path}: "
+                f"{key}={actual!r}, expected {expected_value!r}"
+            )
+
+    actual_sha256 = file_sha256(baseline_path)
+    expected_sha256 = manifest.get("baseline_sha256")
+    if actual_sha256 != expected_sha256:
+        raise ValueError(
+            f"Generated TOB baseline hash mismatch for {baseline_path}: "
+            f"{actual_sha256} != {expected_sha256}"
+        )
+    contract = manifest.get("artifact_contract", {})
+    if not isinstance(contract, dict) or (
+        contract.get("must_consume_baseline_sha256") != actual_sha256
+    ):
+        raise ValueError(
+            f"Generated TOB baseline manifest {manifest_path} does not carry "
+            "the required artifact hash contract."
+        )
+    return manifest

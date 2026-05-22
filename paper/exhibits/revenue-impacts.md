@@ -2,38 +2,25 @@
 
 | Reform | 2035 | 2050 | 2075 | 2100 |
 | --- | --- | --- | --- | --- |
-| option1 | -257.5 | -507.4 | -1,503.2 | -3,862.8 |
-| option2 | +43.1 | +47.0 | +99.9 | +222.8 |
-| option4 | +12.9 | +11.5 | +51.6 | +168.3 |
-| option5 | +40.9 | +17.3 | -155.7 | -338.5 |
-| option6 | +184.1 | +17.3 | -155.7 | -338.5 |
-| option8 | +109.8 | +169.3 | +451.3 | +1,138.0 |
-| option10 | +87.2 | +128.1 | +335.7 | +825.9 |
-| option12 | +243.2 | +175.2 | -155.7 | -338.5 |
-| option13 | -24.2 | -59.6 | -247.3 | -682.9 |
-| option14_stacked | +258.0 | +239.4 | -36.0 | -432.5 |
+| option1 | -228.4 | -478.5 | -1,476.3 | -3,841.1 |
+| option2 | +24.1 | +41.6 | +119.3 | +364.6 |
+| option4 | +4.8 | +21.5 | +100.9 | +344.9 |
+| option5 | +30.9 | -23.6 | -297.3 | -1,379.1 |
+| option8 | +77.9 | +146.5 | +461.6 | +1,268.6 |
+| option10 | +59.8 | +111.4 | +346.3 | +956.3 |
+| option12 | +210.1 | +118.4 | -297.3 | -1,379.1 |
 
 The rebuilt standard series shows the expected late-horizon split: repeal or
-TOB-reducing options (`option1`, `option5`, `option6`, `option12`) become
-increasingly costly relative to current law, while broader taxation options
-(`option2`, `option8`, `option10`) continue to raise revenue. `option13` and
-`option14_stacked` should be interpreted separately because they run on the
-balanced-fix baseline rather than plain current law.
+TOB-reducing options (`option1`, `option5`, `option12`) become increasingly
+costly relative to current law, while broader taxation options (`option2`,
+`option8`, `option10`) continue to raise revenue.
 
 ## Terminal-year trust-fund decomposition
 
 | Reform | 2100 Revenue ($B) | 2100 TOB ($B) | 2100 OASDI Net ($B) | 2100 HI Net ($B) |
 | --- | --- | --- | --- | --- |
-| option1 | -3,862.8 | -3,862.8 | -2,101.3 | -1,761.5 |
-| option12 | -338.5 | -3,862.8 | +523.5 | -845.5 |
-| option13 | -682.9 | -682.9 | +7,815.1 | -1,044.6 |
-| option14_stacked | -432.5 | -5,016.0 | +540.0 | -961.3 |
-| option2 | +222.8 | +222.8 | +14.5 | +208.4 |
-| option4 | +168.3 | +168.3 | -35.0 | +203.4 |
-| option8 | +1,138.0 | +1,138.0 | +14.5 | +1,123.5 |
-
-At `2100`, `option13` closes the modeled gaps through a combination of benefit
-reduction, higher OASDI payroll-tax revenue, and a smaller positive HI payroll
-rate rather than the old negative-HI-rate endpoint. `option14_stacked`
-therefore starts from the recovered balanced-fix baseline and shows a much
-larger revenue loss than its direct TOB effect alone.
+| option1 | -3,841.1 | -3,841.1 | -2,101.8 | -1,761.7 |
+| option12 | -1,379.1 | -3,841.1 | -143.8 | -1,223.1 |
+| option2 | +364.6 | +364.6 | +38.4 | +328.3 |
+| option4 | +344.9 | +344.9 | +19.2 | +327.7 |
+| option8 | +1,268.6 | +1,268.6 | +38.4 | +1,237.5 |

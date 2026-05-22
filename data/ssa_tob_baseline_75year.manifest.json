@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-22T09:09:17.209326+00:00",
+  "scenario_id": "crfb_post_obbba_tob_75y",
+  "calibration_target_id": "post_obbba_calibrated_tob_75y",
+  "baseline_kind": "calibration_target",
+  "not_law": true,
+  "law_mode": "trustees-2025-core-thresholds-v1",
+  "baseline_path": "data/ssa_tob_baseline_75year.csv",
+  "baseline_sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
+  "output": {
+    "path": "data/ssa_tob_baseline_75year.csv",
+    "sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
+    "rows": 76,
+    "years": [
+      2025,
+      2100
+    ],
+    "units": "billions_of_nominal_dollars"
+  },
+  "source_files": [
+    {
+      "role": "raw_trustees_current_law_tob_comparator",
+      "path": "data/tob_current_law_tr2025.csv",
+      "sha256": "a7b2af3b088bde10dad8b9e205e0206300490faed375c33f8bddfa1fe8b824c1"
+    },
+    {
+      "role": "oact_post_obbba_oasdi_nominal_delta",
+      "path": "data/oasdi_oact_20250805_nominal_delta.csv",
+      "sha256": "69e8e7428705fcc5e79b9e5eef0f0aa95455482fe44b4ae91c84d2e8b0ce1a9d"
+    },
+    {
+      "role": "ssa_economic_projection",
+      "path": "data/ssa_economic_projections.csv",
+      "sha256": "4d8ec8c671271972c3f5ded6a744173f462c4c51431fa7c0bcee9b220893af1a"
+    }
+  ],
+  "raw_current_law_comparator": {
+    "role": "raw_trustees_current_law_tob_comparator",
+    "path": "data/tob_current_law_tr2025.csv",
+    "sha256": "a7b2af3b088bde10dad8b9e205e0206300490faed375c33f8bddfa1fe8b824c1"
+  },
+  "target_source": {
+    "oasdi": "SSA OACT Aug. 5, 2025 letter Table 1b.n nominal OASDI cash flow change",
+    "hi": "CMS FY2025 Financial Report direction only; annual HI path bridged in code",
+    "current_law": "2025 Trustees current-law TOB baseline"
+  },
+  "bridge_methods": {
+    "oasdi_delta_methods": [
+      "carry_forward_2099_nominal_delta",
+      "oact_table_1b_nominal"
+    ],
+    "hi_method": "match_oasdi_pct_change",
+    "hi_notes": [
+      "Scale HI by the same percentage change as OASDI until a public CMS annual HI post-OBBBA series is identified."
+    ]
+  },
+  "artifact_contract": {
+    "must_consume_baseline_sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
+    "must_expose_scenario_id": "crfb_post_obbba_tob_75y",
+    "reject_raw_current_law_substitution": true
+  },
+  "builder": {
+    "module": "src/tob_baseline.py",
+    "module_sha256": "528b08946c4703e58c9eaddec3e05f8dae35aa48b7009e3431a7e1a4ee0751fc",
+    "script": "scripts/build_tob_baseline.py",
+    "script_sha256": "347ca30b4a9c45732b455178bf819d3d12975773747f8dc585abb43d4611bfdd",
+    "git_head": "f8a2e08dd924066e13d603b3ba9f3e001811cc71",
+    "git_dirty": true
+  }
+}

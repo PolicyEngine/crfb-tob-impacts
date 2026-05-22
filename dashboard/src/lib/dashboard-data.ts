@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 
-export type ScoringType = "static";
-export type AllocationMode = "currentLaw" | "baselineShares";
+export type ScoringType = "static" | "behavioral";
+export type AllocationMode = "currentLaw" | "baselineShares" | "allOasdi" | "allHi";
 export type DisplayUnit = "dollars" | "pctPayroll" | "pctGdp";
 
 export interface YearlyImpact {
@@ -10,6 +10,7 @@ export interface YearlyImpact {
   tobOasdiImpact: number;
   tobMedicareHiImpact: number;
   tobTotalImpact: number;
+  generalFundImpact: number;
   baselineRevenue: number;
   reformRevenue: number;
   baselineTobOasdi: number;
@@ -22,8 +23,10 @@ export interface YearlyImpact {
   pctOfGdp: number;
   oasdiPctOfPayroll: number;
   hiPctOfPayroll: number;
+  generalFundPctOfPayroll: number;
   oasdiPctOfGdp: number;
   hiPctOfGdp: number;
+  generalFundPctOfGdp: number;
 }
 
 interface EconomicProjection {
@@ -60,8 +63,7 @@ const allocationEligibleOptions = new Set([
 ]);
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
-const directBranchingOptions = new Set(["option12", "option13", "option14_stacked"]);
-const generalRevenueOptions = new Set(["option7"]);
+const directBranchingOptions = new Set(["option12"]);
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const ALLOCATION_ELIGIBLE_OPTIONS = [...allocationEligibleOptions];
@@ -96,7 +98,7 @@ async function fetchCsv(path: string): Promise<string> {
 }
 
 async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
-  const csvContent = await fetchCsv(`/data/hi_taxable_payroll.csv`);
+  const csvContent = await fetchCsv("/data/hi_taxable_payroll.csv");
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true,
     skipEmptyLines: true,
@@ -113,7 +115,7 @@ async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
 async function loadEconomicProjections(): Promise<Map<number, EconomicProjection>> {
   if (!projectionCache) {
     projectionCache = Promise.all([
-      fetchCsv(`/data/ssa_economic_projections.csv`),
+      fetchCsv("/data/ssa_economic_projections.csv"),
       loadHiTaxablePayroll(),
     ]).then(([csvContent, hiTaxablePayroll]) => {
       const parsed = Papa.parse<Record<string, string>>(csvContent, {
@@ -144,15 +146,6 @@ function splitRevenueImpacts(
   row: AllocationInput,
   allocationMode: AllocationMode,
 ): AllocationResult {
-  if (generalRevenueOptions.has(row.reformName)) {
-    return {
-      revenueImpact: row.revenueImpact,
-      tobOasdiImpact: 0,
-      tobMedicareHiImpact: 0,
-      tobTotalImpact: 0,
-    };
-  }
-
   if (directBranchingOptions.has(row.reformName)) {
     const revenueImpact = row.oasdiNetImpact + row.hiNetImpact;
     return {
@@ -167,6 +160,24 @@ function splitRevenueImpacts(
     baselineShareOptions.has(row.reformName) ||
     (allocationMode === "baselineShares" &&
       allocationEligibleOptions.has(row.reformName));
+
+  if (allocationMode === "allOasdi" && allocationEligibleOptions.has(row.reformName)) {
+    return {
+      revenueImpact: row.revenueImpact,
+      tobOasdiImpact: row.revenueImpact,
+      tobMedicareHiImpact: 0,
+      tobTotalImpact: row.revenueImpact,
+    };
+  }
+
+  if (allocationMode === "allHi" && allocationEligibleOptions.has(row.reformName)) {
+    return {
+      revenueImpact: row.revenueImpact,
+      tobOasdiImpact: 0,
+      tobMedicareHiImpact: row.revenueImpact,
+      tobTotalImpact: row.revenueImpact,
+    };
+  }
 
   if (usesBaselineShares) {
     const baselineTotal = row.baselineTobOasdi + row.baselineTobMedicareHi;
@@ -199,21 +210,20 @@ function splitRevenueImpacts(
     };
   }
 
-  const revenueImpact = row.tobOasdiImpact + row.tobMedicareHiImpact;
   return {
-    revenueImpact,
+    revenueImpact: row.revenueImpact,
     tobOasdiImpact: row.tobOasdiImpact,
     tobMedicareHiImpact: row.tobMedicareHiImpact,
-    tobTotalImpact: revenueImpact,
+    tobTotalImpact: row.tobOasdiImpact + row.tobMedicareHiImpact,
   };
 }
 
 export async function loadDashboardData(
-  _scoringType: ScoringType,
+  scoringType: ScoringType,
   allocationMode: AllocationMode,
 ): Promise<Record<string, YearlyImpact[]>> {
   const [csvContent, projections] = await Promise.all([
-    fetchCsv(`/data/all_static_results.csv`),
+    fetchCsv("/data/results.csv"),
     loadEconomicProjections(),
   ]);
 
@@ -225,6 +235,8 @@ export async function loadDashboardData(
   const result: Record<string, YearlyImpact[]> = {};
 
   for (const row of parsed.data) {
+    if ((row.scoring_type ?? "") !== scoringType) continue;
+
     const reformName = row.reform_name ?? "";
     if (!reformName) continue;
 
@@ -240,6 +252,7 @@ export async function loadDashboardData(
       hiNetImpact: asNumber(row.hi_net_impact),
     };
     const split = splitRevenueImpacts(allocationRow, allocationMode);
+    const generalFundImpact = split.revenueImpact - split.tobTotalImpact;
     const economicProjection = projections.get(year) ?? {
       year,
       oasdiTaxablePayroll: 0,
@@ -253,6 +266,7 @@ export async function loadDashboardData(
       tobOasdiImpact: split.tobOasdiImpact,
       tobMedicareHiImpact: split.tobMedicareHiImpact,
       tobTotalImpact: split.tobTotalImpact,
+      generalFundImpact,
       baselineRevenue: asNumber(row.baseline_revenue),
       reformRevenue: asNumber(row.reform_revenue),
       baselineTobOasdi: allocationRow.baselineTobOasdi,
@@ -278,6 +292,10 @@ export async function loadDashboardData(
         economicProjection.hiTaxablePayroll > 0
           ? (split.tobMedicareHiImpact / economicProjection.hiTaxablePayroll) * 100
           : 0,
+      generalFundPctOfPayroll:
+        economicProjection.oasdiTaxablePayroll > 0
+          ? (generalFundImpact / economicProjection.oasdiTaxablePayroll) * 100
+          : 0,
       oasdiPctOfGdp:
         economicProjection.gdp > 0
           ? (split.tobOasdiImpact / economicProjection.gdp) * 100
@@ -286,6 +304,8 @@ export async function loadDashboardData(
         economicProjection.gdp > 0
           ? (split.tobMedicareHiImpact / economicProjection.gdp) * 100
           : 0,
+      generalFundPctOfGdp:
+        economicProjection.gdp > 0 ? (generalFundImpact / economicProjection.gdp) * 100 : 0,
     };
 
     if (!result[reformName]) {
@@ -323,7 +343,13 @@ export function calculateTotals(data: YearlyImpact[]) {
   };
 }
 
-export function spotlightRows(data: YearlyImpact[]) {
-  const spotlightYears = new Set([2026, 2030, 2035]);
+export function spotlightRows(
+  data: YearlyImpact[],
+  viewMode: "10year" | "75year" = "75year",
+) {
+  const spotlightYears =
+    viewMode === "10year"
+      ? new Set([2026, 2030, 2035])
+      : new Set([2026, 2035, 2050, 2075, 2100]);
   return data.filter((row) => spotlightYears.has(row.year));
 }

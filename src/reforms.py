@@ -371,17 +371,15 @@ def enable_ss_credit_phase_out():
     }
 
 
-# CBO labor supply elasticities (for dynamic scoring)
+# CBO labor supply elasticities (for conventional scoring)
 #
-# Use the age-based parameter structure supported by current policyengine-us.
-# Base elasticities apply below the built-in age threshold; workers above that
-# threshold receive the configured multipliers.
+# Use the labor-supply elasticity schema supported by current policyengine-us.
+# Earlier local branches split income elasticities into a base value and age
+# multipliers; current policyengine-us exposes income as a scalar and keeps
+# substitution elasticities by primary-earner decile plus secondary earner.
 CBO_ELASTICITIES = {
-    "gov.simulation.labor_supply_responses.elasticities.income.base": {
+    "gov.simulation.labor_supply_responses.elasticities.income": {
         "2024-01-01.2100-12-31": -0.05
-    },
-    "gov.simulation.labor_supply_responses.elasticities.income.age_multiplier_over_threshold": {
-        "2024-01-01.2100-12-31": 2.0
     },
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.primary.1": {
         "2024-01-01.2100-12-31": 0.31
@@ -416,13 +414,10 @@ CBO_ELASTICITIES = {
     "gov.simulation.labor_supply_responses.elasticities.substitution.by_position_and_decile.secondary": {
         "2024-01-01.2100-12-31": 0.27
     },
-    "gov.simulation.labor_supply_responses.elasticities.substitution.age_multiplier_over_threshold": {
-        "2024-01-01.2100-12-31": 2.0
-    },
 }
 
 
-# Dict-returning functions for each option (used for dynamic scoring)
+# Dict-returning functions for each option (used for conventional scoring)
 # These return complete parameter dictionaries with CBO elasticities pre-merged
 
 
@@ -647,8 +642,8 @@ def get_option12_dict():
     return reform_dict
 
 
-# Complete dynamic scoring dictionaries with CBO elasticities pre-merged
-def get_option1_dynamic_dict():
+# Complete conventional scoring dictionaries with CBO elasticities pre-merged
+def get_option1_conventional_dict():
     """Return complete parameter dict for Option 1 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -656,7 +651,7 @@ def get_option1_dynamic_dict():
     return result
 
 
-def get_option2_dynamic_dict():
+def get_option2_conventional_dict():
     """Return complete parameter dict for Option 2 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -664,7 +659,7 @@ def get_option2_dynamic_dict():
     return result
 
 
-def get_option3_dynamic_dict():
+def get_option3_conventional_dict():
     """Return complete parameter dict for Option 3 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -673,7 +668,7 @@ def get_option3_dynamic_dict():
     return result
 
 
-def get_option4_dynamic_dict(credit_amount=500):
+def get_option4_conventional_dict(credit_amount=500):
     """Return complete parameter dict for Option 4 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -683,7 +678,7 @@ def get_option4_dynamic_dict(credit_amount=500):
     return result
 
 
-def get_option5_dynamic_dict():
+def get_option5_conventional_dict():
     """Return complete parameter dict for Option 5 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -692,7 +687,7 @@ def get_option5_dynamic_dict():
     return result
 
 
-def get_option6_dynamic_dict():
+def get_option6_conventional_dict():
     """Return complete parameter dict for Option 6 with CBO elasticities."""
     reform_dict = {
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
@@ -754,7 +749,7 @@ def get_option6_dynamic_dict():
     return reform_dict
 
 
-def get_option7_dynamic_dict():
+def get_option7_conventional_dict():
     """Return complete parameter dict for Option 7 with CBO elasticities."""
     result = {}
     result.update(eliminate_senior_deduction())
@@ -762,7 +757,7 @@ def get_option7_dynamic_dict():
     return result
 
 
-def get_option8_dynamic_dict():
+def get_option8_conventional_dict():
     """Return complete parameter dict for Option 8 with CBO elasticities."""
     result = {}
     result.update(tax_100_percent_ss())
@@ -770,7 +765,7 @@ def get_option8_dynamic_dict():
     return result
 
 
-def get_option9_dynamic_dict():
+def get_option9_conventional_dict():
     """Return complete parameter dict for Option 9 with CBO elasticities."""
     result = {}
     result.update(tax_90_percent_ss())
@@ -778,7 +773,7 @@ def get_option9_dynamic_dict():
     return result
 
 
-def get_option10_dynamic_dict():
+def get_option10_conventional_dict():
     """Return complete parameter dict for Option 10 with CBO elasticities."""
     result = {}
     result.update(tax_95_percent_ss())
@@ -786,7 +781,7 @@ def get_option10_dynamic_dict():
     return result
 
 
-def get_option11_dynamic_dict():
+def get_option11_conventional_dict():
     """Return complete parameter dict for Option 11 with CBO elasticities.
 
     $700 credit with 6% phase-out above $150k (joint) / $75k (other).
@@ -800,7 +795,7 @@ def get_option11_dynamic_dict():
     return result
 
 
-def get_option12_dynamic_dict():
+def get_option12_conventional_dict():
     """Return complete parameter dict for Option 12 with CBO elasticities.
 
     Extended Roth-Style Swap with specific phase-out schedule.
@@ -814,11 +809,11 @@ def get_option12_dynamic_dict():
 # OPTION 13 / BALANCED FIX - NOT IMPLEMENTED HERE
 # =============================================================================
 #
-# Option 13 (Balanced Fix Baseline) requires dynamic year-by-year gap closing
+# Option 13 (Balanced Fix Baseline) requires conventional year-by-year gap closing
 # that CANNOT be implemented via Reform.from_dict(). The implementation requires:
 #
 #   1. Running a baseline simulation to calculate actual SS/HI gaps each year
-#   2. Computing tax rate increases dynamically based on real gaps
+#   2. Computing tax rate increases from real gaps
 #   3. Applying benefit cuts via set_input() with TOB feedback adjustment
 #
 # The correct implementation is in: batch/run_option13_modal.py
@@ -829,7 +824,7 @@ def get_option12_dynamic_dict():
 #   - 50% closed via payroll tax increases (split employee/employer)
 #   - 50% closed via SS benefit cuts (with TOB feedback: cut / (1 - 0.175))
 #
-# To run Option 13: modal run --detach batch/run_option13_modal.py --years 2035,2036,...
+# To run publishable Modal jobs, use the package CLI so runtime contracts are checked.
 # =============================================================================
 
 

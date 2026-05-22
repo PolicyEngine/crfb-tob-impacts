@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 import { MethodologyDiagram } from "@/components/methodology-diagram";
+import { LiveModelingProgress } from "@/components/live-modeling-progress";
+import { ReproducibilityRoadmap } from "@/components/reproducibility-roadmap";
 import { sitePath } from "@/lib/site-path";
 
 function AccordionItem({
@@ -146,26 +148,21 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Scoring Approach"
-          summary="Static scoring holds behavior constant; conventional scoring adds labor-supply responses."
+          summary="Static scoring is primary; current-contract labor-supply response results are pending."
         >
           <p>
             <strong>Static scoring:</strong> holds taxpayer behavior constant and isolates the
-            mechanical effect of policy changes.
+            mechanical effect of policy changes. This is the dashboard&apos;s default scoring
+            surface. Options 1-12 use full reform H5 microsimulation outputs for
+            2026-2035 and every fifth year from 2040-2100. Annual dashboard rows between
+            long-run anchor years are linearly interpolated for display continuity; the exact
+            selected-year H5 rows are preserved separately in the production results.
           </p>
           <p className="mt-4">
-            <strong>Conventional scoring:</strong> is not shown in the current public dashboard.
-            The prior conventional artifact is quarantined until it can be rerun on the same
-            baseline lineage as the static release.
-          </p>
-          <p className="mt-4">
-            The special-case balanced-fix scenarios `option13` and `option14_stacked` remain
-            static-only in the current release. A conventional version would require a separate
-            iterative post-response solve rather than the published standard conventional pipeline.
-          </p>
-          <p className="mt-4">
-            The largest conventional/static differences typically show up in the
-            long horizon for the structural swap options and the broad
-            tax-expansion options.
+            <strong>Supplemental labor-supply response:</strong> will be republished
+            only from current-contract full reform H5 artifacts. Earlier non-contract
+            response data are excluded from the dashboard because they were not generated
+            from the current full-H5 production lineage.
           </p>
         </AccordionItem>
 
@@ -177,8 +174,8 @@ export function MethodologySection() {
             <li><strong>Options 1-2 and 8-10</strong>: current-law style benefit-tax allocation.</li>
             <li><strong>Options 3-4 and 11</strong>: baseline-share allocation.</li>
             <li><strong>Options 5-6</strong>: employer-contribution taxes directed to their trust funds.</li>
-            <li><strong>Option 7</strong>: allocated to general revenues.</li>
-            <li><strong>Option 12-13</strong>: handled through direct branching or special baseline logic.</li>
+            <li><strong>Option 7</strong>: total is the full federal income-tax gain; OASDI, HI, and general fund show the accounting split.</li>
+            <li><strong>Option 12</strong>: handled through direct branching for the structural swap.</li>
           </BulletList>
         </AccordionItem>
       </div>
@@ -209,6 +206,43 @@ export function MethodologySection() {
             </a>
           </li>
         </ul>
+      </div>
+
+      <div className="grid gap-4 border-t border-[var(--pe-color-border-light)] pt-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-normal text-[var(--pe-color-text-tertiary)]">
+            Appendix
+          </p>
+          <p className="mt-1 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+            Internal production tracking
+          </p>
+        </div>
+        <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
+          <summary className="cursor-pointer px-5 py-4 text-left">
+            <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
+              Internal reproducibility roadmap
+            </span>
+            <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+              Gates, logs, and artifact targets for the CRFB rebuild workflow.
+            </span>
+          </summary>
+          <div className="border-t border-[var(--pe-color-border-light)]">
+            <ReproducibilityRoadmap embedded />
+          </div>
+        </details>
+        <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
+          <summary className="cursor-pointer px-5 py-4 text-left">
+            <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
+              Live modeling status
+            </span>
+            <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+              Baseline readiness and full-H5 reform artifact progress.
+            </span>
+          </summary>
+          <div className="border-t border-[var(--pe-color-border-light)]">
+            <LiveModelingProgress />
+          </div>
+        </details>
       </div>
     </section>
   );

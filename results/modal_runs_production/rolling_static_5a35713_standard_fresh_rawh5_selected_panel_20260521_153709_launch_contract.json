@@ -1,0 +1,302 @@
+{
+  "artifact_version": 1,
+  "base_dataset_snapshot": {
+    "requested_path": "hf://policyengine/policyengine-us-data/enhanced_cps_2024.h5@688f972425f5e858fc52bda2b696e0af74fea920"
+  },
+  "baseline_metrics_artifacts_used": false,
+  "baseline_snapshot_path": "/tmp/crfb_reform_snapshot_5a35713_fresh_standard_selected_20260521_153519",
+  "calls": [
+    {
+      "call_id": "fc-01KS60T2DNTQPNDF9ZX8HJW71K",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2DNTQPNDF9ZX8HJW71K",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2026.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2026.csv",
+      "year": 2026
+    },
+    {
+      "call_id": "fc-01KS60T2GNQ4YFQ2WDQN7HPJT7",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2GNQ4YFQ2WDQN7HPJT7",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2027.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2027.csv",
+      "year": 2027
+    },
+    {
+      "call_id": "fc-01KS60T2M3NZ9Y49SXGS8JQYYY",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2M3NZ9Y49SXGS8JQYYY",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2028.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2028.csv",
+      "year": 2028
+    },
+    {
+      "call_id": "fc-01KS60T2Q0Q3SWMXN3QVVZGRF1",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2Q0Q3SWMXN3QVVZGRF1",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2029.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2029.csv",
+      "year": 2029
+    },
+    {
+      "call_id": "fc-01KS60T2T5QW1HAKHBSS6WBQS1",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2T5QW1HAKHBSS6WBQS1",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2030.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2030.csv",
+      "year": 2030
+    },
+    {
+      "call_id": "fc-01KS60T2WQC5GA56EEPSJ2PCE3",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2WQC5GA56EEPSJ2PCE3",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2031.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2031.csv",
+      "year": 2031
+    },
+    {
+      "call_id": "fc-01KS60T2ZFVJ0ENQ6GDT7ABXA4",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T2ZFVJ0ENQ6GDT7ABXA4",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2032.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2032.csv",
+      "year": 2032
+    },
+    {
+      "call_id": "fc-01KS60T324GRF1NJ3NX0F82DFF",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T324GRF1NJ3NX0F82DFF",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2033.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2033.csv",
+      "year": 2033
+    },
+    {
+      "call_id": "fc-01KS60T358DBGNEPTXHQHCPPFH",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T358DBGNEPTXHQHCPPFH",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2034.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2034.csv",
+      "year": 2034
+    },
+    {
+      "call_id": "fc-01KS60T37QBDWFJT3AX2J80H8A",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T37QBDWFJT3AX2J80H8A",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2035.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2035.csv",
+      "year": 2035
+    },
+    {
+      "call_id": "fc-01KS60T3ACJZFDMATVQC1BGN6P",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3ACJZFDMATVQC1BGN6P",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2040.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2040.csv",
+      "year": 2040
+    },
+    {
+      "call_id": "fc-01KS60T3CZHBSDNZYQ0FN1SHZB",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3CZHBSDNZYQ0FN1SHZB",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2045.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2045.csv",
+      "year": 2045
+    },
+    {
+      "call_id": "fc-01KS60T3H9GGWDGD4SDQ94VE7S",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3H9GGWDGD4SDQ94VE7S",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2050.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2050.csv",
+      "year": 2050
+    },
+    {
+      "call_id": "fc-01KS60T3P8AVHCBQNSMSX9132G",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3P8AVHCBQNSMSX9132G",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2055.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2055.csv",
+      "year": 2055
+    },
+    {
+      "call_id": "fc-01KS60T3SCN7E62JV5P08GESJ3",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3SCN7E62JV5P08GESJ3",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2060.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2060.csv",
+      "year": 2060
+    },
+    {
+      "call_id": "fc-01KS60T3WH7Z5SFA4KV22T1XSD",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T3WH7Z5SFA4KV22T1XSD",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2065.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2065.csv",
+      "year": 2065
+    },
+    {
+      "call_id": "fc-01KS60T404HETSDEW7KRXS04S5",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T404HETSDEW7KRXS04S5",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2070.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2070.csv",
+      "year": 2070
+    },
+    {
+      "call_id": "fc-01KS60T42YVXE61318KW9SYB21",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T42YVXE61318KW9SYB21",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2075.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2075.csv",
+      "year": 2075
+    },
+    {
+      "call_id": "fc-01KS60T46JXB5ZV9M5MG9KBK45",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T46JXB5ZV9M5MG9KBK45",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2080.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2080.csv",
+      "year": 2080
+    },
+    {
+      "call_id": "fc-01KS60T49945TSR0WC9KWD1FZY",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T49945TSR0WC9KWD1FZY",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2085.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2085.csv",
+      "year": 2085
+    },
+    {
+      "call_id": "fc-01KS60T4CW5Q1772FJZQKV084Y",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T4CW5Q1772FJZQKV084Y",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2090.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2090.csv",
+      "year": 2090
+    },
+    {
+      "call_id": "fc-01KS60T4HP7EG9YCQRQZRVGTE8",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T4HP7EG9YCQRQZRVGTE8",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2095.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2095.csv",
+      "year": 2095
+    },
+    {
+      "call_id": "fc-01KS60T4NPD7HVJBJPNZDF84Y3",
+      "dashboard_url": "https://modal.com/id/fc-01KS60T4NPD7HVJBJPNZDF84Y3",
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static/year_2100.csv",
+      "volume_file": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943/year_2100.csv",
+      "year": 2100
+    }
+  ],
+  "combined_output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709.csv",
+  "compact_household_metrics_required_from_year": 2026,
+  "created_at": "2026-05-21T15:39:43-04:00",
+  "local_output_dir": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static",
+  "minimum_calibration_quality": "exact",
+  "modal_app_url": "https://modal.com/apps/policyengine/main/ap-yMmq7tIsHEeaPSoNVnMyz2",
+  "modal_volume": "crfb-results",
+  "modal_volume_prefix": "rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_static_20260521_153943",
+  "notes": [
+    "Current submit manifest predates embedded runtime-contract fields; this sidecar records the same launch contract durably.",
+    "Fiscal aggregation must use MicroSeries/MicroDF operations only; raw reform H5s are required so aggregates can be recomputed without rerunning microsims.",
+    "R2 mirroring was not configured in this shell; raw reform H5s are expected first in the Modal crfb-results volume under reform_raw_h5/year=YYYY/reform=option*/scenario.h5."
+  ],
+  "policyengine_py_worktree": "/Users/maxghenis/PolicyEngine/_worktrees/policyengine-py-crfb-longrun-full",
+  "policyengine_us_contract": {
+    "locked_version": "1.700.2",
+    "package_file_sha256": "4816cc93528d4b0e752d0c27242911fa4d35c97c26ac7ff171c468cf5ae3e670",
+    "package_tree_sha256": "e3b3e42002892f1c9ae576a3b96aeeda55b0f504cfc8623adbb9e06cce441f18",
+    "version": "1.700.2"
+  },
+  "policyengine_us_contract_2100": {
+    "locked_version": "1.700.2",
+    "package_file_sha256": "4816cc93528d4b0e752d0c27242911fa4d35c97c26ac7ff171c468cf5ae3e670",
+    "package_tree_sha256": "e3b3e42002892f1c9ae576a3b96aeeda55b0f504cfc8623adbb9e06cce441f18",
+    "version": "1.700.2"
+  },
+  "purpose": "CRFB TOB fresh production static reform panel launch contract",
+  "raw_reform_h5_required_from_year": 2026,
+  "reforms": [
+    "option1",
+    "option2",
+    "option3",
+    "option4",
+    "option5",
+    "option6",
+    "option7",
+    "option8",
+    "option9",
+    "option10",
+    "option11",
+    "option12"
+  ],
+  "required_calibration_profile": "ss-payroll-tob",
+  "runtime_packages": {
+    "policyengine-core": "3.26.1",
+    "policyengine-us": "1.700.2",
+    "policyengine-us-data": "1.115.5"
+  },
+  "scoring": "static",
+  "selected_years": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030,
+    2031,
+    2032,
+    2033,
+    2034,
+    2035,
+    2040,
+    2045,
+    2050,
+    2055,
+    2060,
+    2065,
+    2070,
+    2075,
+    2080,
+    2085,
+    2090,
+    2095,
+    2100
+  ],
+  "source_sha": "5a357137e2fd33975745603915e98a51b7be81d0",
+  "submission_manifest": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_fresh_rawh5_selected_panel_20260521_153709_submission.json",
+  "support_augmentation_2100": {
+    "activation_start_year": 2075,
+    "blueprint_base_weight_scale": 5.0,
+    "clone_weight_scale": 0.1,
+    "donors_per_target": 10,
+    "family": "targeted_donor",
+    "max_distance_for_clone": 5.0,
+    "name": "donor-backed-composite-v1",
+    "non_target_income_sanitizer_mode": "clone_all",
+    "report_file": "support_augmentation_report.json",
+    "report_summary": {
+      "augmented_household_count": 42504,
+      "augmented_person_count": 104434,
+      "base_household_count": 41314,
+      "base_person_count": 101384,
+      "clone_household_count": 1190,
+      "skipped_target_count": 0,
+      "successful_target_count": 1190
+    },
+    "sanitize_clone_non_target_income": true,
+    "sanitize_worker_non_target_income": false,
+    "target_year": 2100,
+    "target_year_strategy": "fixed",
+    "top_n_targets": 60
+  },
+  "support_gate_override": true,
+  "target_source": {
+    "baseline_kind": "current_law_comparator",
+    "description": "2025 Trustees current-law baseline used by the legacy long-term calibration stack.",
+    "file": "trustees_2025_current_law.csv",
+    "name": "trustees_2025_current_law",
+    "not_law": false,
+    "notes": [
+      "Generated from social_security_aux.csv for explicit source selection."
+    ],
+    "sha256": "e059aa9fba806b260a399b8a6a18b892a6363ba12ee00fe21ab109d09dff0ec4",
+    "source_urls": [
+      "https://www.ssa.gov/oact/tr/2025/lrIndex.html",
+      "https://www.ssa.gov/oact/solvency/provisions/tables/table_run133.html"
+    ],
+    "type": "trustees_current_law"
+  },
+  "tax_assumption": {
+    "description": "Best-public Trustees tax-side approximation: keep Social Security benefit-tax thresholds fixed, but wage-index all federal income tax parameters that otherwise use IRS CPI uprating after 2034 using the active NAWI path.",
+    "name": "trustees-2025-core-thresholds-v1",
+    "not_default_current_law": true,
+    "parameter_groups": [
+      "all_gov_irs_uprating_parameters"
+    ],
+    "projection_base_year": 2026,
+    "source": "SSA 2025 Trustees Report V.C.7 and OACT email clarification, May 6, 2026",
+    "start_year": 2035,
+    "uprating_parameter": "gov.irs.uprating",
+    "wage_index": "gov.ssa.nawi"
+  }
+}

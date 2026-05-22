@@ -20,20 +20,20 @@ components described below. The static estimand therefore holds the projected
 population, income, and benefit distribution fixed within a year and varies
 only the policy parameters.
 
-The conventional estimand uses the same projected data and baseline contract
-but lets the policy reform trigger PolicyEngine labor-supply
-response variables before revenue is measured:
+The labor-supply response estimand uses the same projected data and baseline
+contract but lets the policy reform trigger PolicyEngine labor-supply response
+variables before revenue is measured:
 
 $$
-\Delta^{conventional}_{sy}
+\Delta^{LSR}_{sy}
 = \sum_i w_{iy} R_i(P_s, D_{iy}, L_i(P_s))
 - \sum_i w_{iy} R_i(P_0, D_{iy}, L_i(P_0)).
 $$
 
-The behavioral component $L_i(\cdot)$ is limited to the conventional
-labor-supply response layer. The model does not endogenously reproject
-population, wage growth, interest rates, benefit claiming, mortality, or the
-Social Security trust-fund balance in response to a reform.
+The behavioral component $L_i(\cdot)$ is limited to the labor-supply response
+layer. The model does not endogenously reproject population, wage growth,
+interest rates, benefit claiming, mortality, or the Social Security trust-fund
+balance in response to a reform.
 
 ## Base microdata
 
@@ -65,7 +65,46 @@ The named target source is `trustees_2025_current_law`, based on the 2025
 Social Security Trustees current-law projections [@ssa2025trustees], with
 Medicare HI context from the 2025 Medicare Trustees Report
 [@medicare2025trustees]. The policy parameter assumption for the project is
-`trustees-core-thresholds-v1`.
+`trustees-2025-core-thresholds-v1`.
+
+That assumption preserves two distinct parts of the Trustees treatment. First,
+the Social Security benefit-tax combined-income thresholds remain fixed in
+nominal dollars, consistent with the Internal Revenue Code thresholds used in
+the Trustees taxation-of-benefits method. Second, the first ten projection
+years use current-law income-tax parameter indexing through `2034`; beginning in
+`2035`, the Trustees assume income-tax brackets rise with average wages rather
+than chained CPI-U to avoid indefinite bracket compression relative to income
+levels [@ssa2025trustees]. The public Trustees Report text names income-tax
+brackets. SSA/OACT separately clarified to PolicyEngine in May 2026 that the
+same long-range assumption applies to both income-tax rate brackets and federal
+income-tax thresholds such as standard deductions.[^oact-threshold-email] We
+therefore implement `trustees-2025-core-thresholds-v1` as fixed benefit-tax
+thresholds plus wage-indexed core federal income-tax thresholds beginning in
+`2035`, covering ordinary income-tax brackets, standard deductions, aged/blind
+standard deduction additions, capital-gains thresholds, and AMT thresholds.
+Federal income-tax parameters outside this core threshold bundle, such as
+credit amounts and refundability limits, remain on current-law indexing unless
+they are directly changed by a modeled reform.
+For contributed CRFB reform parameters that are not part of current law, the
+policy specification controls indexing. In particular, the option11 Social
+Security credit phase-out thresholds remain fixed at `$150,000` for joint filers
+and `$75,000` for other filers. Because the credit is nonrefundable, any gross
+credit calculated for tax units with zero pre-credit income-tax liability is
+recorded as unavailable rather than reducing federal revenue.
+
+| Assumption area | Public Trustees source | OACT correspondence | Implementation in this analysis |
+|---|---|---|---|
+| Social Security benefit-tax combined-income thresholds | The Trustees taxation-of-benefits method treats the statutory benefit-tax thresholds as fixed in nominal dollars. | Our question to OACT stated this understanding; OACT's reply did not contradict it. | Kept fixed in nominal dollars under current law. |
+| Ordinary income-tax brackets | The Trustees Report states that, after the tenth projection year, income-tax brackets rise with average wages rather than chained CPI-U. | Confirmed as part of the long-range assumption. | Wage-indexed beginning in `2035`. |
+| Standard deduction and related deduction thresholds | Not named separately in the public Trustees paragraph. | OACT clarified that the long-range assumption applies to federal income-tax thresholds, including standard deductions. | Standard deduction amounts and aged/blind additions are wage-indexed beginning in `2035`. |
+| Capital-gains and AMT thresholds | Not named separately in the public Trustees paragraph. | Treated as threshold-like federal income-tax parameters under the OACT clarification. | Capital-gains thresholds and AMT bracket, exemption, phaseout, and separate-filing thresholds are wage-indexed beginning in `2035`. |
+| Credit amounts, refundability limits, and other non-threshold parameters | Not specified in the Trustees taxation-of-benefits paragraph. | We asked OACT a narrower follow-up on credits; no public or email clarification is incorporated in the current release contract. | Left on current-law indexing unless a reform changes them directly. |
+
+[^oact-threshold-email]: Email from SSA Office of the Chief Actuary Actuarial
+    Services to PolicyEngine, May 5, 2026, replying to "Clarification on
+    Trustees long-run income-tax threshold assumption." OACT wrote that the
+    long-range assumption applies to income-tax rate brackets and federal
+    income-tax thresholds, with standard deductions given as an example.
 
 The projection script builds a year-specific dataset only after it has
 calculated all calibration variables at household level. The saved H5 sidecar
@@ -113,6 +152,76 @@ The production delivery path is exact-calibration only for delivered years. The
 runtime rejects aggregate-quality calibration, rejects IPF fallback, checks that
 the dataset metadata matches the required target source and profile, and
 requires all published files to come from validated year-level H5 artifacts.
+
+## Late-year support augmentation
+
+For years `2075` and later, the current pipeline augments the base CPS support
+before calibration. The reason is practical rather than conceptual: by the far
+horizon, the original survey support can contain too few households that both
+match the projected old-age population and carry the Social Security,
+payroll-tax, and taxation-of-benefits combinations needed to hit all Trustees
+targets with stable weights. Reweighting alone can then match aggregates only by
+placing too much weight on a small number of taxation-of-benefits contributors.
+
+The augmentation used for the current rebuild is `donor-backed-composite-v1`.
+It does not insert unconstrained free synthetic households. Instead, the data
+builder first identifies dominant missing late-year household types from a
+synthetic-support solve, then maps those targets back to nearby real `2024`
+donor tax units. For the CRFB sentinel recipe, the fixed `2100` support
+supplement uses the top `120` synthetic target types and `20` donor tax units
+per target, with the supplement activated from `2075` onward. Donor-backed
+clone records preserve real entity structure while retargeting the components
+that created late-tail instability, including pension and dividend-like income
+components.
+
+The support construction is separate from the final publication calibration.
+The support solve is allowed a `5%` constraint tolerance to avoid falling back
+to sparse archetype weights, and the calibration blueprint scales original base
+household priors by `0.15` before assigning clone priors from the synthetic
+support solution. The final year-level entropy calibration still solves against
+the actual realized rows and must hit Social Security benefits, taxable
+payroll, OASDI taxation-of-benefits revenue, and HI taxation-of-benefits
+revenue exactly. Ordinary nonpayroll-income and preferential-investment-income
+guard targets are computed from the unaugmented base data so the donor-backed
+support does not define its own income-tax target.
+
+Each augmented H5 sidecar records the support profile, target year, donor
+counts, solve tolerance, and support report. The CRFB runtime then applies
+late-year support gates to both aggregate household weights and policy-target
+contributors. For OASDI and HI taxation-of-benefits contributors, the current
+publication gates require at least `1,000` positive contributors, contributor
+effective sample size of at least `50`, top-10 contribution share of at most
+`50%`, top-100 contribution share of at most `95%`, and max single-contributor
+share of at most `15%`.
+
+As an external check on the support strategy, we compared the `2100`
+donor-backed H5 with a reweight-only H5 that used the same Trustees aggregate
+calibration targets but no support augmentation. The reweight-only file had
+higher generic effective sample size (`555` versus `463`) and was closer to the
+Trustees Table IV.B3 covered-worker count (`+4.4%` versus `+7.8%`). However, it
+fit the old-age beneficiary support much worse: relative to the Trustees
+current-payment counts, the donor-backed file missed OASI beneficiaries by
+`-8.9%` and OASDI beneficiaries by `-12.4%`, while the reweight-only file missed
+them by `-23.3%` and `-25.7%` [@ssa2025trustees]. The same reweight-only file
+also produced higher baseline income tax (`$37.0` trillion versus `$35.7`
+trillion) and shifted more of the `option12` employer-payroll inclusion into
+tax units above `$2` million of taxable income (`36.8%` versus `28.5%`). We
+therefore treat donor-backed support as the publication default and retain
+reweight-only calibration as a robustness check rather than the primary
+late-year estimator.
+
+This diagnostic also identifies the next calibration extension. The data
+pipeline now carries Trustees covered-worker counts, OASI beneficiary counts, DI
+beneficiary counts, total OASDI beneficiary counts, detailed OASI/DI beneficiary
+current-payment counts, and Medicare HI taxable payroll. These controls pin
+average taxable payroll per covered worker, average benefits per beneficiary,
+and the HI payroll base used by employer-payroll swap reforms. We do not treat
+GDP, AWI, or CPI as calibration targets in this microdata step: GDP is outside
+the microsimulation model, and AWI/CPI enter as exogenous projection inputs. The
+publication calibration profile can hard-target covered workers, broad
+beneficiary counts, and HI taxable payroll, while detailed beneficiary counts
+remain definition-audited until the OASI/DI auxiliary split is reconciled with
+the current PolicyEngine Social Security input variables.
 
 ## Calibration estimator
 
@@ -176,13 +285,16 @@ differences. The core output columns are:
 
 The trust-fund allocation depends on reform design. Direct benefit-taxation
 components use the model's OASDI and HI taxation-of-benefits variables. Senior
-deduction or credit components change general income-tax liability; unless they
-also alter Social Security taxability, they do not create dedicated OASDI or HI
-revenue. Employer-payroll-tax swap options add the modeled income-tax revenue
-from taxing employer OASDI and Medicare contributions, then subtract lost
-baseline taxation-of-benefits revenue. For `option6`, the phase-in allocation
-assigns early employer-contribution gains to OASDI first until the OASDI share
-of the payroll-tax rate is filled, then to HI.
+deduction or credit components can change federal income-tax liability without
+crediting all of that change to the trust funds. For `option7`, which only
+eliminates the temporary senior deduction, total revenue remains the full
+federal income-tax impact, while OASDI, HI, and general-fund columns show the
+accounting split. Employer-payroll-tax swap
+options add the modeled income-tax revenue from taxing employer OASDI and Medicare
+contributions, then subtract lost baseline taxation-of-benefits revenue. The
+legacy `option6` short phase-in allocation assigns early employer-contribution
+gains to OASDI first until the OASDI share of the payroll-tax rate is filled,
+then to HI.
 
 This allocation convention is why total federal revenue and trust-fund revenue
 do not always move one-for-one. A reform can raise individual income-tax
@@ -190,11 +302,11 @@ revenue while weakening one trust fund, or it can replace taxation-of-benefits
 revenue with employer-contribution revenue allocated differently across OASDI
 and HI.
 
-## Conventional scoring
+## Supplemental labor-supply response scoring
 
-The conventional series uses the same calibrated datasets as the static
-series but applies PolicyEngine's labor-supply response layer inside the reform
-simulation. The conventional reform dictionaries merge the statutory reform
+Static estimates are the primary scoring surface for the CRFB dashboard.
+Supplemental labor-supply response scoring is pending a current-contract full-H5
+rerun. Labor-supply response reform dictionaries merge the statutory reform
 parameters with the project's age-based elasticity schedule:
 
 - income elasticity base: `-0.05`
@@ -206,56 +318,16 @@ parameters with the project's age-based elasticity schedule:
 
 The doubled older-worker elasticity reflects the literature review judgment
 used for this project: near-retirement and retirement-age workers are more
-responsive on the labor-supply margin than prime-age workers. Conventional
-results therefore should be interpreted as revenue estimates under that
-specific elasticity schedule, not as macroeconomic forecasts.
+responsive on the labor-supply margin than prime-age workers. Labor-supply
+response results therefore should be interpreted as partial-equilibrium revenue
+estimates under that specific elasticity schedule, not as macroeconomic
+forecasts. They are not official CBO or JCT scores.
 
-The current conventional artifact is quarantined pending a same-baseline rerun.
-When cleared for release, conventional results should cover only standard
-reforms `option1` through `option12`. A conventional version of `option13` or
-`option14_stacked` would require re-solving the balanced-fix payroll-rate and
-benefit-cut parameters after the labor-supply response, because the response
-changes taxable payroll, income-tax revenue, and trust-fund gaps. That
-iterative special-case conventional solve is not part of the current release
-contract.
-
-## Balanced-fix special cases
-
-`option13` and `option14_stacked` are not ordinary reforms scored against
-current law. They are assembled through a special-case pipeline beginning in
-`2035`, with current-law placeholders for `2026-2034`.
-
-For `option13`, the pipeline first calculates current-law OASDI income, OASDI
-benefits, HI income, and HI expenditures. OASDI income includes employee,
-employer, and self-employment Social Security taxes plus OASDI
-taxation-of-benefits revenue. HI income includes employee, employer,
-self-employment Medicare taxes, Additional Medicare Tax, and HI
-taxation-of-benefits revenue. HI expenditures are loaded from the Trustees HI
-series. Where the input file lacks a public annual `2100` value, the endpoint
-is extrapolated from the `2090-2099` observations.
-
-The balanced-fix solve then proceeds in two stages:
-
-1. Apply a proportional Social Security benefit cut equal to one-half of the
-   current-law OASDI shortfall, then recompute OASDI and HI income after the
-   benefit cut. This step captures the actual taxation-of-benefits feedback
-   from lower benefits rather than applying a fixed gross-up approximation.
-2. Close the remaining OASDI gap with a Social Security payroll-tax rate
-   increase on taxable OASDI payroll, and close the remaining HI gap with a
-   Medicare payroll-tax rate change on uncapped payroll. Each rate change is
-   split evenly between employee and employer rates. If the post-benefit-cut
-   HI system is in surplus, the HI payroll rate change is negative.
-
-The recorded `option13` result includes the benefit multiplier, payroll-rate
-changes, income-tax impact, taxation-of-benefits impacts, rate-increase
-revenue, and final OASDI and HI gaps.
-
-`option14_stacked` compares the `option12` structural swap against the
-`option13` balanced-fix baseline. Operationally, the `option13` reform output
-becomes the baseline for `option14_stacked`, while the reform side uses the
-`option12` structural parameters. The resulting estimate is therefore not
-comparable to standard `option12` as a current-law delta; it is the incremental
-effect of the structural swap relative to the balanced-fix baseline.
+The public dashboard does not currently publish labor-supply response rows.
+Earlier response files were removed because they were not generated from the
+current full-H5 production lineage. New response rows must come from the same
+guarded full reform H5 contract as the static cells, then be aggregated from
+those durable H5 artifacts.
 
 ## Reproducibility and validation
 
@@ -290,10 +362,9 @@ Several limitations remain even after the clean rerun. The base microdata are
 survey-derived and therefore carry sampling error, item nonresponse, and
 imputation error. Calibration matches selected aggregate margins, not the full
 joint distribution of age, earnings, Social Security benefits, filing status,
-health spending, and assets. Long-run HI expenditures enter the balanced-fix
-special case as an external Trustees-derived series rather than as a
-micro-simulated spending model. Conventional estimates are sensitive to the chosen
+health spending, and assets. Long-run HI expenditures enter the dashboard as an
+external Trustees-derived denominator rather than as a micro-simulated spending
+model. Labor-supply response estimates are sensitive to the chosen
 labor-supply elasticities and do not include macro feedback, portfolio
 responses, claiming responses, mortality changes, or political feedback from
-trust-fund exhaustion. Finally, special-case conventional scoring is intentionally
-excluded because it would require a separate iterative solve.
+trust-fund exhaustion.

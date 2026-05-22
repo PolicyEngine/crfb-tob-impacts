@@ -1,0 +1,130 @@
+{
+  "submitted_at": "2026-05-20T23:07:43.240633",
+  "reforms": [
+    "option1",
+    "option2",
+    "option3",
+    "option4",
+    "option5",
+    "option6",
+    "option7",
+    "option8",
+    "option9",
+    "option10",
+    "option11",
+    "option12"
+  ],
+  "years": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030,
+    2031,
+    2032,
+    2033,
+    2034,
+    2035,
+    2040,
+    2045
+  ],
+  "scoring": "static",
+  "output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520.csv",
+  "output_dir": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static",
+  "volume_prefix": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743",
+  "sample_fraction": 0.0,
+  "sample_seed": 0,
+  "sample_min_households": 0,
+  "drop_zero_weight_households": false,
+  "skip_tax_assumption_contract": false,
+  "use_baseline_artifacts": false,
+  "minimum_calibration_quality": "exact",
+  "required_calibration_profile": "ss-payroll-tob",
+  "allow_unsafe_long_run_artifact": false,
+  "calls": [
+    {
+      "year": 2026,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2026.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2026.csv",
+      "call_id": "fc-01KS481N9AFH2DAFHYS6FJWTHB",
+      "dashboard_url": "https://modal.com/id/fc-01KS481N9AFH2DAFHYS6FJWTHB"
+    },
+    {
+      "year": 2027,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2027.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2027.csv",
+      "call_id": "fc-01KS481NC4MFQPN0JZA9J6GSG6",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NC4MFQPN0JZA9J6GSG6"
+    },
+    {
+      "year": 2028,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2028.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2028.csv",
+      "call_id": "fc-01KS481NE3C871PPHWBSY81FM4",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NE3C871PPHWBSY81FM4"
+    },
+    {
+      "year": 2029,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2029.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2029.csv",
+      "call_id": "fc-01KS481NG1ZQ0HETRK7P92NMT4",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NG1ZQ0HETRK7P92NMT4"
+    },
+    {
+      "year": 2030,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2030.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2030.csv",
+      "call_id": "fc-01KS481NJTVJ3XNNXH1SSP4AN3",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NJTVJ3XNNXH1SSP4AN3"
+    },
+    {
+      "year": 2031,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2031.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2031.csv",
+      "call_id": "fc-01KS481NMQY3TERF2YFS3W2YBE",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NMQY3TERF2YFS3W2YBE"
+    },
+    {
+      "year": 2032,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2032.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2032.csv",
+      "call_id": "fc-01KS481NPMJQ08JZB6H1XG9FNW",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NPMJQ08JZB6H1XG9FNW"
+    },
+    {
+      "year": 2033,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2033.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2033.csv",
+      "call_id": "fc-01KS481NSHDMQJTTNS5K0RBSJ6",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NSHDMQJTTNS5K0RBSJ6"
+    },
+    {
+      "year": 2034,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2034.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2034.csv",
+      "call_id": "fc-01KS481NW6YC0T08TS221X925G",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NW6YC0T08TS221X925G"
+    },
+    {
+      "year": 2035,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2035.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2035.csv",
+      "call_id": "fc-01KS481NYB8NS9SZWSM8ASVRMV",
+      "dashboard_url": "https://modal.com/id/fc-01KS481NYB8NS9SZWSM8ASVRMV"
+    },
+    {
+      "year": 2040,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2040.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2040.csv",
+      "call_id": "fc-01KS481P0VTG7WN9BVVS5YECF6",
+      "dashboard_url": "https://modal.com/id/fc-01KS481P0VTG7WN9BVVS5YECF6"
+    },
+    {
+      "year": 2045,
+      "local_file": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/rolling_static_5a35713_standard_2026_2045_20260520_static/year_2045.csv",
+      "volume_file": "rolling_static_5a35713_standard_2026_2045_20260520_static_20260520_230743/year_2045.csv",
+      "call_id": "fc-01KS481P3FCPZMRF6FMTJAD26V",
+      "dashboard_url": "https://modal.com/id/fc-01KS481P3FCPZMRF6FMTJAD26V"
+    }
+  ]
+}
