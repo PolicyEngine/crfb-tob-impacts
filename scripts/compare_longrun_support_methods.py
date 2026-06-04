@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 import sys
@@ -35,13 +36,19 @@ from src.tax_assumption_loader import (  # noqa: E402
 )
 
 
-DEFAULT_SUPPORT_DATASET = (
-    "/Users/maxghenis/PolicyEngine/_local_runs/"
-    "crfb_py_bundle_2100_20260513/2100.h5"
+# These default to bundles produced by the local CRFB long-run pipeline, which
+# live outside the repo. Override the directory with CRFB_LOCAL_RUNS_DIR, or pass
+# explicit paths on the command line, to run on another machine.
+LOCAL_RUNS_DIR = Path(
+    os.environ.get(
+        "CRFB_LOCAL_RUNS_DIR", str(Path.home() / "PolicyEngine" / "_local_runs")
+    )
 )
-DEFAULT_NO_SUPPORT_DATASET = (
-    "/Users/maxghenis/PolicyEngine/_local_runs/"
-    "crfb_py_bundle_2100_no_support_20260513/2100.h5"
+DEFAULT_SUPPORT_DATASET = str(
+    LOCAL_RUNS_DIR / "crfb_py_bundle_2100_20260513" / "2100.h5"
+)
+DEFAULT_NO_SUPPORT_DATASET = str(
+    LOCAL_RUNS_DIR / "crfb_py_bundle_2100_no_support_20260513" / "2100.h5"
 )
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "tmp" / "longrun_support_validation"
 

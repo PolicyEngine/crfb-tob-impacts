@@ -486,6 +486,14 @@ def build_live_reform_status(
                         "ready" if year in baseline_ready_years else "missing"
                     ),
                     "reform_h5_status": reform_h5_status,
+                    # The long-run reweighting only targets age structure, SS
+                    # beneficiary counts, payroll, and TOB aggregates; federal
+                    # income tax is never a calibration constraint. Its level
+                    # (and the implied tax-to-GDP ratio) is therefore an
+                    # unconstrained by-product of the weight solve and is not
+                    # reliable in the late-horizon tail, even when the targeted
+                    # aggregates match. Hence "...known_income_tax_tail_caveat"
+                    # rather than a clean reviewed status.
                     "aggregate_status": (
                         "reviewed_with_known_income_tax_tail_caveat"
                         if reform_h5_status in {"complete", "sentinel_complete"}
