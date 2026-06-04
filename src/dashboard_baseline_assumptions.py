@@ -464,6 +464,10 @@ def build_baseline_aggregates(tax_assumption_name: str) -> pd.DataFrame:
         [["year", *baseline_cols]]
         .rename(
             columns={
+                # baseline_revenue and federal_income_tax are the same quantity
+                # — the post-calibration microsimulation federal income tax
+                # aggregate. The dashboard column is just relabeled here; no
+                # rescaling or post-hoc adjustment is applied.
                 "baseline_revenue": "federal_income_tax",
                 "baseline_tob_oasdi": "release_tob_oasdi",
                 "baseline_tob_medicare_hi": "release_tob_hi",

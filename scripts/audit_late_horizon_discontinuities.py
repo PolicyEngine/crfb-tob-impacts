@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 
-REPO = Path("/Users/maxghenis/PolicyEngine/crfb-tob-impacts")
+REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 DASHBOARD_DATA = REPO / "dashboard" / "public" / "data"
 STATIC = RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"

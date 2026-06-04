@@ -16,11 +16,19 @@ REQUIRE_DEFAULT_DATASET = (
 STAGING_PREFIX = f"staging/{VERSION}"
 REPO_ID = os.environ.get("CRFB_LONGRUN_HF_REPO_ID", "policyengine/policyengine-us-data")
 REPO_TYPE = "model"
+# Defaults to the long_term storage of a local crfb-pinned us-data checkout.
+# Override with CRFB_LONGRUN_LOCAL_DIR to publish from another location.
 LOCAL_LONG_TERM_DIR = Path(
     os.environ.get(
         "CRFB_LONGRUN_LOCAL_DIR",
-        "/Users/maxghenis/PolicyEngine/policyengine-us-data-crfb-pin/"
-        "policyengine_us_data/storage/long_term",
+        str(
+            Path.home()
+            / "PolicyEngine"
+            / "policyengine-us-data-crfb-pin"
+            / "policyengine_us_data"
+            / "storage"
+            / "long_term"
+        ),
     )
 )
 LOCAL_RELEASE_DIR = Path(

@@ -13,9 +13,15 @@ app = modal.App("option12-standalone")
 
 results_volume = modal.Volume.from_name("crfb-results", create_if_missing=True)
 
-POLICYENGINE_US_PATH = os.environ.get(
-    "CRFB_POLICYENGINE_US_PATH", "/Users/pavelmakarchuk/policyengine-us"
-)
+# Mounted into the Modal image below; must point at a local policyengine-us
+# checkout. Required (no implicit default), per the repo convention in
+# src/runtime_config.py.
+POLICYENGINE_US_PATH = os.environ.get("CRFB_POLICYENGINE_US_PATH")
+if not POLICYENGINE_US_PATH:
+    raise SystemExit(
+        "CRFB_POLICYENGINE_US_PATH must be set to a local policyengine-us "
+        "checkout (e.g. ~/PolicyEngine/policyengine-us)."
+    )
 
 image = (
     modal.Image.debian_slim(python_version="3.11")

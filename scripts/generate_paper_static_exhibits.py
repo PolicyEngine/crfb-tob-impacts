@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 
-REPO = Path("/Users/maxghenis/PolicyEngine/crfb-tob-impacts")
+REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
