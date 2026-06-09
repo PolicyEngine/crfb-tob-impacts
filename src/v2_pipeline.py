@@ -1,0 +1,1086 @@
+"""Year-dataset builder for the v2 baseline (see src/v2_projection.py).
+
+Stage flow per year:
+
+A. Materialize the latest enhanced CPS at the target year in a fresh
+   simulation (PolicyEngine uprating supplies value growth).
+B. Lightly reweight households to the SSA Trustees age distribution
+   (entropy, 5-year buckets).
+C. Rescale values to Trustees aggregates: earnings so SSA taxable payroll
+   matches, Social Security benefits so OASDI cost matches. Write the H5.
+D. Validate against the written artifact (with the Trustees long-run tax
+   assumption active from 2035) and run the final light entropy calibration
+   on the full target family: age, Social Security, taxable payroll,
+   post-OBBBA OASDI TOB, post-OBBBA HI TOB. Update weights in place.
+
+Every stage emits sentinel diagnostics; the year fails closed if the final
+calibration misses targets or publication gates fail.
+"""
+
+from __future__ import annotations
+
+import gc
+import sys
+import time
+from pathlib import Path
+
+import h5py
+import numpy as np
+import pandas as pd
+
+from src.v2_projection import (
+    aggregate_age_targets,
+    build_age_bins,
+    build_household_age_bin_matrix,
+    calibrate_entropy_constraints,
+    contribution_audit,
+    entropy_weight_audit,
+    evaluate_publication_gates,
+    load_economic_targets,
+    load_population_age_targets,
+    load_tob_targets,
+    solve_earnings_scale,
+    target_source_provenance,
+    write_json,
+)
+from src.tax_assumption_loader import (
+    TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
+    load_canonical_tax_assumption_reform,
+)
+
+TAX_ASSUMPTION_START_YEAR = 2035
+TAX_ASSUMPTION_END_YEAR = 2100
+
+PERSON_LEVEL_IDENTITY_INPUTS = (
+    "person_id",
+    "household_id",
+    "person_household_id",
+    "family_id",
+    "person_family_id",
+    "tax_unit_id",
+    "person_tax_unit_id",
+    "spm_unit_id",
+    "person_spm_unit_id",
+    "marital_unit_id",
+    "person_marital_unit_id",
+)
+
+# Earnings-type inputs rescaled by the payroll factor alpha. Wage rates move
+# with earnings so the implied hours stay fixed.
+EARNINGS_SCALE_CANDIDATES = (
+    "employment_income_before_lsr",
+    "self_employment_income_before_lsr",
+    "sstb_self_employment_income_before_lsr",
+    "partnership_se_income",
+    "farm_operations_income",
+    "hourly_wage",
+)
+
+SOCIAL_SECURITY_SCALE_CANDIDATES = (
+    "social_security_retirement",
+    "social_security_disability",
+    "social_security_survivors",
+    "social_security_dependents",
+)
+
+# Non-earnings, non-Social-Security income of beneficiary households,
+# rescaled by gamma so modeled taxation of benefits reaches the Trustees
+# target at the value level (instead of through weight tilting).
+OTHER_INCOME_SCALE_CANDIDATES = (
+    "taxable_interest_income",
+    "tax_exempt_interest_income",
+    "qualified_dividend_income",
+    "non_qualified_dividend_income",
+    "long_term_capital_gains",
+    "short_term_capital_gains",
+    "non_sch_d_capital_gains",
+    "taxable_ira_distributions",
+    "taxable_pension_income",
+    "tax_exempt_pension_income",
+    "rental_income",
+    "farm_rent_income",
+    "estate_income",
+    "partnership_s_corp_income",
+    "miscellaneous_income",
+)
+
+GAMMA_MAX = 2.0
+GAMMA_TOLERANCE = 0.02
+GAMMA_MAX_PROBES = 4
+
+# Income-side guard groups (mirroring the v1 production calibration):
+# the final calibration must not change these aggregate income totals,
+# so weight tilts cannot inflate other income to reach the TOB target.
+INCOME_GUARD_GROUPS = {
+    "preferential_investment_income": (
+        "long_term_capital_gains_before_response",
+        "long_term_capital_gains_on_collectibles",
+        "qualified_dividend_income",
+    ),
+    "ordinary_nonpayroll_income": (
+        "short_term_capital_gains",
+        "non_sch_d_capital_gains",
+        "non_qualified_dividend_income",
+        "taxable_interest_income",
+        "tax_exempt_interest_income",
+        "partnership_s_corp_income",
+        "partnership_se_income",
+        "estate_income",
+        "rental_income",
+        "farm_income",
+        "farm_operations_income",
+        "farm_rent_income",
+        "miscellaneous_income",
+        "salt_refund_income",
+        "taxable_401k_distributions",
+        "taxable_403b_distributions",
+        "taxable_ira_distributions",
+        "taxable_private_pension_income",
+        "taxable_sep_distributions",
+        "tax_exempt_ira_distributions",
+        "tax_exempt_private_pension_income",
+        "qualified_bdc_income",
+        "qualified_reit_and_ptp_income",
+    ),
+}
+INCOME_GUARD_START_YEAR = 2075
+
+# Donor-clone late-year support: clone the strongest real
+# taxation-of-benefits contributor households with deterministic income
+# jitter so the final calibration has dense support where the 2024 sample
+# is thin. Follows the v1 donor-backed approach (real donors, perturbed
+# clones, small priors), restated for the v2 value-scaled frames.
+DONOR_CLONE_START_YEAR = 2075
+DONOR_CLONE_TOP_HOUSEHOLDS = 1_500
+DONOR_CLONES_PER_HOUSEHOLD = 4
+DONOR_CLONE_PRIOR_SCALE = 0.10
+DONOR_CLONE_OTHER_INCOME_SIGMA = 0.18
+DONOR_CLONE_BENEFIT_SIGMA = 0.10
+
+AGE_BUCKET_SIZE = 5
+
+
+def _log(message: str) -> None:
+    print(message, flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Stage A: materialize the base dataset at the target year
+# ---------------------------------------------------------------------------
+
+
+def _person_level_values(sim, variable, *, period):
+    try:
+        series = sim.calculate(variable, period=period, map_to="person")
+    except Exception:
+        series = sim.calculate(variable, period=period)
+    if hasattr(series, "values"):
+        return np.asarray(series.values)
+    return np.asarray(series)
+
+
+def _ensure_person_level_identity_inputs(df, sim, *, base_period):
+    output = df
+    person_rows = len(output)
+    for variable in PERSON_LEVEL_IDENTITY_INPUTS:
+        column = f"{variable}__{base_period}"
+        if column in output.columns:
+            continue
+        values = _person_level_values(sim, variable, period=base_period)
+        if len(values) != person_rows:
+            raise ValueError(
+                f"{variable} mapped to {len(values)} rows; "
+                f"expected {person_rows}."
+            )
+        output[column] = values
+    return output
+
+
+def _pseudo_input_variables(sim) -> set[str]:
+    """Input variables that aggregate calculated components; storing them
+    would freeze stale values."""
+    tbs = sim.tax_benefit_system
+    pseudo = set()
+    for var_name in sim.input_variables:
+        variable = tbs.variables.get(var_name)
+        adds = getattr(variable, "adds", None) if variable else None
+        if not adds or not isinstance(adds, list):
+            continue
+        for component in adds:
+            component_variable = tbs.variables.get(component)
+            if component_variable and len(
+                getattr(component_variable, "formulas", {})
+            ):
+                pseudo.add(var_name)
+                break
+    return pseudo
+
+
+def _entity_membership_column(entity_key, *, base_period, year, columns):
+    bases = (
+        ["person_id"]
+        if entity_key == "person"
+        else [f"person_{entity_key}_id", f"{entity_key}_id"]
+    )
+    for base in bases:
+        for candidate in (f"{base}__{base_period}", f"{base}__{year}"):
+            if candidate in columns:
+                return candidate
+    return None
+
+
+def _project_variable_to_person_rows(sim, df, *, var_name, year, base_period):
+    values = np.asarray(sim.calculate(var_name, period=year).values)
+    if len(values) == len(df):
+        return values
+    variable = sim.tax_benefit_system.variables.get(var_name)
+    entity_key = getattr(getattr(variable, "entity", None), "key", None)
+    if entity_key is None:
+        raise ValueError(f"Cannot determine entity for {var_name}.")
+    membership_column = _entity_membership_column(
+        entity_key, base_period=base_period, year=year, columns=df.columns
+    )
+    if membership_column is None:
+        raise ValueError(f"No membership column for {var_name} ({entity_key}).")
+    entity_ids = np.asarray(
+        sim.calculate(f"{entity_key}_id", map_to=entity_key).values
+    )
+    if len(entity_ids) != len(values):
+        raise ValueError(f"Cannot align {var_name} on {entity_key}.")
+    aligned = df[membership_column].map(dict(zip(entity_ids, values)))
+    if aligned.isna().any():
+        raise ValueError(f"{var_name}: unmapped person rows.")
+    return np.asarray(aligned.values)
+
+
+def materialize_year_frame(sim, year: int) -> pd.DataFrame:
+    """Person-row input dataframe with every input variable at ``year``."""
+    base_period = int(sim.default_calculation_period)
+    df = sim.to_input_dataframe()
+    df = _ensure_person_level_identity_inputs(df, sim, base_period=base_period)
+
+    pseudo = _pseudo_input_variables(sim)
+    drop = [
+        f"{var}__{base_period}"
+        for var in pseudo
+        if f"{var}__{base_period}" in df.columns
+    ]
+    if drop:
+        df = df.drop(columns=drop)
+
+    fallback_renames = []
+    for column in [c for c in df.columns if f"__{base_period}" in c]:
+        var_name = column.replace(f"__{base_period}", "")
+        new_column = f"{var_name}__{year}"
+        if var_name in ("household_weight", "person_weight"):
+            continue
+        try:
+            df[new_column] = _project_variable_to_person_rows(
+                sim, df, var_name=var_name, year=year, base_period=base_period
+            )
+            df = df.drop(columns=[column])
+        except Exception as error:
+            fallback_renames.append(f"{var_name}: {error}")
+            df = df.rename(columns={column: new_column})
+    if fallback_renames:
+        _log(
+            f"  [materialize {year}] carried base-year values for "
+            f"{len(fallback_renames)} variables"
+        )
+        for line in fallback_renames[:5]:
+            print(f"    {line}", file=sys.stderr)
+
+    # Household weights at the target year (includes uprated population
+    # level); person weights derive from household weights at runtime.
+    household_weights = sim.calculate(
+        "household_id", period=year, map_to="household"
+    ).weights
+    household_ids = sim.calculate(
+        "household_id", period=year, map_to="household"
+    ).values
+    hh_to_weight = dict(zip(household_ids, np.asarray(household_weights)))
+    df[f"household_weight__{year}"] = df[
+        f"person_household_id__{year}"
+    ].map(hh_to_weight)
+    df = df.drop(
+        columns=[
+            f"household_weight__{base_period}",
+            f"person_weight__{base_period}",
+            f"person_weight__{year}",
+        ],
+        errors="ignore",
+    )
+    return df
+
+
+def household_structure(df: pd.DataFrame, year: int):
+    """Household ids, person->household row index, ages, base weights."""
+    person_household_id = df[f"person_household_id__{year}"].to_numpy()
+    household_ids = np.unique(person_household_id)
+    hh_index = {hh: i for i, hh in enumerate(household_ids)}
+    person_household_index = np.fromiter(
+        (hh_index[hh] for hh in person_household_id),
+        dtype=int,
+        count=len(person_household_id),
+    )
+    ages = df[f"age__{year}"].to_numpy()
+    weights = (
+        pd.DataFrame(
+            {
+                "hh": person_household_id,
+                "w": df[f"household_weight__{year}"].to_numpy(),
+            }
+        )
+        .groupby("hh")
+        .w.first()
+        .reindex(household_ids)
+        .to_numpy()
+    )
+    return household_ids, person_household_index, ages, weights
+
+
+# ---------------------------------------------------------------------------
+# H5 writing
+# ---------------------------------------------------------------------------
+
+
+def write_year_h5(df: pd.DataFrame, year: int, output_path: Path) -> None:
+    """Materialize the input dataframe into a runnable PolicyEngine H5."""
+    from policyengine_core.data.dataset import Dataset
+    from policyengine_us import Microsimulation
+
+    dataset = Dataset.from_dataframe(df, year)
+    sim = Microsimulation()
+    sim.dataset = dataset
+    sim.build_from_dataset()
+
+    # Dump only the variables the frame intends to ship. Anything else in
+    # a holder (defaults, derived caches) would shadow its formula when the
+    # dataset is simulated.
+    intended = {column.rsplit("__", 1)[0] for column in df.columns}
+    data = {}
+    for variable in sim.tax_benefit_system.variables:
+        if variable not in intended:
+            continue
+        holder = sim.get_holder(variable)
+        known_periods = holder.get_known_periods()
+        if not known_periods:
+            continue
+        data[variable] = {}
+        for period in known_periods:
+            values = np.array(holder.get_array(period))
+            if values.dtype == np.object_:
+                try:
+                    values = values.astype("S")
+                except (TypeError, ValueError):
+                    continue
+            data[variable][period] = values
+
+    leaked = {
+        name
+        for name in data
+        if name.endswith("_behavioral_response")
+        or name
+        in (
+            "employment_income",
+            "irs_employment_income",
+            "payroll_tax_gross_wages",
+            "taxable_self_employment_income",
+            "taxable_earnings_for_social_security",
+            "social_security",
+            "tob_revenue_oasdi",
+            "tob_revenue_medicare_hi",
+            "income_tax",
+        )
+    }
+    if leaked:
+        raise RuntimeError(
+            f"Derived variables leaked into the year frame: {sorted(leaked)}"
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with h5py.File(output_path, "w") as handle:
+        for variable, periods in data.items():
+            group = handle.create_group(variable)
+            for period, values in periods.items():
+                group.create_dataset(str(period), data=values)
+    del sim, dataset
+    gc.collect()
+
+
+def update_h5_household_weights(
+    output_path: Path, year: int, household_weights: np.ndarray
+) -> None:
+    with h5py.File(output_path, "r+") as handle:
+        key = f"household_weight/{year}"
+        if key not in handle:
+            raise RuntimeError(f"{output_path} lacks {key}.")
+        stored = handle[key]
+        if stored.shape != household_weights.shape:
+            raise RuntimeError(
+                f"household_weight shape {stored.shape} != "
+                f"{household_weights.shape}"
+            )
+        stored[...] = household_weights
+
+
+# ---------------------------------------------------------------------------
+# Year build
+# ---------------------------------------------------------------------------
+
+
+def _household_vectors(sim, year: int):
+    """Household-level target vectors from a simulation."""
+
+    def hh(variable):
+        return np.asarray(
+            sim.calculate(variable, period=year, map_to="household").values
+        )
+
+    payroll = hh("taxable_earnings_for_social_security") + hh(
+        "social_security_taxable_self_employment_income"
+    )
+    return {
+        "ss_total": hh("social_security"),
+        "payroll_total": payroll,
+        "oasdi_tob": hh("tob_revenue_oasdi"),
+        "hi_tob": hh("tob_revenue_medicare_hi"),
+        "income_tax": hh("income_tax"),
+    }
+
+
+def _sim_from_frame(df: pd.DataFrame, year: int, reform):
+    """In-memory simulation over the current frame (no file round-trip)."""
+    from policyengine_core.data.dataset import Dataset
+    from policyengine_us import Microsimulation
+
+    dataset = Dataset.from_dataframe(df, year)
+    if reform is None:
+        sim = Microsimulation()
+    else:
+        sim = Microsimulation(reform=reform)
+    sim.dataset = dataset
+    sim.build_from_dataset()
+    return sim
+
+
+def _solve_other_income_gamma(
+    df: pd.DataFrame,
+    year: int,
+    reform,
+    other_income_columns: list[str],
+    beneficiary_person_mask: np.ndarray,
+    demographic_weights: np.ndarray,
+    person_household_index: np.ndarray,
+    tob_targets: dict[str, float],
+) -> tuple[float, list[dict]]:
+    """Scale beneficiary households' other income toward the Trustees
+    taxation-of-benefits target.
+
+    Best-effort: at far horizons benefit inclusion saturates at 85% and
+    bracket positions move slowly, so total TOB becomes nearly inelastic
+    to other income. When probes show that, the solver stops at the best
+    bounded gamma and the final entropy calibration closes the rest.
+
+    Returns (gamma, probe history). The frame is NOT modified.
+    """
+    target_total = tob_targets["oasdi_tob"] + tob_targets["hi_tob"]
+    probes: list[dict] = []
+
+    def total_tob_at(gamma: float) -> float:
+        probe_df = df.copy()
+        scaled = probe_df.loc[
+            beneficiary_person_mask, other_income_columns
+        ] * gamma
+        probe_df.loc[beneficiary_person_mask, other_income_columns] = scaled
+        sim = _sim_from_frame(probe_df, year, reform)
+        vectors = _household_vectors(sim, year)
+        del sim
+        gc.collect()
+        total = float(
+            (vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights
+        )
+        probes.append({"gamma": gamma, "total_tob": total})
+        _log(
+            f"    [gamma probe] gamma={gamma:.3f} -> total TOB "
+            f"${total/1e9:,.1f}B vs target ${target_total/1e9:,.1f}B "
+            f"({total/target_total - 1:+.1%})"
+        )
+        return total
+
+    gamma = 1.0
+    total = total_tob_at(gamma)
+    if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
+        return gamma, probes
+
+    elasticity = 1.5  # prior; refined after the second probe
+    for _ in range(GAMMA_MAX_PROBES):
+        ratio = target_total / total
+        gamma_next = gamma * ratio ** (1 / elasticity)
+        gamma_next = min(max(gamma_next, 1 / GAMMA_MAX), GAMMA_MAX)
+        total_next = total_tob_at(gamma_next)
+        implied = None
+        if total_next > 0 and total > 0 and gamma_next != gamma:
+            implied = float(
+                np.log(total_next / total) / np.log(gamma_next / gamma)
+            )
+            if 0.2 < implied < 6:
+                elasticity = implied
+        gamma, total = gamma_next, total_next
+        if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
+            return gamma, probes
+        if gamma in (GAMMA_MAX, 1 / GAMMA_MAX):
+            break
+        if implied is not None and implied < 0.2:
+            # TOB is effectively saturated; more probes cannot help.
+            break
+
+    best = min(probes, key=lambda p: abs(p["total_tob"] / target_total - 1))
+    _log(
+        f"    [gamma] best-effort gamma={best['gamma']:.3f} leaves TOB gap "
+        f"{best['total_tob']/target_total - 1:+.1%}; final calibration "
+        "closes the remainder"
+    )
+    return best["gamma"], probes
+
+
+def _id_columns(df: pd.DataFrame, year: int) -> list[str]:
+    return [
+        f"{variable}__{year}"
+        for variable in PERSON_LEVEL_IDENTITY_INPUTS
+        if f"{variable}__{year}" in df.columns
+    ]
+
+
+def _append_donor_clones(
+    df: pd.DataFrame,
+    year: int,
+    *,
+    tob_by_household: np.ndarray,
+    household_ids: np.ndarray,
+    person_household_index: np.ndarray,
+    weights: np.ndarray,
+    other_income_columns: list[str],
+    ss_columns: list[str],
+) -> tuple[pd.DataFrame, dict]:
+    """Append jittered clones of the strongest real TOB contributor
+    households so late-year calibration has dense support.
+
+    Clones keep entity structure (all ids re-keyed), receive deterministic
+    lognormal jitter on other income and benefits, and carry small prior
+    weights; the final calibration decides how much of each clone to use.
+    """
+    contributions = tob_by_household * weights
+    donor_count = min(DONOR_CLONE_TOP_HOUSEHOLDS, int((contributions > 0).sum()))
+    donor_rows = np.argsort(contributions)[::-1][:donor_count]
+    donor_household_ids = set(household_ids[donor_rows])
+
+    id_cols = _id_columns(df, year)
+    max_id = max(float(df[c].max()) for c in id_cols)
+    offset_base = 10 ** int(np.ceil(np.log10(max_id + 2)))
+
+    donor_mask = np.isin(
+        df[f"person_household_id__{year}"].to_numpy(), list(donor_household_ids)
+    )
+    donor_frame = df.loc[donor_mask]
+    donor_person_household = donor_frame[f"person_household_id__{year}"].to_numpy()
+
+    clone_frames = []
+    for copy_index in range(1, DONOR_CLONES_PER_HOUSEHOLD + 1):
+        clone = donor_frame.copy()
+        for column in id_cols:
+            clone[column] = clone[column] + offset_base * copy_index
+        rng = np.random.default_rng(year * 100 + copy_index)
+        per_household_other = {
+            hh: factor
+            for hh, factor in zip(
+                sorted(donor_household_ids),
+                np.exp(
+                    rng.normal(
+                        -0.5 * DONOR_CLONE_OTHER_INCOME_SIGMA**2,
+                        DONOR_CLONE_OTHER_INCOME_SIGMA,
+                        len(donor_household_ids),
+                    )
+                ),
+            )
+        }
+        per_household_benefit = {
+            hh: factor
+            for hh, factor in zip(
+                sorted(donor_household_ids),
+                np.exp(
+                    rng.normal(
+                        -0.5 * DONOR_CLONE_BENEFIT_SIGMA**2,
+                        DONOR_CLONE_BENEFIT_SIGMA,
+                        len(donor_household_ids),
+                    )
+                ),
+            )
+        }
+        other_factor = np.array(
+            [per_household_other[hh] for hh in donor_person_household]
+        )
+        benefit_factor = np.array(
+            [per_household_benefit[hh] for hh in donor_person_household]
+        )
+        clone[other_income_columns] = clone[other_income_columns].mul(
+            other_factor, axis=0
+        )
+        clone[ss_columns] = clone[ss_columns].mul(benefit_factor, axis=0)
+        clone[f"household_weight__{year}"] = (
+            clone[f"household_weight__{year}"] * DONOR_CLONE_PRIOR_SCALE
+        )
+        clone_frames.append(clone)
+
+    augmented = pd.concat([df] + clone_frames, ignore_index=True)
+    info = {
+        "name": "v2-donor-clone-v1",
+        "donor_household_count": donor_count,
+        "clones_per_household": DONOR_CLONES_PER_HOUSEHOLD,
+        "clone_household_count": donor_count * DONOR_CLONES_PER_HOUSEHOLD,
+        "prior_weight_scale": DONOR_CLONE_PRIOR_SCALE,
+        "other_income_jitter_sigma": DONOR_CLONE_OTHER_INCOME_SIGMA,
+        "benefit_jitter_sigma": DONOR_CLONE_BENEFIT_SIGMA,
+        "clone_person_rows": int(donor_mask.sum()) * DONOR_CLONES_PER_HOUSEHOLD,
+    }
+    return augmented, info
+
+
+def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
+    """Household-level income-guard group vectors from a simulation."""
+    groups = {}
+    for group_name, components in INCOME_GUARD_GROUPS.items():
+        total = None
+        for component in components:
+            if component not in sim.tax_benefit_system.variables:
+                continue
+            values = np.asarray(
+                sim.calculate(
+                    component, period=year, map_to="household"
+                ).values,
+                dtype=float,
+            )
+            total = values if total is None else total + values
+        if total is not None and np.abs(total).sum() > 1e-6:
+            groups[f"income_guard_{group_name}"] = total
+    return groups
+
+
+def _tax_assumption_reform(year: int):
+    if year < TAX_ASSUMPTION_START_YEAR:
+        return None
+    return load_canonical_tax_assumption_reform(
+        TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
+        start_year=TAX_ASSUMPTION_START_YEAR,
+        end_year=TAX_ASSUMPTION_END_YEAR,
+    )
+
+
+def _gap_table(label: str, achieved: dict, targets: dict) -> None:
+    _log(f"  [{label}]")
+    for name, target in targets.items():
+        value = achieved[name]
+        _log(
+            f"    {name:>14}: ${value/1e9:>10,.1f}B vs "
+            f"${target/1e9:>10,.1f}B ({value/target - 1:+.2%})"
+        )
+
+
+def build_year(
+    year: int,
+    base_dataset: str,
+    output_dir: Path,
+    *,
+    base_dataset_label: str | None = None,
+    policyengine_us_version: str | None = None,
+) -> dict:
+    """Build one calibrated year dataset; returns the sentinel record."""
+    from policyengine_us import Microsimulation
+
+    start_time = time.monotonic()
+    output_dir = Path(output_dir)
+    output_path = output_dir / f"{year}.h5"
+    _log(f"\n===== building {year} =====")
+
+    economic_targets = load_economic_targets(year)
+    tob_targets = load_tob_targets(year)
+    ages_axis, population_totals = load_population_age_targets(year)
+    bins = build_age_bins(AGE_BUCKET_SIZE)
+    age_targets = aggregate_age_targets(population_totals, bins)
+
+    # ----- Stage A: materialize -----
+    # The input frame must be extracted before any other calculation:
+    # calculated caches would otherwise leak into the frame as stored
+    # outputs and shadow their formulas downstream.
+    sim = Microsimulation(dataset=base_dataset)
+    df = materialize_year_frame(sim, year)
+    cap = float(
+        sim.tax_benefit_system.parameters(
+            f"{year}-01-01"
+        ).gov.irs.payroll.social_security.cap
+    )
+    gross_wages = np.asarray(
+        sim.calculate("payroll_tax_gross_wages", period=year).values
+    )
+    taxable_se = np.asarray(
+        sim.calculate("taxable_self_employment_income", period=year).values
+    )
+    del sim
+    gc.collect()
+
+    household_ids, person_household_index, ages, base_weights = (
+        household_structure(df, year)
+    )
+    n_households = len(household_ids)
+    age_matrix, _ = build_household_age_bin_matrix(
+        ages, person_household_index, n_households, AGE_BUCKET_SIZE
+    )
+
+    raw_population = float(base_weights @ age_matrix.sum(axis=1))
+    raw_share_65 = float(
+        base_weights @ age_matrix[:, 13:].sum(axis=1)
+    ) / raw_population
+    target_share_65 = float(age_targets[13:].sum() / age_targets.sum())
+    _log(
+        f"  [stage A] population {raw_population/1e6:,.1f}M vs target "
+        f"{age_targets.sum()/1e6:,.1f}M; 65+ share {raw_share_65:.1%} vs "
+        f"target {target_share_65:.1%}"
+    )
+
+    # ----- Stage B: demographic reweight -----
+    demographic_weights, _ = calibrate_entropy_constraints(
+        age_matrix, age_targets, base_weights
+    )
+    audit_b = entropy_weight_audit(demographic_weights, base_weights)
+    _log(
+        f"  [stage B] age calibrated: ESS {audit_b['effective_sample_size']:,.0f}, "
+        f"positive {audit_b['positive_weight_count']:,}/{n_households:,}, "
+        f"median ratio {audit_b['median_weight_ratio']:.2f}"
+    )
+
+    # ----- Stage C: value scaling -----
+    person_demo_weights = demographic_weights[person_household_index]
+    alpha = solve_earnings_scale(
+        gross_wages=gross_wages,
+        taxable_self_employment=taxable_se,
+        weights=person_demo_weights,
+        cap=cap,
+        payroll_target=economic_targets["payroll_total"],
+    )
+    ss_columns = [
+        f"{var}__{year}"
+        for var in SOCIAL_SECURITY_SCALE_CANDIDATES
+        if f"{var}__{year}" in df.columns
+    ]
+    ss_person_total = df[ss_columns].sum(axis=1).to_numpy()
+    ss_current = float((ss_person_total * person_demo_weights).sum())
+    beta = economic_targets["ss_total"] / ss_current
+
+    earnings_columns = [
+        f"{var}__{year}"
+        for var in EARNINGS_SCALE_CANDIDATES
+        if f"{var}__{year}" in df.columns
+    ]
+    df[earnings_columns] = df[earnings_columns] * alpha
+    df[ss_columns] = df[ss_columns] * beta
+    _log(
+        f"  [stage C] earnings scale alpha={alpha:.4f}, "
+        f"benefits scale beta={beta:.4f} "
+        f"({len(earnings_columns)} earnings cols, {len(ss_columns)} SS cols)"
+    )
+
+    df[f"household_weight__{year}"] = demographic_weights[
+        person_household_index
+    ]
+
+    # ----- Stage C-gamma: other income of beneficiary households -----
+    reform = _tax_assumption_reform(year)
+    other_income_columns = [
+        f"{var}__{year}"
+        for var in OTHER_INCOME_SCALE_CANDIDATES
+        if f"{var}__{year}" in df.columns
+    ]
+    household_has_ss = (
+        np.bincount(
+            person_household_index,
+            weights=ss_person_total,
+            minlength=n_households,
+        )
+        > 0
+    )
+    beneficiary_person_mask = household_has_ss[person_household_index]
+    gamma, gamma_probes = _solve_other_income_gamma(
+        df,
+        year,
+        reform,
+        other_income_columns,
+        beneficiary_person_mask,
+        demographic_weights,
+        person_household_index,
+        tob_targets,
+    )
+    df.loc[beneficiary_person_mask, other_income_columns] = (
+        df.loc[beneficiary_person_mask, other_income_columns] * gamma
+    )
+    _log(
+        f"  [stage C-gamma] other-income scale gamma={gamma:.4f} "
+        f"({len(other_income_columns)} columns, "
+        f"{int(beneficiary_person_mask.sum()):,} beneficiary-household "
+        "person rows)"
+    )
+
+    # ----- Stage C3: donor-clone support (late years) -----
+    support_augmentation = None
+    if year >= DONOR_CLONE_START_YEAR:
+        probe_sim = _sim_from_frame(df, year, reform)
+        probe_vectors = _household_vectors(probe_sim, year)
+        del probe_sim
+        gc.collect()
+        df, support_augmentation = _append_donor_clones(
+            df,
+            year,
+            tob_by_household=probe_vectors["oasdi_tob"]
+            + probe_vectors["hi_tob"],
+            household_ids=household_ids,
+            person_household_index=person_household_index,
+            weights=demographic_weights,
+            other_income_columns=other_income_columns,
+            ss_columns=ss_columns,
+        )
+        household_ids, person_household_index, ages, start_weights = (
+            household_structure(df, year)
+        )
+        n_households = len(household_ids)
+        age_matrix, _ = build_household_age_bin_matrix(
+            ages, person_household_index, n_households, AGE_BUCKET_SIZE
+        )
+        _log(
+            f"  [stage C3] appended "
+            f"{support_augmentation['clone_household_count']:,} donor "
+            f"clones from {support_augmentation['donor_household_count']:,} "
+            "real contributor households"
+        )
+    else:
+        start_weights = demographic_weights
+
+    write_year_h5(df, year, output_path)
+
+    # ----- Stage C2: artifact-true validation -----
+    sim2 = Microsimulation(dataset=str(output_path), reform=reform)
+    vectors = _household_vectors(sim2, year)
+    sim2_household_ids = np.asarray(
+        sim2.calculate("household_id", period=year, map_to="household").values
+    )
+    if not np.array_equal(sim2_household_ids, household_ids):
+        raise RuntimeError("Household order changed between stages.")
+    guard_vectors = (
+        _income_guard_vectors(sim2, year)
+        if year >= INCOME_GUARD_START_YEAR
+        else {}
+    )
+    del sim2
+    gc.collect()
+
+    achieved_scaled = {
+        name: float(vectors[name] @ start_weights)
+        for name in ("ss_total", "payroll_total", "oasdi_tob", "hi_tob")
+    }
+    all_targets = {**economic_targets, **tob_targets}
+    _gap_table("stage C2: post-scaling, pre-final-calibration", achieved_scaled, all_targets)
+
+    payroll_gap = (
+        achieved_scaled["payroll_total"] / economic_targets["payroll_total"]
+        - 1
+    )
+    if abs(payroll_gap) > 0.02:
+        raise RuntimeError(
+            f"Earnings scaling missed payroll by {payroll_gap:+.2%}; "
+            "the scaled-variable set needs review."
+        )
+
+    # ----- Stage D: final light calibration -----
+    guard_targets = {
+        name: float(values @ start_weights)
+        for name, values in guard_vectors.items()
+    }
+    if guard_targets:
+        _log(
+            "  [income guards] "
+            + ", ".join(
+                f"{name.removeprefix('income_guard_')} "
+                f"${target/1e9:,.0f}B"
+                for name, target in guard_targets.items()
+            )
+        )
+    constraint_matrix = np.column_stack(
+        [
+            age_matrix,
+            vectors["ss_total"],
+            vectors["payroll_total"],
+            vectors["oasdi_tob"],
+            vectors["hi_tob"],
+        ]
+        + list(guard_vectors.values())
+    )
+    constraint_targets = np.concatenate(
+        [
+            age_targets,
+            [
+                economic_targets["ss_total"],
+                economic_targets["payroll_total"],
+                tob_targets["oasdi_tob"],
+                tob_targets["hi_tob"],
+            ],
+            list(guard_targets.values()),
+        ]
+    )
+    final_weights, solve_info = calibrate_entropy_constraints(
+        constraint_matrix, constraint_targets, start_weights
+    )
+    audit_d = entropy_weight_audit(final_weights, start_weights)
+    contributor_audits = {
+        name: contribution_audit(vectors[name], final_weights)
+        for name in ("ss_total", "payroll_total", "oasdi_tob", "hi_tob")
+    }
+    achieved_final = {
+        name: float(vectors[name] @ final_weights)
+        for name in ("ss_total", "payroll_total", "oasdi_tob", "hi_tob")
+    }
+    _gap_table("stage D: final calibration", achieved_final, all_targets)
+    _log(
+        f"  [stage D] ESS {audit_d['effective_sample_size']:,.0f}, positive "
+        f"{audit_d['positive_weight_count']:,}/{n_households:,}, top-10 share "
+        f"{audit_d['top_10_weight_share_pct']:.1f}%, max ratio vs start "
+        f"{audit_d['max_weight_ratio']:.2f}"
+    )
+    for name, audit in contributor_audits.items():
+        _log(
+            f"    {name}: contributors {audit['positive_contributor_count']:,}, "
+            f"contributor ESS {audit['contributor_effective_sample_size']:,.0f}, "
+            f"top-10 {audit['top_10_contribution_share_pct']:.0f}%"
+        )
+
+    from src.v2_projection import CONTRIBUTOR_GATE_START_YEAR
+
+    gates = evaluate_publication_gates(
+        audit_d,
+        contributor_audits,
+        apply_contributor_gates=year >= CONTRIBUTOR_GATE_START_YEAR,
+    )
+    if not gates["passed"]:
+        for failure in gates["failures"]:
+            _log(f"    GATE FAILURE: {failure}")
+        raise RuntimeError(f"{year}: publication gates failed.")
+
+    update_h5_household_weights(output_path, year, final_weights)
+
+    income_tax_total = float(vectors["income_tax"] @ final_weights)
+    elapsed = time.monotonic() - start_time
+
+    sentinel = {
+        "year": year,
+        "alpha_earnings_scale": alpha,
+        "beta_benefits_scale": beta,
+        "gamma_other_income_scale": gamma,
+        "population_raw": raw_population,
+        "population_target": float(age_targets.sum()),
+        "share_65_plus_raw": raw_share_65,
+        "share_65_plus_target": target_share_65,
+        "income_tax_total": income_tax_total,
+        "max_constraint_pct_error": solve_info["max_constraint_pct_error"],
+        "duration_seconds": elapsed,
+        "duration_clock": "time.monotonic",
+        **{f"{k}_achieved": v for k, v in achieved_final.items()},
+        **{f"{k}_target": v for k, v in all_targets.items()},
+        **{f"prescale_{k}": v for k, v in achieved_scaled.items()},
+        **{f"stage_b_{k}": v for k, v in audit_b.items()},
+        **{f"final_{k}": v for k, v in audit_d.items()},
+        **{
+            f"{name}_{metric}": value
+            for name, audit in contributor_audits.items()
+            for metric, value in audit.items()
+        },
+        "donor_clone_household_count": (
+            support_augmentation["clone_household_count"]
+            if support_augmentation
+            else 0
+        ),
+        "gates_passed": gates["passed"],
+    }
+
+    metadata = {
+        "contract_version": 2,
+        "method": "v2-demographic-reweight-value-scaling",
+        "year": year,
+        "base_dataset_path": base_dataset_label or str(base_dataset),
+        "calibration_audit": {
+            "calibration_quality": "exact",
+            "method_used": "entropy",
+            "max_constraint_pct_error": solve_info[
+                "max_constraint_pct_error"
+            ],
+            **{f"stage_b_{k}": v for k, v in audit_b.items()},
+            **audit_d,
+            "constraints": {
+                name: {
+                    "target": all_targets[name],
+                    "achieved": achieved_final[name],
+                    "pct_error": achieved_final[name] / all_targets[name] - 1,
+                }
+                for name in achieved_final
+            }
+            | {
+                name: {
+                    "target": target,
+                    "achieved": float(guard_vectors[name] @ final_weights),
+                }
+                for name, target in guard_targets.items()
+            },
+            "contributors": contributor_audits,
+            "validation_passed": True,
+            "validation_issues": [],
+        },
+        "support_augmentation": support_augmentation,
+        "value_scaling": {
+            "alpha_earnings_scale": alpha,
+            "beta_benefits_scale": beta,
+            "gamma_other_income_scale": gamma,
+            "gamma_probes": gamma_probes,
+            "earnings_columns": earnings_columns,
+            "social_security_columns": ss_columns,
+            "other_income_columns": other_income_columns,
+            "beneficiary_person_rows": int(beneficiary_person_mask.sum()),
+        },
+        "profile": {
+            "name": "v2-demo-values",
+            "description": (
+                "Light demographic entropy reweight to Trustees age "
+                "distribution, value rescaling to Trustees taxable payroll "
+                "and OASDI cost, final light entropy calibration to age, "
+                "Social Security, taxable payroll, and post-OBBBA TOB."
+            ),
+            "age_bucket_size": AGE_BUCKET_SIZE,
+            "calibration_method": "entropy",
+        },
+        "policyengine_us": {"version": policyengine_us_version},
+        "target_source": {
+            "name": "post_obbba_tob_75y",
+            "baseline_kind": "calibration_target",
+            "not_law": True,
+            "files": target_source_provenance(),
+        },
+        "tax_assumption": {
+            "name": TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
+            "start_year": TAX_ASSUMPTION_START_YEAR,
+            "end_year": TAX_ASSUMPTION_END_YEAR,
+            "active": year >= TAX_ASSUMPTION_START_YEAR,
+            "description": (
+                "Social Security benefit-tax thresholds fixed in nominal "
+                "dollars; IRS uprating follows the NAWI wage path from 2035."
+            ),
+        },
+        "sentinel": sentinel,
+    }
+    write_json(Path(f"{output_path}.metadata.json"), metadata)
+    _log(f"  wrote {output_path} ({elapsed:,.0f}s)")
+    return sentinel

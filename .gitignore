@@ -27,3 +27,4 @@ venv/
 policy-impact-dashboard/build/
 policy-impact-dashboard/node_modules/
 projected_datasets_snapshots/
+projected_datasets_v2/
