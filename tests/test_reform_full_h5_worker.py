@@ -126,6 +126,17 @@ def test_behavioral_scoring_uses_behavioral_reform_alias(monkeypatch):
     assert build_policy_reform("option1", "conventional") == ("option1", marker)
 
 
+def test_behavioral_scoring_accepts_custom_reform(monkeypatch):
+    marker = object()
+
+    monkeypatch.setattr(
+        "src.reforms.get_reverse_roth_conventional_reform",
+        lambda: marker,
+    )
+
+    assert build_policy_reform("reverse_roth", "behavioral") is marker
+
+
 def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     baseline_reform = object()
     baseline_system = SimpleNamespace(simulation=None)

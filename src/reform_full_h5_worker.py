@@ -90,13 +90,23 @@ def _option_static_reform(reform_id: str) -> Any:
     return function()
 
 
+def _coerce_policy_reform(reform_definition: Any) -> Any:
+    if isinstance(reform_definition, dict):
+        return Reform.from_dict(reform_definition, country_id="us")
+    return reform_definition
+
+
 def _option_behavioral_reform(reform_id: str) -> Any:
     from . import reforms as crfb_reforms
 
-    function = getattr(crfb_reforms, f"get_{reform_id}_conventional_dict", None)
+    function = getattr(crfb_reforms, f"get_{reform_id}_behavioral_reform", None)
+    if function is None:
+        function = getattr(crfb_reforms, f"get_{reform_id}_conventional_reform", None)
+    if function is None:
+        function = getattr(crfb_reforms, f"get_{reform_id}_conventional_dict", None)
     if function is None:
         raise KeyError(f"Unknown behavioral reform: {reform_id}")
-    return Reform.from_dict(function(), country_id="us")
+    return _coerce_policy_reform(function())
 
 
 def build_policy_reform(reform_id: str, scoring_type: str) -> Any:

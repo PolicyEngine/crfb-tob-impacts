@@ -40,6 +40,10 @@ try:
         get_option8_reform,
         get_option9_conventional_dict,
         get_option9_reform,
+        get_reverse_roth_conventional_reform,
+        get_reverse_roth_reform,
+        get_tax93_conventional_dict,
+        get_tax93_reform,
     )
     from .tax_assumption_loader import (
         TaxAssumptionContract,
@@ -72,6 +76,10 @@ except ImportError:  # pragma: no cover - script execution fallback
         get_option8_reform,
         get_option9_conventional_dict,
         get_option9_reform,
+        get_reverse_roth_conventional_reform,
+        get_reverse_roth_reform,
+        get_tax93_conventional_dict,
+        get_tax93_reform,
     )
     from tax_assumption_loader import (
         TaxAssumptionContract,
@@ -93,6 +101,8 @@ STATIC_REFORM_FUNCTIONS = {
     "option10": get_option10_reform,
     "option11": get_option11_reform,
     "option12": get_option12_reform,
+    "reverse_roth": get_reverse_roth_reform,
+    "tax93": get_tax93_reform,
 }
 
 CONVENTIONAL_REFORM_DICT_FUNCTIONS = {
@@ -108,6 +118,8 @@ CONVENTIONAL_REFORM_DICT_FUNCTIONS = {
     "option10": get_option10_conventional_dict,
     "option11": get_option11_conventional_dict,
     "option12": get_option12_conventional_dict,
+    "reverse_roth": get_reverse_roth_conventional_reform,
+    "tax93": get_tax93_conventional_dict,
 }
 
 OPTION6_PHASE_IN_RATES = {
@@ -405,15 +417,13 @@ def _aligned_metric_array(
     valid_positions = positions < sorted_source_ids.size
     matched = np.zeros(target_ids.shape, dtype=bool)
     matched[valid_positions] = (
-        sorted_source_ids[positions[valid_positions]]
-        == target_ids[valid_positions]
+        sorted_source_ids[positions[valid_positions]] == target_ids[valid_positions]
     )
     if not bool(np.all(matched)):
         missing = target_ids[~matched]
         preview = ", ".join(str(value) for value in missing[:5])
         raise ValueError(
-            "Baseline household metrics are missing reform household_ids: "
-            + preview
+            "Baseline household metrics are missing reform household_ids: " + preview
         )
     return values[order][positions]
 
@@ -488,9 +498,7 @@ def scenario_aggregate_to_dict(
         "social_security": float(aggregate.social_security),
         "taxable_payroll": float(aggregate.taxable_payroll),
         "employer_ss_tax_revenue": float(aggregate.employer_ss_tax_revenue),
-        "employer_medicare_tax_revenue": float(
-            aggregate.employer_medicare_tax_revenue
-        ),
+        "employer_medicare_tax_revenue": float(aggregate.employer_medicare_tax_revenue),
     }
 
 
@@ -505,9 +513,7 @@ def scenario_aggregate_from_dict(
         social_security=float(values["social_security"]),
         taxable_payroll=float(values["taxable_payroll"]),
         employer_ss_tax_revenue=float(values["employer_ss_tax_revenue"]),
-        employer_medicare_tax_revenue=float(
-            values["employer_medicare_tax_revenue"]
-        ),
+        employer_medicare_tax_revenue=float(values["employer_medicare_tax_revenue"]),
     )
 
 
@@ -702,9 +708,7 @@ def _sample_household_indices(
         return values / np.mean(positive_values)
 
     size_measure = np.abs(household_weights) * (
-        1
-        + normalized(household_social_security)
-        + normalized(household_earnings)
+        1 + normalized(household_social_security) + normalized(household_earnings)
     )
     size_measure = np.where(size_measure > 0, size_measure, 1)
     eligible_by_size = eligible_indices[
@@ -1098,7 +1102,9 @@ def compute_scenario_household_metrics_aggregate_and_raw_h5(
     household_ids = np.asarray(household_microseries.values)
     log_step(f"household_id done ({household_ids.shape[0]} households)")
     log_step("income_tax start")
-    income_tax_microseries = sim.calculate("income_tax", map_to="household", period=year)
+    income_tax_microseries = sim.calculate(
+        "income_tax", map_to="household", period=year
+    )
     income_tax = _float_array(income_tax_microseries.values)
     log_step("income_tax done")
     log_step("tob_revenue_medicare_hi start")
@@ -1492,7 +1498,7 @@ def build_reform(
     reform_id: str,
     scoring_type: str,
     reform_functions: dict[str, Callable[[], Any]],
-    conventional_functions: dict[str, Callable[[], dict[str, Any]]],
+    conventional_functions: dict[str, Callable[[], Any]],
 ) -> Any:
     if scoring_type == "static":
         reform_func = reform_functions.get(reform_id)
@@ -1504,8 +1510,10 @@ def build_reform(
         conventional_dict_func = conventional_functions.get(reform_id)
         if conventional_dict_func is None:
             raise KeyError(f"No conventional dict for: {reform_id}")
-        reform_params = conventional_dict_func()
-        return Reform.from_dict(reform_params, country_id="us")
+        reform_definition = conventional_dict_func()
+        if isinstance(reform_definition, dict):
+            return Reform.from_dict(reform_definition, country_id="us")
+        return reform_definition
 
     raise ValueError(f"Invalid scoring type: {scoring_type}")
 
