@@ -13,10 +13,10 @@ than the v1 (``ss-payroll-tob``) stack:
   full target family (age, Social Security, taxable payroll, OASDI TOB,
   HI TOB) exactly. Because values are pre-scaled, the final pass needs only
   a small tilt, keeping the effective sample size high.
-- **TOB targets are post-OBBBA.** The model law (policyengine-us) includes
-  OBBBA, so datasets calibrate to the post-OBBBA taxation-of-benefits
-  baseline (``data/ssa_tob_baseline_75year.csv``) rather than the pre-OBBBA
-  current-law series used by the v1 datasets.
+- **TOB targets are TR2026 current law.** The 2026 Trustees Reports
+  include OBBBA in current law, so datasets calibrate to the TR2026
+  taxation-of-benefits series directly — consistent with the model law
+  and free of the TR2025 post-OBBBA bridge the v1 datasets predated.
 
 The entropy solver follows the positive entropy-balancing approach in
 ``policyengine-us-data`` ``datasets/cps/long_term/calibration.py`` at commit
@@ -96,8 +96,9 @@ def _sha256(path: Path) -> str:
 def load_population_age_targets(year: int) -> tuple[np.ndarray, np.ndarray]:
     """Return (ages 0..85, population totals) for ``year``.
 
-    Source: SSA Trustees Social Security area population by single year of
-    age (``SSPopJul_TR2024.csv``). Ages above 85 collapse into the 85+ slot.
+    Source: TR2026 V.A3 age-group totals applied to the TR2024
+    single-year-age shape (``SSPopJul_TR2026_interim.csv``). Ages above 85
+    collapse into the 85+ slot.
     """
     table = pd.read_csv(POPULATION_FILE)
     rows = table[table.Year == year]
@@ -110,7 +111,7 @@ def load_population_age_targets(year: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 def load_economic_targets(year: int) -> dict[str, float]:
-    """Trustees 2025 OASDI cost and taxable payroll targets in dollars."""
+    """TR2026 OASDI cost and taxable payroll targets in dollars."""
     table = pd.read_csv(ECONOMIC_FILE).set_index("year")
     if year not in table.index:
         raise ValueError(f"No Trustees economic projection for {year}.")
