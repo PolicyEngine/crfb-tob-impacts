@@ -159,11 +159,11 @@ INCOME_GUARD_START_YEAR = 2026
 # is thin. Follows the v1 donor-backed approach (real donors, perturbed
 # clones, small priors), restated for the v2 value-scaled frames.
 DONOR_CLONE_START_YEAR = 2075
-DONOR_CLONE_TOP_HOUSEHOLDS = 3_000
-DONOR_CLONES_PER_HOUSEHOLD = 6
-DONOR_CLONE_PRIOR_SCALE = 0.12
-DONOR_CLONE_OTHER_INCOME_SIGMA = 0.30
-DONOR_CLONE_BENEFIT_SIGMA = 0.15
+DONOR_CLONE_TOP_HOUSEHOLDS = 4_000
+DONOR_CLONES_PER_HOUSEHOLD = 8
+DONOR_CLONE_PRIOR_SCALE = 0.10
+DONOR_CLONE_OTHER_INCOME_SIGMA = 0.35
+DONOR_CLONE_BENEFIT_SIGMA = 0.18
 
 AGE_BUCKET_SIZE = 5
 
@@ -179,6 +179,33 @@ AGE_BUCKET_SIZE = 5
 INPUT_REPAIR_CAPS = {
     "miscellaneous_income": 10_000_000.0,
 }
+
+# Long-run growth harmonization: the SOI uprating extensions packaged in
+# policyengine-us grow several income categories faster than the economy
+# forever (qualified dividends at about 5% per year against TR2026
+# nominal GDP near 3.5%), so AGI outruns GDP at far horizons. Through
+# 2034 the CBO-vintage growth stands; from 2035 each category's
+# cumulative growth is capped at the TR2026 nominal-GDP path.
+GROWTH_CAP_BASE_YEAR = 2034
+GROWTH_CAP_VARIABLES = (
+    "taxable_interest_income",
+    "tax_exempt_interest_income",
+    "qualified_dividend_income",
+    "non_qualified_dividend_income",
+    "long_term_capital_gains",
+    "short_term_capital_gains",
+    "non_sch_d_capital_gains",
+    "taxable_ira_distributions",
+    "taxable_pension_income",
+    "tax_exempt_pension_income",
+    "rental_income",
+    "farm_rent_income",
+    "estate_income",
+    "partnership_s_corp_income",
+    "miscellaneous_income",
+    "qualified_bdc_income",
+    "qualified_reit_and_ptp_income",
+)
 
 
 def _log(message: str) -> None:
@@ -267,6 +294,46 @@ def _project_variable_to_person_rows(sim, df, *, var_name, year, base_period):
     if aligned.isna().any():
         raise ValueError(f"{var_name}: unmapped person rows.")
     return np.asarray(aligned.values)
+
+
+def _tr2026_gdp_growth(from_year: int, to_year: int) -> float:
+    table = pd.read_csv(
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "social_security_aux_tr2026.csv"
+    ).set_index("year")
+    return float(
+        table.loc[to_year, "gdp_in_billion_nominal_usd"]
+        / table.loc[from_year, "gdp_in_billion_nominal_usd"]
+    )
+
+
+def cap_longrun_income_growth(df: pd.DataFrame, sim, year: int) -> dict:
+    """Cap each category's post-2034 cumulative growth at nominal GDP.
+
+    Returns {variable: factor} for the categories that were scaled down.
+    """
+    if year <= GROWTH_CAP_BASE_YEAR:
+        return {}
+    gdp_growth = _tr2026_gdp_growth(GROWTH_CAP_BASE_YEAR, year)
+    parameters = sim.tax_benefit_system.parameters
+    factors: dict[str, float] = {}
+    for variable_name in GROWTH_CAP_VARIABLES:
+        variable = sim.tax_benefit_system.variables.get(variable_name)
+        uprating = getattr(variable, "uprating", None) if variable else None
+        column = f"{variable_name}__{year}"
+        if uprating is None or column not in df.columns:
+            continue
+        parameter = parameters.get_child(uprating)
+        category_growth = float(
+            parameter(f"{year}-01-01") / parameter(f"{GROWTH_CAP_BASE_YEAR}-01-01")
+        )
+        if category_growth <= gdp_growth:
+            continue
+        factor = gdp_growth / category_growth
+        df[column] = df[column] * factor
+        factors[variable_name] = factor
+    return factors
 
 
 def repair_corrupt_inputs(df: pd.DataFrame, year: int) -> dict:
@@ -1139,6 +1206,7 @@ def build_year(
         },
         "support_augmentation": support_augmentation,
         "input_repairs": repair_log,
+        "longrun_growth_caps": growth_caps,
         "value_scaling": {
             "alpha_earnings_scale": alpha,
             "beta_benefits_scale": beta,
