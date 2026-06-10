@@ -147,7 +147,11 @@ INCOME_GUARD_GROUPS = {
         "qualified_reit_and_ptp_income",
     ),
 }
-INCOME_GUARD_START_YEAR = 2075
+# Guards apply to every year: without them the final calibration can
+# close taxation-of-benefits residuals by upweighting households heavy in
+# concentrated income types (the 2026 diagnostic showed miscellaneous and
+# partnership income doubling through the weight tilt alone).
+INCOME_GUARD_START_YEAR = 2026
 
 # Donor-clone late-year support: clone the strongest real
 # taxation-of-benefits contributor households with deterministic income
