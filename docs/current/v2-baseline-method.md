@@ -49,15 +49,26 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
     aggregate uprating series.
   - `gamma` rescales beneficiary households' non-earnings, non-benefit
     income (pensions, IRA distributions, interest, dividends, capital
-    gains, rents) so modeled total taxation of benefits reaches the
-    post-OBBBA target. This closes the TOB gap with values rather than
-    weight tilts.
-- **Stage D — final light calibration.** Entropy-balance from the Stage B
-  weights to hit all five target families exactly: age distribution,
-  Social Security benefits, taxable payroll, OASDI TOB, and HI TOB — the
-  TOB targets now being the **post-OBBBA** series
-  (`data/ssa_tob_baseline_75year.csv`). Because values already carry the
-  economics, this pass needs only a small tilt.
+    gains, rents) toward the Trustees taxation-of-benefits target,
+    best-effort: at far horizons the 85% inclusion cap saturates and TOB
+    becomes nearly inelastic to other income, so `gamma` is bounded and
+    the final calibration closes the remainder.
+- **Stage C3 — donor-clone support (2075 on).** Append deterministic
+  jittered clones of the strongest real taxation-of-benefits contributor
+  households (1,500 donors x 4 clones at one-tenth prior weight), then
+  re-solve the value scales on the augmented frame. This follows the v1
+  donor-backed approach in spirit, restated for the value-scaled frames,
+  and keeps late-year contributor support dense enough to pass the
+  publication gates without free synthetic records.
+- **Stage D — final light calibration.** Entropy-balance from the
+  demographic weights to hit all target families exactly: age
+  distribution, Social Security benefits, taxable payroll, and the
+  TR2026 current-law OASDI and HI taxation-of-benefits series. From 2075
+  the calibration also pins two self-referential income guards (ordinary
+  non-payroll income and preferential investment income, as in v1) so
+  weight tilts cannot inflate other income to reach the TOB target.
+  Because values already carry the economics, the early-year pass needs
+  only a small tilt; late years lean on the donor support.
 
 Validation is artifact-true: target vectors for Stage D come from a
 simulation over the written H5 (with the
@@ -82,9 +93,10 @@ that earlier drafts of this work carried.
 
 ## Differences from v1, by design
 
-- **No donor-backed synthetic support.** With values at year-Y scale, the
-  TOB-contributing population is broad enough that late years calibrate
-  exactly on real records alone.
+- **Slimmer late-year support.** Values at year-Y scale keep the
+  TOB-contributing population broad, so donor support starts later, uses
+  simple jittered clones of real contributor households, and drops the
+  synthetic blueprint machinery.
 - **TR2026 current-law TOB is the calibration target** (OBBBA included
   natively), so dataset TOB equals the published baseline and the
   post-OBBBA gap columns vanish.
