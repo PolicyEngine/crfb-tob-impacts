@@ -5,10 +5,12 @@ can do it stepwise with sentinels to see the data you can also rerun the
 modal reform analysis (just every 5y)". Stepwise-with-sentinels is binding:
 one paid sentinel cell, inspect the data, then the full panel.
 
-Panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × `option1–option12`
-× `static` = 192 cells, followed by behavioral endpoints
-(`2026, 2100` × 12 = 24 cells) under a second approval. Estimated compute
-from v1 actuals (~$0.16/static cell, ~$1/behavioral cell): ≈$55 total.
+Panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × 14 reforms
+(`option1–option12`, `reverse_roth`, `tax93`) × `static` = 224 cells,
+followed by behavioral endpoints (`2026, 2100` × 14 = 28 cells) under a
+second approval. The reverse-Roth and 93% options come from the May 22,
+2026 CRFB meeting (Sarney/Colavito). Estimated compute from v1 actuals
+(~$0.16/static cell, ~$1/behavioral cell): ≈$65 total.
 
 ## Sequence
 
