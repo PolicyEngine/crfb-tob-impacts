@@ -371,3 +371,23 @@ def test_donor_clones_are_deterministic():
     import pandas as pd
 
     pd.testing.assert_frame_equal(first, second)
+
+
+def test_repair_zeroes_corrupt_miscellaneous_income():
+    import pandas as pd
+
+    from src.v2_pipeline import repair_corrupt_inputs
+
+    year = 2026
+    df = pd.DataFrame(
+        {
+            f"miscellaneous_income__{year}": [500.0, 795_294_848.0, 0.0],
+            f"employment_income_before_lsr__{year}": [50_000.0, 60_000.0, 0.0],
+        }
+    )
+    log = repair_corrupt_inputs(df, year)
+    assert log["miscellaneous_income"]["records_zeroed"] == 1
+    assert log["miscellaneous_income"]["amount_zeroed"] == 795_294_848.0
+    assert df[f"miscellaneous_income__{year}"].tolist() == [500.0, 0.0, 0.0]
+    # Plausible values and other variables are untouched.
+    assert df[f"employment_income_before_lsr__{year}"].sum() == 110_000.0

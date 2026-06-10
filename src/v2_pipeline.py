@@ -167,6 +167,19 @@ DONOR_CLONE_BENEFIT_SIGMA = 0.15
 
 AGE_BUCKET_SIZE = 5
 
+# Data repair at materialization. The published enhanced CPS stores
+# corrupt miscellaneous_income values: dozens of person records pinned at
+# exactly $795,294,848 (an imputation top-code artifact), summing to
+# $9.3T weighted against a real-world total near $100B. Uprated across
+# the 75-year horizon and amplified by donor cloning, these records
+# poison the income side and the TOB contributor pool. Values above the
+# threshold are unambiguously corrupt and are zeroed; the repair is
+# logged and stamped into metadata. Upstream fix tracked in
+# policyengine-us-data.
+INPUT_REPAIR_CAPS = {
+    "miscellaneous_income": 10_000_000.0,
+}
+
 
 def _log(message: str) -> None:
     print(message, flush=True)
@@ -254,6 +267,25 @@ def _project_variable_to_person_rows(sim, df, *, var_name, year, base_period):
     if aligned.isna().any():
         raise ValueError(f"{var_name}: unmapped person rows.")
     return np.asarray(aligned.values)
+
+
+def repair_corrupt_inputs(df: pd.DataFrame, year: int) -> dict:
+    """Zero out unambiguously corrupt input values; returns the repair log."""
+    log: dict = {}
+    for variable, cap in INPUT_REPAIR_CAPS.items():
+        column = f"{variable}__{year}"
+        if column not in df.columns:
+            continue
+        values = df[column].to_numpy()
+        corrupt = values > cap
+        if corrupt.any():
+            log[variable] = {
+                "cap": cap,
+                "records_zeroed": int(corrupt.sum()),
+                "amount_zeroed": float(values[corrupt].sum()),
+            }
+            df.loc[corrupt, column] = 0.0
+    return log
 
 
 def materialize_year_frame(sim, year: int) -> pd.DataFrame:
@@ -737,6 +769,13 @@ def build_year(
     # outputs and shadow their formulas downstream.
     sim = Microsimulation(dataset=base_dataset)
     df = materialize_year_frame(sim, year)
+    repair_log = repair_corrupt_inputs(df, year)
+    for variable, repair in repair_log.items():
+        _log(
+            f"  [repair] {variable}: zeroed {repair['records_zeroed']:,} "
+            f"records above ${repair['cap']:,.0f} "
+            f"(${repair['amount_zeroed'] / 1e9:,.1f}B unweighted)"
+        )
     cap = float(
         sim.tax_benefit_system.parameters(
             f"{year}-01-01"
@@ -1099,6 +1138,7 @@ def build_year(
             "validation_issues": [],
         },
         "support_augmentation": support_augmentation,
+        "input_repairs": repair_log,
         "value_scaling": {
             "alpha_earnings_scale": alpha,
             "beta_benefits_scale": beta,
