@@ -68,26 +68,34 @@ weights are written back in place. Publication gates from
 
 ## Targets and sources
 
+All targets come from the **2026 Trustees Reports** (released June 9,
+2026), whose current-law baseline includes OBBBA — eliminating the TR2025
+post-OBBBA bridge (OACT letter deltas and the provisional HI scaling)
+that earlier drafts of this work carried.
+
 | Target | Source file | Notes |
 | --- | --- | --- |
-| Population by single year of age | `data/SSPopJul_TR2024.csv` | TR2024 vintage, same as v1; TR2025 single-year ages are not published in machine-readable form |
-| OASDI benefits, taxable payroll | `data/social_security_aux_tr2025.csv` | 2025 Trustees Report |
-| OASDI + HI taxation of benefits | `data/ssa_tob_baseline_75year.csv` | Post-OBBBA baseline (OACT Aug 5, 2025 deltas; HI bridged by matching the OASDI percentage change) |
+| Population by single year of age | `data/SSPopJul_TR2026_interim.csv` | TR2026 V.A3 group totals (under 20 / 20-64 / 65+) applied to the TR2024 single-year shape; interim until SSA posts the TR2026 single-year file |
+| OASDI cost, taxable payroll | `data/social_security_aux_tr2026.csv` | TR2026 IV.B1 cost rate x VI.G1 payroll, intermediate assumptions |
+| OASDI taxation of benefits | `data/social_security_aux_tr2026.csv` | TR2026 IV.B2 percent of payroll x VI.G1 payroll |
+| HI taxation of benefits | `data/social_security_aux_tr2026.csv` | CMS 2026 Medicare Trustees expanded tables, annual through 2100 |
 
 ## Differences from v1, by design
 
 - **No donor-backed synthetic support.** With values at year-Y scale, the
   TOB-contributing population is broad enough that late years calibrate
   exactly on real records alone.
-- **Post-OBBBA TOB baseline is the calibration target**, so dataset TOB
-  equals the published baseline and the post-OBBBA gap columns vanish.
+- **TR2026 current-law TOB is the calibration target** (OBBBA included
+  natively), so dataset TOB equals the published baseline and the
+  post-OBBBA gap columns vanish.
 - **Demographics stay light.** Stage D tilts from the demographic solution
   by small ratios (about 1.3 at 2026) instead of three orders of magnitude.
 
 ## Known limitations
 
-- The age-distribution file is TR2024-vintage (as in v1); SSA blocks
-  automated retrieval of the TR2025 single-year population file.
+- The single-year age *shape* within broad groups is TR2024-vintage;
+  group levels are TR2026. SSA has not yet posted the TR2026
+  single-year-age population file.
 - The enhanced CPS household-weight level (~170M households after age
   calibration) exceeds administrative household counts, and modeled
   aggregate income tax exceeds administrative collections. Both are
@@ -101,3 +109,13 @@ weights are written back in place. Publication gates from
 - Sex and marital-status distributions are not yet calibration targets,
   although the Trustees population file provides them; they are candidate
   additions if TOB-by-filing-status composition needs tightening.
+
+## Wage-path vintage
+
+The model law's long-run wage indexing (`gov.ssa.nawi` and the payroll
+cap inside policyengine-us 1.700.2) follows the TR2025 intermediate
+path; TR2026's average wage index runs about 18% higher by 2100. The
+value-scaling stages pin taxable payroll, benefits, and TOB to TR2026
+aggregates regardless, so this affects only the within-model bracket
+positions of individual records. Updating the packaged NAWI path to
+TR2026 is a follow-up policyengine-us change.

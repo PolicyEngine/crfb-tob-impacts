@@ -3,7 +3,9 @@
 Authorization: Max, by chat on 2026-06-09 — "if you're really confident and
 can do it stepwise with sentinels to see the data you can also rerun the
 modal reform analysis (just every 5y)". Stepwise-with-sentinels is binding:
-one paid sentinel cell, inspect the data, then the full panel.
+one paid sentinel cell, inspect the data, then the full panel. All
+targets are the 2026 Trustees Reports (released June 9, 2026; OBBBA in
+current law).
 
 Panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × 14 reforms
 (`option1–option12`, `reverse_roth`, `tax93`) × `static` = 224 cells,
@@ -38,7 +40,7 @@ second approval. The reverse-Roth and 93% options come from the May 22,
 6. **Sentinel launch** — `modal run modal_batch/reform_full_h5.py::
    submit_reform_full_h5` with `launch_mode=sentinel`, the v2
    `dataset_template`, both manifests, and `wait_for_completion`. Set
-   `CRFB_REQUIRED_TARGET_SOURCE=post_obbba_tob_75y` so worker provenance
+   `CRFB_REQUIRED_TARGET_SOURCE=tr2026_current_law` so worker provenance
    records the v2 target source.
 7. **Sentinel verification** — R2 `scenario.h5` + `metadata.json` +
    `complete.json` exist; object SHA equals `metadata.output_h5_sha256`;

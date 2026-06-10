@@ -44,6 +44,19 @@ AUX_OUTPUT = REPO_ROOT / "data" / "social_security_aux_tr2026.csv"
 POPULATION_OUTPUT = REPO_ROOT / "data" / "SSPopJul_TR2026_interim.csv"
 MANIFEST_OUTPUT = REPO_ROOT / "data" / "tr2026_sources.manifest.json"
 
+HI_RATES_CSV = SOURCES / "HI Cost and Income Rates.csv"
+TR2025_AUX = REPO_ROOT / "data" / "social_security_aux_tr2025.csv"
+TR2025_HI = REPO_ROOT / "data" / "hi_expenditures_tr2025.csv"
+
+ECONOMIC_PROJECTIONS_OUTPUTS = (
+    REPO_ROOT / "data" / "ssa_economic_projections.csv",
+    REPO_ROOT / "dashboard" / "public" / "data" / "ssa_economic_projections.csv",
+)
+HI_PAYROLL_OUTPUT = (
+    REPO_ROOT / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv"
+)
+TRUST_FUND_GAPS_OUTPUT = REPO_ROOT / "data" / "trust_fund_gaps.csv"
+
 SOURCE_URLS = {
     "SingleYearTRTables_TR2026.xlsx": (
         "https://www.ssa.gov/oact/TR/2026/SingleYearTRTables_TR2026.xlsx"
@@ -223,6 +236,105 @@ def build_interim_single_year_population(groups: pd.DataFrame) -> pd.DataFrame:
     return interim
 
 
+def extract_hi_rates() -> pd.DataFrame:
+    """HI cost and income rates (% of HI taxable payroll) by year."""
+    with HI_RATES_CSV.open(encoding="utf-8-sig") as handle:
+        rows = list(csv.reader(handle))
+    records = []
+    for row in rows:
+        cell = (row[0] if row else "").strip()
+        if not cell.isdigit():
+            continue
+        try:
+            records.append(
+                {
+                    "year": int(cell),
+                    "hi_cost_rate": float(row[1]),
+                    "hi_income_rate": float(row[2]),
+                }
+            )
+        except (ValueError, IndexError):
+            continue
+    frame = pd.DataFrame(records).drop_duplicates("year", keep="last")
+    return frame.set_index("year")
+
+
+def write_dashboard_denominators(aux: pd.DataFrame) -> None:
+    """Refresh dashboard payroll/GDP denominators and trust-fund gaps."""
+    projections = aux.rename(
+        columns={
+            "taxable_payroll_in_billion_nominal_usd": "taxable_payroll",
+            "gdp_in_billion_nominal_usd": "gdp",
+        }
+    )[["year", "taxable_payroll", "gdp"]]
+    projections = projections[projections.year >= 2026].round(1)
+    for output in ECONOMIC_PROJECTIONS_OUTPUTS:
+        projections.to_csv(output, index=False)
+        print(f"wrote {output}")
+
+    # HI taxable payroll: scale the TR2026 OASDI payroll by the TR2025
+    # HI/OASDI payroll ratio (display denominator only; the Medicare
+    # expanded tables do not publish HI payroll levels directly).
+    tr2025 = pd.read_csv(TR2025_AUX).set_index("year")
+    tr2025_hi = pd.read_csv(TR2025_HI)[["year", "hi_taxable_payroll"]]
+    tr2025_hi["hi_taxable_payroll"] = tr2025_hi.hi_taxable_payroll / 1e9
+    tr2025_hi = tr2025_hi.set_index("year")
+    dashboard_hi = pd.read_csv(HI_PAYROLL_OUTPUT).set_index("year")
+    rows = []
+    for year in projections.year:
+        if year in tr2025_hi.index:
+            hi_2025 = float(tr2025_hi.loc[year, "hi_taxable_payroll"])
+        elif year in dashboard_hi.index:
+            hi_2025 = float(dashboard_hi.loc[year, "hi_taxable_payroll"])
+        else:
+            continue
+        ratio = hi_2025 / float(
+            tr2025.loc[year, "taxable_payroll_in_billion_nominal_usd"]
+        )
+        payroll_2026 = float(
+            projections.loc[projections.year == year, "taxable_payroll"].iloc[0]
+        )
+        rows.append(
+            {"year": year, "hi_taxable_payroll": round(ratio * payroll_2026, 6)}
+        )
+    pd.DataFrame(rows).to_csv(HI_PAYROLL_OUTPUT, index=False)
+    print(f"wrote {HI_PAYROLL_OUTPUT} ({len(rows)} years)")
+
+    workbook = openpyxl.load_workbook(WORKBOOK, read_only=True)
+    oasdi_income = _sheet_year_series(
+        workbook["IV.B1"], 7, label="IV.B1 OASDI income rate"
+    )
+    oasdi_cost = _sheet_year_series(
+        workbook["IV.B1"], 8, label="IV.B1 OASDI cost rate"
+    )
+    hi_rates = extract_hi_rates()
+    gap_rows = []
+    for year in YEARS:
+        if year < 2026 or year not in hi_rates.index:
+            continue
+        gap_rows.append(
+            {
+                "year": year,
+                "oasdi_cost_rate": round(oasdi_cost[year], 2),
+                "oasdi_income_rate": round(oasdi_income[year], 2),
+                "oasdi_gap_pct": round(
+                    oasdi_cost[year] - oasdi_income[year], 2
+                ),
+                "hi_cost_rate": round(hi_rates.loc[year, "hi_cost_rate"], 2),
+                "hi_income_rate": round(
+                    hi_rates.loc[year, "hi_income_rate"], 2
+                ),
+                "hi_gap_pct": round(
+                    hi_rates.loc[year, "hi_cost_rate"]
+                    - hi_rates.loc[year, "hi_income_rate"],
+                    2,
+                ),
+            }
+        )
+    pd.DataFrame(gap_rows).to_csv(TRUST_FUND_GAPS_OUTPUT, index=False)
+    print(f"wrote {TRUST_FUND_GAPS_OUTPUT} ({len(gap_rows)} years)")
+
+
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -235,6 +347,8 @@ def main() -> int:
     print(f"wrote {AUX_OUTPUT} ({len(aux)} years)")
     sample = aux[aux.year.isin([2026, 2050, 2100])].round(2)
     print(sample.to_string(index=False))
+
+    write_dashboard_denominators(aux)
 
     groups = extract_population_groups()
     interim = build_interim_single_year_population(groups)
