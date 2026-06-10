@@ -22,6 +22,7 @@ import type { NameType, ValueType } from "recharts/types/component/DefaultToolti
 import { useEffect, useState } from "react";
 
 import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
+import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-section";
 import { BalancedFixSection } from "@/components/balanced-fix-section";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -710,7 +711,10 @@ export function DashboardShell() {
           </section>
 
           {activeTab === "baseline" ? (
-            <BaselineAssumptionsSection />
+            <>
+              <BaselineAssumptionsSection />
+              <BaselineDiagnosticsSection />
+            </>
           ) : activeTab === "balancedFix" ? (
             <BalancedFixSection />
           ) : loading ? (

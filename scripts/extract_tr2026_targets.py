@@ -124,6 +124,19 @@ def extract_ssa_series() -> pd.DataFrame:
         workbook["IV.B2"], 10, label="IV.B2 OASDI TOB % of payroll"
     )
 
+    covered_workers = _sheet_year_series(
+        workbook["IV.B4"], 1, label="IV.B4 covered workers"
+    )
+    oasi_beneficiaries = _sheet_year_series(
+        workbook["IV.B4"], 2, label="IV.B4 OASI beneficiaries"
+    )
+    di_beneficiaries = _sheet_year_series(
+        workbook["IV.B4"], 3, label="IV.B4 DI beneficiaries"
+    )
+    oasdi_beneficiaries = _sheet_year_series(
+        workbook["IV.B4"], 4, label="IV.B4 OASDI beneficiaries"
+    )
+
     rows = []
     for year in YEARS:
         rows.append(
@@ -140,6 +153,10 @@ def extract_ssa_series() -> pd.DataFrame:
                 "oasdi_tob_billions_nominal_usd": round(
                     tob_pct[year] / 100.0 * payroll[year], 4
                 ),
+                "covered_workers_thousands": covered_workers.get(year),
+                "oasi_beneficiaries_thousands": oasi_beneficiaries.get(year),
+                "di_beneficiaries_thousands": di_beneficiaries.get(year),
+                "oasdi_beneficiaries_thousands": oasdi_beneficiaries.get(year),
             }
         )
     return pd.DataFrame(rows)

@@ -104,7 +104,11 @@ OTHER_INCOME_SCALE_CANDIDATES = (
     "miscellaneous_income",
 )
 
-GAMMA_MAX = 2.0
+# Gamma is a bounded calibration nudge, not a free knob: at 1.25 it can
+# close modest TOB gaps, but larger values distort the income side (the
+# 2026 diagnostic run with gamma 1.62 pushed AGI far above GDP). The
+# final calibration and donor support absorb any residual.
+GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
 
@@ -151,11 +155,11 @@ INCOME_GUARD_START_YEAR = 2075
 # is thin. Follows the v1 donor-backed approach (real donors, perturbed
 # clones, small priors), restated for the v2 value-scaled frames.
 DONOR_CLONE_START_YEAR = 2075
-DONOR_CLONE_TOP_HOUSEHOLDS = 1_500
-DONOR_CLONES_PER_HOUSEHOLD = 4
-DONOR_CLONE_PRIOR_SCALE = 0.10
-DONOR_CLONE_OTHER_INCOME_SIGMA = 0.18
-DONOR_CLONE_BENEFIT_SIGMA = 0.10
+DONOR_CLONE_TOP_HOUSEHOLDS = 3_000
+DONOR_CLONES_PER_HOUSEHOLD = 6
+DONOR_CLONE_PRIOR_SCALE = 0.12
+DONOR_CLONE_OTHER_INCOME_SIGMA = 0.30
+DONOR_CLONE_BENEFIT_SIGMA = 0.15
 
 AGE_BUCKET_SIZE = 5
 
@@ -440,6 +444,7 @@ def _household_vectors(sim, year: int):
         "oasdi_tob": hh("tob_revenue_oasdi"),
         "hi_tob": hh("tob_revenue_medicare_hi"),
         "income_tax": hh("income_tax"),
+        "agi": hh("adjusted_gross_income"),
     }
 
 
@@ -669,6 +674,15 @@ def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
         if total is not None and np.abs(total).sum() > 1e-6:
             groups[f"income_guard_{group_name}"] = total
     return groups
+
+
+def _gdp_for_year(year: int) -> float:
+    table = pd.read_csv(
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "social_security_aux_tr2026.csv"
+    ).set_index("year")
+    return float(table.loc[year, "gdp_in_billion_nominal_usd"]) * 1e9
 
 
 def _tax_assumption_reform(year: int):
@@ -977,6 +991,20 @@ def build_year(
         for name in ("ss_total", "payroll_total", "oasdi_tob", "hi_tob")
     }
     _gap_table("stage D: final calibration", achieved_final, all_targets)
+    gdp = _gdp_for_year(year)
+    agi_total = float(vectors["agi"] @ final_weights)
+    income_tax_total_check = float(vectors["income_tax"] @ final_weights)
+    _log(
+        f"  [income side] AGI ${agi_total / 1e12:,.1f}T "
+        f"({agi_total / gdp:.0%} of GDP), income tax "
+        f"${income_tax_total_check / 1e12:,.1f}T "
+        f"({income_tax_total_check / gdp:.0%} of GDP)"
+    )
+    if agi_total / gdp > 1.0:
+        _log(
+            "    WARNING: AGI exceeds GDP; the income side is not "
+            "plausible. Inspect gamma and the calibration tilt."
+        )
     _log(
         f"  [stage D] ESS {audit_d['effective_sample_size']:,.0f}, positive "
         f"{audit_d['positive_weight_count']:,}/{n_households:,}, top-10 share "
