@@ -189,8 +189,7 @@ def _ensure_person_level_identity_inputs(df, sim, *, base_period):
         values = _person_level_values(sim, variable, period=base_period)
         if len(values) != person_rows:
             raise ValueError(
-                f"{variable} mapped to {len(values)} rows; "
-                f"expected {person_rows}."
+                f"{variable} mapped to {len(values)} rows; expected {person_rows}."
             )
         output[column] = values
     return output
@@ -208,9 +207,7 @@ def _pseudo_input_variables(sim) -> set[str]:
             continue
         for component in adds:
             component_variable = tbs.variables.get(component)
-            if component_variable and len(
-                getattr(component_variable, "formulas", {})
-            ):
+            if component_variable and len(getattr(component_variable, "formulas", {})):
                 pseudo.add(var_name)
                 break
     return pseudo
@@ -242,9 +239,7 @@ def _project_variable_to_person_rows(sim, df, *, var_name, year, base_period):
     )
     if membership_column is None:
         raise ValueError(f"No membership column for {var_name} ({entity_key}).")
-    entity_ids = np.asarray(
-        sim.calculate(f"{entity_key}_id", map_to=entity_key).values
-    )
+    entity_ids = np.asarray(sim.calculate(f"{entity_key}_id", map_to=entity_key).values)
     if len(entity_ids) != len(values):
         raise ValueError(f"Cannot align {var_name} on {entity_key}.")
     aligned = df[membership_column].map(dict(zip(entity_ids, values)))
@@ -299,9 +294,9 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
         "household_id", period=year, map_to="household"
     ).values
     hh_to_weight = dict(zip(household_ids, np.asarray(household_weights)))
-    df[f"household_weight__{year}"] = df[
-        f"person_household_id__{year}"
-    ].map(hh_to_weight)
+    df[f"household_weight__{year}"] = df[f"person_household_id__{year}"].map(
+        hh_to_weight
+    )
     df = df.drop(
         columns=[
             f"household_weight__{base_period}",
@@ -418,8 +413,7 @@ def update_h5_household_weights(
         stored = handle[key]
         if stored.shape != household_weights.shape:
             raise RuntimeError(
-                f"household_weight shape {stored.shape} != "
-                f"{household_weights.shape}"
+                f"household_weight shape {stored.shape} != {household_weights.shape}"
             )
         stored[...] = household_weights
 
@@ -489,22 +483,18 @@ def _solve_other_income_gamma(
 
     def total_tob_at(gamma: float) -> float:
         probe_df = df.copy()
-        scaled = probe_df.loc[
-            beneficiary_person_mask, other_income_columns
-        ] * gamma
+        scaled = probe_df.loc[beneficiary_person_mask, other_income_columns] * gamma
         probe_df.loc[beneficiary_person_mask, other_income_columns] = scaled
         sim = _sim_from_frame(probe_df, year, reform)
         vectors = _household_vectors(sim, year)
         del sim
         gc.collect()
-        total = float(
-            (vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights
-        )
+        total = float((vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights)
         probes.append({"gamma": gamma, "total_tob": total})
         _log(
             f"    [gamma probe] gamma={gamma:.3f} -> total TOB "
-            f"${total/1e9:,.1f}B vs target ${target_total/1e9:,.1f}B "
-            f"({total/target_total - 1:+.1%})"
+            f"${total / 1e9:,.1f}B vs target ${target_total / 1e9:,.1f}B "
+            f"({total / target_total - 1:+.1%})"
         )
         return total
 
@@ -521,9 +511,7 @@ def _solve_other_income_gamma(
         total_next = total_tob_at(gamma_next)
         implied = None
         if total_next > 0 and total > 0 and gamma_next != gamma:
-            implied = float(
-                np.log(total_next / total) / np.log(gamma_next / gamma)
-            )
+            implied = float(np.log(total_next / total) / np.log(gamma_next / gamma))
             if 0.2 < implied < 6:
                 elasticity = implied
         gamma, total = gamma_next, total_next
@@ -538,7 +526,7 @@ def _solve_other_income_gamma(
     best = min(probes, key=lambda p: abs(p["total_tob"] / target_total - 1))
     _log(
         f"    [gamma] best-effort gamma={best['gamma']:.3f} leaves TOB gap "
-        f"{best['total_tob']/target_total - 1:+.1%}; final calibration "
+        f"{best['total_tob'] / target_total - 1:+.1%}; final calibration "
         "closes the remainder"
     )
     return best["gamma"], probes
@@ -674,9 +662,7 @@ def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
             if component not in sim.tax_benefit_system.variables:
                 continue
             values = np.asarray(
-                sim.calculate(
-                    component, period=year, map_to="household"
-                ).values,
+                sim.calculate(component, period=year, map_to="household").values,
                 dtype=float,
             )
             total = values if total is None else total + values
@@ -700,8 +686,8 @@ def _gap_table(label: str, achieved: dict, targets: dict) -> None:
     for name, target in targets.items():
         value = achieved[name]
         _log(
-            f"    {name:>14}: ${value/1e9:>10,.1f}B vs "
-            f"${target/1e9:>10,.1f}B ({value/target - 1:+.2%})"
+            f"    {name:>14}: ${value / 1e9:>10,.1f}B vs "
+            f"${target / 1e9:>10,.1f}B ({value / target - 1:+.2%})"
         )
 
 
@@ -747,8 +733,8 @@ def build_year(
     del sim
     gc.collect()
 
-    household_ids, person_household_index, ages, base_weights = (
-        household_structure(df, year)
+    household_ids, person_household_index, ages, base_weights = household_structure(
+        df, year
     )
     n_households = len(household_ids)
     age_matrix, _ = build_household_age_bin_matrix(
@@ -756,13 +742,11 @@ def build_year(
     )
 
     raw_population = float(base_weights @ age_matrix.sum(axis=1))
-    raw_share_65 = float(
-        base_weights @ age_matrix[:, 13:].sum(axis=1)
-    ) / raw_population
+    raw_share_65 = float(base_weights @ age_matrix[:, 13:].sum(axis=1)) / raw_population
     target_share_65 = float(age_targets[13:].sum() / age_targets.sum())
     _log(
-        f"  [stage A] population {raw_population/1e6:,.1f}M vs target "
-        f"{age_targets.sum()/1e6:,.1f}M; 65+ share {raw_share_65:.1%} vs "
+        f"  [stage A] population {raw_population / 1e6:,.1f}M vs target "
+        f"{age_targets.sum() / 1e6:,.1f}M; 65+ share {raw_share_65:.1%} vs "
         f"target {target_share_65:.1%}"
     )
 
@@ -808,9 +792,7 @@ def build_year(
         f"({len(earnings_columns)} earnings cols, {len(ss_columns)} SS cols)"
     )
 
-    df[f"household_weight__{year}"] = demographic_weights[
-        person_household_index
-    ]
+    df[f"household_weight__{year}"] = demographic_weights[person_household_index]
 
     # ----- Stage C-gamma: other income of beneficiary households -----
     reform = _tax_assumption_reform(year)
@@ -858,8 +840,7 @@ def build_year(
         df, support_augmentation = _append_donor_clones(
             df,
             year,
-            tob_by_household=probe_vectors["oasdi_tob"]
-            + probe_vectors["hi_tob"],
+            tob_by_household=probe_vectors["oasdi_tob"] + probe_vectors["hi_tob"],
             household_ids=household_ids,
             person_household_index=person_household_index,
             weights=demographic_weights,
@@ -926,9 +907,7 @@ def build_year(
     if not np.array_equal(sim2_household_ids, household_ids):
         raise RuntimeError("Household order changed between stages.")
     guard_vectors = (
-        _income_guard_vectors(sim2, year)
-        if year >= INCOME_GUARD_START_YEAR
-        else {}
+        _income_guard_vectors(sim2, year) if year >= INCOME_GUARD_START_YEAR else {}
     )
     del sim2
     gc.collect()
@@ -938,11 +917,12 @@ def build_year(
         for name in ("ss_total", "payroll_total", "oasdi_tob", "hi_tob")
     }
     all_targets = {**economic_targets, **tob_targets}
-    _gap_table("stage C2: post-scaling, pre-final-calibration", achieved_scaled, all_targets)
+    _gap_table(
+        "stage C2: post-scaling, pre-final-calibration", achieved_scaled, all_targets
+    )
 
     payroll_gap = (
-        achieved_scaled["payroll_total"] / economic_targets["payroll_total"]
-        - 1
+        achieved_scaled["payroll_total"] / economic_targets["payroll_total"] - 1
     )
     if abs(payroll_gap) > 0.02:
         raise RuntimeError(
@@ -952,15 +932,13 @@ def build_year(
 
     # ----- Stage D: final light calibration -----
     guard_targets = {
-        name: float(values @ start_weights)
-        for name, values in guard_vectors.items()
+        name: float(values @ start_weights) for name, values in guard_vectors.items()
     }
     if guard_targets:
         _log(
             "  [income guards] "
             + ", ".join(
-                f"{name.removeprefix('income_guard_')} "
-                f"${target/1e9:,.0f}B"
+                f"{name.removeprefix('income_guard_')} ${target / 1e9:,.0f}B"
                 for name, target in guard_targets.items()
             )
         )
@@ -1053,9 +1031,7 @@ def build_year(
             for metric, value in audit.items()
         },
         "donor_clone_household_count": (
-            support_augmentation["clone_household_count"]
-            if support_augmentation
-            else 0
+            support_augmentation["clone_household_count"] if support_augmentation else 0
         ),
         "gates_passed": gates["passed"],
     }
@@ -1068,9 +1044,7 @@ def build_year(
         "calibration_audit": {
             "calibration_quality": "exact",
             "method_used": "entropy",
-            "max_constraint_pct_error": solve_info[
-                "max_constraint_pct_error"
-            ],
+            "max_constraint_pct_error": solve_info["max_constraint_pct_error"],
             **{f"stage_b_{k}": v for k, v in audit_b.items()},
             **audit_d,
             "constraints": {

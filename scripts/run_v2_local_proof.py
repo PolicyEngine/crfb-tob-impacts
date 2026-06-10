@@ -33,9 +33,7 @@ def main() -> int:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--baseline-manifest", required=True)
     parser.add_argument("--run-prefix", required=True)
-    parser.add_argument(
-        "--output-root", default="tmp/full_h5_local_proof_v2"
-    )
+    parser.add_argument("--output-root", default="tmp/full_h5_local_proof_v2")
     parser.add_argument("--schema-output", default=None)
     args = parser.parse_args()
 
@@ -49,12 +47,14 @@ def main() -> int:
         dataset_path=str(REPO_ROOT / args.dataset),
         output_root=str(REPO_ROOT / args.output_root),
         run_prefix=args.run_prefix,
-        baseline_dataset_manifest_path=str(
-            REPO_ROOT / args.baseline_manifest
-        ),
+        baseline_dataset_manifest_path=str(REPO_ROOT / args.baseline_manifest),
         require_object_store=False,
     )
-    print(json.dumps({k: v for k, v in result.items() if k != "metadata"}, indent=2, default=str)[:4000])
+    print(
+        json.dumps(
+            {k: v for k, v in result.items() if k != "metadata"}, indent=2, default=str
+        )[:4000]
+    )
 
     if result.get("status") not in (None, "ok", "complete", "success"):
         print(f"local proof status: {result.get('status')}", file=sys.stderr)

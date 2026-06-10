@@ -336,10 +336,9 @@ def test_donor_clones_rekey_ids_and_scale_priors():
     hh_col = augmented[f"household_id__{year}"]
     assert hh_col.nunique() == 6 + clone_households
     # Clone priors are scaled down.
-    clone_rows = augmented.iloc[len(df):]
+    clone_rows = augmented.iloc[len(df) :]
     assert (
-        clone_rows[f"household_weight__{year}"]
-        == 100.0 * DONOR_CLONE_PRIOR_SCALE
+        clone_rows[f"household_weight__{year}"] == 100.0 * DONOR_CLONE_PRIOR_SCALE
     ).all()
     # Jitter changed other income but kept it positive.
     base_dividends = df[f"qualified_dividend_income__{year}"].iloc[-1]

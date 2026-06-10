@@ -55,9 +55,7 @@ def main() -> int:
         required=True,
         help="ISO-8601 creation timestamp recorded verbatim.",
     )
-    parser.add_argument(
-        "--volume", default="policyengine-us-data-long-term"
-    )
+    parser.add_argument("--volume", default="policyengine-us-data-long-term")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 

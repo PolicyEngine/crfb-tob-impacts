@@ -117,8 +117,7 @@ def load_economic_targets(year: int) -> dict[str, float]:
     row = table.loc[year]
     return {
         "ss_total": float(row.oasdi_cost_in_billion_nominal_usd) * 1e9,
-        "payroll_total": float(row.taxable_payroll_in_billion_nominal_usd)
-        * 1e9,
+        "payroll_total": float(row.taxable_payroll_in_billion_nominal_usd) * 1e9,
     }
 
 
@@ -251,9 +250,7 @@ def calibrate_entropy_constraints(
     gram = A_scaled.T @ (baseline_weights[:, None] * A_scaled)
     gram += np.eye(gram.shape[0]) * ridge
     try:
-        beta = np.linalg.solve(
-            gram, targets_scaled - A_scaled.T @ baseline_weights
-        )
+        beta = np.linalg.solve(gram, targets_scaled - A_scaled.T @ baseline_weights)
     except np.linalg.LinAlgError:
         beta = np.zeros(A.shape[1])
 
@@ -277,9 +274,7 @@ def calibrate_entropy_constraints(
         for _ in range(80):
             candidate = beta - step_size * step
             w_candidate = weights_for(candidate)
-            candidate_objective = float(
-                w_candidate.sum() - targets_scaled @ candidate
-            )
+            candidate_objective = float(w_candidate.sum() - targets_scaled @ candidate)
             if candidate_objective < objective:
                 beta = candidate
                 improved = True
@@ -294,9 +289,7 @@ def calibrate_entropy_constraints(
     w = weights_for(beta)
     achieved = A.T @ w
     with np.errstate(divide="ignore", invalid="ignore"):
-        pct_errors = np.abs(achieved - targets) / np.maximum(
-            np.abs(targets), 1e-9
-        )
+        pct_errors = np.abs(achieved - targets) / np.maximum(np.abs(targets), 1e-9)
     max_pct = float(np.max(pct_errors))
     if gradient_norm > 1e-6 or max_pct > 1e-4:
         raise RuntimeError(
@@ -311,32 +304,22 @@ def calibrate_entropy_constraints(
     return w, info
 
 
-def entropy_weight_audit(
-    weights: np.ndarray, baseline_weights: np.ndarray
-) -> dict:
+def entropy_weight_audit(weights: np.ndarray, baseline_weights: np.ndarray) -> dict:
     weights = np.asarray(weights, dtype=float)
     baseline_weights = np.asarray(baseline_weights, dtype=float)
     positive = weights > 0
     sorted_weights = np.sort(weights)[::-1]
     total = float(weights.sum())
     with np.errstate(divide="ignore", invalid="ignore"):
-        ratios = np.where(
-            baseline_weights > 0, weights / baseline_weights, np.nan
-        )
+        ratios = np.where(baseline_weights > 0, weights / baseline_weights, np.nan)
     return {
         "weight_sum": total,
         "baseline_weight_sum": float(baseline_weights.sum()),
         "positive_weight_count": int(positive.sum()),
         "positive_weight_pct": float(100 * positive.mean()),
-        "effective_sample_size": float(
-            total**2 / float((weights**2).sum())
-        ),
-        "top_10_weight_share_pct": float(
-            100 * sorted_weights[:10].sum() / total
-        ),
-        "top_100_weight_share_pct": float(
-            100 * sorted_weights[:100].sum() / total
-        ),
+        "effective_sample_size": float(total**2 / float((weights**2).sum())),
+        "top_10_weight_share_pct": float(100 * sorted_weights[:10].sum() / total),
+        "top_100_weight_share_pct": float(100 * sorted_weights[:100].sum() / total),
         "max_weight_ratio": float(np.nanmax(ratios)),
         "median_weight_ratio": float(np.nanmedian(ratios)),
     }
@@ -344,9 +327,7 @@ def entropy_weight_audit(
 
 def contribution_audit(values: np.ndarray, weights: np.ndarray) -> dict:
     """Concentration of a weighted total across contributing households."""
-    contributions = np.asarray(values, dtype=float) * np.asarray(
-        weights, dtype=float
-    )
+    contributions = np.asarray(values, dtype=float) * np.asarray(weights, dtype=float)
     positive = contributions[contributions > 0]
     total = float(positive.sum())
     if total <= 0:
@@ -369,9 +350,7 @@ def contribution_audit(values: np.ndarray, weights: np.ndarray) -> dict:
         "top_100_contribution_share_pct": float(
             100 * sorted_contributions[:100].sum() / total
         ),
-        "max_contribution_share_pct": float(
-            100 * sorted_contributions[0] / total
-        ),
+        "max_contribution_share_pct": float(100 * sorted_contributions[0] / total),
     }
 
 
@@ -453,8 +432,8 @@ def solve_earnings_scale(
             ceiling = taxable_payroll_at_scale(np.inf, *args)
             raise RuntimeError(
                 "Taxable payroll target "
-                f"${payroll_target/1e9:,.1f}B exceeds the cap-bound ceiling "
-                f"${ceiling/1e9:,.1f}B."
+                f"${payroll_target / 1e9:,.1f}B exceeds the cap-bound ceiling "
+                f"${ceiling / 1e9:,.1f}B."
             )
     for _ in range(200):
         mid = 0.5 * (low + high)

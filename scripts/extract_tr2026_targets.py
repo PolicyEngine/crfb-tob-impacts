@@ -34,8 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SOURCES = REPO_ROOT / "data" / "sources" / "tr2026"
 WORKBOOK = SOURCES / "SingleYearTRTables_TR2026.xlsx"
 MEDICARE_CSV = (
-    SOURCES
-    / "Medicare Sources of Non-Interest Income as a Percentage of Total "
+    SOURCES / "Medicare Sources of Non-Interest Income as a Percentage of Total "
     "Income and as a Percentage of Gross Domestic Product.csv"
 )
 TR2024_POPULATION = REPO_ROOT / "data" / "SSPopJul_TR2024.csv"
@@ -72,9 +71,7 @@ SOURCE_URLS = {
 YEARS = range(2025, 2101)
 
 
-def _sheet_year_series(
-    worksheet, value_column: int, *, label: str
-) -> dict[int, float]:
+def _sheet_year_series(worksheet, value_column: int, *, label: str) -> dict[int, float]:
     """Collect {year: value} from the Intermediate section of a
     single-year TR table sheet.
 
@@ -116,17 +113,13 @@ def _sheet_year_series(
 
 def extract_ssa_series() -> pd.DataFrame:
     workbook = openpyxl.load_workbook(WORKBOOK, read_only=True)
-    payroll = _sheet_year_series(
-        workbook["VI.G1"], 3, label="VI.G1 taxable payroll"
-    )
+    payroll = _sheet_year_series(workbook["VI.G1"], 3, label="VI.G1 taxable payroll")
     gdp = _sheet_year_series(workbook["VI.G1"], 4, label="VI.G1 GDP")
     awi = _sheet_year_series(workbook["VI.G1"], 2, label="VI.G1 AWI")
     # VI.G2 (cost in dollars) truncates at combined reserve depletion, so
     # cost comes from the IV.B1 OASDI cost rate (percent of payroll, which
     # runs through 2100) times taxable payroll.
-    cost_rate = _sheet_year_series(
-        workbook["IV.B1"], 8, label="IV.B1 OASDI cost rate"
-    )
+    cost_rate = _sheet_year_series(workbook["IV.B1"], 8, label="IV.B1 OASDI cost rate")
     tob_pct = _sheet_year_series(
         workbook["IV.B2"], 10, label="IV.B2 OASDI TOB % of payroll"
     )
@@ -156,9 +149,7 @@ def extract_hi_tob() -> dict[int, float]:
     """HI income from taxation of benefits, billions of dollars by year."""
     with MEDICARE_CSV.open(encoding="utf-8-sig") as handle:
         rows = list(csv.reader(handle))
-    header = next(
-        row for row in rows if row and row[0].strip().startswith("Calendar")
-    )
+    header = next(row for row in rows if row and row[0].strip().startswith("Calendar"))
     tob_column = next(
         index
         for index, cell in enumerate(header)
@@ -213,9 +204,7 @@ def build_interim_single_year_population(groups: pd.DataFrame) -> pd.DataFrame:
         )
 
     tr2024 = tr2024.assign(group=group_of(tr2024.Age))
-    group_2024 = (
-        tr2024.groupby(["Year", "group"], observed=True).Total.sum().unstack()
-    )
+    group_2024 = tr2024.groupby(["Year", "group"], observed=True).Total.sum().unstack()
     targets = groups.set_index("year")
 
     frames = []
@@ -227,9 +216,9 @@ def build_interim_single_year_population(groups: pd.DataFrame) -> pd.DataFrame:
             for group in ("under_20", "age_20_64", "age_65_plus")
         }
         year_frame = tr2024[tr2024.Year == year].copy()
-        year_frame["Total"] = year_frame.Total * year_frame.group.map(
-            ratios
-        ).astype(float)
+        year_frame["Total"] = year_frame.Total * year_frame.group.map(ratios).astype(
+            float
+        )
         frames.append(year_frame[["Year", "Age", "Total"]])
     interim = pd.concat(frames, ignore_index=True)
     interim["Total"] = interim.Total.round(0).astype(int)
@@ -304,9 +293,7 @@ def write_dashboard_denominators(aux: pd.DataFrame) -> None:
     oasdi_income = _sheet_year_series(
         workbook["IV.B1"], 7, label="IV.B1 OASDI income rate"
     )
-    oasdi_cost = _sheet_year_series(
-        workbook["IV.B1"], 8, label="IV.B1 OASDI cost rate"
-    )
+    oasdi_cost = _sheet_year_series(workbook["IV.B1"], 8, label="IV.B1 OASDI cost rate")
     hi_rates = extract_hi_rates()
     gap_rows = []
     for year in YEARS:
@@ -317,13 +304,9 @@ def write_dashboard_denominators(aux: pd.DataFrame) -> None:
                 "year": year,
                 "oasdi_cost_rate": round(oasdi_cost[year], 2),
                 "oasdi_income_rate": round(oasdi_income[year], 2),
-                "oasdi_gap_pct": round(
-                    oasdi_cost[year] - oasdi_income[year], 2
-                ),
+                "oasdi_gap_pct": round(oasdi_cost[year] - oasdi_income[year], 2),
                 "hi_cost_rate": round(hi_rates.loc[year, "hi_cost_rate"], 2),
-                "hi_income_rate": round(
-                    hi_rates.loc[year, "hi_income_rate"], 2
-                ),
+                "hi_income_rate": round(hi_rates.loc[year, "hi_income_rate"], 2),
                 "hi_gap_pct": round(
                     hi_rates.loc[year, "hi_cost_rate"]
                     - hi_rates.loc[year, "hi_income_rate"],
@@ -358,7 +341,7 @@ def main() -> int:
         year_data = interim[interim.Year == year]
         total = year_data.Total.sum()
         aged_share = year_data[year_data.Age >= 65].Total.sum() / total
-        print(f"  {year}: {total/1e6:.1f}M, 65+ share {aged_share:.1%}")
+        print(f"  {year}: {total / 1e6:.1f}M, 65+ share {aged_share:.1%}")
 
     manifest = {
         "description": "2026 Trustees Report calibration target sources",
