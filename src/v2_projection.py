@@ -36,9 +36,12 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
 
-POPULATION_FILE = DATA_DIR / "SSPopJul_TR2024.csv"
-ECONOMIC_FILE = DATA_DIR / "social_security_aux_tr2025.csv"
-TOB_BASELINE_FILE = DATA_DIR / "ssa_tob_baseline_75year.csv"
+# 2026 Trustees Report targets (see data/tr2026_sources.manifest.json).
+# TR2026 incorporates OBBBA in current law, so its taxation-of-benefits
+# series replaces the TR2025 post-OBBBA bridge.
+POPULATION_FILE = DATA_DIR / "SSPopJul_TR2026_interim.csv"
+ECONOMIC_FILE = DATA_DIR / "social_security_aux_tr2026.csv"
+TOB_FILE = DATA_DIR / "social_security_aux_tr2026.csv"
 
 # Publication gates mirror docs/current/late-year-support-gates.md.
 AGGREGATE_GATES = {
@@ -120,14 +123,14 @@ def load_economic_targets(year: int) -> dict[str, float]:
 
 
 def load_tob_targets(year: int) -> dict[str, float]:
-    """Post-OBBBA taxation-of-benefits targets in dollars."""
-    table = pd.read_csv(TOB_BASELINE_FILE).set_index("year")
+    """TR2026 current-law taxation-of-benefits targets in dollars."""
+    table = pd.read_csv(TOB_FILE).set_index("year")
     if year not in table.index:
-        raise ValueError(f"No post-OBBBA TOB baseline for {year}.")
+        raise ValueError(f"No TR2026 TOB target for {year}.")
     row = table.loc[year]
     return {
-        "oasdi_tob": float(row.tob_oasdi_billions) * 1e9,
-        "hi_tob": float(row.tob_hi_billions) * 1e9,
+        "oasdi_tob": float(row.oasdi_tob_billions_nominal_usd) * 1e9,
+        "hi_tob": float(row.hi_tob_billions_nominal_usd) * 1e9,
     }
 
 
@@ -137,22 +140,24 @@ def target_source_provenance() -> list[dict[str, str]]:
             "role": "population_by_single_year_age",
             "file": str(POPULATION_FILE.relative_to(REPO_ROOT)),
             "sha256": _sha256(POPULATION_FILE),
-            "source": "SSA Trustees Social Security area population "
-            "(TR2024 vintage, single year of age)",
+            "source": "TR2026 V.A3 age-group totals applied to the TR2024 "
+            "single-year-age shape (interim until SSA posts the TR2026 "
+            "single-year file)",
         },
         {
-            "role": "trustees_2025_economic",
+            "role": "trustees_2026_economic",
             "file": str(ECONOMIC_FILE.relative_to(REPO_ROOT)),
             "sha256": _sha256(ECONOMIC_FILE),
-            "source": "SSA 2025 Trustees Report OASDI cost and taxable "
-            "payroll (social_security_aux.csv from policyengine-us-data)",
+            "source": "SSA 2026 Trustees Report: OASDI cost rate (IV.B1) "
+            "times taxable payroll (VI.G1), intermediate assumptions",
         },
         {
-            "role": "post_obbba_tob_baseline",
-            "file": str(TOB_BASELINE_FILE.relative_to(REPO_ROOT)),
-            "sha256": _sha256(TOB_BASELINE_FILE),
-            "source": "Generated post-OBBBA TOB baseline "
-            "(2025 Trustees current law + OACT Aug 5, 2025 deltas)",
+            "role": "tr2026_current_law_tob",
+            "file": str(TOB_FILE.relative_to(REPO_ROOT)),
+            "sha256": _sha256(TOB_FILE),
+            "source": "OASDI TOB: TR2026 IV.B2 percent of taxable payroll "
+            "times VI.G1 payroll; HI TOB: CMS 2026 Medicare Trustees "
+            "expanded tables. TR2026 current law includes OBBBA.",
         },
     ]
 

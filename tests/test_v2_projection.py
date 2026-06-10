@@ -28,21 +28,26 @@ def test_population_age_targets_2060():
     assert len(ages) == 86
     assert ages[0] == 0 and ages[-1] == 85
     total = totals.sum()
-    assert 390e6 < total < 415e6
+    # TR2026 intermediate population (lower fertility and immigration
+    # than TR2024): 376.7M in 2060.
+    assert 370e6 < total < 385e6
     share_65_plus = totals[ages >= 65].sum() / total
-    assert 0.20 < share_65_plus < 0.26
+    assert 0.21 < share_65_plus < 0.26
 
 
 def test_economic_targets_2026():
     targets = load_economic_targets(2026)
-    assert targets["ss_total"] == pytest.approx(1_701.334e9)
-    assert targets["payroll_total"] == pytest.approx(11_129e9)
+    # TR2026 intermediate: 15.37% cost rate on $11,043B taxable payroll.
+    assert targets["ss_total"] == pytest.approx(1_697.3091e9, rel=1e-6)
+    assert targets["payroll_total"] == pytest.approx(11_043e9)
 
 
-def test_tob_targets_post_obbba_2026():
+def test_tob_targets_tr2026_2026():
     targets = load_tob_targets(2026)
-    assert targets["oasdi_tob"] == pytest.approx(60.5901e9)
-    assert targets["hi_tob"] == pytest.approx(41.1868539030e9)
+    # TR2026 current law includes OBBBA: IV.B2 puts OASDI TOB at 0.56% of
+    # payroll; the CMS 2026 Medicare tables put HI TOB at $46.97B.
+    assert targets["oasdi_tob"] == pytest.approx(61.8408e9, rel=1e-6)
+    assert targets["hi_tob"] == pytest.approx(46.966e9, rel=1e-3)
 
 
 def test_tob_targets_cover_every_fifth_year():
@@ -57,8 +62,8 @@ def test_target_source_provenance_records_hashes():
     names = {entry["role"] for entry in provenance}
     assert {
         "population_by_single_year_age",
-        "trustees_2025_economic",
-        "post_obbba_tob_baseline",
+        "trustees_2026_economic",
+        "tr2026_current_law_tob",
     } <= names
     for entry in provenance:
         assert len(entry["sha256"]) == 64
@@ -300,7 +305,12 @@ def test_donor_clones_rekey_ids_and_scale_priors():
 
     year = 2100
     df = _toy_frame(year)
-    household_ids = np.arange(6)
+    # Mirror production frames, whose id columns arrive as int32 and large:
+    # re-keying must widen them instead of overflowing.
+    for column in df.columns:
+        if "_id__" in column:
+            df[column] = (df[column] + 2_000_000_000).astype("int32")
+    household_ids = np.arange(6) + 2_000_000_000
     person_household_index = df[f"person_household_id__{year}"].to_numpy()
     weights = np.full(6, 100.0)
     tob = np.array([0.0, 0.0, 5.0, 10.0, 50.0, 100.0])

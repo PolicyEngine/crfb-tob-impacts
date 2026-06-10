@@ -576,8 +576,9 @@ def _append_donor_clones(
     donor_household_ids = set(household_ids[donor_rows])
 
     id_cols = _id_columns(df, year)
-    max_id = max(float(df[c].max()) for c in id_cols)
-    offset_base = 10 ** int(np.ceil(np.log10(max_id + 2)))
+    df = df.copy()
+    for column in id_cols:
+        df[column] = df[column].astype(np.int64)
 
     donor_mask = np.isin(
         df[f"person_household_id__{year}"].to_numpy(), list(donor_household_ids)
@@ -585,11 +586,28 @@ def _append_donor_clones(
     donor_frame = df.loc[donor_mask]
     donor_person_household = donor_frame[f"person_household_id__{year}"].to_numpy()
 
+    # Compact per-column re-keying: clone ids start just above each id
+    # column's existing maximum. Power-of-ten offsets would exceed int32
+    # range and float32 precision inside policyengine-core.
+    column_max = {column: int(df[column].max()) for column in id_cols}
+    column_codes = {}
+    column_unique_counts = {}
+    for column in id_cols:
+        codes, uniques = pd.factorize(donor_frame[column], sort=True)
+        column_codes[column] = codes
+        column_unique_counts[column] = len(uniques)
+
+    clone_person_rows = np.flatnonzero(donor_mask)
     clone_frames = []
     for copy_index in range(1, DONOR_CLONES_PER_HOUSEHOLD + 1):
         clone = donor_frame.copy()
         for column in id_cols:
-            clone[column] = clone[column] + offset_base * copy_index
+            clone[column] = (
+                column_max[column]
+                + 1
+                + (copy_index - 1) * column_unique_counts[column]
+                + column_codes[column]
+            )
         rng = np.random.default_rng(year * 100 + copy_index)
         per_household_other = {
             hh: factor
@@ -642,6 +660,7 @@ def _append_donor_clones(
         "other_income_jitter_sigma": DONOR_CLONE_OTHER_INCOME_SIGMA,
         "benefit_jitter_sigma": DONOR_CLONE_BENEFIT_SIGMA,
         "clone_person_rows": int(donor_mask.sum()) * DONOR_CLONES_PER_HOUSEHOLD,
+        "donor_person_row_indices": clone_person_rows,
     }
     return augmented, info
 
@@ -859,6 +878,39 @@ def build_year(
             f"{support_augmentation['clone_household_count']:,} donor "
             f"clones from {support_augmentation['donor_household_count']:,} "
             "real contributor households"
+        )
+
+        # Clones add earnings and benefit mass; re-solve the value scales
+        # on the augmented frame so totals stay pinned to the targets.
+        donor_rows = support_augmentation.pop("donor_person_row_indices")
+        copies = support_augmentation["clones_per_household"]
+        gw_aug = np.concatenate(
+            [alpha * gross_wages] + [alpha * gross_wages[donor_rows]] * copies
+        )
+        tse_aug = np.concatenate(
+            [alpha * taxable_se] + [alpha * taxable_se[donor_rows]] * copies
+        )
+        person_weights_aug = start_weights[person_household_index]
+        alpha_correction = solve_earnings_scale(
+            gross_wages=gw_aug,
+            taxable_self_employment=tse_aug,
+            weights=person_weights_aug,
+            cap=cap,
+            payroll_target=economic_targets["payroll_total"],
+        )
+        df[earnings_columns] = df[earnings_columns] * alpha_correction
+        alpha *= alpha_correction
+        ss_aug_total = float(
+            (df[ss_columns].sum(axis=1).to_numpy() * person_weights_aug).sum()
+        )
+        beta_correction = economic_targets["ss_total"] / ss_aug_total
+        df[ss_columns] = df[ss_columns] * beta_correction
+        beta *= beta_correction
+        support_augmentation["alpha_correction"] = alpha_correction
+        support_augmentation["beta_correction"] = beta_correction
+        _log(
+            f"  [stage C3] post-clone rescale: alpha x{alpha_correction:.4f}, "
+            f"beta x{beta_correction:.4f}"
         )
     else:
         start_weights = demographic_weights
