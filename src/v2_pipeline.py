@@ -336,6 +336,35 @@ def cap_longrun_income_growth(df: pd.DataFrame, sim, year: int) -> dict:
     return factors
 
 
+def sanitize_enum_inputs(df: pd.DataFrame, sim, year: int) -> dict:
+    """Coerce enum values the model cannot encode to each variable's
+    default (populace stores 'unknown' race codes that the strict
+    ``set_input`` round-trip rejects). Returns {variable: records_coerced}.
+    """
+    log: dict = {}
+    for column in df.columns:
+        variable_name = column.rsplit("__", 1)[0]
+        variable = sim.tax_benefit_system.variables.get(variable_name)
+        possible = getattr(variable, "possible_values", None) if variable else None
+        if possible is None:
+            continue
+        if df[column].dtype != object and not pd.api.types.is_string_dtype(
+            df[column]
+        ):
+            continue
+        valid = {entry.name for entry in possible}
+        values = df[column].astype(str)
+        invalid = ~values.isin(valid)
+        if invalid.any():
+            default = getattr(variable, "default_value", None)
+            default_name = (
+                default.name if hasattr(default, "name") else list(valid)[0]
+            )
+            df.loc[invalid, column] = default_name
+            log[variable_name] = int(invalid.sum())
+    return log
+
+
 def repair_corrupt_inputs(df: pd.DataFrame, year: int) -> dict:
     """Zero out unambiguously corrupt input values; returns the repair log."""
     log: dict = {}
@@ -836,6 +865,9 @@ def build_year(
     # outputs and shadow their formulas downstream.
     sim = Microsimulation(dataset=base_dataset)
     df = materialize_year_frame(sim, year)
+    enum_log = sanitize_enum_inputs(df, sim, year)
+    for variable, count in enum_log.items():
+        _log(f"  [sanitize] {variable}: coerced {count:,} invalid enum values")
     repair_log = repair_corrupt_inputs(df, year)
     for variable, repair in repair_log.items():
         _log(
@@ -1017,11 +1049,37 @@ def build_year(
         beta_correction = economic_targets["ss_total"] / ss_aug_total
         df[ss_columns] = df[ss_columns] * beta_correction
         beta *= beta_correction
+        # Clones also add other-income mass that nothing else re-pins
+        # (the pre-clone runs showed AGI jumping ~30 points of GDP at the
+        # donor start year). Normalize each other-income category back to
+        # its pre-clone weighted total so clones provide support without
+        # changing value aggregates.
+        base_rows = len(gross_wages)
+        pre_clone_other = (
+            df[other_income_columns]
+            .iloc[:base_rows]
+            .mul(person_weights_aug[:base_rows], axis=0)
+            .sum()
+            .sum()
+        )
+        post_clone_other = (
+            df[other_income_columns].mul(person_weights_aug, axis=0).sum().sum()
+        )
+        other_income_correction = (
+            pre_clone_other / post_clone_other if post_clone_other else 1.0
+        )
+        df[other_income_columns] = (
+            df[other_income_columns] * other_income_correction
+        )
         support_augmentation["alpha_correction"] = alpha_correction
         support_augmentation["beta_correction"] = beta_correction
+        support_augmentation["other_income_correction"] = (
+            other_income_correction
+        )
         _log(
             f"  [stage C3] post-clone rescale: alpha x{alpha_correction:.4f}, "
-            f"beta x{beta_correction:.4f}"
+            f"beta x{beta_correction:.4f}, other income "
+            f"x{other_income_correction:.4f}"
         )
     else:
         start_weights = demographic_weights
@@ -1212,6 +1270,7 @@ def build_year(
         },
         "support_augmentation": support_augmentation,
         "input_repairs": repair_log,
+        "enum_sanitization": enum_log,
         "longrun_growth_caps": growth_caps,
         "value_scaling": {
             "alpha_earnings_scale": alpha,
