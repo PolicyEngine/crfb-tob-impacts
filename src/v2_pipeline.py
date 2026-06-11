@@ -244,20 +244,37 @@ def _ensure_person_level_identity_inputs(df, sim, *, base_period):
 
 
 def _pseudo_input_variables(sim) -> set[str]:
-    """Input variables that aggregate calculated components; storing them
-    would freeze stale values."""
+    """Stored adds-aggregates that must not ship in the year frame.
+
+    An aggregate is dropped when every component can supply its value —
+    either the component is itself a stored input (populace ships
+    ``social_security`` alongside its four components) or it is
+    formula-backed (the enhanced CPS ships ``employment_income`` whose
+    behavioral-response component recomputes). Keeping the aggregate
+    would shadow the adds formula and freeze stale values.
+    """
     tbs = sim.tax_benefit_system
+    stored = set(sim.input_variables)
     pseudo = set()
-    for var_name in sim.input_variables:
+    for var_name in stored:
         variable = tbs.variables.get(var_name)
         adds = getattr(variable, "adds", None) if variable else None
         if not adds or not isinstance(adds, list):
             continue
+        covered = True
         for component in adds:
             component_variable = tbs.variables.get(component)
-            if component_variable and len(getattr(component_variable, "formulas", {})):
-                pseudo.add(var_name)
+            if component_variable is None:
+                covered = False
                 break
+            if component in stored or len(
+                getattr(component_variable, "formulas", {})
+            ):
+                continue
+            covered = False
+            break
+        if covered:
+            pseudo.add(var_name)
     return pseudo
 
 
