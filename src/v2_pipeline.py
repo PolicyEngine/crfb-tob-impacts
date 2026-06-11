@@ -405,6 +405,12 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
     """Person-row input dataframe with every input variable at ``year``."""
     base_period = int(sim.default_calculation_period)
     df = sim.to_input_dataframe()
+    # Some bases (populace) ship pre-uprated columns for many periods;
+    # keep only the base period so this pipeline is the single uprating
+    # authority and out-year columns cannot bypass the value stages.
+    base_columns = [c for c in df.columns if c.endswith(f"__{base_period}")]
+    if len(base_columns) < len(df.columns):
+        df = df[base_columns].copy()
     df = _ensure_person_level_identity_inputs(df, sim, base_period=base_period)
 
     pseudo = _pseudo_input_variables(sim)
