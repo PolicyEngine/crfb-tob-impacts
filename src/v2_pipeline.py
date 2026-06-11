@@ -843,6 +843,12 @@ def build_year(
             f"records above ${repair['cap']:,.0f} "
             f"(${repair['amount_zeroed'] / 1e9:,.1f}B unweighted)"
         )
+    growth_caps = cap_longrun_income_growth(df, sim, year)
+    if growth_caps:
+        capped = ", ".join(
+            f"{name} x{factor:.2f}" for name, factor in growth_caps.items()
+        )
+        _log(f"  [growth cap] post-2034 growth capped at GDP: {capped}")
     cap = float(
         sim.tax_benefit_system.parameters(
             f"{year}-01-01"

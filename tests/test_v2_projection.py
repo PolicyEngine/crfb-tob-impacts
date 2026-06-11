@@ -391,3 +391,16 @@ def test_repair_zeroes_corrupt_miscellaneous_income():
     assert df[f"miscellaneous_income__{year}"].tolist() == [500.0, 0.0, 0.0]
     # Plausible values and other variables are untouched.
     assert df[f"employment_income_before_lsr__{year}"].sum() == 110_000.0
+
+
+def test_growth_cap_call_site_present():
+    # Regression: a formatting-mismatched patch once dropped the call site
+    # while the function and its metadata reference both existed, crashing
+    # every build at metadata assembly.
+    import inspect
+
+    from src import v2_pipeline
+
+    source = inspect.getsource(v2_pipeline.build_year)
+    assert "cap_longrun_income_growth(df, sim, year)" in source
+    assert '"longrun_growth_caps": growth_caps' in inspect.getsource(v2_pipeline)
