@@ -54,7 +54,9 @@ BASELINE_VOLUME_MOUNT_PATH = os.environ.get(
     "/baselines",
 )
 DEFAULT_R2_MODAL_SECRET_NAME = "crfb-reform-full-h5-r2-axiom"
-CANONICAL_LEDGER_PATH = LOCAL_PROJECT_ROOT / "docs" / "current" / "reform-modeling-progress.json"
+CANONICAL_LEDGER_PATH = (
+    LOCAL_PROJECT_ROOT / "docs" / "current" / "reform-modeling-progress.json"
+)
 CODE_BUNDLE_STATIC_PATHS = (
     "pyproject.toml",
     "uv.lock",
@@ -119,6 +121,42 @@ def _modal_secret_names() -> list[str]:
         DEFAULT_R2_MODAL_SECRET_NAME,
     ]
     return list(dict.fromkeys(name for name in names if name))
+
+
+def _refuse_mixed_scoring_prefix(run_prefix: str, requested_cells: Any) -> None:
+    """Abort when a run prefix already holds artifacts of another scoring type.
+
+    The durable artifact path is keyed by year and reform only, so launching
+    behavioral cells into a prefix that already holds static cells (or vice
+    versa) would overwrite the earlier artifacts.
+    """
+    import json as _json
+
+    scorings = {cell.scoring_type for cell in requested_cells}
+    if len(scorings) != 1:
+        raise ApprovalGuardError(
+            f"A single launch must use one scoring type, got {sorted(scorings)}."
+        )
+    requested_scoring = next(iter(scorings))
+    bucket = os.environ.get("CRFB_R2_BUCKET") or "axiom-corpus"
+    client = _boto3_client_from_env()
+    prefix = f"crfb/reform_full_h5/{run_prefix}/reform_full_h5/"
+    response = client.list_objects_v2(Bucket=bucket, Prefix=prefix, MaxKeys=1000)
+    metadata_keys = [
+        record["Key"]
+        for record in response.get("Contents", [])
+        if record["Key"].endswith("/metadata.json")
+    ]
+    for key in metadata_keys[:8]:
+        existing = _json.loads(client.get_object(Bucket=bucket, Key=key)["Body"].read())
+        existing_scoring = str(existing.get("scoring_type") or "")
+        if existing_scoring and existing_scoring != requested_scoring:
+            raise ApprovalGuardError(
+                f"Run prefix {run_prefix!r} already holds "
+                f"{existing_scoring} artifacts ({key}); launching "
+                f"{requested_scoring} cells there would overwrite them. "
+                "Use a distinct run prefix per scoring type."
+            )
 
 
 def _boto3_client_from_env() -> Any:
@@ -303,7 +341,9 @@ def _hash_tree(root: str | Path) -> str:
     return digest.hexdigest()
 
 
-def _runtime_fingerprint(*, policyengine_us_tree_path: str | Path | None) -> dict[str, Any]:
+def _runtime_fingerprint(
+    *, policyengine_us_tree_path: str | Path | None
+) -> dict[str, Any]:
     tree_path = Path(policyengine_us_tree_path) if policyengine_us_tree_path else None
     return {
         "runtime_env": {
@@ -312,7 +352,9 @@ def _runtime_fingerprint(*, policyengine_us_tree_path: str | Path | None) -> dic
         },
         "policyengine_package_spec": _policyengine_package_spec(),
         "policyengine_us_tree_sha256": (
-            _hash_tree(tree_path) if tree_path is not None and tree_path.exists() else None
+            _hash_tree(tree_path)
+            if tree_path is not None and tree_path.exists()
+            else None
         ),
     }
 
@@ -340,7 +382,9 @@ def compute_reform_full_h5_bundle_sha(
 
 policyengine_us_path = os.environ.get("CRFB_POLICYENGINE_US_PATH")
 projected_datasets_path = Path(
-    os.environ.get("CRFB_PROJECTED_DATASETS_PATH", LOCAL_PROJECT_ROOT / "projected_datasets")
+    os.environ.get(
+        "CRFB_PROJECTED_DATASETS_PATH", LOCAL_PROJECT_ROOT / "projected_datasets"
+    )
 )
 
 image = (
@@ -358,7 +402,9 @@ image = (
     )
     .add_local_dir(LOCAL_PROJECT_ROOT / "src", "/app/src", copy=True)
     .add_local_dir(LOCAL_PROJECT_ROOT / "modal_batch", "/app/modal_batch", copy=True)
-    .add_local_file(LOCAL_PROJECT_ROOT / "pyproject.toml", "/app/pyproject.toml", copy=True)
+    .add_local_file(
+        LOCAL_PROJECT_ROOT / "pyproject.toml", "/app/pyproject.toml", copy=True
+    )
     .add_local_file(LOCAL_PROJECT_ROOT / "uv.lock", "/app/uv.lock", copy=True)
 )
 if projected_datasets_path.exists() and not _env_bool(
@@ -534,7 +580,9 @@ def submit_reform_full_h5(
         baseline_dataset_manifest=baseline_dataset_manifest,
     )
     if submit_command and submit_command != canonical_command:
-        raise ApprovalGuardError("submit_command override must match canonical command.")
+        raise ApprovalGuardError(
+            "submit_command override must match canonical command."
+        )
     submit_command = canonical_command
     code_bundle_sha = compute_reform_full_h5_bundle_sha(
         repo_root=LOCAL_PROJECT_ROOT,
@@ -553,9 +601,7 @@ def submit_reform_full_h5(
             expected_schema_manifest_text = expected_schema_manifest_path.read_text(
                 encoding="utf-8"
             )
-            expected_schema_manifest_payload = json.loads(
-                expected_schema_manifest_text
-            )
+            expected_schema_manifest_payload = json.loads(expected_schema_manifest_text)
         elif not dry_run:
             raise FileNotFoundError(expected_schema_manifest_path)
     baseline_dataset_manifest_payload = None
@@ -580,7 +626,10 @@ def submit_reform_full_h5(
             or expected_schema_manifest_sha is None
         ):
             raise ApprovalGuardError("Expected schema manifest is required for launch.")
-        if ledger.get("approved_expected_schema_manifest_sha") != expected_schema_manifest_sha:
+        if (
+            ledger.get("approved_expected_schema_manifest_sha")
+            != expected_schema_manifest_sha
+        ):
             raise ApprovalGuardError(
                 "approved_expected_schema_manifest_sha does not match the file."
             )
@@ -589,7 +638,9 @@ def submit_reform_full_h5(
             or baseline_dataset_manifest_text is None
             or baseline_dataset_manifest_sha is None
         ):
-            raise ApprovalGuardError("Baseline dataset manifest is required for launch.")
+            raise ApprovalGuardError(
+                "Baseline dataset manifest is required for launch."
+            )
         if (
             ledger.get("approved_baseline_dataset_manifest_sha")
             != baseline_dataset_manifest_sha
@@ -638,13 +689,21 @@ def submit_reform_full_h5(
         print(f"Dry-run manifest: {manifest_path}")
         return
 
+    # The artifact path carries year and reform but not scoring type, so a
+    # run prefix must never mix scoring types: a later launch would silently
+    # overwrite the earlier one's scenario H5s. Refuse before consuming the
+    # approval.
+    _refuse_mixed_scoring_prefix(run_prefix, requested_cells)
+
     store = _approval_store_from_ledger(ledger)
     reservations = submitter_consume_and_reserve(
         ledger_path=ledger_file,
         requested_cells=requested_cells,
         launch_mode=launch_mode,
         worker_entrypoint=WORKER_ENTRYPOINT,
-        worker_sha=contract_file_sha256(LOCAL_PROJECT_ROOT / "src" / "reform_full_h5_worker.py"),
+        worker_sha=contract_file_sha256(
+            LOCAL_PROJECT_ROOT / "src" / "reform_full_h5_worker.py"
+        ),
         submit_command=submit_command,
         code_bundle_sha=code_bundle_sha,
         durable_storage_target=durable_storage_target,
@@ -722,8 +781,7 @@ def submit_reform_full_h5(
                 },
             )
             print(
-                "Running "
-                f"{reservation.cell.key()} via synchronous Modal remote call."
+                f"Running {reservation.cell.key()} via synchronous Modal remote call."
             )
             try:
                 result = compute_reform_full_h5_cell_remote.remote(payload)
