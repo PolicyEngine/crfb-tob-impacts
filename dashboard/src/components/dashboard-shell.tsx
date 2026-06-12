@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 
 import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
 import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-section";
+import { TobExplainerSection } from "@/components/tob-explainer-section";
 import { BalancedFixSection } from "@/components/balanced-fix-section";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MethodologySection } from "@/components/methodology-section";
@@ -734,6 +735,8 @@ export function DashboardShell() {
             </section>
           ) : (
             <>
+              <TobExplainerSection />
+
               {/* Reform name + category band — a slim editorial surface, no card */}
               <section className="border-t border-[var(--pe-color-border-light)] pt-6">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">

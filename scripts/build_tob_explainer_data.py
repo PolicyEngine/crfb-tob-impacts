@@ -201,11 +201,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    import policyengine_us
+    from importlib.metadata import version
 
     payload = {
         "schema": "crfb_tob_explainer/v1",
-        "policyengine_us_version": policyengine_us.__version__,
+        "policyengine_us_version": version("policyengine-us"),
         "curve_year": CURVE_YEAR,
         "parameters": statutory_parameters(),
         "curves": build_curves(),
