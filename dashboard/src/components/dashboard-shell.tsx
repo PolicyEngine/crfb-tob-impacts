@@ -46,7 +46,7 @@ type ViewMode = "10year" | "75year";
 type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) =>
-  /^option(?:[1-9]|1[0-2])$/.test(reform.id),
+  /^(?:option(?:[1-9]|1[0-2])|reverse_roth|tax93)$/.test(reform.id),
 );
 
 const PAPER_HREF = sitePath("/paper/");
@@ -61,8 +61,9 @@ const BENEFIT_RULE_IDS = [
   "option9",
   "option10",
   "option11",
+  "tax93",
 ];
-const STRUCTURAL_IDS = ["option5", "option12"];
+const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];
 
 const LONG_RUN_X_AXIS_TICKS = [
   2026,
