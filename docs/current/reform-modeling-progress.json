@@ -1,7 +1,7 @@
 {
   "schema": "crfb_reform_modeling_progress/v1",
   "source_of_truth": "docs/current/REFORM_MODELING_BIBLE.md",
-  "updated_at": "2026-06-12T03:18:02.717982+00:00",
+  "updated_at": "2026-06-12T03:29:31.661562+00:00",
   "current_gate": "G5.5",
   "full_launch_allowed": false,
   "paid_modal_launch_allowed": true,
@@ -26,284 +26,17 @@
     }
   ],
   "allowed_paid_call_count": 1,
-  "approval_nonce": "v2pop-tr2026-sentinel-20260611",
+  "approval_nonce": "v2pop-tr2026-sentinel-20260611b",
   "approval_consumed": false,
   "approval_consumed_at": null,
   "approval_consumed_by": null,
   "paid_call_count_consumed": 0,
   "reserved_cells": [],
   "reservation_token_hashes": [],
-  "spawned_call_records": [
-    {
-      "year": 2026,
-      "reform": "option1",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "5d9d8ff885fc946888fac14f083e061a86c09f80b92a316bcaf7ebf7e52fd010",
-      "call_id": "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option10",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "f83dbe64e1ca77b69eecbf68ac2aab3473bfce7c85b736f88d8e1774bdbc8320",
-      "call_id": "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option11",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "f883ff062b3a643f58e8504b67810883349be0eb374210589219c3208ff6e6c8",
-      "call_id": "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option12",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "c876d8d9961be1372124c6c9bc5f2a91914dc1b20e3c9e92bc303adb68d2c162",
-      "call_id": "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option2",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "f52bee4c2a060beed3f57ecd1b6769f4c8b4feb27ccc3b5ed2840247c60ebcf0",
-      "call_id": "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option3",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "a9c29b02a16fc894299da9fff8060c69ec8087cd23a18d502681cc7d5c0d692b",
-      "call_id": "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option4",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "074cffe60713462ec644fb82ac45eb4d43a73698dd14d71a3da092081292029f",
-      "call_id": "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option5",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "eab3b332e3a0d9fe344e9d192c2d6d5006c8001859ef859c0e1a7be4667cf5f7",
-      "call_id": "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option6",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "dcee531ee08c08975c7de7ad9b8cfd8b4e5e368c645076b93ca3f2e59dcbc871",
-      "call_id": "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option7",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "0962f45495c373264de14dfff5d8d948f8cf686bced1d79735ca4225ff3ffd6a",
-      "call_id": "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option8",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "7de4df18cb122409822a4a425654e98bdee024e4b4f219a3fb3d5d5f395aa2e2",
-      "call_id": "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
-      "dashboard_url": null
-    },
-    {
-      "year": 2026,
-      "reform": "option9",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
-      "reservation_token_hash": "78fcfb80d7bc03cc8904658699be8eac1a7d06da777dad338e9b09bae60edd48",
-      "call_id": "fc-01KS7R5W42GCBF8V5RCE2G09G0",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option1",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "1d2d5eef974bca55c949eb4082bc18d3ebec7c116bf01f2b6db6ee286f187f10",
-      "call_id": "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option10",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "6c5729f4da2509a5332b17364ce682ace14bce610696d44a72541a36f8ae62b2",
-      "call_id": "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option11",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "cbf731f28a15c91009c20e38c72e1b6e94615149c7127bf79368de01e422e01a",
-      "call_id": "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option12",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "e2e89631e273af44cf62f022951112a551da84d128c53c7851d628785b8c74e2",
-      "call_id": "fc-01KS7R5YBSJKZA487V9YHRCVYG",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option2",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "706dc159d2cf919dce0f653b0af7a8fe4c74b475d3d81064c48a4b81c0d1f7c2",
-      "call_id": "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option3",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "8c35977b888c83b19e25e0a7eaa816258a6ff3153158f67a6203514a81095e43",
-      "call_id": "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option4",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "da8d2bbc9483fb8dcf988070c3cdfeb86a3a9bde6492cb17462135e1abb3c269",
-      "call_id": "fc-01KS7R600B06CRBVWXCRQV4BFK",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option5",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "e493fc541702acf63554825bac60f202557cea8048c19c6e28cf74aefb7db396",
-      "call_id": "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option6",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "0e99beafc8765fec0706141c30d1a3f9f6ef0bee1cfe64825039547eb4cbefd4",
-      "call_id": "fc-01KS7R610RPKV2QD60RERYM15R",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option7",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "31f24c1a3dbea261f329f4e8ff70d20c25f001a9cead62aebfafe94f011fed20",
-      "call_id": "fc-01KS7R61G507HEM3WV435H3JZK",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option8",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "7a58f0ac4d2317c2f2b6fb5e817a3eec56fef873c70b719f5d339da30338fff7",
-      "call_id": "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
-      "dashboard_url": null
-    },
-    {
-      "year": 2100,
-      "reform": "option9",
-      "scoring_type": "behavioral",
-      "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
-      "reservation_token_hash": "4a3b156cf5909fc6cdb486ec10e475abed396e6e1874df7674b4ed0ca0bf4a84",
-      "call_id": "fc-01KS7R62MQT1NXK6QKEQXRQRDS",
-      "dashboard_url": null
-    }
-  ],
-  "spawned_call_ids": [
-    "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
-    "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
-    "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
-    "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
-    "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
-    "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
-    "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
-    "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
-    "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
-    "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
-    "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
-    "fc-01KS7R5W42GCBF8V5RCE2G09G0",
-    "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
-    "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
-    "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
-    "fc-01KS7R5YBSJKZA487V9YHRCVYG",
-    "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
-    "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
-    "fc-01KS7R600B06CRBVWXCRQV4BFK",
-    "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
-    "fc-01KS7R610RPKV2QD60RERYM15R",
-    "fc-01KS7R61G507HEM3WV435H3JZK",
-    "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
-    "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
-  ],
+  "spawned_call_records": [],
+  "spawned_call_ids": [],
   "launched_call_ids": [],
-  "completed_call_ids": [
-    "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
-    "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
-    "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
-    "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
-    "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
-    "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
-    "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
-    "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
-    "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
-    "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
-    "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
-    "fc-01KS7R5W42GCBF8V5RCE2G09G0",
-    "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
-    "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
-    "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
-    "fc-01KS7R5YBSJKZA487V9YHRCVYG",
-    "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
-    "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
-    "fc-01KS7R600B06CRBVWXCRQV4BFK",
-    "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
-    "fc-01KS7R610RPKV2QD60RERYM15R",
-    "fc-01KS7R61G507HEM3WV435H3JZK",
-    "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
-    "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
-  ],
+  "completed_call_ids": [],
   "behavioral_naming_policy": {
     "canonical_scoring_type": "behavioral",
     "legacy_alias": "conventional",
@@ -6146,5 +5879,279 @@
       "option7_2100_behavioral_revenue_impact_b": 0.0,
       "largest_2100_behavioral_minus_static_b": "option1 -29.4B; option5/6/12 +23.2B"
     }
+  },
+  "previous_run_call_history": {
+    "run_prefix": "full_h5_5a35713_behavioral_endpoints_lsrbasefix_20260522_0748",
+    "spawned_call_records": [
+      {
+        "year": 2026,
+        "reform": "option1",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "5d9d8ff885fc946888fac14f083e061a86c09f80b92a316bcaf7ebf7e52fd010",
+        "call_id": "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option10",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "f83dbe64e1ca77b69eecbf68ac2aab3473bfce7c85b736f88d8e1774bdbc8320",
+        "call_id": "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option11",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "f883ff062b3a643f58e8504b67810883349be0eb374210589219c3208ff6e6c8",
+        "call_id": "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option12",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "c876d8d9961be1372124c6c9bc5f2a91914dc1b20e3c9e92bc303adb68d2c162",
+        "call_id": "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option2",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "f52bee4c2a060beed3f57ecd1b6769f4c8b4feb27ccc3b5ed2840247c60ebcf0",
+        "call_id": "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option3",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "a9c29b02a16fc894299da9fff8060c69ec8087cd23a18d502681cc7d5c0d692b",
+        "call_id": "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option4",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "074cffe60713462ec644fb82ac45eb4d43a73698dd14d71a3da092081292029f",
+        "call_id": "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option5",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "eab3b332e3a0d9fe344e9d192c2d6d5006c8001859ef859c0e1a7be4667cf5f7",
+        "call_id": "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option6",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "dcee531ee08c08975c7de7ad9b8cfd8b4e5e368c645076b93ca3f2e59dcbc871",
+        "call_id": "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option7",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "0962f45495c373264de14dfff5d8d948f8cf686bced1d79735ca4225ff3ffd6a",
+        "call_id": "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option8",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "7de4df18cb122409822a4a425654e98bdee024e4b4f219a3fb3d5d5f395aa2e2",
+        "call_id": "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
+        "dashboard_url": null
+      },
+      {
+        "year": 2026,
+        "reform": "option9",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2026.h5",
+        "reservation_token_hash": "78fcfb80d7bc03cc8904658699be8eac1a7d06da777dad338e9b09bae60edd48",
+        "call_id": "fc-01KS7R5W42GCBF8V5RCE2G09G0",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option1",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "1d2d5eef974bca55c949eb4082bc18d3ebec7c116bf01f2b6db6ee286f187f10",
+        "call_id": "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option10",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "6c5729f4da2509a5332b17364ce682ace14bce610696d44a72541a36f8ae62b2",
+        "call_id": "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option11",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "cbf731f28a15c91009c20e38c72e1b6e94615149c7127bf79368de01e422e01a",
+        "call_id": "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option12",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "e2e89631e273af44cf62f022951112a551da84d128c53c7851d628785b8c74e2",
+        "call_id": "fc-01KS7R5YBSJKZA487V9YHRCVYG",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option2",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "706dc159d2cf919dce0f653b0af7a8fe4c74b475d3d81064c48a4b81c0d1f7c2",
+        "call_id": "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option3",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "8c35977b888c83b19e25e0a7eaa816258a6ff3153158f67a6203514a81095e43",
+        "call_id": "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option4",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "da8d2bbc9483fb8dcf988070c3cdfeb86a3a9bde6492cb17462135e1abb3c269",
+        "call_id": "fc-01KS7R600B06CRBVWXCRQV4BFK",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option5",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "e493fc541702acf63554825bac60f202557cea8048c19c6e28cf74aefb7db396",
+        "call_id": "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option6",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "0e99beafc8765fec0706141c30d1a3f9f6ef0bee1cfe64825039547eb4cbefd4",
+        "call_id": "fc-01KS7R610RPKV2QD60RERYM15R",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option7",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "31f24c1a3dbea261f329f4e8ff70d20c25f001a9cead62aebfafe94f011fed20",
+        "call_id": "fc-01KS7R61G507HEM3WV435H3JZK",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option8",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "7a58f0ac4d2317c2f2b6fb5e817a3eec56fef873c70b719f5d339da30338fff7",
+        "call_id": "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
+        "dashboard_url": null
+      },
+      {
+        "year": 2100,
+        "reform": "option9",
+        "scoring_type": "behavioral",
+        "dataset_path": "/baselines/crfb-longrun-20260520-5a35713-annual/2100.h5",
+        "reservation_token_hash": "4a3b156cf5909fc6cdb486ec10e475abed396e6e1874df7674b4ed0ca0bf4a84",
+        "call_id": "fc-01KS7R62MQT1NXK6QKEQXRQRDS",
+        "dashboard_url": null
+      }
+    ],
+    "spawned_call_ids": [
+      "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
+      "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
+      "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
+      "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
+      "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
+      "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
+      "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
+      "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
+      "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
+      "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
+      "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
+      "fc-01KS7R5W42GCBF8V5RCE2G09G0",
+      "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
+      "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
+      "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
+      "fc-01KS7R5YBSJKZA487V9YHRCVYG",
+      "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
+      "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
+      "fc-01KS7R600B06CRBVWXCRQV4BFK",
+      "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
+      "fc-01KS7R610RPKV2QD60RERYM15R",
+      "fc-01KS7R61G507HEM3WV435H3JZK",
+      "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
+      "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
+    ],
+    "launched_call_ids": [],
+    "completed_call_ids": [
+      "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
+      "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
+      "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
+      "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
+      "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
+      "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
+      "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
+      "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
+      "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
+      "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
+      "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
+      "fc-01KS7R5W42GCBF8V5RCE2G09G0",
+      "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
+      "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
+      "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
+      "fc-01KS7R5YBSJKZA487V9YHRCVYG",
+      "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
+      "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
+      "fc-01KS7R600B06CRBVWXCRQV4BFK",
+      "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
+      "fc-01KS7R610RPKV2QD60RERYM15R",
+      "fc-01KS7R61G507HEM3WV435H3JZK",
+      "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
+      "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
+    ]
   }
 }
