@@ -23,10 +23,18 @@ from src.runtime_config import (
 )
 
 
+def _installed_policyengine_us_version() -> str:
+    from importlib.metadata import version
+
+    return version("policyengine-us")
+
+
 def _write_dataset(
     base_dir: Path,
     year: int,
     *,
+    policyengine_us_version: str | None = None,
+    policyengine_us_git_sha: str | None = None,
     profile_name: str = "ss-payroll-tob",
     tax_assumption_name: str = "trustees-2025-core-thresholds-v1",
     fell_back_to_ipf: bool = False,
@@ -61,6 +69,14 @@ def _write_dataset(
     dataset_file.write_text("", encoding="utf-8")
     metadata = {
         "year": year,
+        # The dataset contract requires the builder's policyengine-us
+        # version; these fixtures stand in for datasets built with the
+        # installed package.
+        "policyengine_us": {
+            "version": policyengine_us_version or _installed_policyengine_us_version(),
+            "git_commit_id": policyengine_us_git_sha or "0" * 40,
+            "git_dirty": False,
+        },
         "target_source": {
             "name": "trustees_2025_current_law",
         },
@@ -629,11 +645,18 @@ def test_dataset_path_rejects_wrong_profile(monkeypatch, tmp_path):
 
 
 def test_dataset_path_accepts_validated_dataset(monkeypatch, tmp_path):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     dataset_dir = tmp_path / "datasets"
     snapshot_dir = tmp_path / "snapshot"
     dataset_dir.mkdir()
     snapshot_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
 
     monkeypatch.setenv("CRFB_PROJECTED_DATASETS_PATH", str(dataset_dir))
     monkeypatch.setenv("CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH", str(snapshot_dir))
@@ -868,9 +891,16 @@ def test_dataset_path_can_resolve_through_policyengine_py_manifest(
     monkeypatch,
     tmp_path,
 ):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     managed_dir = tmp_path / "managed"
     managed_dir.mkdir()
-    expected = _write_dataset(managed_dir, 2026)
+    expected = _write_dataset(
+        managed_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _install_fake_policyengine_py_manifest(
         monkeypatch,
         dataset_file=expected,
@@ -899,7 +929,9 @@ def test_dataset_path_template_enforces_policyengine_us_runtime_contract(
     runtime_git_sha = _write_policyengine_us_runtime(runtime, "1.691.10")
     dataset_dir = tmp_path / "datasets"
     dataset_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _add_policyengine_us_metadata(
         expected,
         version="1.691.10",
@@ -1090,7 +1122,9 @@ def test_dataset_path_template_accepts_matching_policyengine_us_runtime(
     runtime_git_sha = _write_policyengine_us_runtime(runtime, "1.691.10")
     dataset_dir = tmp_path / "datasets"
     dataset_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _add_policyengine_us_metadata(
         expected,
         version="1.691.10",
@@ -1175,6 +1209,11 @@ def test_dataset_path_rejects_wrong_tax_assumption(monkeypatch, tmp_path):
 
 
 def test_dataset_path_accepts_year_bounded_approximate_dataset(monkeypatch, tmp_path):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     dataset_dir = tmp_path / "datasets"
     snapshot_dir = tmp_path / "snapshot"
     dataset_dir.mkdir()
@@ -1182,6 +1221,7 @@ def test_dataset_path_accepts_year_bounded_approximate_dataset(monkeypatch, tmp_
     expected = _write_dataset(
         dataset_dir,
         2080,
+        policyengine_us_git_sha=runtime_git_sha,
         calibration_quality="approximate",
         max_constraint_pct_error=3.0,
     )

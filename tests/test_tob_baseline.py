@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from src.tob_baseline import (
+    build_tob_baseline_tr2026,
     HI_METHOD_CURRENT_LAW,
     HI_METHOD_MATCH_OASDI_PCT_CHANGE,
     POST_OBBBA_SCENARIO_ID,
@@ -37,14 +38,14 @@ def test_hi_bridge_can_match_oasdi_percentage_change() -> None:
 
 
 def test_generated_baseline_validates() -> None:
-    baseline = build_tob_baseline(HI_METHOD_MATCH_OASDI_PCT_CHANGE)
+    baseline = build_tob_baseline_tr2026()
     validate_generated_baseline(baseline)
 
 
 def test_generated_baseline_manifest_marks_target_not_law(tmp_path) -> None:
     baseline_path = tmp_path / "ssa_tob_baseline_75year.csv"
     manifest_path = tmp_path / "ssa_tob_baseline_75year.manifest.json"
-    baseline = build_tob_baseline(HI_METHOD_MATCH_OASDI_PCT_CHANGE)
+    baseline = build_tob_baseline_tr2026()
     write_tob_baseline(baseline, baseline_path)
 
     manifest = write_tob_baseline_manifest(baseline_path, manifest_path)
@@ -53,5 +54,6 @@ def test_generated_baseline_manifest_marks_target_not_law(tmp_path) -> None:
     assert validated == manifest
     assert manifest["scenario_id"] == POST_OBBBA_SCENARIO_ID
     assert manifest["baseline_kind"] == "calibration_target"
-    assert manifest["not_law"] is True
+    # TR2026 current law carries OBBBA natively; the series is law-based.
+    assert manifest["not_law"] is False
     assert manifest["artifact_contract"]["reject_raw_current_law_substitution"] is True
