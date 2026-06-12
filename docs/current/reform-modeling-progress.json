@@ -19,7 +19,11 @@
   "approved_baseline_dataset_manifest_sha": "7ea3df995b3ecdc9de2c19c1e47d1f711108b881a6052b6810baf53093557732",
   "approved_pip_freeze_sha256": "3c327535723b36c23c77b49ffa637f39e100c8099e238abee60a9481c3f041f8",
   "approved_cells": [
-    "year=2026/reform=option1/scoring=static"
+    {
+      "year": 2026,
+      "reform": "option1",
+      "scoring_type": "static"
+    }
   ],
   "allowed_paid_call_count": 1,
   "approval_nonce": "v2pop-tr2026-sentinel-20260611",
