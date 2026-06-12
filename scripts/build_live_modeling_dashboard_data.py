@@ -20,8 +20,12 @@ DEFAULT_SUBMISSION_GLOB = "results/modal_submissions/reform_full_h5_*.json"
 DEFAULT_R2_BUCKET = "axiom-corpus"
 DEFAULT_R2_PREFIX_ROOT = "crfb/reform_full_h5"
 
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13))
-SELECTED_YEARS = tuple(range(2026, 2036)) + tuple(range(2040, 2101, 5))
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
+    "reverse_roth",
+    "tax93",
+)
+# The v2pop panel runs every fifth year (2026, 2030, then 2035-2100).
+SELECTED_YEARS = (2026, 2030) + tuple(range(2035, 2101, 5))
 
 BASELINE_OUTPUT = DASHBOARD_DATA / "live_baseline_results.csv"
 REFORM_STATUS_OUTPUT = DASHBOARD_DATA / "live_reform_status.csv"
