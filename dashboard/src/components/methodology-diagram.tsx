@@ -87,7 +87,7 @@ export function MethodologyDiagram() {
         width="760"
         height="600"
         role="img"
-        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO targets feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets for the reform panel"
+        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO targets feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of real survey households for the reform panel"
         className="mx-auto h-auto max-w-full"
       >
         <rect x="0" y="0" width="760" height="600" fill="#f9fafb" rx="8" />
@@ -199,38 +199,6 @@ export function MethodologyDiagram() {
           caption2="benefits to OASDI cost · γ nudges beneficiary other income toward TOB"
         />
         <Down x={290} y1={358} y2={374} />
-
-        {/* support augmentation callout */}
-        <g>
-          <rect
-            x={490}
-            y={288}
-            width={250}
-            height={70}
-            rx={6}
-            fill={palette.amberWash}
-            stroke={palette.amberBorder}
-            strokeWidth={1}
-          />
-          <text x={615} y={307} textAnchor="middle" fontSize="11" fontWeight="600" fill={palette.amber}>
-            2075+ support augmentation
-          </text>
-          <text x={615} y={323} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-            Jittered resamples of real households
-          </text>
-          <text x={615} y={336} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-            spread weight across the much older
-          </text>
-          <text x={615} y={349} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-            age mix; totals re-pinned to targets
-          </text>
-          <path
-            d="M490 323 L460 323"
-            stroke={palette.amberBorder}
-            strokeWidth="1.5"
-            fill="none"
-          />
-        </g>
 
         {/* Stage D */}
         <Box

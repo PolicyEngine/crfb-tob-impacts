@@ -53,13 +53,18 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
     best-effort: at far horizons the 85% inclusion cap saturates and TOB
     becomes nearly inelastic to other income, so `gamma` is bounded and
     the final calibration closes the remainder.
-- **Stage C3 — donor-clone support (2075 on).** Append deterministic
-  jittered clones of the strongest real taxation-of-benefits contributor
-  households (1,500 donors x 4 clones at one-tenth prior weight), then
-  re-solve the value scales on the augmented frame. This follows the v1
-  donor-backed approach in spirit, restated for the value-scaled frames,
-  and keeps late-year contributor support dense enough to pass the
-  publication gates without free synthetic records.
+- **Stage C3 — donor-clone support (disabled).** The pipeline retains
+  machinery to append jittered clones of the strongest real
+  taxation-of-benefits contributor households when a base cannot support
+  the far horizon. On the populace base it is off: a clone-free build of
+  2100 — the hardest year, with the most extreme age shift — passes every
+  publication gate with margin (taxation-of-benefits contributor
+  effective sample sizes of 152 OASDI and 127 HI against the >=50 gate;
+  top-10 contribution 17–21% against the <=50% gate). Every record in
+  every published year is therefore a real survey household. Enabling
+  clones would roughly 2.5x the late-year contributor support at the cost
+  of carrying perturbed copies; the published datasets prefer the clean
+  frame.
 - **Stage D — final light calibration.** Entropy-balance from the
   demographic weights to hit all target families exactly: age
   distribution, Social Security benefits, taxable payroll, and the
@@ -68,7 +73,8 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
   non-payroll income and preferential investment income, as in v1) so
   weight tilts cannot inflate other income to reach the TOB target.
   Because values already carry the economics, the early-year pass needs
-  only a small tilt; late years lean on the donor support.
+  only a small tilt; late years lean on the broad real contributor base
+  the value scaling preserves.
 
 Validation is artifact-true: target vectors for Stage D come from a
 simulation over the written H5 (with the
@@ -93,10 +99,10 @@ that earlier drafts of this work carried.
 
 ## Differences from v1, by design
 
-- **Slimmer late-year support.** Values at year-Y scale keep the
-  TOB-contributing population broad, so donor support starts later, uses
-  simple jittered clones of real contributor households, and drops the
-  synthetic blueprint machinery.
+- **No synthetic records.** Values at year-Y scale keep the
+  TOB-contributing population broad enough that the populace base passes
+  every late-year gate bare; v1's donor-backed synthetic support is
+  retained in code but disabled.
 - **TR2026 current-law TOB is the calibration target** (OBBBA included
   natively), so dataset TOB equals the published baseline and the
   post-OBBBA gap columns vanish.

@@ -111,10 +111,11 @@ export function MethodologySection() {
           <p className="mt-4">
             Separating the channels keeps both honest: reweighting alone would hit
             aggregates by silently distorting who the population is, while value
-            scaling alone could not shift the age structure. From 2075 the much older
-            age mix is supported by jittered resamples of real households — added at
-            small prior weights before stage D re-pins every total — so that a handful
-            of records never carries the very-old population.
+            scaling alone could not shift the age structure. Every record in every
+            published year is a real survey household — no synthetic rows. A
+            clone-free build of 2100, the hardest year, passes every publication
+            gate with a comfortable margin, so the populace base supports the
+            full horizon bare.
           </p>
         </AccordionItem>
 

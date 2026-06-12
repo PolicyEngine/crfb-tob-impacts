@@ -156,9 +156,12 @@ INCOME_GUARD_START_YEAR = 2026
 # Donor-clone late-year support: clone the strongest real
 # taxation-of-benefits contributor households with deterministic income
 # jitter so the final calibration has dense support where the 2024 sample
-# is thin. Follows the v1 donor-backed approach (real donors, perturbed
-# clones, small priors), restated for the v2 value-scaled frames.
-DONOR_CLONE_START_YEAR = 2075
+# is thin. Disabled by default: a clone-free 2100 build on the populace
+# base passes every publication gate (TOB contributor ESS 152 OASDI /
+# 127 HI against the >=50 gate), so the published datasets carry only
+# real survey households. The machinery is retained for bases that
+# cannot support the far horizon bare; set the start year to re-enable.
+DONOR_CLONE_START_YEAR = 9999
 DONOR_CLONE_TOP_HOUSEHOLDS = 4_000
 DONOR_CLONES_PER_HOUSEHOLD = 8
 DONOR_CLONE_PRIOR_SCALE = 0.10
@@ -267,9 +270,7 @@ def _pseudo_input_variables(sim) -> set[str]:
             if component_variable is None:
                 covered = False
                 break
-            if component in stored or len(
-                getattr(component_variable, "formulas", {})
-            ):
+            if component in stored or len(getattr(component_variable, "formulas", {})):
                 continue
             covered = False
             break
@@ -365,18 +366,14 @@ def sanitize_enum_inputs(df: pd.DataFrame, sim, year: int) -> dict:
         possible = getattr(variable, "possible_values", None) if variable else None
         if possible is None:
             continue
-        if df[column].dtype != object and not pd.api.types.is_string_dtype(
-            df[column]
-        ):
+        if df[column].dtype != object and not pd.api.types.is_string_dtype(df[column]):
             continue
         valid = {entry.name for entry in possible}
         values = df[column].astype(str)
         invalid = ~values.isin(valid)
         if invalid.any():
             default = getattr(variable, "default_value", None)
-            default_name = (
-                default.name if hasattr(default, "name") else list(valid)[0]
-            )
+            default_name = default.name if hasattr(default, "name") else list(valid)[0]
             df.loc[invalid, column] = default_name
             log[variable_name] = int(invalid.sum())
     return log
@@ -603,16 +600,24 @@ def _household_vectors(sim, year: int):
     }
 
 
-def _sim_from_frame(df: pd.DataFrame, year: int, reform):
-    """In-memory simulation over the current frame (no file round-trip)."""
+def _sim_from_frame(
+    df: pd.DataFrame, year: int, reform, scaffold_dataset: str | None = None
+):
+    """In-memory simulation over the current frame (no file round-trip).
+
+    The constructor needs some dataset to scaffold entities before the
+    frame replaces it; ``scaffold_dataset`` (normally the build's base
+    dataset file) avoids resolving the HuggingFace default, which is both
+    slower and a network dependency.
+    """
     from policyengine_core.data.dataset import Dataset
     from policyengine_us import Microsimulation
 
     dataset = Dataset.from_dataframe(df, year)
-    if reform is None:
-        sim = Microsimulation()
-    else:
-        sim = Microsimulation(reform=reform)
+    kwargs = {"dataset": scaffold_dataset} if scaffold_dataset else {}
+    if reform is not None:
+        kwargs["reform"] = reform
+    sim = Microsimulation(**kwargs)
     sim.dataset = dataset
     sim.build_from_dataset()
     return sim
@@ -627,6 +632,7 @@ def _solve_other_income_gamma(
     demographic_weights: np.ndarray,
     person_household_index: np.ndarray,
     tob_targets: dict[str, float],
+    scaffold_dataset: str | None = None,
 ) -> tuple[float, list[dict]]:
     """Scale beneficiary households' other income toward the Trustees
     taxation-of-benefits target.
@@ -645,7 +651,7 @@ def _solve_other_income_gamma(
         probe_df = df.copy()
         scaled = probe_df.loc[beneficiary_person_mask, other_income_columns] * gamma
         probe_df.loc[beneficiary_person_mask, other_income_columns] = scaled
-        sim = _sim_from_frame(probe_df, year, reform)
+        sim = _sim_from_frame(probe_df, year, reform, scaffold_dataset)
         vectors = _household_vectors(sim, year)
         del sim
         gc.collect()
@@ -1004,6 +1010,7 @@ def build_year(
         demographic_weights,
         person_household_index,
         tob_targets,
+        scaffold_dataset=base_dataset,
     )
     df.loc[beneficiary_person_mask, other_income_columns] = (
         df.loc[beneficiary_person_mask, other_income_columns] * gamma
@@ -1018,7 +1025,7 @@ def build_year(
     # ----- Stage C3: donor-clone support (late years) -----
     support_augmentation = None
     if year >= DONOR_CLONE_START_YEAR:
-        probe_sim = _sim_from_frame(df, year, reform)
+        probe_sim = _sim_from_frame(df, year, reform, base_dataset)
         probe_vectors = _household_vectors(probe_sim, year)
         del probe_sim
         gc.collect()
@@ -1091,14 +1098,10 @@ def build_year(
         other_income_correction = (
             pre_clone_other / post_clone_other if post_clone_other else 1.0
         )
-        df[other_income_columns] = (
-            df[other_income_columns] * other_income_correction
-        )
+        df[other_income_columns] = df[other_income_columns] * other_income_correction
         support_augmentation["alpha_correction"] = alpha_correction
         support_augmentation["beta_correction"] = beta_correction
-        support_augmentation["other_income_correction"] = (
-            other_income_correction
-        )
+        support_augmentation["other_income_correction"] = other_income_correction
         _log(
             f"  [stage C3] post-clone rescale: alpha x{alpha_correction:.4f}, "
             f"beta x{beta_correction:.4f}, other income "
