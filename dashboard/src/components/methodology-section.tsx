@@ -74,100 +74,126 @@ export function MethodologySection() {
 
       <div className="space-y-4">
         <AccordionItem
-          title="Two-Stage Projection Methodology"
-          summary="75-year projections use economic uprating followed by positive-entropy calibration to match Trustees Report targets."
+          title="Yearly calibration: demographics in weights, economics in values"
+          summary="Each projection year is built independently: light demographic reweighting, then value scaling to official aggregates given those weights, then a final exact calibration."
           defaultOpen
         >
           <p>
-            <strong>Stage 1: Economic Uprating</strong> — PolicyEngine projects each household&apos;s
-            economic circumstances forward using official macroeconomic assumptions from the
-            2025 Social Security Trustees Report.
+            Every year from 2026 to 2100 is constructed from the same 2024 microdata
+            in four stages:
           </p>
           <BulletList>
-            <li>Employment income follows wage growth (AWI) projections.</li>
-            <li>Social Security benefits follow COLA projections.</li>
-            <li>Capital gains follow asset appreciation projections.</li>
-            <li>Tax parameters are uprated according to statutory indexing rules.</li>
+            <li>
+              <strong>A. Grow incomes to the target year.</strong> Each income category
+              follows its own uprating path — CBO-vintage growth through 2034, capped at
+              the Trustees nominal GDP path beyond so no source outruns the projected
+              economy. Tax parameters follow statutory indexing.
+            </li>
+            <li>
+              <strong>B. Demographic reweight.</strong> A light positive-entropy
+              adjustment shifts household weights to the Trustees single-year age
+              distribution. Weights carry demographics only — they are not asked to
+              fix dollar aggregates.
+            </li>
+            <li>
+              <strong>C. Value calibration, given those weights.</strong> Scalars
+              solved against the reweighted population align earnings with SSA
+              taxable payroll (accounting for the taxable maximum), benefits with
+              OASDI cost, and beneficiary non-benefit income with taxation-of-benefits
+              revenue.
+            </li>
+            <li>
+              <strong>D. Final entropy calibration.</strong> A last weight adjustment
+              hits the age distribution and all fiscal targets exactly, with guard
+              constraints holding investment and other income to their growth paths.
+            </li>
           </BulletList>
           <p className="mt-4">
-            <strong>Stage 2: Demographic and fiscal calibration</strong> — Household weights
-            are adjusted using positive-entropy calibration to match SSA demographic
-            and fiscal projections while keeping weights non-negative.
-          </p>
-          <p className="mt-4">
-            <strong>Key innovation:</strong> tax calculations happen at the household level
-            before aggregation, which avoids person-to-household mapping inconsistencies.
+            Separating the channels keeps both honest: reweighting alone would hit
+            aggregates by silently distorting who the population is, while value
+            scaling alone could not shift the age structure. From 2075 the much older
+            age mix is supported by jittered resamples of real households — added at
+            small prior weights before stage D re-pins every total — so that a handful
+            of records never carries the very-old population.
           </p>
         </AccordionItem>
 
         <AccordionItem
-          title="Positive-Entropy Calibration Method"
-          summary="Targets demographics, benefits, payroll, and trust-fund revenues."
+          title="Calibration targets and publication gates"
+          summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every published year."
         >
           <p>
-            <strong>Positive-entropy calibration</strong> simultaneously matches five
-            official targets while minimizing divergence from the baseline
-            Enhanced CPS household weights. The current `ss-payroll-tob`
-            publication profile uses this entropy path; GREG is retained only
-            as a legacy flag-based option in the data pipeline.
+            <strong>Positive-entropy calibration</strong> matches every target exactly
+            while minimizing divergence from the base survey weights and keeping all
+            weights positive. Targets come from the 2026 Trustees Report intermediate
+            assumptions:
           </p>
           <BulletList>
-            <li><strong>Age distribution</strong> — 86 categories from SSA population projections.</li>
-            <li><strong>Social Security benefits</strong> — total OASDI benefit payments.</li>
+            <li><strong>Age distribution</strong> — single-year SSA population projections.</li>
+            <li><strong>Social Security benefits</strong> — total OASDI program cost.</li>
             <li><strong>Taxable payroll</strong> — earnings subject to Social Security taxation.</li>
             <li><strong>OASDI trust fund revenue</strong> — taxation of benefits revenue to Social Security.</li>
             <li><strong>Medicare HI trust fund revenue</strong> — taxation of benefits revenue to Medicare.</li>
+            <li><strong>Income guards</strong> — investment and other non-payroll income held to their uprated paths.</li>
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
             <p>
-              <strong>Validation:</strong> release artifacts are checked against the intended
-              Trustees calibration contract before they enter the dashboard.
+              <strong>Gates:</strong> a year publishes only if it passes effective
+              sample size, weight concentration, and taxation-of-benefits contributor
+              support checks. The baseline tab charts every major series — including
+              uncalibrated by-products like income tax and AGI — against external
+              references through 2100.
             </p>
           </div>
         </AccordionItem>
 
         <AccordionItem
-          title="Data Sources"
-          summary="Calibrated to SSA and CMS projections for demographics, benefits, payroll, and trust-fund revenue."
+          title="Data sources"
+          summary="populace microdata calibrated to SSA, CMS, and CBO projections."
         >
           <p>
-            <strong>Microdata foundation:</strong> Enhanced CPS 2024 from PolicyEngine US with
-            IRS integration and machine-learning imputation.
+            <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace 2024
+            database, built entirely from primary sources (CPS ASEC, IRS PUF, SCF,
+            SIPP, CPS ORG, MEPS, ACS) with every layer traceable to its origin.
           </p>
           <p className="mt-4">
-            <strong>Calibration targets:</strong>
+            <strong>Projection targets:</strong>
           </p>
           <BulletList>
-            <li>Age distribution from SSA single-year demographic projections.</li>
-            <li>Social Security benefits from the 2025 Trustees Report.</li>
-            <li>Taxable payroll from the 2025 Trustees Report.</li>
-            <li>OASDI trust-fund TOB revenue from SSA Trustees supplemental tables.</li>
-            <li>Medicare HI trust-fund TOB revenue from the 2025 Medicare Trustees Report.</li>
+            <li>Demographics, payroll, benefits, GDP, and AWI from the 2026 Social Security Trustees Report intermediate assumptions.</li>
+            <li>OASDI taxation-of-benefits revenue from the Trustees income-rate and payroll tables.</li>
+            <li>Medicare HI taxation-of-benefits revenue from the CMS 2026 Trustees expanded tables, annual through 2100.</li>
+            <li>Per-category income growth from the CBO long-term forecast through 2034, capped at Trustees GDP growth thereafter.</li>
           </BulletList>
+          <p className="mt-4">
+            The 2026 Trustees Report incorporates the 2025 reconciliation act (OBBBA),
+            including the senior deduction, directly in current law — no
+            post-legislation bridge is required.
+          </p>
         </AccordionItem>
 
         <AccordionItem
-          title="Scoring Approach"
+          title="Scoring approach"
           summary="Static scoring is primary; behavioral labor-response results are supplemental."
         >
           <p>
             <strong>Static scoring:</strong> holds taxpayer behavior constant and isolates the
             mechanical effect of policy changes. This is the dashboard&apos;s default scoring
-            surface. Options 1-12 use full reform H5 microsimulation outputs for
-            2026-2035 and every fifth year from 2040-2100. Annual dashboard rows between
-            long-run anchor years are linearly interpolated for display continuity; the exact
-            selected-year H5 rows are preserved separately in the production results.
+            surface. All fourteen reforms use full reform H5 microsimulation outputs
+            computed on the calibrated year datasets for 2026, 2030, and every fifth
+            year from 2035 to 2100. Annual dashboard rows between anchor years are
+            linearly interpolated for display continuity; the exact anchor-year H5
+            rows are preserved separately in the production results.
           </p>
           <p className="mt-4">
             <strong>Supplemental labor-supply response:</strong> uses the same
-            current-contract full reform H5 lineage and is available from the Scoring
-            control. Earlier non-contract response data are excluded from the dashboard
-            because they were not generated from the current full-H5 production lineage.
+            full reform H5 lineage at the 2026 and 2100 endpoints and is available
+            from the Scoring control.
           </p>
         </AccordionItem>
 
         <AccordionItem
-          title="Trust Fund Allocation"
+          title="Trust fund allocation"
           summary="Revenue allocation varies by reform type."
         >
           <BulletList>
@@ -191,8 +217,13 @@ export function MethodologySection() {
             </a>
           </li>
           <li>
-            <a href="https://www.ssa.gov/oact/tr/2025/" target="_blank" rel="noreferrer" className="hover:underline">
-              2025 Social Security Trustees Report
+            <a href="https://www.ssa.gov/oact/tr/2026/" target="_blank" rel="noreferrer" className="hover:underline">
+              2026 Social Security Trustees Report
+            </a>
+          </li>
+          <li>
+            <a href="https://huggingface.co/datasets/policyengine/populace-us" target="_blank" rel="noreferrer" className="hover:underline">
+              populace microdata
             </a>
           </li>
           <li>
