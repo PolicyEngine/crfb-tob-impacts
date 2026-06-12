@@ -1,167 +1,447 @@
 {
   "schema": "crfb_reform_modeling_progress/v1",
   "source_of_truth": "docs/current/REFORM_MODELING_BIBLE.md",
-  "updated_at": "2026-06-12T18:47:26.926972+00:00",
+  "updated_at": "2026-06-12T20:44:36.475454+00:00",
   "current_gate": "G8",
   "full_launch_allowed": true,
   "paid_modal_launch_allowed": true,
   "sentinel_launch_allowed": false,
   "approved_worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
   "approved_worker_sha": "ba9c4a4a9ebda78159a7369540568776ed2754e5c5a9ef001ba5e8e16461a773",
-  "approved_code_bundle_sha": "304bd00210b39f0696d6dd3ed2ef262eb38fd667097bf1115b4262805f12acf0",
-  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=full cells=year=2026/reform=option1/scoring=behavioral,year=2026/reform=option10/scoring=behavioral,year=2026/reform=option11/scoring=behavioral,year=2026/reform=option12/scoring=behavioral,year=2026/reform=option2/scoring=behavioral,year=2026/reform=option3/scoring=behavioral,year=2026/reform=option4/scoring=behavioral,year=2026/reform=option5/scoring=behavioral,year=2026/reform=option6/scoring=behavioral,year=2026/reform=option7/scoring=behavioral,year=2026/reform=option8/scoring=behavioral,year=2026/reform=option9/scoring=behavioral,year=2026/reform=reverse_roth/scoring=behavioral,year=2026/reform=tax93/scoring=behavioral,year=2100/reform=option1/scoring=behavioral,year=2100/reform=option10/scoring=behavioral,year=2100/reform=option11/scoring=behavioral,year=2100/reform=option12/scoring=behavioral,year=2100/reform=option2/scoring=behavioral,year=2100/reform=option3/scoring=behavioral,year=2100/reform=option4/scoring=behavioral,year=2100/reform=option5/scoring=behavioral,year=2100/reform=option6/scoring=behavioral,year=2100/reform=option7/scoring=behavioral,year=2100/reform=option8/scoring=behavioral,year=2100/reform=option9/scoring=behavioral,year=2100/reform=reverse_roth/scoring=behavioral,year=2100/reform=tax93/scoring=behavioral run_prefix=v2pop_tr2026_behavioral_20260612 dataset_template=/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-v2pop.json",
+  "approved_code_bundle_sha": "dac6fc37e52d75099be8d94fcae3dee112269c471fa47221e9d93deece625a01",
+  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=full cells=year=2075/reform=option1/scoring=static,year=2075/reform=option10/scoring=static,year=2075/reform=option11/scoring=static,year=2075/reform=option12/scoring=static,year=2075/reform=option2/scoring=static,year=2075/reform=option3/scoring=static,year=2075/reform=option4/scoring=static,year=2075/reform=option5/scoring=static,year=2075/reform=option6/scoring=static,year=2075/reform=option7/scoring=static,year=2075/reform=option8/scoring=static,year=2075/reform=option9/scoring=static,year=2075/reform=reverse_roth/scoring=static,year=2075/reform=tax93/scoring=static,year=2080/reform=option1/scoring=static,year=2080/reform=option10/scoring=static,year=2080/reform=option11/scoring=static,year=2080/reform=option12/scoring=static,year=2080/reform=option2/scoring=static,year=2080/reform=option3/scoring=static,year=2080/reform=option4/scoring=static,year=2080/reform=option5/scoring=static,year=2080/reform=option6/scoring=static,year=2080/reform=option7/scoring=static,year=2080/reform=option8/scoring=static,year=2080/reform=option9/scoring=static,year=2080/reform=reverse_roth/scoring=static,year=2080/reform=tax93/scoring=static,year=2085/reform=option1/scoring=static,year=2085/reform=option10/scoring=static,year=2085/reform=option11/scoring=static,year=2085/reform=option12/scoring=static,year=2085/reform=option2/scoring=static,year=2085/reform=option3/scoring=static,year=2085/reform=option4/scoring=static,year=2085/reform=option5/scoring=static,year=2085/reform=option6/scoring=static,year=2085/reform=option7/scoring=static,year=2085/reform=option8/scoring=static,year=2085/reform=option9/scoring=static,year=2085/reform=reverse_roth/scoring=static,year=2085/reform=tax93/scoring=static,year=2090/reform=option1/scoring=static,year=2090/reform=option10/scoring=static,year=2090/reform=option11/scoring=static,year=2090/reform=option12/scoring=static,year=2090/reform=option2/scoring=static,year=2090/reform=option3/scoring=static,year=2090/reform=option4/scoring=static,year=2090/reform=option5/scoring=static,year=2090/reform=option6/scoring=static,year=2090/reform=option7/scoring=static,year=2090/reform=option8/scoring=static,year=2090/reform=option9/scoring=static,year=2090/reform=reverse_roth/scoring=static,year=2090/reform=tax93/scoring=static,year=2095/reform=option1/scoring=static,year=2095/reform=option10/scoring=static,year=2095/reform=option11/scoring=static,year=2095/reform=option12/scoring=static,year=2095/reform=option2/scoring=static,year=2095/reform=option3/scoring=static,year=2095/reform=option4/scoring=static,year=2095/reform=option5/scoring=static,year=2095/reform=option6/scoring=static,year=2095/reform=option7/scoring=static,year=2095/reform=option8/scoring=static,year=2095/reform=option9/scoring=static,year=2095/reform=reverse_roth/scoring=static,year=2095/reform=tax93/scoring=static,year=2100/reform=option1/scoring=static,year=2100/reform=option10/scoring=static,year=2100/reform=option11/scoring=static,year=2100/reform=option12/scoring=static,year=2100/reform=option2/scoring=static,year=2100/reform=option3/scoring=static,year=2100/reform=option4/scoring=static,year=2100/reform=option5/scoring=static,year=2100/reform=option6/scoring=static,year=2100/reform=option7/scoring=static,year=2100/reform=option8/scoring=static,year=2100/reform=option9/scoring=static,year=2100/reform=reverse_roth/scoring=static,year=2100/reform=tax93/scoring=static run_prefix=v2pop_tr2026_noclone_20260612 dataset_template=/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json",
   "approved_durable_storage_target": "r2://axiom-corpus/crfb/reform_full_h5",
   "approved_r2_bucket_prefix": "r2://axiom-corpus/crfb/reform_full_h5",
   "approval_transaction_store": "r2://axiom-corpus/crfb/reform_full_h5/approval_store/v2pop_tr2026_20260611",
   "approved_expected_schema_manifest": "docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json",
   "approved_expected_schema_manifest_sha": "87561098500713fb0a0ec2220783345431d8987acf0aa8862e84824d7728f34d",
-  "approved_baseline_dataset_manifest": "docs/current/manifests/baseline-dataset-manifest-v2pop.json",
-  "approved_baseline_dataset_manifest_sha": "7ea3df995b3ecdc9de2c19c1e47d1f711108b881a6052b6810baf53093557732",
+  "approved_baseline_dataset_manifest": "docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json",
+  "approved_baseline_dataset_manifest_sha": "e307e0448ebba10dcc1035e3c00d4584d920d4f1cb28ce819fd3713917c6188b",
   "approved_pip_freeze_sha256": "3c327535723b36c23c77b49ffa637f39e100c8099e238abee60a9481c3f041f8",
   "approved_cells": [
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option1",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option10",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option11",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option12",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option2",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option3",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option4",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option5",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option6",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option7",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option8",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "option9",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "reverse_roth",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
-      "year": 2026,
+      "year": 2075,
       "reform": "tax93",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option1",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option10",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option11",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option12",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option2",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option3",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option4",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option5",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option6",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option7",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option8",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "option9",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "reverse_roth",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2080,
+      "reform": "tax93",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option1",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option10",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option11",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option12",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option2",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option3",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option4",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option5",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option6",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option7",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option8",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "option9",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "reverse_roth",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2085,
+      "reform": "tax93",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option1",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option10",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option11",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option12",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option2",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option3",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option4",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option5",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option6",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option7",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option8",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "option9",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "reverse_roth",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2090,
+      "reform": "tax93",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option1",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option10",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option11",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option12",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option2",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option3",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option4",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option5",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option6",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option7",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option8",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "option9",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "reverse_roth",
+      "scoring_type": "static"
+    },
+    {
+      "year": 2095,
+      "reform": "tax93",
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option1",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option10",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option11",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option12",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option2",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option3",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option4",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option5",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option6",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option7",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option8",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "option9",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "reverse_roth",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     },
     {
       "year": 2100,
       "reform": "tax93",
-      "scoring_type": "behavioral"
+      "scoring_type": "static"
     }
   ],
-  "allowed_paid_call_count": 28,
-  "approval_nonce": "v2pop-tr2026-behavioral-20260612b",
+  "allowed_paid_call_count": 84,
+  "approval_nonce": "v2pop-tr2026-noclone-20260612",
   "approval_consumed": false,
   "approval_consumed_at": null,
   "approval_consumed_by": null,
@@ -189,9 +469,9 @@
     "revenue_impact_2026_billions": -108.8,
     "verified_at": "2026-06-12T03:58:02.762820+00:00"
   },
-  "approval_text_or_id": "Behavioral endpoints relaunch on a scoring-distinct run prefix after the first behavioral launch was cancelled (cross-scoring overwrite risk, no data lost). Per Max's standing authorization (2026-06-09 'do it all'). 28 cells: 2026+2100 x 14 reforms, scoring=behavioral.",
+  "approval_text_or_id": "Far-horizon static re-run on the clone-free baselines per Max's 2026-06-12 direction ('can we just use the populace for later years'). All six no-clone years pass publication gates (contributor ESS 107-156 vs gate 50). 84 cells: 2075-2100 every fifth year x 14 reforms, static. Build id crfb-longrun-v2pop-tr2026-noclone-9f1260b-20260612.",
   "approved_by": "Max Ghenis",
-  "approved_at": "2026-06-12T18:47:26.926972+00:00",
+  "approved_at": "2026-06-12T20:44:36.475454+00:00",
   "bad_run": {
     "app_id": "ap-yMmq7tIsHEeaPSoNVnMyz2",
     "state": "stopped",
@@ -8821,6 +9101,296 @@
       "spawned_call_ids": [],
       "note": "All 28 calls cancelled before any completion: the artifact path has no scoring segment, so this launch would have overwritten the static panel's endpoint cells. Static artifacts verified intact afterward. Submitter now refuses cross-scoring prefix reuse.",
       "archived_at": "2026-06-12T18:47:26.926972+00:00"
+    },
+    {
+      "run_prefix": "v2pop_tr2026_behavioral_20260612 (2026 complete; 2100 cancelled for no-clone rebuild)",
+      "nonce": "v2pop-tr2026-behavioral-20260612b",
+      "spawned_call_records": [
+        {
+          "year": 2026,
+          "reform": "option1",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "8635a83c7acda4f8852627aabd5fee2fb47952a9d0899b85d5857cb05b529934",
+          "call_id": "fc-01KTYJT86BRHB0BEMJ3WVZXZTC",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option10",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "394783f80d86744186db5ae66387bb95ea7e8c8734d5c23bc8622bf518993d42",
+          "call_id": "fc-01KTYJT8XAKH56PSTE3MMDN9GS",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option11",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "79706075ac3fb0afb0a0be595bdbe7e61cc33253c95d7486cd14c8f7d22e0d07",
+          "call_id": "fc-01KTYJT9FVJG828GBZYEZ904HX",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option12",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "ad75ec4b2e2bfcd7cdbf4ba6768fe32df0a9a878e51a0a108b21830a985b838d",
+          "call_id": "fc-01KTYJTD1YS4J4VGZ9T20BDW7B",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option2",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "1c82c75f5bd99bc05f10ac12caabc7779b6b5a8939c3fe5b01ca789447b83b58",
+          "call_id": "fc-01KTYJTDTCZXPXE0MY0XG5C4NG",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option3",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "7e52de1c6adb9ee1f284b6dfe9a58e579865f99a44bffa0f5e6d8164098ee721",
+          "call_id": "fc-01KTYJTESYDGZC7B35SSYAMT5Z",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option4",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "cdcea2fc2cd1e4f397fd5d54a13329ea3741b589ecc448249251e3e4d4cc8acf",
+          "call_id": "fc-01KTYJTJ2DTKJ1KZP66EXRKTXW",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option5",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "f6a2e81c5bcd7076429c17923fd9c48a18387ecb509f942f1102c5a3e28667bc",
+          "call_id": "fc-01KTYJTK7K7E7T1BR8K7K6JE3Q",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option6",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "51bac75487df30471b6963a76a0e0ddea80756f5a32fe38635790ad3d939d7a6",
+          "call_id": "fc-01KTYJTM6G4RP738ZGGQ3HS9G0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option7",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "5d4a091407c6ef8bcbdb8bb794ad7c9c15b834df50bcd55d8ead95531ddd78b3",
+          "call_id": "fc-01KTYJTMPWX1JD7CBHP26V2ERV",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option8",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "6741164a62515a39e6315dd005e59dc9f63793fe6f5500ca8bb7c5c00720952d",
+          "call_id": "fc-01KTYJTYTN2EKNTK63C936T174",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "option9",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "fc62082abe5253b572f217d48a652a00095d7e6d29d7f9796f20caf82e589d01",
+          "call_id": "fc-01KTYJV310AAP5Y49PYP3RWBFR",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "reverse_roth",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "f6283aa70ba68f4a4ed874ebdbd000891b0ecdfd9a8606a84726daf3554a6ab7",
+          "call_id": "fc-01KTYJV4T7R6YJFJ5BDSRHA16M",
+          "dashboard_url": null
+        },
+        {
+          "year": 2026,
+          "reform": "tax93",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2026.h5",
+          "reservation_token_hash": "ccffcba51495ec99251c8995410b2fc688d096be89fbec396e72c8c8fc2f0433",
+          "call_id": "fc-01KTYJV6MY81FAZJ8PB5YKQV75",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option1",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "8f1a707854deb8c79ccdf495c79e711b5b7a90e52a881d092347146fc380cfbd",
+          "call_id": "fc-01KTYJV7HXFYDWSXPMZTT7XBJ1",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option10",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "4606bb847a125a03c8a7296de55024e99275aea922d7dcf3fcdefd511391297d",
+          "call_id": "fc-01KTYJV8ND2RG69MD1JREKBAY9",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option11",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "99cc644bd0e1a3c511422564bce8f67f5b4134f53b123c0c458594218c5d7d3c",
+          "call_id": "fc-01KTYJV9GY8HMW679S1R28G7ZD",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option12",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "1a8832af47beead9a617f19422ccc0d65b5b2c0a761edecced5ef18b870bed92",
+          "call_id": "fc-01KTYJVA59R08NW3B7C8QBWZNS",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option2",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "2666fee3126d93a042d93a81f2fae7b5be1fabc698ab666b99339f96080e5ea3",
+          "call_id": "fc-01KTYJVAZ701D5VT0VG8FEHFJD",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option3",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "016deb57fdce5bdc903c32ec52d79e2c0b8d8eb28d7122f1ed74fb9cdb1decf6",
+          "call_id": "fc-01KTYJVBYZDG3QS228C794DMW0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option4",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "0a5cb60d8434defbb767f9404b18bb68ebf4669ff7679c8b0da64d7e861a3299",
+          "call_id": "fc-01KTYJVCG27E8RCZHA12FGME4X",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option5",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "ad50f9fcad64bec653a8a5fa99f37cf2adbfada7ca0bef4c1e01a5323e62292e",
+          "call_id": "fc-01KTYJVEJR0FAG8J56D6S0RF89",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option6",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "9e581916c2d80934e81ce1ff9552e3cdae35210942f61952155fa80bba966b89",
+          "call_id": "fc-01KTYJVFX5G67E9TEX3DVDBM71",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option7",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "26bce82a9c5e623109f784be76c74bb528c40f1bcc952b7766dcd04ce68059a3",
+          "call_id": "fc-01KTYJVGHHQT3BTXVC6MQW75H1",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option8",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "0d01b7b6c9cb9f7842fe664a6eaf246859b25c6b47bb26317f57cc8aaa934580",
+          "call_id": "fc-01KTYJVHCNP8KMRCCBWDX47DCB",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option9",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "219dd348e953717295ea886ff2b49390634d227a3751b3eb51bdfa4b8f19314d",
+          "call_id": "fc-01KTYJVJ8JK8F01T4AWF6EYN61",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "reverse_roth",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "1130bc79b4a25a2daab4456c0bb60e27c055cfc2c3b2e326f431c5f8994860db",
+          "call_id": "fc-01KTYJVK8VE7A0NQAFV13D3EHH",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "tax93",
+          "scoring_type": "behavioral",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/2100.h5",
+          "reservation_token_hash": "92ef3a475667f7e7609d60484136e600f1ee064c25820ceb05e44c7d53b64e11",
+          "call_id": "fc-01KTYJVN96H3B0EH5E7NPJPMSB",
+          "dashboard_url": null
+        }
+      ],
+      "spawned_call_ids": [
+        "fc-01KTYJT86BRHB0BEMJ3WVZXZTC",
+        "fc-01KTYJT8XAKH56PSTE3MMDN9GS",
+        "fc-01KTYJT9FVJG828GBZYEZ904HX",
+        "fc-01KTYJTD1YS4J4VGZ9T20BDW7B",
+        "fc-01KTYJTDTCZXPXE0MY0XG5C4NG",
+        "fc-01KTYJTESYDGZC7B35SSYAMT5Z",
+        "fc-01KTYJTJ2DTKJ1KZP66EXRKTXW",
+        "fc-01KTYJTK7K7E7T1BR8K7K6JE3Q",
+        "fc-01KTYJTM6G4RP738ZGGQ3HS9G0",
+        "fc-01KTYJTMPWX1JD7CBHP26V2ERV",
+        "fc-01KTYJTYTN2EKNTK63C936T174",
+        "fc-01KTYJV310AAP5Y49PYP3RWBFR",
+        "fc-01KTYJV4T7R6YJFJ5BDSRHA16M",
+        "fc-01KTYJV6MY81FAZJ8PB5YKQV75",
+        "fc-01KTYJV7HXFYDWSXPMZTT7XBJ1",
+        "fc-01KTYJV8ND2RG69MD1JREKBAY9",
+        "fc-01KTYJV9GY8HMW679S1R28G7ZD",
+        "fc-01KTYJVA59R08NW3B7C8QBWZNS",
+        "fc-01KTYJVAZ701D5VT0VG8FEHFJD",
+        "fc-01KTYJVBYZDG3QS228C794DMW0",
+        "fc-01KTYJVCG27E8RCZHA12FGME4X",
+        "fc-01KTYJVEJR0FAG8J56D6S0RF89",
+        "fc-01KTYJVFX5G67E9TEX3DVDBM71",
+        "fc-01KTYJVGHHQT3BTXVC6MQW75H1",
+        "fc-01KTYJVHCNP8KMRCCBWDX47DCB",
+        "fc-01KTYJVJ8JK8F01T4AWF6EYN61",
+        "fc-01KTYJVK8VE7A0NQAFV13D3EHH",
+        "fc-01KTYJVN96H3B0EH5E7NPJPMSB"
+      ],
+      "note": "All 14 year-2026 behavioral cells completed and verified. Year-2100 cells cancelled mid-run when Max approved dropping donor clones; 11 had completed on the cloned 2100 baseline and are superseded.",
+      "archived_at": "2026-06-12T20:44:36.475454+00:00"
     }
   ]
 }
