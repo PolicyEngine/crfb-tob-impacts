@@ -81,7 +81,9 @@ def build_live_baseline_results(
         "tob_total_pct_oasdi_payroll",
     ]
     aggregates = pd.read_csv(baseline_aggregates_path)
-    aggregates = aggregates[[column for column in aggregate_columns if column in aggregates]]
+    aggregates = aggregates[
+        [column for column in aggregate_columns if column in aggregates]
+    ]
 
     rows: list[dict[str, Any]] = []
     for year in SELECTED_YEARS:
@@ -118,7 +120,9 @@ def build_live_baseline_results(
                     audit.get("top_100_weight_share_pct")
                 ),
                 "negative_weight_pct": _maybe_float(audit.get("negative_weight_pct")),
-                "h5_social_security_b": _constraint_value_billions(metadata, "ss_total"),
+                "h5_social_security_b": _constraint_value_billions(
+                    metadata, "ss_total"
+                ),
                 "h5_oasdi_taxable_payroll_b": _constraint_value_billions(
                     metadata, "payroll_total"
                 ),
@@ -164,7 +168,9 @@ def _record_reform_status(
 ) -> None:
     key = (reform_id, year)
     existing = records.get(key)
-    if existing and _status_rank(str(existing.get("reform_h5_status"))) > _status_rank(status):
+    if existing and _status_rank(str(existing.get("reform_h5_status"))) > _status_rank(
+        status
+    ):
         return
     records[key] = {"reform_h5_status": status, **record}
 
@@ -385,8 +391,7 @@ def _scan_r2_completion_records(
 
     bucket = os.environ.get("CRFB_R2_BUCKET") or DEFAULT_R2_BUCKET
     root = (
-        os.environ.get("CRFB_REFORM_FULL_H5_R2_PREFIX_ROOT")
-        or DEFAULT_R2_PREFIX_ROOT
+        os.environ.get("CRFB_REFORM_FULL_H5_R2_PREFIX_ROOT") or DEFAULT_R2_PREFIX_ROOT
     ).strip("/")
     records: dict[tuple[str, int], dict[str, Any]] = {}
 

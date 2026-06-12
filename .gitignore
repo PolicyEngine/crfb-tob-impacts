@@ -29,3 +29,11 @@ policy-impact-dashboard/node_modules/
 projected_datasets_snapshots/
 projected_datasets_v2/
 data/sources/populace/*.h5
+
+# Year-dataset build outputs live on disk and Modal volumes; the manifests
+# under docs/current/manifests/ carry their hashes.
+projected_datasets/
+projected_datasets_v2/
+projected_datasets_v2_tr2025/
+projected_datasets_v2pop/
+tmp/
