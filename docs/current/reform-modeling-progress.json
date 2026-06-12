@@ -1,299 +1,34 @@
 {
   "schema": "crfb_reform_modeling_progress/v1",
   "source_of_truth": "docs/current/REFORM_MODELING_BIBLE.md",
-  "updated_at": "2026-05-22T12:26:08.891998Z",
-  "current_gate": "G10",
+  "updated_at": "2026-06-12T03:18:02.717982+00:00",
+  "current_gate": "G5.5",
   "full_launch_allowed": false,
-  "paid_modal_launch_allowed": false,
-  "sentinel_launch_allowed": false,
+  "paid_modal_launch_allowed": true,
+  "sentinel_launch_allowed": true,
   "approved_worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
-  "approved_worker_sha": "c51e5d0bdfd03fa9db19be39d4cc4c20aa52c772ad409352c367df028cff3d5c",
-  "approved_code_bundle_sha": "a62b1db770545b006e909c05e0f585500045941b440dc9eac36d79252ec06ba3",
-  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=full cells=year=2026/reform=option1/scoring=behavioral,year=2026/reform=option10/scoring=behavioral,year=2026/reform=option11/scoring=behavioral,year=2026/reform=option12/scoring=behavioral,year=2026/reform=option2/scoring=behavioral,year=2026/reform=option3/scoring=behavioral,year=2026/reform=option4/scoring=behavioral,year=2026/reform=option5/scoring=behavioral,year=2026/reform=option6/scoring=behavioral,year=2026/reform=option7/scoring=behavioral,year=2026/reform=option8/scoring=behavioral,year=2026/reform=option9/scoring=behavioral,year=2100/reform=option1/scoring=behavioral,year=2100/reform=option10/scoring=behavioral,year=2100/reform=option11/scoring=behavioral,year=2100/reform=option12/scoring=behavioral,year=2100/reform=option2/scoring=behavioral,year=2100/reform=option3/scoring=behavioral,year=2100/reform=option4/scoring=behavioral,year=2100/reform=option5/scoring=behavioral,year=2100/reform=option6/scoring=behavioral,year=2100/reform=option7/scoring=behavioral,year=2100/reform=option8/scoring=behavioral,year=2100/reform=option9/scoring=behavioral run_prefix=full_h5_5a35713_behavioral_endpoints_lsrbasefix_20260522_0748 dataset_template=/baselines/crfb-longrun-20260520-5a35713-annual/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-5a35713-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-5a35713-selected-panel-20260522.json",
+  "approved_worker_sha": "ba9c4a4a9ebda78159a7369540568776ed2754e5c5a9ef001ba5e8e16461a773",
+  "approved_code_bundle_sha": "b62fc9aa5b77b7746bb284e6cd79bfc9f5cb0aafd62fc828de9f613fbfa53fe8",
+  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=sentinel cells=year=2026/reform=option1/scoring=static run_prefix=v2pop_tr2026_20260611 dataset_template=/baselines/crfb-longrun-v2pop-tr2026-9f1260b-20260611/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-v2pop.json",
   "approved_durable_storage_target": "r2://axiom-corpus/crfb/reform_full_h5",
   "approved_r2_bucket_prefix": "r2://axiom-corpus/crfb/reform_full_h5",
-  "approval_transaction_store": "r2://axiom-corpus/crfb/reform_full_h5/approval_store/full_h5_5a35713_behavioral_endpoints_lsrbasefix_20260522_0748",
-  "approved_expected_schema_manifest": "docs/current/schemas/reform-full-h5-expected-schema-5a35713-2026-option1-local-proof.json",
-  "approved_expected_schema_manifest_sha": "25aef0d70193f9d1c5d4fd8ebd05fc3061f9e075d5bc07cb4f9e826b2e07f670",
-  "approved_baseline_dataset_manifest": "docs/current/manifests/baseline-dataset-manifest-5a35713-selected-panel-20260522.json",
-  "approved_baseline_dataset_manifest_sha": "49b12c9c43f146de86185f08c4f49e8f28aa37849a7e60a63ab552ac828d833c",
+  "approval_transaction_store": "r2://axiom-corpus/crfb/reform_full_h5/approval_store/v2pop_tr2026_20260611",
+  "approved_expected_schema_manifest": "docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json",
+  "approved_expected_schema_manifest_sha": "87561098500713fb0a0ec2220783345431d8987acf0aa8862e84824d7728f34d",
+  "approved_baseline_dataset_manifest": "docs/current/manifests/baseline-dataset-manifest-v2pop.json",
+  "approved_baseline_dataset_manifest_sha": "7ea3df995b3ecdc9de2c19c1e47d1f711108b881a6052b6810baf53093557732",
   "approved_pip_freeze_sha256": "3c327535723b36c23c77b49ffa637f39e100c8099e238abee60a9481c3f041f8",
   "approved_cells": [
-    {
-      "year": 2026,
-      "reform": "option1",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option10",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option11",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option12",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option2",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option3",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option4",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option5",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option6",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option7",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option8",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option9",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option1",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option10",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option11",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option12",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option2",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option3",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option4",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option5",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option6",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option7",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option8",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option9",
-      "scoring_type": "behavioral"
-    }
+    "year=2026/reform=option1/scoring=static"
   ],
-  "allowed_paid_call_count": 24,
-  "approval_nonce": "full-5a35713-behavioral-endpoints-lsrbasefix-20260522-0748",
-  "approval_consumed": true,
-  "approval_consumed_at": "2026-05-22T11:47:08.956916Z",
-  "approval_consumed_by": "modal_batch/reform_full_h5.py::submit_reform_full_h5",
-  "paid_call_count_consumed": 24,
-  "reserved_cells": [
-    {
-      "year": 2026,
-      "reform": "option1",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option10",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option11",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option12",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option2",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option3",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option4",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option5",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option6",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option7",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option8",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2026,
-      "reform": "option9",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option1",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option10",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option11",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option12",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option2",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option3",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option4",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option5",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option6",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option7",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option8",
-      "scoring_type": "behavioral"
-    },
-    {
-      "year": 2100,
-      "reform": "option9",
-      "scoring_type": "behavioral"
-    }
-  ],
-  "reservation_token_hashes": [
-    "5d9d8ff885fc946888fac14f083e061a86c09f80b92a316bcaf7ebf7e52fd010",
-    "f83dbe64e1ca77b69eecbf68ac2aab3473bfce7c85b736f88d8e1774bdbc8320",
-    "f883ff062b3a643f58e8504b67810883349be0eb374210589219c3208ff6e6c8",
-    "c876d8d9961be1372124c6c9bc5f2a91914dc1b20e3c9e92bc303adb68d2c162",
-    "f52bee4c2a060beed3f57ecd1b6769f4c8b4feb27ccc3b5ed2840247c60ebcf0",
-    "a9c29b02a16fc894299da9fff8060c69ec8087cd23a18d502681cc7d5c0d692b",
-    "074cffe60713462ec644fb82ac45eb4d43a73698dd14d71a3da092081292029f",
-    "eab3b332e3a0d9fe344e9d192c2d6d5006c8001859ef859c0e1a7be4667cf5f7",
-    "dcee531ee08c08975c7de7ad9b8cfd8b4e5e368c645076b93ca3f2e59dcbc871",
-    "0962f45495c373264de14dfff5d8d948f8cf686bced1d79735ca4225ff3ffd6a",
-    "7de4df18cb122409822a4a425654e98bdee024e4b4f219a3fb3d5d5f395aa2e2",
-    "78fcfb80d7bc03cc8904658699be8eac1a7d06da777dad338e9b09bae60edd48",
-    "1d2d5eef974bca55c949eb4082bc18d3ebec7c116bf01f2b6db6ee286f187f10",
-    "6c5729f4da2509a5332b17364ce682ace14bce610696d44a72541a36f8ae62b2",
-    "cbf731f28a15c91009c20e38c72e1b6e94615149c7127bf79368de01e422e01a",
-    "e2e89631e273af44cf62f022951112a551da84d128c53c7851d628785b8c74e2",
-    "706dc159d2cf919dce0f653b0af7a8fe4c74b475d3d81064c48a4b81c0d1f7c2",
-    "8c35977b888c83b19e25e0a7eaa816258a6ff3153158f67a6203514a81095e43",
-    "da8d2bbc9483fb8dcf988070c3cdfeb86a3a9bde6492cb17462135e1abb3c269",
-    "e493fc541702acf63554825bac60f202557cea8048c19c6e28cf74aefb7db396",
-    "0e99beafc8765fec0706141c30d1a3f9f6ef0bee1cfe64825039547eb4cbefd4",
-    "31f24c1a3dbea261f329f4e8ff70d20c25f001a9cead62aebfafe94f011fed20",
-    "7a58f0ac4d2317c2f2b6fb5e817a3eec56fef873c70b719f5d339da30338fff7",
-    "4a3b156cf5909fc6cdb486ec10e475abed396e6e1874df7674b4ed0ca0bf4a84"
-  ],
+  "allowed_paid_call_count": 1,
+  "approval_nonce": "v2pop-tr2026-sentinel-20260611",
+  "approval_consumed": false,
+  "approval_consumed_at": null,
+  "approval_consumed_by": null,
+  "paid_call_count_consumed": 0,
+  "reserved_cells": [],
+  "reservation_token_hashes": [],
   "spawned_call_records": [
     {
       "year": 2026,
@@ -538,32 +273,7 @@
     "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
     "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
   ],
-  "launched_call_ids": [
-    "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
-    "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
-    "fc-01KS7R5PDHDCHXKJR64B5BRR1K",
-    "fc-01KS7R5PYRKJ4RRQ3KY1SJWGQX",
-    "fc-01KS7R5QGK9KDEDW5JC8G16Y1A",
-    "fc-01KS7R5R66CJ8B5E6QCGWNBET7",
-    "fc-01KS7R5RVHXG9JWH5KCPHWA5MG",
-    "fc-01KS7R5SEHH82Q5NJNAT18NV0B",
-    "fc-01KS7R5T3Q3JW5BS19XCQZ5F20",
-    "fc-01KS7R5TMJAG6S09JHC9RCZYNX",
-    "fc-01KS7R5V628RZBRG7QSNFAP2NJ",
-    "fc-01KS7R5W42GCBF8V5RCE2G09G0",
-    "fc-01KS7R5WRMS2BFYT2TM60SQRAV",
-    "fc-01KS7R5XBSFVTR8X730CA5J4FQ",
-    "fc-01KS7R5XTC0QR3AZF6NFY9RNNQ",
-    "fc-01KS7R5YBSJKZA487V9YHRCVYG",
-    "fc-01KS7R5YTSG1PX2KPMK6QMZYW8",
-    "fc-01KS7R5ZFMJRPMZK0BPAPFWVSP",
-    "fc-01KS7R600B06CRBVWXCRQV4BFK",
-    "fc-01KS7R60HP18SQ5SX8T5ZYVKQR",
-    "fc-01KS7R610RPKV2QD60RERYM15R",
-    "fc-01KS7R61G507HEM3WV435H3JZK",
-    "fc-01KS7R622VAJZ9EQ1TJQ52XCBP",
-    "fc-01KS7R62MQT1NXK6QKEQXRQRDS"
-  ],
+  "launched_call_ids": [],
   "completed_call_ids": [
     "fc-01KS7R5MY83QBVHZ90WJ5A1GQ4",
     "fc-01KS7R5NG5HVF4XBP4KHCV60CW",
@@ -623,9 +333,9 @@
     "manual_weight_aggregation_used": false,
     "object_store_validation": "passed"
   },
-  "approval_text_or_id": "Max approved the 2026 and 2100 behavioral endpoint reform-H5 run; fresh attached relaunch after no-wait Modal attempt was invalidated and submitter patched to forbid detached ephemeral full launches.",
+  "approval_text_or_id": "Max authorized by chat: 2026-06-09 'if you're really confident and can do it stepwise with sentinels to see the data you can also rerun the modal reform analysis (just every 5y)'; 2026-06-10 'sounds good do it all'; 2026-06-11 'ok i think we can really use populace now - check it out, it's live'. One paid sentinel cell on the v2pop TR2026 populace baselines before the full panel.",
   "approved_by": "Max Ghenis",
-  "approved_at": "2026-05-22T11:45:53.002784Z",
+  "approved_at": "2026-06-12T03:18:02.717982+00:00",
   "bad_run": {
     "app_id": "ap-yMmq7tIsHEeaPSoNVnMyz2",
     "state": "stopped",
@@ -1035,7 +745,7 @@
       }
     }
   ],
-  "active_run_prefix": "full_h5_5a35713_behavioral_endpoints_lsrbasefix_20260522_0748",
+  "active_run_prefix": "v2pop_tr2026_20260611",
   "recovery_launch_history": [
     {
       "archived_at": "2026-05-22T02:22:55.403447+00:00",
