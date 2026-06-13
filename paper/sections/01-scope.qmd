@@ -8,9 +8,11 @@ separate from, two other project surfaces:
 - the **operational docs**, which track rerun status, reproducibility, and audit decisions
 
 The current analysis extends the original eight-option report to a broader
-twelve-option package over a `2026-2100` modeling window. The live release
-surface is the standard reform set, `option1` through `option12`, generated
-from the current full-H5 contract.
+fourteen-reform package over a `2026-2100` modeling window. The live release
+surface is the standard reform set, `option1` through `option12`, plus two
+additional reforms — a reverse-Roth proposal and a `93%` benefit-taxation
+benchmark — all generated from the current full-H5 contract on the populace
+microdata base.
 
 ## Current-law baseline
 
@@ -18,13 +20,18 @@ Under current law, Social Security benefits become taxable once combined income
 exceeds statutory thresholds, with up to 50 percent of benefits taxable at the
 lower tier and up to 85 percent taxable at the higher tier [@irs2024pub915].
 Revenue from this taxation is split between the Social Security OASDI trust
-funds and the Medicare Hospital Insurance trust fund [@ssa2025trustees;
-@medicare2025trustees].
+funds and the Medicare Hospital Insurance trust fund [@ssa2026trustees;
+@medicare2026trustees].
 
-The baseline also reflects the temporary bonus senior deduction enacted in the
-One Big Beautiful Bill Act and its scheduled expiration after `2028`
-[@jct2025bonus]. That matters for interpretation because several reform options
-either extend, repeal, or replace that temporary senior-specific tax relief.
+The baseline is the **2026 Trustees Report intermediate-assumptions current
+law**, which already incorporates the 2025 reconciliation act (the One Big
+Beautiful Bill Act), including the temporary bonus senior deduction and its
+scheduled expiration after `2028` [@jct2025bonus]. Because the Trustees baseline
+is OBBBA-native, this analysis requires no post-legislation bridge: the modeled
+current law and the calibration target describe the same world. The
+senior-deduction expiration still matters for interpretation because several
+reform options extend, repeal, or replace that temporary senior-specific tax
+relief.
 
 ## Research questions
 

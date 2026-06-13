@@ -1,0 +1,123 @@
+{
+  "schema": "crfb_full_reform_h5_schema/v1",
+  "path": "tmp/full_h5_local_proof_v2/local_proof_v2pop_2026_option1_static/reform_full_h5/year=2026/reform=option1/scenario.h5",
+  "size_bytes": 35010787,
+  "sha256": "fc82eb056d45b49249aca43f2cfb9cbbd98973c363b31797745884d409d77359",
+  "entities": {
+    "person": {
+      "rows": 160858,
+      "columns": [
+        "person_id",
+        "marital_unit_id",
+        "family_id",
+        "spm_unit_id",
+        "tax_unit_id",
+        "household_id",
+        "person_weight",
+        "age",
+        "is_male",
+        "race",
+        "is_child",
+        "is_adult",
+        "employment_income",
+        "ssi",
+        "social_security",
+        "medicare_cost",
+        "medicaid",
+        "unemployment_compensation",
+        "self_employment_income",
+        "partnership_s_corp_income",
+        "sstb_self_employment_income_before_lsr",
+        "taxable_earnings_for_social_security",
+        "social_security_taxable_self_employment_income",
+        "employee_social_security_tax",
+        "employee_medicare_tax",
+        "employer_social_security_tax",
+        "employer_medicare_tax",
+        "self_employment_tax"
+      ],
+      "column_count": 28,
+      "required_weight_column": "person_weight",
+      "required_weight_column_present": true
+    },
+    "household": {
+      "rows": 75112,
+      "columns": [
+        "household_id",
+        "household_weight",
+        "household_count_people",
+        "household_net_income",
+        "household_income_decile",
+        "household_benefits",
+        "household_tax",
+        "household_market_income",
+        "congressional_district_geoid",
+        "employer_ss_tax_income_tax_revenue",
+        "employer_medicare_tax_income_tax_revenue"
+      ],
+      "column_count": 11,
+      "required_weight_column": "household_weight",
+      "required_weight_column_present": true
+    },
+    "tax_unit": {
+      "rows": 87519,
+      "columns": [
+        "tax_unit_id",
+        "tax_unit_weight",
+        "income_tax",
+        "employee_payroll_tax",
+        "state_income_tax",
+        "household_state_income_tax",
+        "eitc",
+        "ctc",
+        "tax_unit_social_security",
+        "tax_unit_taxable_social_security",
+        "taxable_social_security",
+        "tob_revenue_oasdi",
+        "tob_revenue_medicare_hi"
+      ],
+      "column_count": 13,
+      "required_weight_column": "tax_unit_weight",
+      "required_weight_column_present": true
+    },
+    "spm_unit": {
+      "rows": 76665,
+      "columns": [
+        "spm_unit_id",
+        "spm_unit_weight",
+        "snap",
+        "tanf",
+        "spm_unit_net_income",
+        "spm_unit_is_in_spm_poverty",
+        "spm_unit_is_in_deep_spm_poverty"
+      ],
+      "column_count": 7,
+      "required_weight_column": "spm_unit_weight",
+      "required_weight_column_present": true
+    },
+    "family": {
+      "rows": 79365,
+      "columns": [
+        "family_id",
+        "family_weight"
+      ],
+      "column_count": 2,
+      "required_weight_column": "family_weight",
+      "required_weight_column_present": true
+    },
+    "marital_unit": {
+      "rows": 124087,
+      "columns": [
+        "marital_unit_id",
+        "marital_unit_weight"
+      ],
+      "column_count": 2,
+      "required_weight_column": "marital_unit_weight",
+      "required_weight_column_present": true
+    }
+  },
+  "entity_count": 6,
+  "schema_hash": "058e06b2a72728be39ad899573ca8719be15ea0b0ad3c9a57ed6ae8d0dcd0495",
+  "schema_role": "preapproved_expected_full_output_schema",
+  "source": "v2pop local proof 2026/option1/static on projected_datasets_v2pop/2026.h5 (populace base, populace-us-2024-9f1260b-20260611)"
+}

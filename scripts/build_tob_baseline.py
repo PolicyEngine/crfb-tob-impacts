@@ -11,6 +11,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.tob_baseline import (
+    build_tob_baseline_tr2026,
     GENERATED_BASELINE_PATH,
     HI_METHODS,
     build_tob_baseline,
@@ -27,7 +28,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--hi-method",
         choices=sorted(HI_METHODS),
-        required=True,
+        required=False,
+        default="current_law",
         help="How to derive the HI annual path while the public CMS post-OBBBA annual series remains unresolved.",
     )
     parser.add_argument(
@@ -41,7 +43,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    baseline = build_tob_baseline(args.hi_method)
+    baseline = build_tob_baseline_tr2026()
     validate_generated_baseline(baseline)
     write_tob_baseline(baseline, args.output)
     manifest_path = args.output.with_suffix(".manifest.json")
@@ -52,7 +54,7 @@ def main() -> None:
         f"Wrote {args.output}: 2026 OASDI={sample['tob_oasdi_billions']:.4f} "
         f"HI={sample['tob_hi_billions']:.4f} "
         f"Total={sample['tob_total_billions']:.4f} "
-        f"(HI method: {args.hi_method})"
+        "(TR2026 current law, no bridge)"
     )
     print(
         f"Wrote {manifest_path}: scenario={manifest['scenario_id']} "

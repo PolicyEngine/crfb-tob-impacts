@@ -20,8 +20,12 @@ DEFAULT_SUBMISSION_GLOB = "results/modal_submissions/reform_full_h5_*.json"
 DEFAULT_R2_BUCKET = "axiom-corpus"
 DEFAULT_R2_PREFIX_ROOT = "crfb/reform_full_h5"
 
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13))
-SELECTED_YEARS = tuple(range(2026, 2036)) + tuple(range(2040, 2101, 5))
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
+    "reverse_roth",
+    "tax93",
+)
+# The v2pop panel runs every fifth year (2026, 2030, then 2035-2100).
+SELECTED_YEARS = (2026, 2030) + tuple(range(2035, 2101, 5))
 
 BASELINE_OUTPUT = DASHBOARD_DATA / "live_baseline_results.csv"
 REFORM_STATUS_OUTPUT = DASHBOARD_DATA / "live_reform_status.csv"
@@ -77,7 +81,9 @@ def build_live_baseline_results(
         "tob_total_pct_oasdi_payroll",
     ]
     aggregates = pd.read_csv(baseline_aggregates_path)
-    aggregates = aggregates[[column for column in aggregate_columns if column in aggregates]]
+    aggregates = aggregates[
+        [column for column in aggregate_columns if column in aggregates]
+    ]
 
     rows: list[dict[str, Any]] = []
     for year in SELECTED_YEARS:
@@ -114,7 +120,9 @@ def build_live_baseline_results(
                     audit.get("top_100_weight_share_pct")
                 ),
                 "negative_weight_pct": _maybe_float(audit.get("negative_weight_pct")),
-                "h5_social_security_b": _constraint_value_billions(metadata, "ss_total"),
+                "h5_social_security_b": _constraint_value_billions(
+                    metadata, "ss_total"
+                ),
                 "h5_oasdi_taxable_payroll_b": _constraint_value_billions(
                     metadata, "payroll_total"
                 ),
@@ -160,7 +168,9 @@ def _record_reform_status(
 ) -> None:
     key = (reform_id, year)
     existing = records.get(key)
-    if existing and _status_rank(str(existing.get("reform_h5_status"))) > _status_rank(status):
+    if existing and _status_rank(str(existing.get("reform_h5_status"))) > _status_rank(
+        status
+    ):
         return
     records[key] = {"reform_h5_status": status, **record}
 
@@ -381,8 +391,7 @@ def _scan_r2_completion_records(
 
     bucket = os.environ.get("CRFB_R2_BUCKET") or DEFAULT_R2_BUCKET
     root = (
-        os.environ.get("CRFB_REFORM_FULL_H5_R2_PREFIX_ROOT")
-        or DEFAULT_R2_PREFIX_ROOT
+        os.environ.get("CRFB_REFORM_FULL_H5_R2_PREFIX_ROOT") or DEFAULT_R2_PREFIX_ROOT
     ).strip("/")
     records: dict[tuple[str, int], dict[str, Any]] = {}
 

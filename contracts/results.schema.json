@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "crfb_results_contract/v1",
+  "description": "One canonical results artifact: every published number with its full lineage chain, in populace Target grammar where targets appear.",
+  "type": "object",
+  "required": ["schema", "generated_at", "lineage", "results"],
+  "properties": {
+    "schema": { "const": "crfb_results_contract/v1" },
+    "generated_at": { "type": "string" },
+    "lineage": {
+      "type": "object",
+      "required": ["base_dataset", "baseline_build", "targets", "reform_runs"],
+      "properties": {
+        "base_dataset": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string" },
+            "huggingface_repo": { "type": "string" }
+          }
+        },
+        "baseline_build": {
+          "type": "object",
+          "required": ["run_id", "manifest_path", "manifest_sha256", "year_h5_sha256"],
+          "properties": {
+            "run_id": { "type": "string" },
+            "manifest_path": { "type": "string" },
+            "manifest_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "year_h5_sha256": {
+              "type": "object",
+              "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "entity", "aggregation", "period", "value", "source"],
+            "properties": {
+              "name": { "type": "string" },
+              "entity": { "type": "string" },
+              "measure": { "type": ["string", "null"] },
+              "aggregation": { "enum": ["sum", "count", "mean"] },
+              "period": { "type": "integer" },
+              "value": { "type": "number" },
+              "source": { "type": "string" }
+            }
+          }
+        },
+        "reform_runs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["run_prefix", "scoring_type"],
+            "properties": {
+              "run_prefix": { "type": "string" },
+              "scoring_type": { "enum": ["static", "behavioral"] },
+              "cell_count": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "reform",
+          "year",
+          "scoring_type",
+          "result_type",
+          "revenue_impact_billions",
+          "lineage"
+        ],
+        "properties": {
+          "reform": { "type": "string" },
+          "year": { "type": "integer", "minimum": 2026, "maximum": 2100 },
+          "scoring_type": { "enum": ["static", "behavioral"] },
+          "result_type": {
+            "enum": ["exact_full_h5", "linear_interpolation_between_full_h5_years"]
+          },
+          "revenue_impact_billions": { "type": "number" },
+          "tob_oasdi_impact_billions": { "type": ["number", "null"] },
+          "tob_medicare_hi_impact_billions": { "type": ["number", "null"] },
+          "baseline_revenue_billions": { "type": ["number", "null"] },
+          "lineage": {
+            "type": "object",
+            "required": ["baseline_year_h5_sha256"],
+            "properties": {
+              "run_prefix": { "type": ["string", "null"] },
+              "scenario_h5_sha256": {
+                "type": ["string", "null"],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "baseline_year_h5_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "interpolated_between": {
+                "type": ["array", "null"],
+                "items": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

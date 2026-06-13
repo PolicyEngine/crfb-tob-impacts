@@ -91,12 +91,19 @@ def _r2_client_from_env() -> Any:
 
     import boto3
 
+    from botocore.config import Config
+
     return boto3.client(
         "s3",
         endpoint_url=endpoint_url,
         region_name=os.environ.get("AWS_DEFAULT_REGION") or "auto",
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,
+        config=Config(
+            retries={"max_attempts": 10, "mode": "adaptive"},
+            connect_timeout=30,
+            read_timeout=300,
+        ),
     )
 
 

@@ -12,7 +12,9 @@ SCRIPT_PATH = REPO_ROOT / "scripts" / "build_release_package.py"
 
 
 def load_package_module():
-    spec = importlib.util.spec_from_file_location("build_release_package_test", SCRIPT_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "build_release_package_test", SCRIPT_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -35,11 +37,11 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
     baseline_contract = manifest["post_obbba_tob_baseline"]
 
     expected_files = [
-        "results/all_static_results_full_h5_selected_panel_display_20260522.csv",
-        "results/behavioral_endpoint_full_h5_exact_20260522.csv",
-        "results/behavioral_endpoint_ratio_display_20260522.csv",
-        "results/behavioral_endpoint_ratio_display_20260522_metadata.json",
-        "results/results_full_h5_selected_panel_display_20260522.csv",
+        "results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
+        "results/behavioral_endpoint_full_h5_exact_20260612.csv",
+        "results/behavioral_endpoint_ratio_display_20260612.csv",
+        "results/behavioral_endpoint_ratio_display_20260612_metadata.json",
+        "results/results_full_h5_v2pop_panel_display_20260612.csv",
         "dashboard/public/data/results.csv",
         "dashboard/public/data/baseline_aggregates.csv",
         "dashboard/public/data/baseline_indexed_parameters.csv",
@@ -100,7 +102,9 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         "dashboard/public/data/baseline_calibration_targets.csv",
         "dashboard/public/data/baseline_calibration_diagnostics.csv",
     ]:
-        with (package.package_dir / relative).open(newline="", encoding="utf-8") as file:
+        with (package.package_dir / relative).open(
+            newline="", encoding="utf-8"
+        ) as file:
             for row in csv.DictReader(file):
                 dataset_path = row.get("dataset_path") or ""
                 if dataset_path.endswith(".h5.metadata.json"):
@@ -115,14 +119,19 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
     for relative in referenced_metadata:
         assert (package.package_dir / relative).exists()
 
-    assert baseline_contract["scenario_id"] == "crfb_post_obbba_tob_75y"
+    assert baseline_contract["scenario_id"] == "crfb_tr2026_current_law_tob_75y"
     assert baseline_contract["baseline_kind"] == "calibration_target"
-    assert baseline_contract["not_law"] is True
-    assert baseline_contract["baseline_sha256"] == json.loads(
-        (package.package_dir / "data/ssa_tob_baseline_75year.manifest.json").read_text(
-            encoding="utf-8"
-        )
-    )["baseline_sha256"]
+    assert baseline_contract["not_law"] is False
+    assert (
+        baseline_contract["baseline_sha256"]
+        == json.loads(
+            (
+                package.package_dir / "data/ssa_tob_baseline_75year.manifest.json"
+            ).read_text(encoding="utf-8")
+        )["baseline_sha256"]
+    )
 
-    assert not any(record["category"] == "special_case_raws" for record in manifest["files"])
+    assert not any(
+        record["category"] == "special_case_raws" for record in manifest["files"]
+    )
     assert package.archive_path is None

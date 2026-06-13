@@ -22,8 +22,11 @@ import type { NameType, ValueType } from "recharts/types/component/DefaultToolti
 import { useEffect, useState } from "react";
 
 import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
+import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-section";
+import { TobExplainerSection } from "@/components/tob-explainer-section";
 import { BalancedFixSection } from "@/components/balanced-fix-section";
 import { ComparisonTable } from "@/components/comparison-table";
+import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
@@ -44,7 +47,7 @@ type ViewMode = "10year" | "75year";
 type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) =>
-  /^option(?:[1-9]|1[0-2])$/.test(reform.id),
+  /^(?:option(?:[1-9]|1[0-2])|reverse_roth|tax93)$/.test(reform.id),
 );
 
 const PAPER_HREF = sitePath("/paper/");
@@ -59,8 +62,9 @@ const BENEFIT_RULE_IDS = [
   "option9",
   "option10",
   "option11",
+  "tax93",
 ];
-const STRUCTURAL_IDS = ["option5", "option12"];
+const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];
 
 const LONG_RUN_X_AXIS_TICKS = [
   2026,
@@ -710,7 +714,10 @@ export function DashboardShell() {
           </section>
 
           {activeTab === "baseline" ? (
-            <BaselineAssumptionsSection />
+            <>
+              <BaselineAssumptionsSection />
+              <BaselineDiagnosticsSection />
+            </>
           ) : activeTab === "balancedFix" ? (
             <BalancedFixSection />
           ) : loading ? (
@@ -730,6 +737,8 @@ export function DashboardShell() {
             </section>
           ) : (
             <>
+              <TobExplainerSection />
+
               {/* Reform name + category band — a slim editorial surface, no card */}
               <section className="border-t border-[var(--pe-color-border-light)] pt-6">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
@@ -957,6 +966,12 @@ export function DashboardShell() {
                 </div>
               </section>
 
+              {/* Distributional impact by income decile, with year selector */}
+              <DistributionalSection
+                reformId={effectiveReformId}
+                reformName={reform.shortName}
+              />
+
               {/* Detailed external comparison table (if present) */}
               <ComparisonTable
                 reformId={effectiveReformId}
@@ -980,7 +995,7 @@ export function DashboardShell() {
                 PolicyEngine
               </a>
               , commissioned by the Committee for a Responsible Federal Budget. Data:
-              2025 Social Security Trustees Report.
+              2026 Social Security Trustees Report and populace microdata.
             </p>
           </footer>
         </main>

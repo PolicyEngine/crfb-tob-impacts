@@ -210,6 +210,38 @@ export const REFORMS: ReformMeta[] = [
     scoringNote:
       "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },
+  {
+    id: "reverse_roth",
+    name: "Reverse Roth Social Security Proposal",
+    shortName: "Reverse Roth",
+    description:
+      "Tax 100% of Social Security benefits and deduct employee Social Security payroll taxes from income tax.",
+    category: "Traditional tax treatment",
+    mechanism:
+      "Applies full benefit taxation immediately while treating employee OASDI payroll-tax contributions as above-the-line deductions.",
+    baseline:
+      "Designed to be scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "This is the mirror image of a Roth-style Social Security swap: contributions become deductible and benefits become fully taxable.",
+    scoringNote:
+      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+  },
+  {
+    id: "tax93",
+    name: "Taxation of 93% of Social Security Benefits",
+    shortName: "93% taxation",
+    description:
+      "Tax 93% of Social Security benefits for all recipients, the share Steve Goss's SSA analysis attributed to employer contributions and earnings.",
+    category: "Expanded taxation",
+    mechanism:
+      "Sets every benefit-taxability rate parameter to 93% with thresholds at zero, mirroring the structure of the 90% and 95% options.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "Sits between the 90% and 95% options; useful as the Goss-consistent estimate of the taxable share of benefits.",
+    scoringNote:
+      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+  },
 ];
 
 export const EXTERNAL_ESTIMATES: Record<string, ExternalEstimate[]> = {

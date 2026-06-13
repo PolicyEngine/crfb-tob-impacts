@@ -13,27 +13,28 @@ DEFAULT_FULL_H5_AGGREGATE = (
     REPO
     / "results"
     / "modal_runs_production"
-    / "full_h5_5a35713_standard_selected_panel_live_20260522.csv"
+    / "full_h5_v2pop_tr2026_panel_20260612.csv"
 )
 DEFAULT_REFERENCE_STATIC = (
     REPO / "results" / "all_static_results_full_h5_selected_panel_display_20260522.csv"
 )
 DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
 DEFAULT_EXACT_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_selected_panel_20260522.csv"
+    REPO / "results" / "all_static_results_full_h5_v2pop_panel_20260612.csv"
 )
 DEFAULT_DISPLAY_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_selected_panel_display_20260522.csv"
+    REPO / "results" / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
 )
 DEFAULT_METADATA_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_selected_panel_20260522_metadata.json"
+    REPO / "results" / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json"
 )
 
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13))
-ANNUAL_YEARS = tuple(range(2026, 2101))
-REQUIRED_EXACT_YEARS = tuple(
-    sorted(set(range(2026, 2036)) | set(range(2040, 2101, 5)))
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
+    "reverse_roth",
+    "tax93",
 )
+ANNUAL_YEARS = tuple(range(2026, 2101))
+REQUIRED_EXACT_YEARS = (2026, 2030) + tuple(range(2035, 2101, 5))
 EXPECTED_EXACT_CELL_COUNT = len(STANDARD_REFORMS) * len(REQUIRED_EXACT_YEARS)
 
 DOLLAR_COLUMNS = (
@@ -227,9 +228,10 @@ def publish_full_h5_static_results(
             "baseline calibration is applied."
         ),
         "long_horizon_display_policy": (
-            "Options 1-12 use exact full-H5 microsimulation outputs for "
-            "2026-2035 and every fifth year from 2040-2100. Non-modeled annual display "
-            "rows are linearly interpolated only for dashboard continuity."
+            "All fourteen reforms use exact full-H5 microsimulation outputs "
+            "for 2026, 2030, and every fifth year from 2035 to 2100 on the "
+            "v2 populace baselines. Non-modeled annual display rows are "
+            "linearly interpolated only for dashboard continuity."
         ),
     }
     metadata_output_path.parent.mkdir(parents=True, exist_ok=True)

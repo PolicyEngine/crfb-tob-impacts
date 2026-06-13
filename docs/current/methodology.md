@@ -8,6 +8,13 @@ The active package contains the standard reforms `option1` through `option12`.
 Legacy non-contract variants are not part of the current dashboard, release, or
 reform-modeling contract.
 
+The package also defines `reverse_roth` as a new proposal scenario: immediately
+tax 100% of Social Security benefits and make employee OASDI payroll taxes
+deductible from income tax. It is runnable as an explicit reform ID, but it is
+not part of the current published `option1` through `option12` result set until
+full reform H5 cells are produced, stored, and aggregated under the production
+contract.
+
 The main delivery window is `2026-2100`.
 
 ## Standard Series Contract

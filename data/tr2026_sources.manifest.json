@@ -1,0 +1,32 @@
+{
+  "description": "2026 Trustees Report calibration target sources",
+  "retrieved": "2026-06-10",
+  "files": [
+    {
+      "file": "data/sources/tr2026/SingleYearTRTables_TR2026.xlsx",
+      "sha256": "38d8c5fee2f8b46dc15dd689c82a080163d190f260066f7e34bbc51f2d6ba361",
+      "source": "https://www.ssa.gov/oact/TR/2026/SingleYearTRTables_TR2026.xlsx (retrieved via web.archive.org, 2026-06-10)"
+    },
+    {
+      "file": "data/sources/tr2026/Medicare Sources of Non-Interest Income as a Percentage of Total Income and as a Percentage of Gross Domestic Product.csv",
+      "sha256": "62ade09847a389a74fb91c1c549d4fc2709568aba11c31547c2e2173d10c2ff1",
+      "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
+    },
+    {
+      "file": "data/social_security_aux_tr2026.csv",
+      "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6",
+      "source": ""
+    },
+    {
+      "file": "data/SSPopJul_TR2026_interim.csv",
+      "sha256": "fa1b088ad7ac9f8f621f861bdb9fef33e81e74ac5862e75654e10977c5e40c12",
+      "source": ""
+    }
+  ],
+  "notes": [
+    "OASDI TOB dollars = IV.B2 percent of taxable payroll times VI.G1 taxable payroll.",
+    "HI TOB from the CMS 2026 Medicare Trustees expanded tables, annual through 2100 (no carry-forward bridge needed).",
+    "Single-year-age population is interim: TR2024 single-year shape rescaled to TR2026 V.A3 group totals until SSA posts the TR2026 single-year file.",
+    "TR2026 incorporates OBBBA in current law, so these TOB targets replace the TR2025 post-OBBBA bridge entirely."
+  ]
+}

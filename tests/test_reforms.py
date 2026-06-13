@@ -1,6 +1,5 @@
 """Tests for reform definitions."""
 
-import pytest
 from src.reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -10,6 +9,8 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
+    get_reverse_roth_conventional_reform,
+    get_reverse_roth_reform,
     REFORMS,
 )
 
@@ -112,9 +113,29 @@ def test_option8_reform():
     assert any("threshold.adjusted_base.main" in str(k) for k in params.keys())
 
 
+def test_reverse_roth_reform():
+    """Test the reverse-Roth Social Security proposal."""
+    reform = get_reverse_roth_reform()
+    assert reform is not None
+    params = reform.parameter_values
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+    assert reform.name == "Reverse Roth Social Security proposal"
+
+
+def test_reverse_roth_conventional_reform_includes_elasticities():
+    """Test reverse-Roth behavioral scoring uses a custom Reform class."""
+    reform = get_reverse_roth_conventional_reform()
+    assert reform is not None
+    params = reform.parameter_values
+    assert any("simulation.labor_supply_responses" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+
+
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 12
+    assert len(REFORMS) == 14
+    assert "reverse_roth" in REFORMS
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():
@@ -133,3 +154,28 @@ def test_reform_variants():
     for amount in [250, 500, 750, 900, 1000]:
         reform = option4["func"](amount)
         assert reform is not None
+
+
+def test_tax93_rates_sit_between_neighbors():
+    from src.reforms import (
+        get_option9_dict,
+        get_option10_dict,
+        get_tax93_dict,
+    )
+
+    rate_keys = [
+        key for key in get_tax93_dict() if ".taxability.rate." in key
+    ]
+    assert rate_keys
+    for key in rate_keys:
+        low = list(get_option9_dict()[key].values())[0]
+        mid = list(get_tax93_dict()[key].values())[0]
+        high = list(get_option10_dict()[key].values())[0]
+        assert low < mid < high
+        assert mid == 0.93
+
+
+def test_tax93_reform_builds():
+    from src.reforms import get_tax93_reform
+
+    assert get_tax93_reform() is not None

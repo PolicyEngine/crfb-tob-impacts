@@ -1,0 +1,2061 @@
+{
+ "schema": "crfb_tob_explainer/v1",
+ "policyengine_us_version": "1.700.2",
+ "curve_year": 2026,
+ "parameters": {
+  "year": 2026,
+  "source": "IRC \u00a786 as represented in policyengine-us parameters gov.irs.social_security.taxability",
+  "base_threshold": {
+   "SINGLE": 25000.0,
+   "JOINT": 32000.0
+  },
+  "adjusted_base_threshold": {
+   "SINGLE": 34000.0,
+   "JOINT": 44000.0
+  },
+  "base_inclusion_rate": 0.5,
+  "additional_inclusion_rate": 0.85,
+  "benefit_inclusion_cap": 0.85,
+  "combined_income_ss_fraction": 0.5
+ },
+ "curves": [
+  {
+   "filing_status": "SINGLE",
+   "ss_benefit": 18000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 750.0,
+     "taxable_share": 0.0417
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 2000.0,
+     "taxable_share": 0.1111
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 3250.0,
+     "taxable_share": 0.1806
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 4500.0,
+     "taxable_share": 0.25
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 6625.0,
+     "taxable_share": 0.3681
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 8750.0,
+     "taxable_share": 0.4861
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 10875.0,
+     "taxable_share": 0.6042
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 13000.0,
+     "taxable_share": 0.7222
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 15125.0,
+     "taxable_share": 0.8403
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "SINGLE",
+   "ss_benefit": 24000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 1000.0,
+     "taxable_share": 0.0417
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 2250.0,
+     "taxable_share": 0.0938
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 3500.0,
+     "taxable_share": 0.1458
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 4925.0,
+     "taxable_share": 0.2052
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 7050.0,
+     "taxable_share": 0.2938
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 9175.0,
+     "taxable_share": 0.3823
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 11300.0,
+     "taxable_share": 0.4708
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 13425.0,
+     "taxable_share": 0.5594
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 15550.0,
+     "taxable_share": 0.6479
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 17675.0,
+     "taxable_share": 0.7365
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 19800.0,
+     "taxable_share": 0.825
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "SINGLE",
+   "ss_benefit": 36000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 250.0,
+     "taxable_share": 0.0069
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 1500.0,
+     "taxable_share": 0.0417
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 2750.0,
+     "taxable_share": 0.0764
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 4000.0,
+     "taxable_share": 0.1111
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 5775.0,
+     "taxable_share": 0.1604
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 7900.0,
+     "taxable_share": 0.2194
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 10025.0,
+     "taxable_share": 0.2785
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 12150.0,
+     "taxable_share": 0.3375
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 14275.0,
+     "taxable_share": 0.3965
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 16400.0,
+     "taxable_share": 0.4556
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 18525.0,
+     "taxable_share": 0.5146
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 20650.0,
+     "taxable_share": 0.5736
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 22775.0,
+     "taxable_share": 0.6326
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 24900.0,
+     "taxable_share": 0.6917
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 27025.0,
+     "taxable_share": 0.7507
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 29150.0,
+     "taxable_share": 0.8097
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "SINGLE",
+   "ss_benefit": 48000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 750.0,
+     "taxable_share": 0.0156
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 2000.0,
+     "taxable_share": 0.0417
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 3250.0,
+     "taxable_share": 0.0677
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 4500.0,
+     "taxable_share": 0.0938
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 6625.0,
+     "taxable_share": 0.138
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 8750.0,
+     "taxable_share": 0.1823
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 10875.0,
+     "taxable_share": 0.2266
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 13000.0,
+     "taxable_share": 0.2708
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 15125.0,
+     "taxable_share": 0.3151
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 17250.0,
+     "taxable_share": 0.3594
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 19375.0,
+     "taxable_share": 0.4036
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 21500.0,
+     "taxable_share": 0.4479
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 23625.0,
+     "taxable_share": 0.4922
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 25750.0,
+     "taxable_share": 0.5365
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 27875.0,
+     "taxable_share": 0.5807
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 30000.0,
+     "taxable_share": 0.625
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 32125.0,
+     "taxable_share": 0.6693
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 34250.0,
+     "taxable_share": 0.7135
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 36375.0,
+     "taxable_share": 0.7578
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 38500.0,
+     "taxable_share": 0.8021
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 40625.0,
+     "taxable_share": 0.8464
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "JOINT",
+   "ss_benefit": 18000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 1000.0,
+     "taxable_share": 0.0556
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 2250.0,
+     "taxable_share": 0.125
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 3500.0,
+     "taxable_share": 0.1944
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 4750.0,
+     "taxable_share": 0.2639
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 6000.0,
+     "taxable_share": 0.3333
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 8125.0,
+     "taxable_share": 0.4514
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 10250.0,
+     "taxable_share": 0.5694
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 12375.0,
+     "taxable_share": 0.6875
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 14500.0,
+     "taxable_share": 0.8056
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 15300.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "JOINT",
+   "ss_benefit": 24000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 1250.0,
+     "taxable_share": 0.0521
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 2500.0,
+     "taxable_share": 0.1042
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 3750.0,
+     "taxable_share": 0.1562
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 5000.0,
+     "taxable_share": 0.2083
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 6425.0,
+     "taxable_share": 0.2677
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 8550.0,
+     "taxable_share": 0.3563
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 10675.0,
+     "taxable_share": 0.4448
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 12800.0,
+     "taxable_share": 0.5333
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 14925.0,
+     "taxable_share": 0.6219
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 17050.0,
+     "taxable_share": 0.7104
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 19175.0,
+     "taxable_share": 0.799
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 20400.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "JOINT",
+   "ss_benefit": 36000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 500.0,
+     "taxable_share": 0.0139
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 1750.0,
+     "taxable_share": 0.0486
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 3000.0,
+     "taxable_share": 0.0833
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 4250.0,
+     "taxable_share": 0.1181
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 5500.0,
+     "taxable_share": 0.1528
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 7275.0,
+     "taxable_share": 0.2021
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 9400.0,
+     "taxable_share": 0.2611
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 11525.0,
+     "taxable_share": 0.3201
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 13650.0,
+     "taxable_share": 0.3792
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 15775.0,
+     "taxable_share": 0.4382
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 17900.0,
+     "taxable_share": 0.4972
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 20025.0,
+     "taxable_share": 0.5563
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 22150.0,
+     "taxable_share": 0.6153
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 24275.0,
+     "taxable_share": 0.6743
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 26400.0,
+     "taxable_share": 0.7333
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 28525.0,
+     "taxable_share": 0.7924
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 30600.0,
+     "taxable_share": 0.85
+    }
+   ]
+  },
+  {
+   "filing_status": "JOINT",
+   "ss_benefit": 48000,
+   "points": [
+    {
+     "other_income": 0,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 2500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 5000,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 7500,
+     "taxable_amount": 0.0,
+     "taxable_share": 0.0
+    },
+    {
+     "other_income": 10000,
+     "taxable_amount": 1000.0,
+     "taxable_share": 0.0208
+    },
+    {
+     "other_income": 12500,
+     "taxable_amount": 2250.0,
+     "taxable_share": 0.0469
+    },
+    {
+     "other_income": 15000,
+     "taxable_amount": 3500.0,
+     "taxable_share": 0.0729
+    },
+    {
+     "other_income": 17500,
+     "taxable_amount": 4750.0,
+     "taxable_share": 0.099
+    },
+    {
+     "other_income": 20000,
+     "taxable_amount": 6000.0,
+     "taxable_share": 0.125
+    },
+    {
+     "other_income": 22500,
+     "taxable_amount": 8125.0,
+     "taxable_share": 0.1693
+    },
+    {
+     "other_income": 25000,
+     "taxable_amount": 10250.0,
+     "taxable_share": 0.2135
+    },
+    {
+     "other_income": 27500,
+     "taxable_amount": 12375.0,
+     "taxable_share": 0.2578
+    },
+    {
+     "other_income": 30000,
+     "taxable_amount": 14500.0,
+     "taxable_share": 0.3021
+    },
+    {
+     "other_income": 32500,
+     "taxable_amount": 16625.0,
+     "taxable_share": 0.3464
+    },
+    {
+     "other_income": 35000,
+     "taxable_amount": 18750.0,
+     "taxable_share": 0.3906
+    },
+    {
+     "other_income": 37500,
+     "taxable_amount": 20875.0,
+     "taxable_share": 0.4349
+    },
+    {
+     "other_income": 40000,
+     "taxable_amount": 23000.0,
+     "taxable_share": 0.4792
+    },
+    {
+     "other_income": 42500,
+     "taxable_amount": 25125.0,
+     "taxable_share": 0.5234
+    },
+    {
+     "other_income": 45000,
+     "taxable_amount": 27250.0,
+     "taxable_share": 0.5677
+    },
+    {
+     "other_income": 47500,
+     "taxable_amount": 29375.0,
+     "taxable_share": 0.612
+    },
+    {
+     "other_income": 50000,
+     "taxable_amount": 31500.0,
+     "taxable_share": 0.6562
+    },
+    {
+     "other_income": 52500,
+     "taxable_amount": 33625.0,
+     "taxable_share": 0.7005
+    },
+    {
+     "other_income": 55000,
+     "taxable_amount": 35750.0,
+     "taxable_share": 0.7448
+    },
+    {
+     "other_income": 57500,
+     "taxable_amount": 37875.0,
+     "taxable_share": 0.7891
+    },
+    {
+     "other_income": 60000,
+     "taxable_amount": 40000.0,
+     "taxable_share": 0.8333
+    },
+    {
+     "other_income": 62500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 65000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 67500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 70000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 72500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 75000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 77500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 80000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 82500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 85000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 87500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 90000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 92500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 95000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 97500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 100000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 102500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 105000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 107500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 110000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 112500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 115000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 117500,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    },
+    {
+     "other_income": 120000,
+     "taxable_amount": 40800.0,
+     "taxable_share": 0.85
+    }
+   ]
+  }
+ ],
+ "context": [
+  {
+   "year": 2026,
+   "beneficiary_households": 60471792.82651994,
+   "tob_paying_households": 25057425.919461474,
+   "share_of_beneficiary_households_paying": 0.4144,
+   "tob_oasdi_billions": 61.8,
+   "tob_medicare_hi_billions": 47.0
+  },
+  {
+   "year": 2050,
+   "beneficiary_households": 70162476.01235414,
+   "tob_paying_households": 51013447.527706884,
+   "share_of_beneficiary_households_paying": 0.7271,
+   "tob_oasdi_billions": 245.2,
+   "tob_medicare_hi_billions": 197.1
+  },
+  {
+   "year": 2100,
+   "beneficiary_households": 109474079.15023041,
+   "tob_paying_households": 90326086.00387415,
+   "share_of_beneficiary_households_paying": 0.8251,
+   "tob_oasdi_billions": 1805.4,
+   "tob_medicare_hi_billions": 1513.7
+  }
+ ],
+ "lineage": {
+  "curves": "policyengine-us household simulations under 2026 current law (post-OBBBA)",
+  "context": "calibrated v2 baseline year datasets (crfb-longrun-v2pop-tr2026-9f1260b-20260611)"
+ }
+}

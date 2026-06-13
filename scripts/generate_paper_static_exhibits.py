@@ -9,8 +9,8 @@ REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
-FINAL_STATIC = RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13))
+FINAL_STATIC = RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + ("reverse_roth", "tax93")
 
 
 def fmt_b(value: float) -> str:
@@ -66,9 +66,10 @@ def build_results_overview(df: pd.DataFrame) -> str:
     option1 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0]))
 
     return f"""
-The current release surface contains only the contract-standard reforms
-`option1` through `option12`. All rows come from the May 22 full-H5 selected
-panel or display interpolation between those exact selected-year H5 outputs.
+The current release surface contains the fourteen contract-standard reforms:
+`option1` through `option12`, the reverse-Roth proposal, and the `93%`
+benchmark. All rows come from the June 12 full-H5 panel on the populace
+baselines, or display interpolation between those exact anchor-year H5 outputs.
 Legacy non-contract artifacts are excluded from the dashboard, paper exhibits,
 and release package.
 
@@ -166,16 +167,16 @@ def build_validation_sentinels(df: pd.DataFrame) -> str:
 
     probe_rows = [
         [
-            "Selected-year full-H5 coverage",
-            "option1-option12",
+            "Anchor-year full-H5 coverage",
+            "fourteen reforms",
             f"{len(exact)} exact full-H5 rows",
-            "Matches the 23-year selected panel contract.",
+            "Matches the 16 anchor-year panel contract (2026, 2030, 2035-2100 by 5).",
         ],
         [
-            "Late-horizon support coverage",
+            "Late-horizon coverage",
             "2075, 2080, 2085, 2090, 2095, 2100",
             f"{len(late_exact)} exact late-year rows",
-            "Uses current support-augmented baseline datasets.",
+            "Real (no-synthetic) populace baseline datasets passing all gates.",
         ],
         [
             "Durable artifact links",
@@ -286,11 +287,16 @@ policy baselines are not identical.
 
 def build_response_status() -> str:
     return """
-Labor-supply response rows are not included in the current public result set.
-The only acceptable response path is the current full-H5 reform contract: each
-cell must save a durable reform H5 first, then aggregates can be computed from
-that H5 using PolicyEngine/MicroSeries operations. Earlier non-contract response
-artifacts were removed from the release surface.
+Labor-supply response rows are generated under the current full-H5 reform contract
+and published as the dashboard's supplemental scoring surface. Each
+endpoint cell saves a durable reform H5 first, computed at `2026` and `2100`
+for all fourteen reforms; aggregates are then derived from those H5s using
+PolicyEngine/MicroSeries operations, and intermediate annual rows are
+interpolated from the endpoint ratios. The rows appear in `results.csv` under
+`scoring_type = behavioral`. Static scoring remains the primary surface;
+labor-supply response results are partial-equilibrium estimates under the
+project's age-based elasticity schedule and are not official CBO or JCT scores.
+Earlier non-contract response artifacts were removed from the release surface.
 """
 
 

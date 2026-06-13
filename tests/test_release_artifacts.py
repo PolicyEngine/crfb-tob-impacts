@@ -18,7 +18,9 @@ RESULTS = REPO_ROOT / "results"
 DASHBOARD_DATA = REPO_ROOT / "dashboard" / "public" / "data"
 DASHBOARD_OUT = REPO_ROOT / "dashboard" / "out" / "data"
 VERCEL_SITE = REPO_ROOT / ".vercel-site"
-STATIC_METADATA = RESULTS / "all_static_results_full_h5_selected_panel_20260522_metadata.json"
+STATIC_METADATA = (
+    RESULTS / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json"
+)
 DASHBOARD_RESULTS = DASHBOARD_DATA / "results.csv"
 DASHBOARD_BASELINE_METADATA = DASHBOARD_DATA / "baseline_assumptions_metadata.json"
 PUBLIC_BASELINE_MANIFEST = DASHBOARD_DATA / "post_obbba_tob_baseline_manifest.json"
@@ -30,18 +32,12 @@ CORE_WAGE_INDEXED_TAX_PARAMETERS = {
     "gov.irs.income.amt.exemption.amount.SINGLE": "AMT exemption",
 }
 RELEASE_RESULT_ARTIFACTS = [
-    RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv",
-    RESULTS / "results_full_h5_selected_panel_display_20260522.csv",
+    RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
+    RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
     DASHBOARD_RESULTS,
 ]
 ALLOWED_CSV_ARTIFACTS = {
-    "results.csv",
-    "data/hi_expenditures_tr2025.csv",
-    "data/oasdi_oact_20250805_nominal_delta.csv",
-    "data/ssa_economic_projections.csv",
-    "data/ssa_tob_baseline_75year.csv",
-    "data/tob_current_law_tr2025.csv",
-    "data/trust_fund_gaps.csv",
+    "dashboard/public/data/balanced_fix_baseline.csv",
     "dashboard/public/data/baseline_aggregates.csv",
     "dashboard/public/data/baseline_calibration_diagnostics.csv",
     "dashboard/public/data/baseline_calibration_targets.csv",
@@ -50,24 +46,32 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/baseline_indexing_growth.csv",
     "dashboard/public/data/baseline_policy_parameters.csv",
     "dashboard/public/data/baseline_reform_parameters.csv",
-    "dashboard/public/data/balanced_fix_baseline.csv",
     "dashboard/public/data/hi_taxable_payroll.csv",
     "dashboard/public/data/live_baseline_results.csv",
     "dashboard/public/data/live_reform_status.csv",
     "dashboard/public/data/results.csv",
     "dashboard/public/data/ssa_economic_projections.csv",
-    "results/all_static_results_full_h5_selected_panel_20260522.csv",
-    "results/all_static_results_full_h5_selected_panel_display_20260522.csv",
-    "results/behavioral_endpoint_full_h5_exact_20260522.csv",
-    "results/behavioral_endpoint_ratio_display_20260522.csv",
-    "results/behavioral_revenue_multipliers_by_year_reform_20260522.csv",
-    "results/behavioral_revenue_multipliers_by_year_reform_20260522_long.csv",
-    "results/behavioral_revenue_multipliers_exact_endpoints_20260522.csv",
-    "results/behavioral_revenue_multipliers_exact_endpoints_20260522_long.csv",
-    "results/modal_runs_production/behavioral_endpoint_full_h5_status_20260522.csv",
-    "results/modal_runs_production/full_h5_5a35713_behavioral_endpoints_20260522.csv",
-    "results/modal_runs_production/full_h5_5a35713_standard_selected_panel_live_20260522.csv",
-    "results/results_full_h5_selected_panel_display_20260522.csv",
+    "dashboard/public/data/v2_baseline_diagnostics.csv",
+    "data/SSPopJul_TR2024.csv",
+    "data/SSPopJul_TR2026_interim.csv",
+    "data/hi_expenditures_tr2025.csv",
+    "data/oasdi_oact_20250805_nominal_delta.csv",
+    "data/social_security_aux_tr2025.csv",
+    "data/social_security_aux_tr2026.csv",
+    "data/sources/tr2026/HI Cost and Income Rates.csv",
+    "data/sources/tr2026/Medicare Sources of Non-Interest Income as a Percentage of Total Income and as a Percentage of Gross Domestic Product.csv",
+    "data/ssa_economic_projections.csv",
+    "data/ssa_tob_baseline_75year.csv",
+    "data/tob_current_law_tr2025.csv",
+    "data/trust_fund_gaps.csv",
+    "results.csv",
+    "results/all_static_results_full_h5_v2pop_panel_20260612.csv",
+    "results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
+    "results/behavioral_endpoint_full_h5_exact_20260612.csv",
+    "results/behavioral_endpoint_ratio_display_20260612.csv",
+    "results/modal_runs_production/full_h5_v2pop_tr2026_behavioral_endpoints_20260612.csv",
+    "results/modal_runs_production/full_h5_v2pop_tr2026_panel_20260612.csv",
+    "results/results_full_h5_v2pop_panel_display_20260612.csv",
 }
 BASELINE_AUDIT_PUBLIC_FILES = [
     DASHBOARD_DATA / "baseline_aggregates.csv",
@@ -134,7 +138,7 @@ def assert_post_obbba_tob_target_is_diagnostic_only(results: pd.DataFrame) -> No
 def assert_release_artifact_matches_raw_full_h5(path: Path) -> None:
     results = pd.read_csv(path)
     raw = pd.read_csv(
-        RESULTS / "modal_runs_production" / "full_h5_5a35713_standard_selected_panel_live_20260522.csv"
+        RESULTS / "modal_runs_production" / "full_h5_v2pop_tr2026_panel_20260612.csv"
     )
     raw["baseline_revenue_raw_billions"] = raw["baseline_revenue"] / 1e9
     raw["baseline_tob_total_raw_billions"] = raw["baseline_tob_total"] / 1e9
@@ -151,7 +155,7 @@ def assert_release_artifact_matches_raw_full_h5(path: Path) -> None:
         how="inner",
         validate="one_to_one",
     )
-    assert len(exact) == 276
+    assert len(exact) == 224
     assert (
         exact["baseline_revenue"] - exact["baseline_revenue_raw_billions"]
     ).abs().max() < 1e-6
@@ -165,7 +169,9 @@ def assert_income_tax_baseline_is_direct_microsim(path: Path) -> None:
 
 
 def test_release_artifacts_keep_post_obbba_tob_as_diagnostic_target_only():
-    static = pd.read_csv(RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv")
+    static = pd.read_csv(
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+    )
     dashboard_static = load_dashboard_results("static")
     dashboard_behavioral = load_dashboard_results("behavioral")
 
@@ -177,13 +183,17 @@ def test_release_artifacts_keep_post_obbba_tob_as_diagnostic_target_only():
 def test_release_baseline_income_tax_comes_from_raw_full_h5():
     baseline = pd.read_csv(DASHBOARD_DATA / "baseline_aggregates.csv")
     static = load_dashboard_results("static")
-    option1 = static[static["reform_name"].eq("option1")][
-        ["year", "baseline_revenue"]
-    ]
+    option1 = static[static["reform_name"].eq("option1")][["year", "baseline_revenue"]]
     merged = baseline.merge(option1, on="year", validate="one_to_one")
 
-    assert (merged["federal_income_tax"] - merged["baseline_revenue"]).abs().max() < 1e-6
-    assert float(baseline["federal_income_tax_pct_gdp"].max()) > 25.0
+    assert (
+        merged["federal_income_tax"] - merged["baseline_revenue"]
+    ).abs().max() < 1e-6
+    # Federal income tax sits in a realistic band of GDP on the populace
+    # baseline (roughly 8-11%); v1's 25%+ reflected its over-calibration.
+    income_tax_pct_gdp = baseline["federal_income_tax_pct_gdp"]
+    assert float(income_tax_pct_gdp.max()) < 15.0
+    assert float(income_tax_pct_gdp.min()) > 7.0
 
     target = load_post_obbba_tob_target().rename(
         columns={"target_tob_total": "target_tob_total_from_csv"}
@@ -259,11 +269,7 @@ def test_public_dashboard_hides_income_tax_diagnostic_card():
 
 def test_public_dashboard_hides_2026_baseline_tob_cards():
     dashboard_shell = (
-        REPO_ROOT
-        / "dashboard"
-        / "src"
-        / "components"
-        / "dashboard-shell.tsx"
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
     ).read_text(encoding="utf-8")
     baseline_section = (
         REPO_ROOT
@@ -292,22 +298,24 @@ def test_baseline_assumption_public_audit_files_exist_and_cover_core_contract():
         "hi_tob",
     }.issubset(set(targets["constraint_name"]))
     assert targets["used_in_year_runner_reconciliation"].astype(bool).any()
-    assert diagnostics["diagnostic_id"].isin(
-        ["federal_income_tax_pct_gdp", "effective_sample_size"]
-    ).any()
     assert (
-        "gov.irs.social_security.taxability.threshold.base.main.SINGLE"
-        in set(policy_parameters["parameter_name"])
+        diagnostics["diagnostic_id"]
+        .isin(["federal_income_tax_pct_gdp", "effective_sample_size"])
+        .any()
     )
-    assert (
-        "gov.irs.social_security.taxability.threshold.base.main.SINGLE"
-        in set(reform_parameters["parameter_name"])
+    assert "gov.irs.social_security.taxability.threshold.base.main.SINGLE" in set(
+        policy_parameters["parameter_name"]
+    )
+    assert "gov.irs.social_security.taxability.threshold.base.main.SINGLE" in set(
+        reform_parameters["parameter_name"]
     )
     assert "static" in set(reform_parameters["scoring_type"])
 
 
 def test_income_tax_direct_microsim_guard_rejects_adulterated_exact_rows(tmp_path):
-    good = pd.read_csv(RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv")
+    good = pd.read_csv(
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+    )
     bad_results = tmp_path / "bad_results.csv"
     bad = good.copy()
     mask = (
@@ -333,9 +341,9 @@ def test_baseline_assumption_artifact_exposes_wage_indexed_tax_thresholds():
         parameters["parameter_name"].isin(CORE_WAGE_INDEXED_TAX_PARAMETERS)
     ]
     for row in core_parameters.itertuples(index=False):
-        assert (
-            row.value_2035 > row.value_2034
-        ), f"{row.parameter_name} does not rise at the 2035 wage-indexing boundary"
+        assert row.value_2035 > row.value_2034, (
+            f"{row.parameter_name} does not rise at the 2035 wage-indexing boundary"
+        )
         assert row.growth_2026_to_2100_pct >= MIN_WAGE_INDEXED_THRESHOLD_GROWTH_PCT, (
             f"{row.parameter_name} only grows {row.growth_2026_to_2100_pct:.1f}% "
             "from 2026 to 2100"
@@ -345,10 +353,11 @@ def test_baseline_assumption_artifact_exposes_wage_indexed_tax_thresholds():
 def test_post_obbba_tob_baseline_manifest_matches_current_artifact():
     manifest = load_post_obbba_manifest()
 
-    assert manifest["scenario_id"] == "crfb_post_obbba_tob_75y"
+    assert manifest["scenario_id"] == "crfb_tr2026_current_law_tob_75y"
     assert manifest["baseline_kind"] == "calibration_target"
-    assert manifest["not_law"] is True
-    assert manifest["law_mode"] == "trustees-2025-core-thresholds-v1"
+    # TR2026 carries OBBBA in current law, so the baseline is law-based.
+    assert manifest["not_law"] is False
+    assert manifest["law_mode"] == "trustees-2026-intermediate-v1"
     assert (
         manifest["artifact_contract"]["must_consume_baseline_sha256"]
         == manifest["baseline_sha256"]
@@ -361,7 +370,9 @@ def test_release_and_dashboard_metadata_carry_baseline_hash_contract():
     expected_sha = manifest["baseline_sha256"]
 
     static_metadata = json.loads(STATIC_METADATA.read_text(encoding="utf-8"))
-    dashboard_metadata = json.loads(DASHBOARD_BASELINE_METADATA.read_text(encoding="utf-8"))
+    dashboard_metadata = json.loads(
+        DASHBOARD_BASELINE_METADATA.read_text(encoding="utf-8")
+    )
     public_manifest = json.loads(PUBLIC_BASELINE_MANIFEST.read_text(encoding="utf-8"))
 
     assert static_metadata["post_obbba_tob_baseline_applied"] is False
@@ -369,9 +380,12 @@ def test_release_and_dashboard_metadata_carry_baseline_hash_contract():
     assert dashboard_metadata["post_obbba_tob_baseline_sha256"] == expected_sha
     assert dashboard_metadata["scenario_id"] == manifest["scenario_id"]
     assert dashboard_metadata["baseline_kind"] == "calibration_target"
-    assert dashboard_metadata["not_law"] is True
+    assert dashboard_metadata["not_law"] is False
     assert dashboard_metadata["law_mode"] == manifest["law_mode"]
-    assert dashboard_metadata["hi_bridge_method"] == manifest["bridge_methods"]["hi_method"]
+    assert (
+        dashboard_metadata["hi_bridge_method"]
+        == manifest["bridge_methods"]["hi_method"]
+    )
 
     assert public_manifest["baseline_sha256"] == expected_sha
     assert dashboard_metadata["policyengine_version"] == "4.5.1"
@@ -418,7 +432,9 @@ def test_release_pipeline_has_no_ambiguous_raw_trustees_cli_or_dashboard_referen
 
 
 def test_static_release_exposes_all_static_reforms_in_dashboard_metadata():
-    static = pd.read_csv(RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv")
+    static = pd.read_csv(
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+    )
     reforms_ts = REPO_ROOT / "dashboard" / "src" / "lib" / "reforms.ts"
     reform_text = reforms_ts.read_text(encoding="utf-8")
 
@@ -459,20 +475,20 @@ def test_stale_multiplier_response_artifacts_are_not_public_or_packaged():
 
 
 def test_paper_links_use_dashboard_base_path():
-    shell = (REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx").read_text(
-        encoding="utf-8"
-    )
-    assert "sitePath(\"/paper/\")" in shell
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    assert 'sitePath("/paper/")' in shell
     assert 'href="/paper/' not in shell
 
 
 def test_dashboard_defaults_to_full_75_year_surface():
-    shell = (REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx").read_text(
-        encoding="utf-8"
-    )
-    data_loader = (REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts").read_text(
-        encoding="utf-8"
-    )
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    data_loader = (
+        REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
+    ).read_text(encoding="utf-8")
 
     assert 'useState<ScoringType>("static")' in shell
     assert 'useState<DisplayUnit>("pctPayroll")' in shell
@@ -492,14 +508,14 @@ def test_dashboard_defaults_to_full_75_year_surface():
 
 
 def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():
-    shell = (REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx").read_text(
-        encoding="utf-8"
-    )
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
     reforms = (REPO_ROOT / "dashboard" / "src" / "lib" / "reforms.ts").read_text(
         encoding="utf-8"
     )
 
-    assert 'const STRUCTURAL_IDS = ["option5", "option12"];' in shell
+    assert 'const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];' in shell
     assert 'id: "option6"' in reforms
     assert 'shortName: "Short phase-in Roth"' in reforms
     assert 'id: "option12"' in reforms
@@ -512,12 +528,12 @@ def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():
 
 
 def test_dashboard_exposes_requested_trust_fund_split_modes():
-    shell = (REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx").read_text(
-        encoding="utf-8"
-    )
-    data_loader = (REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts").read_text(
-        encoding="utf-8"
-    )
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    data_loader = (
+        REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
+    ).read_text(encoding="utf-8")
 
     for mode in [
         '{ label: "Baseline shares", value: "baselineShares" }',
@@ -532,9 +548,9 @@ def test_dashboard_exposes_requested_trust_fund_split_modes():
 
 
 def test_option7_dashboard_accounting_preserves_federal_total_and_residual():
-    data_loader = (REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts").read_text(
-        encoding="utf-8"
-    )
+    data_loader = (
+        REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
+    ).read_text(encoding="utf-8")
     methods = (REPO_ROOT / "paper" / "sections" / "03-methods.qmd").read_text(
         encoding="utf-8"
     )
@@ -564,10 +580,12 @@ def test_validation_exhibit_uses_current_full_h5_contract_not_old_sentinel_csvs(
     exhibit = (REPO_ROOT / "paper" / "exhibits" / "validation-sentinels.md").read_text(
         encoding="utf-8"
     )
-    static = pd.read_csv(RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv")
+    static = pd.read_csv(
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+    )
     standard = static[static["reform_name"].isin({f"option{i}" for i in range(1, 13)})]
 
-    assert len(standard[standard["source"].eq("exact_full_h5")]) == 276
+    assert len(standard[standard["source"].eq("exact_full_h5")]) == 192
     assert "current full-H5 production" in exhibit
     assert "contract" in exhibit
     assert "Older non-contract artifacts are not" in exhibit
@@ -587,8 +605,8 @@ def test_public_dashboard_data_cover_full_2026_2100_horizon():
     behavioral = load_dashboard_results("behavioral")
 
     for df, expected_reforms in [
-        (static, 12),
-        (behavioral, 12),
+        (static, 14),
+        (behavioral, 14),
     ]:
         by_reform = df.groupby("reform_name")["year"].agg(["min", "max", "count"])
         assert len(by_reform) == expected_reforms
@@ -608,24 +626,34 @@ def test_public_dashboard_percent_payroll_denominators_cover_full_horizon():
         assert set(range(2026, 2101)).issubset(years)
 
 
-def test_hi_payroll_denominator_matches_raw_source_and_extrapolates_endpoint():
-    raw = pd.read_csv(RESULTS.parent / "data" / "hi_expenditures_tr2025.csv")
+def test_hi_payroll_denominator_follows_tr2026_ratio_path():
+    """The HI denominator scales TR2026 OASDI payroll by the TR2025
+    HI/OASDI payroll ratio; the CMS 2026 expanded tables publish no HI
+    payroll levels."""
     dashboard = pd.read_csv(DASHBOARD_DATA / "hi_taxable_payroll.csv")
+    tr2026 = pd.read_csv(RESULTS.parent / "data" / "social_security_aux_tr2026.csv")
+    tr2025 = pd.read_csv(RESULTS.parent / "data" / "social_security_aux_tr2025.csv")
+    raw_hi_2025 = pd.read_csv(RESULTS.parent / "data" / "hi_expenditures_tr2025.csv")
 
-    merged = dashboard.merge(
-        raw[["year", "hi_taxable_payroll"]],
-        on="year",
-        how="inner",
-        suffixes=("_dashboard", "_raw"),
+    merged = (
+        dashboard.merge(
+            tr2026[["year", "taxable_payroll_in_billion_nominal_usd"]], on="year"
+        )
+        .merge(
+            tr2025[["year", "taxable_payroll_in_billion_nominal_usd"]],
+            on="year",
+            suffixes=("_tr2026", "_tr2025"),
+        )
+        .merge(raw_hi_2025[["year", "hi_taxable_payroll"]], on="year")
     )
-    raw_billions = merged["hi_taxable_payroll_raw"] / 1e9
-    assert (merged["hi_taxable_payroll_dashboard"] - raw_billions).abs().max() < 1e-6
-
-    raw_sorted = raw.sort_values("year")
-    last_two = raw_sorted.tail(2)["hi_taxable_payroll"] / 1e9
-    expected_2100 = last_two.iloc[-1] * (last_two.iloc[-1] / last_two.iloc[-2])
-    actual_2100 = dashboard.loc[
-        dashboard["year"].astype(int) == 2100,
-        "hi_taxable_payroll",
-    ].iloc[0]
-    assert abs(actual_2100 - expected_2100) < 1e-6
+    assert len(merged) > 30
+    ratio = (merged["hi_taxable_payroll_y"] / 1e9) / merged[
+        "taxable_payroll_in_billion_nominal_usd_tr2025"
+    ]
+    expected = ratio * merged["taxable_payroll_in_billion_nominal_usd_tr2026"]
+    assert (merged["hi_taxable_payroll_x"] - expected).abs().max() < 1e-3
+    # The uncapped HI base always exceeds the capped OASDI base.
+    assert (
+        merged["hi_taxable_payroll_x"]
+        > merged["taxable_payroll_in_billion_nominal_usd_tr2026"]
+    ).all()

@@ -37,44 +37,60 @@ class ReleasePackage:
 REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     (
         "results",
-        RESULTS / "all_static_results_full_h5_selected_panel_20260522.csv",
+        RESULTS / "all_static_results_full_h5_v2pop_panel_20260612.csv",
     ),
     (
         "results",
-        RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv",
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
     ),
     (
         "results",
-        RESULTS / "behavioral_endpoint_full_h5_exact_20260522.csv",
+        RESULTS / "behavioral_endpoint_full_h5_exact_20260612.csv",
     ),
     (
         "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260522.csv",
+        RESULTS / "behavioral_endpoint_ratio_display_20260612.csv",
     ),
     (
         "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260522_metadata.json",
-    ),
-    ("results", RESULTS / "all_static_results_full_h5_selected_panel_20260522_metadata.json"),
-    (
-        "results",
-        RESULTS / "results_full_h5_selected_panel_display_20260522.csv",
+        RESULTS / "behavioral_endpoint_ratio_display_20260612_metadata.json",
     ),
     (
         "results",
-        RESULTS / "results_full_h5_selected_panel_display_20260522_metadata.json",
+        RESULTS / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json",
+    ),
+    (
+        "results",
+        RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
+    ),
+    (
+        "results",
+        RESULTS / "results_full_h5_v2pop_panel_display_20260612_metadata.json",
     ),
     ("dashboard_data", REPO / "dashboard" / "public" / "data" / "results.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "ssa_economic_projections.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "baseline_aggregates.csv"),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "ssa_economic_projections.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "baseline_aggregates.csv",
+    ),
     (
         "dashboard_data",
         REPO / "dashboard" / "public" / "data" / "baseline_indexed_parameters.csv",
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "baseline_indexed_parameter_summary.csv",
+        REPO
+        / "dashboard"
+        / "public"
+        / "data"
+        / "baseline_indexed_parameter_summary.csv",
     ),
     (
         "dashboard_data",
@@ -102,7 +118,11 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "post_obbba_tob_baseline_manifest.json",
+        REPO
+        / "dashboard"
+        / "public"
+        / "data"
+        / "post_obbba_tob_baseline_manifest.json",
     ),
     (
         "dashboard_data",
@@ -143,8 +163,7 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("source_data", POST_OBBBA_TOB_BASELINE_MANIFEST),
 )
 
-OPTIONAL_FILES: tuple[tuple[str, Path], ...] = (
-)
+OPTIONAL_FILES: tuple[tuple[str, Path], ...] = ()
 
 DATA_SOURCE_GLOBS: tuple[str, ...] = (
     "data/*.csv",
@@ -187,7 +206,9 @@ def git_value(*args: str) -> str | None:
     return result.stdout.strip()
 
 
-def copy_file(source: Path, package_dir: Path, records: list[dict[str, object]], category: str) -> None:
+def copy_file(
+    source: Path, package_dir: Path, records: list[dict[str, object]], category: str
+) -> None:
     relative = source.relative_to(REPO)
     if any(record["path"] == str(relative) for record in records):
         return
@@ -204,7 +225,12 @@ def copy_file(source: Path, package_dir: Path, records: list[dict[str, object]],
     )
 
 
-def copy_tree(source_root: Path, package_dir: Path, records: list[dict[str, object]], category: str) -> None:
+def copy_tree(
+    source_root: Path,
+    package_dir: Path,
+    records: list[dict[str, object]],
+    category: str,
+) -> None:
     for source in sorted(source_root.rglob("*")):
         if source.is_file():
             copy_file(source, package_dir, records, category)
@@ -214,11 +240,7 @@ def baseline_metadata_paths() -> list[Path]:
     paths: set[Path] = set()
     for csv_path in [
         REPO / "dashboard" / "public" / "data" / "baseline_calibration_targets.csv",
-        REPO
-        / "dashboard"
-        / "public"
-        / "data"
-        / "baseline_calibration_diagnostics.csv",
+        REPO / "dashboard" / "public" / "data" / "baseline_calibration_diagnostics.csv",
     ]:
         if not csv_path.exists():
             continue
@@ -247,7 +269,9 @@ def archive_package(package_dir: Path) -> Path:
     archive_path = package_dir.with_suffix(".zip")
     if archive_path.exists():
         archive_path.unlink()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(
+        archive_path, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
         for path in sorted(package_dir.rglob("*")):
             if path.is_file():
                 archive.write(path, path.relative_to(package_dir.parent))
