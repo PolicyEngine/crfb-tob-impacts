@@ -520,7 +520,7 @@ def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():
         encoding="utf-8"
     )
 
-    assert 'const STRUCTURAL_IDS = ["option5", "option12"];' in shell
+    assert 'const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];' in shell
     assert 'id: "option6"' in reforms
     assert 'shortName: "Short phase-in Roth"' in reforms
     assert 'id: "option12"' in reforms
