@@ -48,8 +48,10 @@ def test_percentages_are_suppressed_not_fabricated(dist: dict) -> None:
     for reform in STANDARD_REFORMS:
         for year, rows in dist["data"][reform].items():
             for r in rows:
+                # Real max across all cells is ~2.5%; a 10% ceiling leaves
+                # ample headroom while still catching a sign-flip regression.
                 if r["pct_change"] is not None:
-                    assert abs(r["pct_change"]) < 25.0, (reform, year, r)
+                    assert abs(r["pct_change"]) < 10.0, (reform, year, r)
 
 
 def test_reverse_roth_is_u_shaped_in_2026(dist: dict) -> None:
