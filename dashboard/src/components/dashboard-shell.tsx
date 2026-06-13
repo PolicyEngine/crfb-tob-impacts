@@ -26,6 +26,7 @@ import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-se
 import { TobExplainerSection } from "@/components/tob-explainer-section";
 import { BalancedFixSection } from "@/components/balanced-fix-section";
 import { ComparisonTable } from "@/components/comparison-table";
+import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
@@ -964,6 +965,12 @@ export function DashboardShell() {
                   )}
                 </div>
               </section>
+
+              {/* Distributional impact by income decile, with year selector */}
+              <DistributionalSection
+                reformId={effectiveReformId}
+                reformName={reform.shortName}
+              />
 
               {/* Detailed external comparison table (if present) */}
               <ComparisonTable
