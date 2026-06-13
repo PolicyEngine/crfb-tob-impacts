@@ -42,6 +42,31 @@ interpolations flagged as such; the exact anchor-year H5 rows remain the cited
 microsimulation outputs. Legacy special-case series are excluded from the
 current dashboard, spreadsheet, and paper release surface.
 
+### Independent estimation cross-check
+
+As an additional guard against systematic error, we cross-checked a sample of
+headline cells against independent back-of-the-envelope estimates derived only
+from public aggregates and statutory parameters, with no access to the model's
+output. The 2026 current-law taxation-of-benefits total reproduces the
+published 2026 Trustees and CMS figures directly (the Hospital Insurance
+component is the CMS expanded-table value to the dollar); the reverse-Roth net
+effect and the rising share of beneficiaries who owe tax on benefits both
+landed inside the independently derived ranges, and the share trajectory
+reproduced the same near-universal-but-capped asymptote from first principles.
+
+The one cell that diverged from a simplified hand calculation — full
+(100 percent) benefit inclusion — did so for an instructive reason. The hand
+calculation assumed low-income beneficiaries are shielded from tax by the
+senior standard deduction and the temporary OBBBA bonus deduction. The
+microsimulation instead finds the revenue is broad-based across the lower and
+middle of the income distribution: benefit-reliant retirees with little other
+income have low adjusted gross income under current partial inclusion, but
+once the full benefit enters income it exceeds even the enlarged senior
+deductions, so they cross their deduction floor and owe tax. The
+household-level calculation captures this composition effect that an aggregate
+shortcut misses. The cross-check is a sanity bound on order of magnitude rather
+than an alternative scoring method, but it is a standing pre-publication step.
+
 ## External benchmark framework
 
 The original report compared selected reforms against outside estimates from the
