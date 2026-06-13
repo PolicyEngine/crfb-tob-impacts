@@ -3,7 +3,9 @@ import { sitePath } from "@/lib/site-path";
 export interface DecileImpact {
   decile: number;
   avg_change: number;
-  pct_change: number;
+  // null where the decile's aggregate baseline net income is not positive
+  // (e.g. the bottom decile), so a percentage change is undefined.
+  pct_change: number | null;
   total_change_billions: number;
 }
 

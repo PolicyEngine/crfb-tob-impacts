@@ -109,22 +109,36 @@ def decile_impacts(baseline: pd.DataFrame, reform: pd.DataFrame) -> list[dict]:
     rows: list[dict] = []
     for decile in range(1, 11):
         group = merged[merged["decile"] == decile]
+        if group.empty:
+            rows.append(
+                {
+                    "decile": decile,
+                    "avg_change": 0.0,
+                    "pct_change": None,
+                    "total_change_billions": 0.0,
+                }
+            )
+            continue
         weighted = mdf.MicroDataFrame(
             group[["change", "baseline_net_income"]],
             weights=group["household_weight"],
         )
         total_change = float(weighted["change"].sum())
         total_baseline = float(weighted["baseline_net_income"].sum())
-        household_count = float(group["household_weight"].sum())
+        # Weighted mean change per household — sum(w*x)/sum(w) via MicroDataFrame,
+        # never a raw sum of the weight column.
+        avg_change = float(weighted["change"].mean())
         rows.append(
             {
                 "decile": decile,
-                "avg_change": round(total_change / household_count, 2)
-                if household_count
-                else 0.0,
+                "avg_change": round(avg_change, 2),
+                # A percentage change is only meaningful when the decile's
+                # aggregate baseline net income is positive. The bottom decile
+                # can be negative (business losses, etc.), where dividing by it
+                # flips the sign and fabricates an outlier, so suppress it.
                 "pct_change": round(100.0 * total_change / total_baseline, 3)
-                if total_baseline
-                else 0.0,
+                if total_baseline > 0
+                else None,
                 "total_change_billions": round(total_change / 1e9, 3),
             }
         )

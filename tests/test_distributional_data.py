@@ -34,7 +34,30 @@ def test_each_reform_year_has_ten_deciles(dist: dict) -> None:
             assert [r["decile"] for r in rows] == list(range(1, 11)), (reform, year)
             for r in rows:
                 assert isinstance(r["avg_change"], (int, float))
-                assert isinstance(r["pct_change"], (int, float))
+                # pct_change is a finite number or null (suppressed where the
+                # decile's aggregate baseline net income is not positive).
+                assert r["pct_change"] is None or isinstance(
+                    r["pct_change"], (int, float)
+                )
+
+
+def test_percentages_are_suppressed_not_fabricated(dist: dict) -> None:
+    # Where a percent is reported it must be a sane magnitude. The old
+    # negative-denominator bug produced a -63% bottom-decile outlier; deciles
+    # with a non-positive baseline must be null rather than a fabricated value.
+    for reform in STANDARD_REFORMS:
+        for year, rows in dist["data"][reform].items():
+            for r in rows:
+                if r["pct_change"] is not None:
+                    assert abs(r["pct_change"]) < 25.0, (reform, year, r)
+
+
+def test_reverse_roth_is_u_shaped_in_2026(dist: dict) -> None:
+    # Low earners gain (payroll-tax deduction), middle deciles lose (full
+    # benefit taxation), top deciles gain again.
+    rows = {r["decile"]: r["avg_change"] for r in dist["data"]["reverse_roth"]["2026"]}
+    assert rows[3] < 0 < rows[10]
+    assert rows[10] > rows[6]
 
 
 def test_full_repeal_is_a_gain_rising_with_income(dist: dict) -> None:

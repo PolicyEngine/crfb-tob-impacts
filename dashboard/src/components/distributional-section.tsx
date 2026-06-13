@@ -32,12 +32,15 @@ function DecileBars({
   const { ref, width } = useElementSize<HTMLDivElement>();
   const data = rows.map((r) => ({
     decile: r.decile,
+    // null values (suppressed percentages) render no bar, keeping the axis sane.
     value: basis === "avg_change" ? r.avg_change : r.pct_change,
   }));
-  const fmt = (v: number) =>
-    basis === "avg_change"
+  const fmt = (v: number | null) => {
+    if (v === null || !Number.isFinite(v)) return "n/a";
+    return basis === "avg_change"
       ? `${v >= 0 ? "+$" : "-$"}${Math.abs(Math.round(v)).toLocaleString()}`
       : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
+  };
 
   return (
     <div ref={ref} className="w-full">
@@ -66,7 +69,10 @@ function DecileBars({
             width={64}
           />
           <Tooltip
-            formatter={(value) => [fmt(Number(value)), "Change in net income"]}
+            formatter={(value) => [
+              fmt(value === null || value === undefined ? null : Number(value)),
+              "Change in net income",
+            ]}
             labelFormatter={(d) => `Decile ${d}`}
             cursor={{ fill: "var(--pe-color-bg-secondary)" }}
           />
@@ -76,7 +82,7 @@ function DecileBars({
               <Cell
                 key={d.decile}
                 fill={
-                  d.value >= 0
+                  (d.value ?? 0) >= 0
                     ? "var(--pe-color-primary-500)"
                     : "var(--pe-color-error)"
                 }
@@ -104,15 +110,24 @@ function interpolateDeciles(
   const hi = byYear[String(upper)];
   if (!lo || !hi) return lo ?? hi ?? [];
   const t = upper === lower ? 0 : (year - lower) / (upper - lower);
-  return lo.map((row, i) => {
-    const other = hi[i];
+  const hiByDecile = new Map(hi.map((r) => [r.decile, r]));
+  const lerp = (a: number, b: number) => a + t * (b - a);
+  return lo.map((row) => {
+    const other = hiByDecile.get(row.decile) ?? row;
+    // Percent change is suppressed (null) for some deciles; only interpolate
+    // when both endpoints are defined, otherwise keep it null.
+    const pct =
+      row.pct_change === null || other.pct_change === null
+        ? null
+        : lerp(row.pct_change, other.pct_change);
     return {
       decile: row.decile,
-      avg_change: row.avg_change + t * (other.avg_change - row.avg_change),
-      pct_change: row.pct_change + t * (other.pct_change - row.pct_change),
-      total_change_billions:
-        row.total_change_billions +
-        t * (other.total_change_billions - row.total_change_billions),
+      avg_change: lerp(row.avg_change, other.avg_change),
+      pct_change: pct,
+      total_change_billions: lerp(
+        row.total_change_billions,
+        other.total_change_billions,
+      ),
     };
   });
 }
@@ -227,6 +242,13 @@ export function DistributionalSection({
       <div className="mt-4">
         <DecileBars rows={rows} basis={basis} />
       </div>
+
+      {basis === "pct_change" && rows.some((r) => r.pct_change === null) ? (
+        <p className="mt-2 text-xs text-[var(--pe-color-text-tertiary)]">
+          Deciles whose aggregate baseline net income is not positive are
+          omitted from the percentage view, where a percent change is undefined.
+        </p>
+      ) : null}
 
       <p className="mt-3 text-xs leading-5 text-[var(--pe-color-text-tertiary)]">
         Deciles rank households by baseline net income, computed from the saved
