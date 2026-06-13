@@ -107,7 +107,7 @@ OTHER_INCOME_SCALE_CANDIDATES = (
 # Gamma is a bounded calibration nudge, not a free knob: at 1.25 it can
 # close modest TOB gaps, but larger values distort the income side (the
 # 2026 diagnostic run with gamma 1.62 pushed AGI far above GDP). The
-# final calibration and donor support absorb any residual.
+# final calibration absorbs any residual.
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
@@ -153,28 +153,13 @@ INCOME_GUARD_GROUPS = {
 # partnership income doubling through the weight tilt alone).
 INCOME_GUARD_START_YEAR = 2026
 
-# Donor-clone late-year support: clone the strongest real
-# taxation-of-benefits contributor households with deterministic income
-# jitter so the final calibration has dense support where the 2024 sample
-# is thin. Disabled by default: a clone-free 2100 build on the populace
-# base passes every publication gate (TOB contributor ESS 152 OASDI /
-# 127 HI against the >=50 gate), so the published datasets carry only
-# real survey households. The machinery is retained for bases that
-# cannot support the far horizon bare; set the start year to re-enable.
-DONOR_CLONE_START_YEAR = 9999
-DONOR_CLONE_TOP_HOUSEHOLDS = 4_000
-DONOR_CLONES_PER_HOUSEHOLD = 8
-DONOR_CLONE_PRIOR_SCALE = 0.10
-DONOR_CLONE_OTHER_INCOME_SIGMA = 0.35
-DONOR_CLONE_BENEFIT_SIGMA = 0.18
-
 AGE_BUCKET_SIZE = 5
 
 # Data repair at materialization. The published enhanced CPS stores
 # corrupt miscellaneous_income values: dozens of person records pinned at
 # exactly $795,294,848 (an imputation top-code artifact), summing to
 # $9.3T weighted against a real-world total near $100B. Uprated across
-# the 75-year horizon and amplified by donor cloning, these records
+# the 75-year horizon, these records
 # poison the income side and the TOB contributor pool. Values above the
 # threshold are unambiguously corrupt and are zeroed; the repair is
 # logged and stamped into metadata. Upstream fix tracked in
@@ -706,119 +691,6 @@ def _id_columns(df: pd.DataFrame, year: int) -> list[str]:
     ]
 
 
-def _append_donor_clones(
-    df: pd.DataFrame,
-    year: int,
-    *,
-    tob_by_household: np.ndarray,
-    household_ids: np.ndarray,
-    person_household_index: np.ndarray,
-    weights: np.ndarray,
-    other_income_columns: list[str],
-    ss_columns: list[str],
-) -> tuple[pd.DataFrame, dict]:
-    """Append jittered clones of the strongest real TOB contributor
-    households so late-year calibration has dense support.
-
-    Clones keep entity structure (all ids re-keyed), receive deterministic
-    lognormal jitter on other income and benefits, and carry small prior
-    weights; the final calibration decides how much of each clone to use.
-    """
-    contributions = tob_by_household * weights
-    donor_count = min(DONOR_CLONE_TOP_HOUSEHOLDS, int((contributions > 0).sum()))
-    donor_rows = np.argsort(contributions)[::-1][:donor_count]
-    donor_household_ids = set(household_ids[donor_rows])
-
-    id_cols = _id_columns(df, year)
-    df = df.copy()
-    for column in id_cols:
-        df[column] = df[column].astype(np.int64)
-
-    donor_mask = np.isin(
-        df[f"person_household_id__{year}"].to_numpy(), list(donor_household_ids)
-    )
-    donor_frame = df.loc[donor_mask]
-    donor_person_household = donor_frame[f"person_household_id__{year}"].to_numpy()
-
-    # Compact per-column re-keying: clone ids start just above each id
-    # column's existing maximum. Power-of-ten offsets would exceed int32
-    # range and float32 precision inside policyengine-core.
-    column_max = {column: int(df[column].max()) for column in id_cols}
-    column_codes = {}
-    column_unique_counts = {}
-    for column in id_cols:
-        codes, uniques = pd.factorize(donor_frame[column], sort=True)
-        column_codes[column] = codes
-        column_unique_counts[column] = len(uniques)
-
-    clone_person_rows = np.flatnonzero(donor_mask)
-    clone_frames = []
-    for copy_index in range(1, DONOR_CLONES_PER_HOUSEHOLD + 1):
-        clone = donor_frame.copy()
-        for column in id_cols:
-            clone[column] = (
-                column_max[column]
-                + 1
-                + (copy_index - 1) * column_unique_counts[column]
-                + column_codes[column]
-            )
-        rng = np.random.default_rng(year * 100 + copy_index)
-        per_household_other = {
-            hh: factor
-            for hh, factor in zip(
-                sorted(donor_household_ids),
-                np.exp(
-                    rng.normal(
-                        -0.5 * DONOR_CLONE_OTHER_INCOME_SIGMA**2,
-                        DONOR_CLONE_OTHER_INCOME_SIGMA,
-                        len(donor_household_ids),
-                    )
-                ),
-            )
-        }
-        per_household_benefit = {
-            hh: factor
-            for hh, factor in zip(
-                sorted(donor_household_ids),
-                np.exp(
-                    rng.normal(
-                        -0.5 * DONOR_CLONE_BENEFIT_SIGMA**2,
-                        DONOR_CLONE_BENEFIT_SIGMA,
-                        len(donor_household_ids),
-                    )
-                ),
-            )
-        }
-        other_factor = np.array(
-            [per_household_other[hh] for hh in donor_person_household]
-        )
-        benefit_factor = np.array(
-            [per_household_benefit[hh] for hh in donor_person_household]
-        )
-        clone[other_income_columns] = clone[other_income_columns].mul(
-            other_factor, axis=0
-        )
-        clone[ss_columns] = clone[ss_columns].mul(benefit_factor, axis=0)
-        clone[f"household_weight__{year}"] = (
-            clone[f"household_weight__{year}"] * DONOR_CLONE_PRIOR_SCALE
-        )
-        clone_frames.append(clone)
-
-    augmented = pd.concat([df] + clone_frames, ignore_index=True)
-    info = {
-        "name": "v2-donor-clone-v1",
-        "donor_household_count": donor_count,
-        "clones_per_household": DONOR_CLONES_PER_HOUSEHOLD,
-        "clone_household_count": donor_count * DONOR_CLONES_PER_HOUSEHOLD,
-        "prior_weight_scale": DONOR_CLONE_PRIOR_SCALE,
-        "other_income_jitter_sigma": DONOR_CLONE_OTHER_INCOME_SIGMA,
-        "benefit_jitter_sigma": DONOR_CLONE_BENEFIT_SIGMA,
-        "clone_person_rows": int(donor_mask.sum()) * DONOR_CLONES_PER_HOUSEHOLD,
-        "donor_person_row_indices": clone_person_rows,
-    }
-    return augmented, info
-
-
 def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
     """Household-level income-guard group vectors from a simulation."""
     groups = {}
@@ -1022,93 +894,7 @@ def build_year(
         "person rows)"
     )
 
-    # ----- Stage C3: donor-clone support (late years) -----
-    support_augmentation = None
-    if year >= DONOR_CLONE_START_YEAR:
-        probe_sim = _sim_from_frame(df, year, reform, base_dataset)
-        probe_vectors = _household_vectors(probe_sim, year)
-        del probe_sim
-        gc.collect()
-        df, support_augmentation = _append_donor_clones(
-            df,
-            year,
-            tob_by_household=probe_vectors["oasdi_tob"] + probe_vectors["hi_tob"],
-            household_ids=household_ids,
-            person_household_index=person_household_index,
-            weights=demographic_weights,
-            other_income_columns=other_income_columns,
-            ss_columns=ss_columns,
-        )
-        household_ids, person_household_index, ages, start_weights = (
-            household_structure(df, year)
-        )
-        n_households = len(household_ids)
-        age_matrix, _ = build_household_age_bin_matrix(
-            ages, person_household_index, n_households, AGE_BUCKET_SIZE
-        )
-        _log(
-            f"  [stage C3] appended "
-            f"{support_augmentation['clone_household_count']:,} donor "
-            f"clones from {support_augmentation['donor_household_count']:,} "
-            "real contributor households"
-        )
-
-        # Clones add earnings and benefit mass; re-solve the value scales
-        # on the augmented frame so totals stay pinned to the targets.
-        donor_rows = support_augmentation.pop("donor_person_row_indices")
-        copies = support_augmentation["clones_per_household"]
-        gw_aug = np.concatenate(
-            [alpha * gross_wages] + [alpha * gross_wages[donor_rows]] * copies
-        )
-        tse_aug = np.concatenate(
-            [alpha * taxable_se] + [alpha * taxable_se[donor_rows]] * copies
-        )
-        person_weights_aug = start_weights[person_household_index]
-        alpha_correction = solve_earnings_scale(
-            gross_wages=gw_aug,
-            taxable_self_employment=tse_aug,
-            weights=person_weights_aug,
-            cap=cap,
-            payroll_target=economic_targets["payroll_total"],
-        )
-        df[earnings_columns] = df[earnings_columns] * alpha_correction
-        alpha *= alpha_correction
-        ss_aug_total = float(
-            (df[ss_columns].sum(axis=1).to_numpy() * person_weights_aug).sum()
-        )
-        beta_correction = economic_targets["ss_total"] / ss_aug_total
-        df[ss_columns] = df[ss_columns] * beta_correction
-        beta *= beta_correction
-        # Clones also add other-income mass that nothing else re-pins
-        # (the pre-clone runs showed AGI jumping ~30 points of GDP at the
-        # donor start year). Normalize each other-income category back to
-        # its pre-clone weighted total so clones provide support without
-        # changing value aggregates.
-        base_rows = len(gross_wages)
-        pre_clone_other = (
-            df[other_income_columns]
-            .iloc[:base_rows]
-            .mul(person_weights_aug[:base_rows], axis=0)
-            .sum()
-            .sum()
-        )
-        post_clone_other = (
-            df[other_income_columns].mul(person_weights_aug, axis=0).sum().sum()
-        )
-        other_income_correction = (
-            pre_clone_other / post_clone_other if post_clone_other else 1.0
-        )
-        df[other_income_columns] = df[other_income_columns] * other_income_correction
-        support_augmentation["alpha_correction"] = alpha_correction
-        support_augmentation["beta_correction"] = beta_correction
-        support_augmentation["other_income_correction"] = other_income_correction
-        _log(
-            f"  [stage C3] post-clone rescale: alpha x{alpha_correction:.4f}, "
-            f"beta x{beta_correction:.4f}, other income "
-            f"x{other_income_correction:.4f}"
-        )
-    else:
-        start_weights = demographic_weights
+    start_weights = demographic_weights
 
     write_year_h5(df, year, output_path)
 
@@ -1258,9 +1044,6 @@ def build_year(
             for name, audit in contributor_audits.items()
             for metric, value in audit.items()
         },
-        "donor_clone_household_count": (
-            support_augmentation["clone_household_count"] if support_augmentation else 0
-        ),
         "gates_passed": gates["passed"],
     }
 
@@ -1294,7 +1077,6 @@ def build_year(
             "validation_passed": True,
             "validation_issues": [],
         },
-        "support_augmentation": support_augmentation,
         "input_repairs": repair_log,
         "enum_sanitization": enum_log,
         "longrun_growth_caps": growth_caps,

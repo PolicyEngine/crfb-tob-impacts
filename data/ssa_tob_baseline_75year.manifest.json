@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-22T09:09:17.209326+00:00",
-  "scenario_id": "crfb_post_obbba_tob_75y",
-  "calibration_target_id": "post_obbba_calibrated_tob_75y",
+  "generated_at": "2026-06-12T08:17:00.546194+00:00",
+  "scenario_id": "crfb_tr2026_current_law_tob_75y",
+  "calibration_target_id": "tr2026_current_law_tob_75y",
   "baseline_kind": "calibration_target",
-  "not_law": true,
-  "law_mode": "trustees-2025-core-thresholds-v1",
+  "not_law": false,
+  "law_mode": "trustees-2026-intermediate-v1",
   "baseline_path": "data/ssa_tob_baseline_75year.csv",
-  "baseline_sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
+  "baseline_sha256": "e85e06cf794a849b23adc42ca44a4b7c9ecefa5935e7f53194db7f6b28c48483",
   "output": {
     "path": "data/ssa_tob_baseline_75year.csv",
-    "sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
+    "sha256": "e85e06cf794a849b23adc42ca44a4b7c9ecefa5935e7f53194db7f6b28c48483",
     "rows": 76,
     "years": [
       2025,
@@ -20,7 +20,17 @@
   },
   "source_files": [
     {
-      "role": "raw_trustees_current_law_tob_comparator",
+      "role": "tr2026_target_extract",
+      "path": "data/social_security_aux_tr2026.csv",
+      "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6"
+    },
+    {
+      "role": "tr2026_source_manifest",
+      "path": "data/tr2026_sources.manifest.json",
+      "sha256": "da3b1f116a854d1cafdb2d898076730ac4646b1ea282e2141cd7063f9276f2b3"
+    },
+    {
+      "role": "legacy_tr2025_current_law_comparator",
       "path": "data/tob_current_law_tr2025.csv",
       "sha256": "a7b2af3b088bde10dad8b9e205e0206300490faed375c33f8bddfa1fe8b824c1"
     },
@@ -32,40 +42,39 @@
     {
       "role": "ssa_economic_projection",
       "path": "data/ssa_economic_projections.csv",
-      "sha256": "4d8ec8c671271972c3f5ded6a744173f462c4c51431fa7c0bcee9b220893af1a"
+      "sha256": "2d4e1daa82ad559bd260306859d85337f88e9bffce21935429ac642218d6d71f"
     }
   ],
   "raw_current_law_comparator": {
-    "role": "raw_trustees_current_law_tob_comparator",
-    "path": "data/tob_current_law_tr2025.csv",
-    "sha256": "a7b2af3b088bde10dad8b9e205e0206300490faed375c33f8bddfa1fe8b824c1"
+    "role": "tr2026_target_extract",
+    "path": "data/social_security_aux_tr2026.csv",
+    "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6"
   },
   "target_source": {
-    "oasdi": "SSA OACT Aug. 5, 2025 letter Table 1b.n nominal OASDI cash flow change",
-    "hi": "CMS FY2025 Financial Report direction only; annual HI path bridged in code",
-    "current_law": "2025 Trustees current-law TOB baseline"
+    "oasdi": "2026 Trustees Report intermediate assumptions: income-rate share of taxable payroll attributable to taxation of benefits",
+    "hi": "CMS 2026 Medicare Trustees expanded tables, annual through 2100",
+    "current_law": "2026 Trustees current-law TOB baseline (OBBBA native)"
   },
   "bridge_methods": {
     "oasdi_delta_methods": [
-      "carry_forward_2099_nominal_delta",
-      "oact_table_1b_nominal"
+      "tr2026_native_current_law"
     ],
-    "hi_method": "match_oasdi_pct_change",
+    "hi_method": "current_law",
     "hi_notes": [
-      "Scale HI by the same percentage change as OASDI until a public CMS annual HI post-OBBBA series is identified."
+      "TR2026 intermediate assumptions carry OBBBA in current law; values are the raw Trustees/CMS series with no bridge."
     ]
   },
   "artifact_contract": {
-    "must_consume_baseline_sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
-    "must_expose_scenario_id": "crfb_post_obbba_tob_75y",
+    "must_consume_baseline_sha256": "e85e06cf794a849b23adc42ca44a4b7c9ecefa5935e7f53194db7f6b28c48483",
+    "must_expose_scenario_id": "crfb_tr2026_current_law_tob_75y",
     "reject_raw_current_law_substitution": true
   },
   "builder": {
     "module": "src/tob_baseline.py",
-    "module_sha256": "528b08946c4703e58c9eaddec3e05f8dae35aa48b7009e3431a7e1a4ee0751fc",
+    "module_sha256": "6ce09d860f96861fe5afe265dbe229a9068c9187a0eca8f8759172115077a2d9",
     "script": "scripts/build_tob_baseline.py",
-    "script_sha256": "347ca30b4a9c45732b455178bf819d3d12975773747f8dc585abb43d4611bfdd",
-    "git_head": "f8a2e08dd924066e13d603b3ba9f3e001811cc71",
+    "script_sha256": "9baa9a70ec7542668e37b43330af082161868870559d2c144951b561a035132c",
+    "git_head": "68b9775a5a20107160f9e093ebebda5ba598a42b",
     "git_dirty": true
   }
 }

@@ -53,18 +53,17 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
     best-effort: at far horizons the 85% inclusion cap saturates and TOB
     becomes nearly inelastic to other income, so `gamma` is bounded and
     the final calibration closes the remainder.
-- **Stage C3 — donor-clone support (disabled).** The pipeline retains
-  machinery to append jittered clones of the strongest real
-  taxation-of-benefits contributor households when a base cannot support
-  the far horizon. On the populace base it is off: a clone-free build of
-  2100 — the hardest year, with the most extreme age shift — passes every
-  publication gate with margin (taxation-of-benefits contributor
-  effective sample sizes of 152 OASDI and 127 HI against the >=50 gate;
-  top-10 contribution 17–21% against the <=50% gate). Every record in
-  every published year is therefore a real survey household. Enabling
-  clones would roughly 2.5x the late-year contributor support at the cost
-  of carrying perturbed copies; the published datasets prefer the clean
-  frame.
+- **No synthetic support stage.** Earlier drafts appended jittered
+  clones of real contributor households at far horizons; the populace
+  base made that unnecessary and the machinery is removed (see git
+  history for the implementation). The validation that justified
+  removal: a clone-free build of 2100 — the hardest year, with the most
+  extreme age shift — passes every publication gate with margin
+  (taxation-of-benefits contributor effective sample sizes of 152 OASDI
+  and 127 HI against the >=50 gate; top-10 contribution 17–21% against
+  the <=50% gate), and all six far-horizon years pass with contributor
+  ESS 107–156. Every record in every published year is a real survey
+  household.
 - **Stage D — final light calibration.** Entropy-balance from the
   demographic weights to hit all target families exactly: age
   distribution, Social Security benefits, taxable payroll, and the
@@ -102,7 +101,7 @@ that earlier drafts of this work carried.
 - **No synthetic records.** Values at year-Y scale keep the
   TOB-contributing population broad enough that the populace base passes
   every late-year gate bare; v1's donor-backed synthetic support is
-  retained in code but disabled.
+  removed entirely.
 - **TR2026 current-law TOB is the calibration target** (OBBBA included
   natively), so dataset TOB equals the published baseline and the
   post-OBBBA gap columns vanish.

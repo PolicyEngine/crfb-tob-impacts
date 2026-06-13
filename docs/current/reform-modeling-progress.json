@@ -92,15 +92,258 @@
   ],
   "allowed_paid_call_count": 14,
   "approval_nonce": "v2pop-tr2026-noclone-behavioral-20260612",
-  "approval_consumed": false,
-  "approval_consumed_at": null,
-  "approval_consumed_by": null,
-  "paid_call_count_consumed": 0,
-  "reserved_cells": [],
-  "reservation_token_hashes": [],
-  "spawned_call_records": [],
-  "spawned_call_ids": [],
-  "launched_call_ids": [],
+  "approval_consumed": true,
+  "approval_consumed_at": "2026-06-13T00:57:32.694976Z",
+  "approval_consumed_by": "modal_batch/reform_full_h5.py::submit_reform_full_h5",
+  "paid_call_count_consumed": 14,
+  "reserved_cells": [
+    {
+      "year": 2100,
+      "reform": "option1",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option10",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option11",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option12",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option2",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option3",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option4",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option5",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option6",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option7",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option8",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "option9",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "reverse_roth",
+      "scoring_type": "behavioral"
+    },
+    {
+      "year": 2100,
+      "reform": "tax93",
+      "scoring_type": "behavioral"
+    }
+  ],
+  "reservation_token_hashes": [
+    "8b07ad48011e63e879858cfb1db9a3b8e3d33f25b7601069dce70cbdd5234e86",
+    "2caca0d49aa2c286095ecae31ff3569dfc82a97e1cfbf980a2d28bd3ac93e206",
+    "ec7809a386831ad0d009903b5fe0d7c50159832aa21a7759e8741c4c2ab3b016",
+    "0c4c23876d9d7b77116f2d62d67c3dc856a122d64c71cad880c4009a494943df",
+    "eaec5d0feae5b33b1e7867a5913e5a6132df59f3b7de9a3a2b57bb614a5d86cb",
+    "173d67dcbe991bf18bffd8e53ef7bdea6097649e24af5a4ca4692b65437910ad",
+    "155f452a4b1b7a4ddc2f1e6225db21aafa4344c1fadb9648a4d6c4e3987157ff",
+    "030b60c8de5ade24aa5e5d269734650938fd8e8889c203f1e9ec4e2702f9edde",
+    "89f576bf1daa4c4392ef541b2be88fa4e1f15cb3ca09971cd8b3a9d3741de80c",
+    "8ce6ee6ebc846f1014e5eb62189e967ee8431c24993f607f81778e6756a0c5f4",
+    "8f4477741b98932bd5c6f5ece0c1eefe4024594a897b92485af92e583bd749e8",
+    "c22a4252f601a7a892bf506b4b094b822bfe0b7d98dea143206918bba1d2bc67",
+    "195442de75a05ed388e59b474314cbd8ee9d8c1915c4e8a83ddd8c4fbcc1869a",
+    "9020ab9ac9b55ef7364769803bb6ed4009c1bf9e61bebf4aa2e62490ea332b7b"
+  ],
+  "spawned_call_records": [
+    {
+      "year": 2100,
+      "reform": "option1",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "8b07ad48011e63e879858cfb1db9a3b8e3d33f25b7601069dce70cbdd5234e86",
+      "call_id": "fc-01KTZ7QY0S02XXA78V0CFVXFCH",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option10",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "2caca0d49aa2c286095ecae31ff3569dfc82a97e1cfbf980a2d28bd3ac93e206",
+      "call_id": "fc-01KTZ7QYG9F548Y5B6BFNAH9PM",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option11",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "ec7809a386831ad0d009903b5fe0d7c50159832aa21a7759e8741c4c2ab3b016",
+      "call_id": "fc-01KTZ7QYZ83M48FC592S0N6ES4",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option12",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "0c4c23876d9d7b77116f2d62d67c3dc856a122d64c71cad880c4009a494943df",
+      "call_id": "fc-01KTZ7QZM13Q84D2JT600X3EGH",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option2",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "eaec5d0feae5b33b1e7867a5913e5a6132df59f3b7de9a3a2b57bb614a5d86cb",
+      "call_id": "fc-01KTZ7R02SCS5WPBKYRXSMAXA3",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option3",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "173d67dcbe991bf18bffd8e53ef7bdea6097649e24af5a4ca4692b65437910ad",
+      "call_id": "fc-01KTZ7R0JZZXE9ZM1N72ZMRGQR",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option4",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "155f452a4b1b7a4ddc2f1e6225db21aafa4344c1fadb9648a4d6c4e3987157ff",
+      "call_id": "fc-01KTZ7R16XKK6X8Q3BM0K0F6VB",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option5",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "030b60c8de5ade24aa5e5d269734650938fd8e8889c203f1e9ec4e2702f9edde",
+      "call_id": "fc-01KTZ7R1TDD3WG4V6KKZSD7BNN",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option6",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "89f576bf1daa4c4392ef541b2be88fa4e1f15cb3ca09971cd8b3a9d3741de80c",
+      "call_id": "fc-01KTZ7R2AD1BAB2VSHJAKVAWX0",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option7",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "8ce6ee6ebc846f1014e5eb62189e967ee8431c24993f607f81778e6756a0c5f4",
+      "call_id": "fc-01KTZ7R2VYW50TZFSF2BJQRC5W",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option8",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "8f4477741b98932bd5c6f5ece0c1eefe4024594a897b92485af92e583bd749e8",
+      "call_id": "fc-01KTZ7R3EP0YH3KZ51SRZPW7CB",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "option9",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "c22a4252f601a7a892bf506b4b094b822bfe0b7d98dea143206918bba1d2bc67",
+      "call_id": "fc-01KTZ7R3PNM1SS23A0M8DACB8C",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "reverse_roth",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "195442de75a05ed388e59b474314cbd8ee9d8c1915c4e8a83ddd8c4fbcc1869a",
+      "call_id": "fc-01KTZ7R43GQN9RDCPBTB9PCBVE",
+      "dashboard_url": null
+    },
+    {
+      "year": 2100,
+      "reform": "tax93",
+      "scoring_type": "behavioral",
+      "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+      "reservation_token_hash": "9020ab9ac9b55ef7364769803bb6ed4009c1bf9e61bebf4aa2e62490ea332b7b",
+      "call_id": "fc-01KTZ7R4MSRVD71JCYTQECFZGG",
+      "dashboard_url": null
+    }
+  ],
+  "spawned_call_ids": [
+    "fc-01KTZ7QY0S02XXA78V0CFVXFCH",
+    "fc-01KTZ7QYG9F548Y5B6BFNAH9PM",
+    "fc-01KTZ7QYZ83M48FC592S0N6ES4",
+    "fc-01KTZ7QZM13Q84D2JT600X3EGH",
+    "fc-01KTZ7R02SCS5WPBKYRXSMAXA3",
+    "fc-01KTZ7R0JZZXE9ZM1N72ZMRGQR",
+    "fc-01KTZ7R16XKK6X8Q3BM0K0F6VB",
+    "fc-01KTZ7R1TDD3WG4V6KKZSD7BNN",
+    "fc-01KTZ7R2AD1BAB2VSHJAKVAWX0",
+    "fc-01KTZ7R2VYW50TZFSF2BJQRC5W",
+    "fc-01KTZ7R3EP0YH3KZ51SRZPW7CB",
+    "fc-01KTZ7R3PNM1SS23A0M8DACB8C",
+    "fc-01KTZ7R43GQN9RDCPBTB9PCBVE",
+    "fc-01KTZ7R4MSRVD71JCYTQECFZGG"
+  ],
+  "launched_call_ids": [
+    "fc-01KTZ7QY0S02XXA78V0CFVXFCH",
+    "fc-01KTZ7QYG9F548Y5B6BFNAH9PM",
+    "fc-01KTZ7QYZ83M48FC592S0N6ES4",
+    "fc-01KTZ7QZM13Q84D2JT600X3EGH",
+    "fc-01KTZ7R02SCS5WPBKYRXSMAXA3",
+    "fc-01KTZ7R0JZZXE9ZM1N72ZMRGQR",
+    "fc-01KTZ7R16XKK6X8Q3BM0K0F6VB",
+    "fc-01KTZ7R1TDD3WG4V6KKZSD7BNN",
+    "fc-01KTZ7R2AD1BAB2VSHJAKVAWX0",
+    "fc-01KTZ7R2VYW50TZFSF2BJQRC5W",
+    "fc-01KTZ7R3EP0YH3KZ51SRZPW7CB",
+    "fc-01KTZ7R3PNM1SS23A0M8DACB8C",
+    "fc-01KTZ7R43GQN9RDCPBTB9PCBVE",
+    "fc-01KTZ7R4MSRVD71JCYTQECFZGG"
+  ],
   "completed_call_ids": [],
   "behavioral_naming_policy": {
     "canonical_scoring_type": "behavioral",
