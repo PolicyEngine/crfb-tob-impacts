@@ -93,12 +93,13 @@ function ExplainerChart({
             width={44}
           />
           <Tooltip
-            formatter={(value: number, name: string) =>
-              name === "share"
-                ? [`${value.toFixed(1)}%`, "Taxable share of benefits"]
-                : [dollars(value), name]
-            }
-            labelFormatter={(v: number) => `Other income ${dollars(v)}`}
+            formatter={(value, name) => {
+              const v = typeof value === "number" ? value : Number(value);
+              return name === "share"
+                ? [`${v.toFixed(1)}%`, "Taxable share of benefits"]
+                : [dollars(v), String(name)];
+            }}
+            labelFormatter={(v) => `Other income ${dollars(Number(v))}`}
           />
           <ReferenceLine
             y={benefitCap * 100}
