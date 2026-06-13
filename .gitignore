@@ -31,6 +31,11 @@ projected_datasets_v2/
 data/sources/populace/*.h5
 
 # Year-dataset build outputs live on disk and Modal volumes; the manifests
-# under docs/current/manifests/ carry their hashes.
+# under docs/current/manifests/ carry their hashes. The small per-year
+# metadata sidecars are tracked as provenance (the calibration audit and
+# release package reference them); only the large H5 payloads are ignored.
 projected_datasets*/
+!projected_datasets_v2pop/
+projected_datasets_v2pop/*
+!projected_datasets_v2pop/*.h5.metadata.json
 tmp/

@@ -1,0 +1,264 @@
+{
+  "base_dataset_path": "populace-us-2024-9f1260b-20260611",
+  "calibration_audit": {
+    "baseline_weight_sum": 191792593.06735376,
+    "calibration_quality": "exact",
+    "constraints": {
+      "hi_tob": {
+        "achieved": 608544000000.0521,
+        "pct_error": 8.570921750106208e-14,
+        "target": 608544000000.0
+      },
+      "income_guard_ordinary_nonpayroll_income": {
+        "achieved": 34488446795686.836,
+        "target": 34488446795686.836
+      },
+      "income_guard_preferential_investment_income": {
+        "achieved": 12964743339551.96,
+        "target": 12964743339551.941
+      },
+      "oasdi_tob": {
+        "achieved": 725465999999.9316,
+        "pct_error": -9.425793479067579e-14,
+        "target": 725466000000.0
+      },
+      "payroll_total": {
+        "achieved": 69091999999999.836,
+        "pct_error": -2.3314683517128287e-15,
+        "target": 69092000000000.0
+      },
+      "ss_total": {
+        "achieved": 13749307999999.832,
+        "pct_error": -1.2212453270876722e-14,
+        "target": 13749308000000.0
+      }
+    },
+    "contributors": {
+      "hi_tob": {
+        "contributor_effective_sample_size": 112.16084883384433,
+        "max_contribution_share_pct": 6.0893085244226315,
+        "positive_contributor_count": 16292,
+        "top_100_contribution_share_pct": 59.093447088862625,
+        "top_10_contribution_share_pct": 21.179881987888646
+      },
+      "oasdi_tob": {
+        "contributor_effective_sample_size": 155.53716796078993,
+        "max_contribution_share_pct": 3.84484145952392,
+        "positive_contributor_count": 16503,
+        "top_100_contribution_share_pct": 55.77663978753685,
+        "top_10_contribution_share_pct": 17.88425071333055
+      },
+      "payroll_total": {
+        "contributor_effective_sample_size": 967.9865111494627,
+        "max_contribution_share_pct": 0.447994841711797,
+        "positive_contributor_count": 60758,
+        "top_100_contribution_share_pct": 22.932916856840382,
+        "top_10_contribution_share_pct": 3.9329418713463564
+      },
+      "ss_total": {
+        "contributor_effective_sample_size": 255.10368263238797,
+        "max_contribution_share_pct": 3.3557546257682245,
+        "positive_contributor_count": 20330,
+        "top_100_contribution_share_pct": 43.711415218883225,
+        "top_10_contribution_share_pct": 12.727997000726424
+      }
+    },
+    "effective_sample_size": 1512.6263559782772,
+    "max_constraint_pct_error": 9.338690364193497e-14,
+    "max_weight_ratio": 689.4690606301916,
+    "median_weight_ratio": 1.00402539851618,
+    "method_used": "entropy",
+    "positive_weight_count": 75112,
+    "positive_weight_pct": 100.0,
+    "stage_b_baseline_weight_sum": 171328389.560492,
+    "stage_b_effective_sample_size": 1580.8644338789575,
+    "stage_b_max_weight_ratio": 12.064512929543225,
+    "stage_b_median_weight_ratio": 1.0077433477242317,
+    "stage_b_positive_weight_count": 75112,
+    "stage_b_positive_weight_pct": 100.0,
+    "stage_b_top_100_weight_share_pct": 15.075902991411036,
+    "stage_b_top_10_weight_share_pct": 2.853860775623572,
+    "stage_b_weight_sum": 191792593.06735376,
+    "top_100_weight_share_pct": 15.777589949893414,
+    "top_10_weight_share_pct": 3.0451311386037587,
+    "validation_issues": [],
+    "validation_passed": true,
+    "weight_sum": 190742206.99465445
+  },
+  "contract_version": 2,
+  "enum_sanitization": {},
+  "input_repairs": {
+    "miscellaneous_income": {
+      "amount_zeroed": 19138701312.0,
+      "cap": 10000000.0,
+      "records_zeroed": 444
+    }
+  },
+  "longrun_growth_caps": {
+    "non_qualified_dividend_income": 0.6008641208288822,
+    "partnership_s_corp_income": 0.9612389353811887,
+    "qualified_bdc_income": 0.6008641208288823,
+    "qualified_dividend_income": 0.6008641208288823,
+    "qualified_reit_and_ptp_income": 0.6008641208288823
+  },
+  "method": "v2-demographic-reweight-value-scaling",
+  "policyengine_us": {
+    "version": null
+  },
+  "profile": {
+    "age_bucket_size": 5,
+    "calibration_method": "entropy",
+    "description": "Light demographic entropy reweight to Trustees age distribution, value rescaling to Trustees taxable payroll and OASDI cost, final light entropy calibration to age, Social Security, taxable payroll, and post-OBBBA TOB.",
+    "name": "v2-demo-values"
+  },
+  "sentinel": {
+    "alpha_earnings_scale": 1.0432209372520647,
+    "beta_benefits_scale": 0.3660555940195581,
+    "donor_clone_household_count": 0,
+    "duration_clock": "time.monotonic",
+    "duration_seconds": 1478.027917292,
+    "final_baseline_weight_sum": 191792593.06735376,
+    "final_effective_sample_size": 1512.6263559782772,
+    "final_max_weight_ratio": 689.4690606301916,
+    "final_median_weight_ratio": 1.00402539851618,
+    "final_positive_weight_count": 75112,
+    "final_positive_weight_pct": 100.0,
+    "final_top_100_weight_share_pct": 15.777589949893414,
+    "final_top_10_weight_share_pct": 3.0451311386037587,
+    "final_weight_sum": 190742206.99465445,
+    "gamma_other_income_scale": 0.8535110392112482,
+    "gates_passed": true,
+    "hi_tob_achieved": 608544000000.0521,
+    "hi_tob_contributor_effective_sample_size": 112.16084883384433,
+    "hi_tob_max_contribution_share_pct": 6.0893085244226315,
+    "hi_tob_positive_contributor_count": 16292,
+    "hi_tob_target": 608544000000.0,
+    "hi_tob_top_100_contribution_share_pct": 59.093447088862625,
+    "hi_tob_top_10_contribution_share_pct": 21.179881987888646,
+    "income_tax_total": 20092663283886.844,
+    "max_constraint_pct_error": 9.338690364193497e-14,
+    "oasdi_tob_achieved": 725465999999.9316,
+    "oasdi_tob_contributor_effective_sample_size": 155.53716796078993,
+    "oasdi_tob_max_contribution_share_pct": 3.84484145952392,
+    "oasdi_tob_positive_contributor_count": 16503,
+    "oasdi_tob_target": 725466000000.0,
+    "oasdi_tob_top_100_contribution_share_pct": 55.77663978753685,
+    "oasdi_tob_top_10_contribution_share_pct": 17.88425071333055,
+    "payroll_total_achieved": 69091999999999.836,
+    "payroll_total_contributor_effective_sample_size": 967.9865111494627,
+    "payroll_total_max_contribution_share_pct": 0.447994841711797,
+    "payroll_total_positive_contributor_count": 60758,
+    "payroll_total_target": 69092000000000.0,
+    "payroll_total_top_100_contribution_share_pct": 22.932916856840382,
+    "payroll_total_top_10_contribution_share_pct": 3.9329418713463564,
+    "population_raw": 356745875.7016946,
+    "population_target": 385658002.0,
+    "prescale_hi_tob": 569942148201.8429,
+    "prescale_oasdi_tob": 768634679038.2565,
+    "prescale_payroll_total": 69092003537573.95,
+    "prescale_ss_total": 13749308521738.355,
+    "share_65_plus_raw": 0.17297225835125973,
+    "share_65_plus_target": 0.2565666976618315,
+    "ss_total_achieved": 13749307999999.832,
+    "ss_total_contributor_effective_sample_size": 255.10368263238797,
+    "ss_total_max_contribution_share_pct": 3.3557546257682245,
+    "ss_total_positive_contributor_count": 20330,
+    "ss_total_target": 13749308000000.0,
+    "ss_total_top_100_contribution_share_pct": 43.711415218883225,
+    "ss_total_top_10_contribution_share_pct": 12.727997000726424,
+    "stage_b_baseline_weight_sum": 171328389.560492,
+    "stage_b_effective_sample_size": 1580.8644338789575,
+    "stage_b_max_weight_ratio": 12.064512929543225,
+    "stage_b_median_weight_ratio": 1.0077433477242317,
+    "stage_b_positive_weight_count": 75112,
+    "stage_b_positive_weight_pct": 100.0,
+    "stage_b_top_100_weight_share_pct": 15.075902991411036,
+    "stage_b_top_10_weight_share_pct": 2.853860775623572,
+    "stage_b_weight_sum": 191792593.06735376,
+    "year": 2075
+  },
+  "support_augmentation": null,
+  "target_source": {
+    "baseline_kind": "calibration_target",
+    "files": [
+      {
+        "file": "data/SSPopJul_TR2026_interim.csv",
+        "role": "population_by_single_year_age",
+        "sha256": "fa1b088ad7ac9f8f621f861bdb9fef33e81e74ac5862e75654e10977c5e40c12",
+        "source": "TR2026 V.A3 age-group totals applied to the TR2024 single-year-age shape (interim until SSA posts the TR2026 single-year file)"
+      },
+      {
+        "file": "data/social_security_aux_tr2026.csv",
+        "role": "trustees_2026_economic",
+        "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6",
+        "source": "SSA 2026 Trustees Report: OASDI cost rate (IV.B1) times taxable payroll (VI.G1), intermediate assumptions"
+      },
+      {
+        "file": "data/social_security_aux_tr2026.csv",
+        "role": "tr2026_current_law_tob",
+        "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6",
+        "source": "OASDI TOB: TR2026 IV.B2 percent of taxable payroll times VI.G1 payroll; HI TOB: CMS 2026 Medicare Trustees expanded tables. TR2026 current law includes OBBBA."
+      }
+    ],
+    "name": "post_obbba_tob_75y",
+    "not_law": true
+  },
+  "tax_assumption": {
+    "active": true,
+    "description": "Social Security benefit-tax thresholds fixed in nominal dollars; IRS uprating follows the NAWI wage path from 2035.",
+    "end_year": 2100,
+    "name": "trustees-2025-core-thresholds-v1",
+    "start_year": 2035
+  },
+  "value_scaling": {
+    "alpha_earnings_scale": 1.0432209372520647,
+    "beneficiary_person_rows": 35916,
+    "beta_benefits_scale": 0.3660555940195581,
+    "earnings_columns": [
+      "employment_income_before_lsr__2075",
+      "self_employment_income_before_lsr__2075",
+      "sstb_self_employment_income_before_lsr__2075",
+      "partnership_se_income__2075",
+      "farm_operations_income__2075",
+      "hourly_wage__2075"
+    ],
+    "gamma_other_income_scale": 0.8535110392112482,
+    "gamma_probes": [
+      {
+        "gamma": 1.0,
+        "total_tob": 1404959778583.8013
+      },
+      {
+        "gamma": 0.9660437516705552,
+        "total_tob": 1389170716604.9263
+      },
+      {
+        "gamma": 0.8535110392112482,
+        "total_tob": 1338576827240.0994
+      }
+    ],
+    "other_income_columns": [
+      "taxable_interest_income__2075",
+      "tax_exempt_interest_income__2075",
+      "qualified_dividend_income__2075",
+      "non_qualified_dividend_income__2075",
+      "short_term_capital_gains__2075",
+      "non_sch_d_capital_gains__2075",
+      "taxable_ira_distributions__2075",
+      "taxable_pension_income__2075",
+      "tax_exempt_pension_income__2075",
+      "rental_income__2075",
+      "farm_rent_income__2075",
+      "estate_income__2075",
+      "partnership_s_corp_income__2075",
+      "miscellaneous_income__2075"
+    ],
+    "social_security_columns": [
+      "social_security_retirement__2075",
+      "social_security_disability__2075",
+      "social_security_survivors__2075",
+      "social_security_dependents__2075"
+    ]
+  },
+  "year": 2075
+}
