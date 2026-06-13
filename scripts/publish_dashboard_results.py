@@ -11,10 +11,10 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
-STATIC_SOURCE = RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
-BEHAVIORAL_SOURCE = RESULTS / "behavioral_endpoint_ratio_display_20260522.csv"
-OUT_RESULTS = RESULTS / "results_full_h5_selected_panel_display_20260522.csv"
-OUT_METADATA = RESULTS / "results_full_h5_selected_panel_display_20260522_metadata.json"
+STATIC_SOURCE = RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
+BEHAVIORAL_SOURCE = RESULTS / "behavioral_endpoint_ratio_display_20260612.csv"
+OUT_RESULTS = RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv"
+OUT_METADATA = RESULTS / "results_full_h5_v2pop_panel_display_20260612_metadata.json"
 DASHBOARD_OUT = REPO / "dashboard" / "public" / "data" / "results.csv"
 ROOT_OUT = REPO / "results.csv"
 
@@ -50,7 +50,9 @@ def build_results(
     if behavioral_source is not None and behavioral_source.exists():
         sources.append(load_source(behavioral_source, "behavioral"))
 
-    columns = list(dict.fromkeys(column for source in sources for column in source.columns))
+    columns = list(
+        dict.fromkeys(column for source in sources for column in source.columns)
+    )
     combined = pd.concat(
         [source.reindex(columns=columns) for source in sources],
         ignore_index=True,
@@ -123,7 +125,9 @@ def main() -> int:
     args.root_out.parent.mkdir(parents=True, exist_ok=True)
 
     results.to_csv(args.out_results, index=False, float_format="%.10f")
-    args.out_metadata.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    args.out_metadata.write_text(
+        json.dumps(metadata, indent=2) + "\n", encoding="utf-8"
+    )
     shutil.copy2(args.out_results, args.dashboard_out)
     shutil.copy2(args.out_results, args.root_out)
 

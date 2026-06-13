@@ -1,0 +1,52 @@
+{
+  "schema": "crfb_dashboard_results/v1",
+  "generated_at": "2026-06-13T10:14:10.035573+00:00",
+  "static_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
+  "conventional_source": null,
+  "behavioral_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/behavioral_endpoint_ratio_display_20260612.csv",
+  "output_results": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/results_full_h5_v2pop_panel_display_20260612.csv",
+  "dashboard_output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/dashboard/public/data/results.csv",
+  "root_compat_output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results.csv",
+  "rows": 2100,
+  "scoring_types": [
+    "behavioral",
+    "static"
+  ],
+  "reforms_by_scoring_type": {
+    "behavioral": [
+      "option1",
+      "option10",
+      "option11",
+      "option12",
+      "option2",
+      "option3",
+      "option4",
+      "option5",
+      "option6",
+      "option7",
+      "option8",
+      "option9",
+      "reverse_roth",
+      "tax93"
+    ],
+    "static": [
+      "option1",
+      "option10",
+      "option11",
+      "option12",
+      "option2",
+      "option3",
+      "option4",
+      "option5",
+      "option6",
+      "option7",
+      "option8",
+      "option9",
+      "reverse_roth",
+      "tax93"
+    ]
+  },
+  "year_start": 2026,
+  "year_end": 2100,
+  "public_dashboard_contract": "Dashboard reads this single results.csv and filters by scoring_type."
+}
