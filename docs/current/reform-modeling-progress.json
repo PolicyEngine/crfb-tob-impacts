@@ -1,7 +1,7 @@
 {
   "schema": "crfb_reform_modeling_progress/v1",
   "source_of_truth": "docs/current/REFORM_MODELING_BIBLE.md",
-  "updated_at": "2026-06-13T00:45:54.268281+00:00",
+  "updated_at": "2026-06-13T00:57:27.981778+00:00",
   "current_gate": "G8",
   "full_launch_allowed": true,
   "paid_modal_launch_allowed": true,
@@ -9,7 +9,7 @@
   "approved_worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
   "approved_worker_sha": "ba9c4a4a9ebda78159a7369540568776ed2754e5c5a9ef001ba5e8e16461a773",
   "approved_code_bundle_sha": "dac6fc37e52d75099be8d94fcae3dee112269c471fa47221e9d93deece625a01",
-  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=full cells=year=2075/reform=option1/scoring=static,year=2075/reform=option10/scoring=static,year=2075/reform=option11/scoring=static,year=2075/reform=option12/scoring=static,year=2075/reform=option2/scoring=static,year=2075/reform=option3/scoring=static,year=2075/reform=option4/scoring=static,year=2075/reform=option5/scoring=static,year=2075/reform=option6/scoring=static,year=2075/reform=option7/scoring=static,year=2075/reform=option8/scoring=static,year=2075/reform=option9/scoring=static,year=2075/reform=reverse_roth/scoring=static,year=2075/reform=tax93/scoring=static,year=2080/reform=option1/scoring=static,year=2080/reform=option10/scoring=static,year=2080/reform=option11/scoring=static,year=2080/reform=option12/scoring=static,year=2080/reform=option2/scoring=static,year=2080/reform=option3/scoring=static,year=2080/reform=option4/scoring=static,year=2080/reform=option5/scoring=static,year=2080/reform=option6/scoring=static,year=2080/reform=option7/scoring=static,year=2080/reform=option8/scoring=static,year=2080/reform=option9/scoring=static,year=2080/reform=reverse_roth/scoring=static,year=2080/reform=tax93/scoring=static,year=2085/reform=option1/scoring=static,year=2085/reform=option10/scoring=static,year=2085/reform=option11/scoring=static,year=2085/reform=option12/scoring=static,year=2085/reform=option2/scoring=static,year=2085/reform=option3/scoring=static,year=2085/reform=option4/scoring=static,year=2085/reform=option5/scoring=static,year=2085/reform=option6/scoring=static,year=2085/reform=option7/scoring=static,year=2085/reform=option8/scoring=static,year=2085/reform=option9/scoring=static,year=2085/reform=reverse_roth/scoring=static,year=2085/reform=tax93/scoring=static,year=2090/reform=option1/scoring=static,year=2090/reform=option10/scoring=static,year=2090/reform=option11/scoring=static,year=2090/reform=option12/scoring=static,year=2090/reform=option2/scoring=static,year=2090/reform=option3/scoring=static,year=2090/reform=option4/scoring=static,year=2090/reform=option5/scoring=static,year=2090/reform=option6/scoring=static,year=2090/reform=option7/scoring=static,year=2090/reform=option8/scoring=static,year=2090/reform=option9/scoring=static,year=2090/reform=reverse_roth/scoring=static,year=2090/reform=tax93/scoring=static,year=2095/reform=option1/scoring=static,year=2095/reform=option10/scoring=static,year=2095/reform=option11/scoring=static,year=2095/reform=option12/scoring=static,year=2095/reform=option2/scoring=static,year=2095/reform=option3/scoring=static,year=2095/reform=option4/scoring=static,year=2095/reform=option5/scoring=static,year=2095/reform=option6/scoring=static,year=2095/reform=option7/scoring=static,year=2095/reform=option8/scoring=static,year=2095/reform=option9/scoring=static,year=2095/reform=reverse_roth/scoring=static,year=2095/reform=tax93/scoring=static,year=2100/reform=option1/scoring=static,year=2100/reform=option10/scoring=static,year=2100/reform=option11/scoring=static,year=2100/reform=option12/scoring=static,year=2100/reform=option2/scoring=static,year=2100/reform=option3/scoring=static,year=2100/reform=option4/scoring=static,year=2100/reform=option5/scoring=static,year=2100/reform=option6/scoring=static,year=2100/reform=option7/scoring=static,year=2100/reform=option8/scoring=static,year=2100/reform=option9/scoring=static,year=2100/reform=reverse_roth/scoring=static,year=2100/reform=tax93/scoring=static run_prefix=v2pop_tr2026_noclone_20260612 dataset_template=/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json",
+  "approved_submit_command": "modal_batch/reform_full_h5.py::submit_reform_full_h5 launch_mode=full cells=year=2100/reform=option1/scoring=behavioral,year=2100/reform=option10/scoring=behavioral,year=2100/reform=option11/scoring=behavioral,year=2100/reform=option12/scoring=behavioral,year=2100/reform=option2/scoring=behavioral,year=2100/reform=option3/scoring=behavioral,year=2100/reform=option4/scoring=behavioral,year=2100/reform=option5/scoring=behavioral,year=2100/reform=option6/scoring=behavioral,year=2100/reform=option7/scoring=behavioral,year=2100/reform=option8/scoring=behavioral,year=2100/reform=option9/scoring=behavioral,year=2100/reform=reverse_roth/scoring=behavioral,year=2100/reform=tax93/scoring=behavioral run_prefix=v2pop_tr2026_noclone_behavioral_20260612 dataset_template=/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/{year}.h5 expected_schema_manifest=docs/current/schemas/reform-full-h5-expected-schema-v2pop-2026-option1-local-proof.json baseline_dataset_manifest=docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json",
   "approved_durable_storage_target": "r2://axiom-corpus/crfb/reform_full_h5",
   "approved_r2_bucket_prefix": "r2://axiom-corpus/crfb/reform_full_h5",
   "approval_transaction_store": "r2://axiom-corpus/crfb/reform_full_h5/approval_store/v2pop_tr2026_20260611",
@@ -20,428 +20,78 @@
   "approved_pip_freeze_sha256": "3c327535723b36c23c77b49ffa637f39e100c8099e238abee60a9481c3f041f8",
   "approved_cells": [
     {
-      "year": 2075,
-      "reform": "option1",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option10",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option11",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option12",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option2",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option3",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option4",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option5",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option6",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option7",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option8",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "option9",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "reverse_roth",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2075,
-      "reform": "tax93",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option1",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option10",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option11",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option12",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option2",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option3",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option4",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option5",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option6",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option7",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option8",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "option9",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "reverse_roth",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2080,
-      "reform": "tax93",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option1",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option10",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option11",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option12",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option2",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option3",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option4",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option5",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option6",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option7",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option8",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "option9",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "reverse_roth",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2085,
-      "reform": "tax93",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option1",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option10",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option11",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option12",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option2",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option3",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option4",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option5",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option6",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option7",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option8",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "option9",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "reverse_roth",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2090,
-      "reform": "tax93",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option1",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option10",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option11",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option12",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option2",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option3",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option4",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option5",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option6",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option7",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option8",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "option9",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "reverse_roth",
-      "scoring_type": "static"
-    },
-    {
-      "year": 2095,
-      "reform": "tax93",
-      "scoring_type": "static"
-    },
-    {
       "year": 2100,
       "reform": "option1",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option10",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option11",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option12",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option2",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option3",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option4",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option5",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option6",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option7",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option8",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "option9",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "reverse_roth",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     },
     {
       "year": 2100,
       "reform": "tax93",
-      "scoring_type": "static"
+      "scoring_type": "behavioral"
     }
   ],
-  "allowed_paid_call_count": 84,
-  "approval_nonce": "v2pop-tr2026-noclone-20260612b",
+  "allowed_paid_call_count": 14,
+  "approval_nonce": "v2pop-tr2026-noclone-behavioral-20260612",
   "approval_consumed": false,
   "approval_consumed_at": null,
   "approval_consumed_by": null,
@@ -469,9 +119,9 @@
     "revenue_impact_2026_billions": -108.8,
     "verified_at": "2026-06-12T03:58:02.762820+00:00"
   },
-  "approval_text_or_id": "Far-horizon static re-run on the clone-free baselines per Max's 2026-06-12 direction ('can we just use the populace for later years'). All six no-clone years pass publication gates (contributor ESS 107-156 vs gate 50). 84 cells: 2075-2100 every fifth year x 14 reforms, static. Build id crfb-longrun-v2pop-tr2026-noclone-9f1260b-20260612.",
+  "approval_text_or_id": "Behavioral 2100 endpoints on the clone-free baselines (14 cells), replacing the cancelled cloned-baseline run. Per Max's standing authorization and the 2026-06-12 no-clone direction.",
   "approved_by": "Max Ghenis",
-  "approved_at": "2026-06-12T20:44:36.475454+00:00",
+  "approved_at": "2026-06-13T00:57:27.981778+00:00",
   "bad_run": {
     "app_id": "ap-yMmq7tIsHEeaPSoNVnMyz2",
     "state": "stopped",
@@ -9483,6 +9133,855 @@
       ],
       "note": "All 84 workers failed in seconds: metadata sidecars were not on the volume. Sidecars uploaded; relaunching.",
       "archived_at": "2026-06-13T00:45:54.268132+00:00"
+    },
+    {
+      "run_prefix": "v2pop_tr2026_noclone_20260612 static 84 (attempt 2, running)",
+      "nonce": "v2pop-tr2026-noclone-20260612b",
+      "spawned_call_records": [
+        {
+          "year": 2075,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "6ebe08aa891be5fe3a64dc840b57a3a0ba43e16e477b101288ac67049d2046c7",
+          "call_id": "fc-01KTZ734Q9NZRQAP4Z4WS8V2BC",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "8c2e6dbe1e95dfc2700caca36a104a10720cb865b4c076c3c657655ab8518267",
+          "call_id": "fc-01KTZ7356R131E20S8X177A3PY",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "b2c1f492deea06e571dd0c81df2092be3ec937eadb18bfed4eb2404d22c3e53b",
+          "call_id": "fc-01KTZ735PJEXE2MA0CKT8PKGJA",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "159c39a2d9a44b7beae4fa34bdb99cdab5614fc6a1085d6bc512475e9d289b9b",
+          "call_id": "fc-01KTZ7367C8P764F6QDADPGR4J",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "55e4ef2c1396758393abdc0084208cc4a457ca700bbfe8033562fe8792a3c387",
+          "call_id": "fc-01KTZ736PTP62C8MN20H0CN36T",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "9805cba1041da1f8c24553b6a4be6c286d18b0e50a68e34d404efd88be3d63eb",
+          "call_id": "fc-01KTZ737866Z40BDZ3T02M7EWT",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "78ae89623447a45f5ae6bdbcece40fed30ae5a41e273c3df283468bba63f8121",
+          "call_id": "fc-01KTZ737SMTYESTP2QK553SW88",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "736c7fb5bbc9c0a0f6a2427081bc689e5d898b165f6dec02f1446e274314a24a",
+          "call_id": "fc-01KTZ738BJ8RKQZQH011SJD00W",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "bebf3f04cf943fd7d5ceb01325d5a54dfb958babee554441df4321d78f64277f",
+          "call_id": "fc-01KTZ738WH5HFPWFE82XMH41C2",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "c40d355b5463a95c44c3586c5f3a4a867a9c2ae591bc4492b3065d8bc52b927e",
+          "call_id": "fc-01KTZ739B88WJ68C0QD4XTPR94",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "c5a13bd0fc91c9c868e83c859a126d9626961527e159430c47ab5a236e4f64cc",
+          "call_id": "fc-01KTZ739W09KH4GG9Z4RG575KX",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "8e22a60226d22b8fa6fd5fcab74f5a599f30ac80ef4d16852e91f5746c16fd13",
+          "call_id": "fc-01KTZ73AR8TXHKD8ZGRSS5EVQV",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "3afd2263a3535246bff0ac60d5e04ec658dd81c7af4bd0754470d26f744b16bd",
+          "call_id": "fc-01KTZ73B933Y93RZQRP2822ZME",
+          "dashboard_url": null
+        },
+        {
+          "year": 2075,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2075.h5",
+          "reservation_token_hash": "03ade1a6bf3791f0376313b97035bba356d374570dd54af7c4b5bc17519097ea",
+          "call_id": "fc-01KTZ73C296B3KWCSH92N34WNV",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "d5017820e65717c15925e18c82b3b3ac402ace59c896eb262dee1f332c2fcc61",
+          "call_id": "fc-01KTZ73CDFXAXZREGMDK4BF0Y9",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "4cbdbbc6f702197a1f443523661eb92006be2df613b9c1984ce6f860d30f2266",
+          "call_id": "fc-01KTZ73D0PN7KYGDKA7X6Q91ET",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "a5053a43b45680b9fe0131e45e037739f1a618ef9fba41d76f617253e27ea4c4",
+          "call_id": "fc-01KTZ73DJGQWHE0NZ1VV1XKZ2K",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "c9b1404fbed7c8bd7d371c813af0c133263c0616bbd2748929f582d4cc5519a8",
+          "call_id": "fc-01KTZ73E0X4SA08F3DP19BD6Q7",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "8f3c8c4d9685c300a5246b28c4f09c3a36191fee120b35dc022d3594508685b9",
+          "call_id": "fc-01KTZ73EK4SES8W0YKC64J5A0N",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "d6f676fb6acc512272df81f0d21c074edf1b8bb4cdffd5cb90b4c3060b5b4c73",
+          "call_id": "fc-01KTZ73F2NYF2EVTTP2F7BXZQ6",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "48189b0f268343d6e9db4f4bdc778280578a317b75bbf0600adcf2b671604e71",
+          "call_id": "fc-01KTZ73FJ49S0RVAXWKG3HTMT5",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "d346189c1aeaa19e6019367f416a4c2100d101e83ac16b9969fbf5801a8c9ba3",
+          "call_id": "fc-01KTZ73G2EZVXQ77X9XV1WDCXG",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "773cf4515e3cd0cec65b9fa1bb1036507e62c98b719cbce9154e5ba7b19f08cf",
+          "call_id": "fc-01KTZ73GNK0XHQH44Q2KQP80PN",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "b9007ec7a1c2701d75096cc2313bc1c03ffc08f8f144f65f1909e1ee4a6ab0f2",
+          "call_id": "fc-01KTZ73H77Y15SKJT3NR4EW9CX",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "df8b971a23ef72b0f629e0701c329026ec0b7711d393c44414278ce84c0922c4",
+          "call_id": "fc-01KTZ73HEE1CZ89FZ5HSAH6MQ5",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "8a5c82345e15b477c814a3a1167d2da93fac03d423062ebc467c304d707ede9b",
+          "call_id": "fc-01KTZ73HYWHG4M82M4A99XG869",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "453fe6d8c3beb99b27ec6871cae086abd4b8dd01edfa243b70f369c3fe1808a4",
+          "call_id": "fc-01KTZ73JEV91PMGAYQ9H628W6X",
+          "dashboard_url": null
+        },
+        {
+          "year": 2080,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2080.h5",
+          "reservation_token_hash": "0ecfcd623d9e868261fee8c31d49054b6ea736b242c0f4eb21548e118aeb4624",
+          "call_id": "fc-01KTZ73JYVWXKHJSQV21G4NMJJ",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "100632e8f3857fec48c2348a91430bebe8d26c7ca3bcdd19a4d7ba5399809d46",
+          "call_id": "fc-01KTZ73KE16JXYQDTPZRWQY35E",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "92e3ed78a750b9ebd8e1abf928bebf5d59915e5976793d11c93bd4af46ba8a8d",
+          "call_id": "fc-01KTZ73KXK87ZMXYFY3QRZP01F",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "3dda52414358beb2fe184dee55e6f2556d444c1e32fd3a70dfacea8ae078e2c3",
+          "call_id": "fc-01KTZ73MDAQ152DZF023AY6SQQ",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "a1618d907c57ae297c7587fe8f5778222b8057b0de748fbfcfd2e9dc95a063ef",
+          "call_id": "fc-01KTZ73MZ1CQMYJ4JCMMHMNB7E",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "ab8f054997a76a481451d1632531d549ce51e9f529863156804118dbb7457c49",
+          "call_id": "fc-01KTZ73NGE8FVHQ6YWB096QVY4",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "668c56ca7bac1db8aff517ac3fa23e110a666a85208883b51fae92ac6607308b",
+          "call_id": "fc-01KTZ73P0QJZPGVV537ZY1T4QM",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "d2510e83726a5209375024c6691b014e41b2974120ceeb2889cf32db02622a5a",
+          "call_id": "fc-01KTZ73PH12V8NJXQAJJDJEF3W",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "e34108ced11d0db3f4b21face82010dae2d99fb77b51b72bc99406db8a4ea37a",
+          "call_id": "fc-01KTZ73Q02SHDEGGYXPJK74FRW",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "5399283227916d8fb90f36ab7277a3fe63e4d55e9662e7bf0b1cc3ab3934c485",
+          "call_id": "fc-01KTZ73QFX6QZG4P6M1BWVHC1C",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "04e26275f5b2b087e76ef1df7756b2a7935c3e778fe38458752a8dfdb44a36f8",
+          "call_id": "fc-01KTZ73R7170D5JC7APC1B8NHA",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "1e6d53da5dbc8ce7f8d78719836584a60b8599a1402a2a8e8a3d6dd93051ec22",
+          "call_id": "fc-01KTZ73RV3V6YH7GASGVREH2V5",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "3c12250522a21b4292e2e28a736ac1af624aa84d50e34dd5af5f4060def06b9c",
+          "call_id": "fc-01KTZ73SMHWHAXAZN4AK1AGZ4E",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "8bba56c00d2d517defc5c5a904f5143699e92c6c48fc9fb3a66af984559a426b",
+          "call_id": "fc-01KTZ73TAJ5R10Y7BT0RTZC6PZ",
+          "dashboard_url": null
+        },
+        {
+          "year": 2085,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2085.h5",
+          "reservation_token_hash": "9e969ca641fe5cab9cb0862082cb767fc0e4f71ff6d72628a5a64b61b79cca88",
+          "call_id": "fc-01KTZ73V4JB0MVXAYR4MWSSD6K",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "7b2fd9335f39e7d99d6842236aab9c75f6067bb089ff30f83a010b5c0b3f8be4",
+          "call_id": "fc-01KTZ73VQ7YKHNG2F2M661EDN0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "3c258954666febc10a3410af77ffc387894863b38f371d7729721ef3d3430df5",
+          "call_id": "fc-01KTZ73W7PJEVABXSXXM7ZRY2K",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "91a715fb24df89e6210148557998c4b60dcccbf27d767ea66a8a384d774baa4c",
+          "call_id": "fc-01KTZ73WQD978G38CFQZN84EKK",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "32b0f37ed2f398f1481ac6dcba43bea4255481886da791254ca9bee84e87439e",
+          "call_id": "fc-01KTZ73X6V1RCMEAN03QB0HQM0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "1fb7ae23ba0882d2ebe9294f41882ca49f984a81ecdfa67189c4cfcf855e390b",
+          "call_id": "fc-01KTZ73XVFJHNDVXEGQK9328CR",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "30107c1512cddfeb7168ec84339d9794c1313ea2723167889a7429a08d06eb19",
+          "call_id": "fc-01KTZ73Y9S5APRHENVYF1KGM9Z",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "2e735efbcac8afc4c83a3d86d4ec50da6ba11c3961740044cf1f6fd79fe0aa22",
+          "call_id": "fc-01KTZ73YSA8K5MTVWDDW11X114",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "5331df13af627650a47707ca45733e2f23882b76d1c48a7b4fac29b5bec8dc8b",
+          "call_id": "fc-01KTZ73Z8VNMXPQXB4TB9GAWHN",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "87bc1b2387049aa2295cecc3e03ef92aba78f13a6a90862081bacee5a179b84a",
+          "call_id": "fc-01KTZ73ZSY6W9ZE6FX7DWR6PG2",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "0bf8699713724751fd4f4a005be6d3f861ac20c09b83af6c5f9bac6e2e5e047e",
+          "call_id": "fc-01KTZ7407M3EKNZ0Z24DN1SMN9",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "a28d9a68fae1dc6d290b1cf05231db51dabce785c1ca13b5dcd20ffabf61136c",
+          "call_id": "fc-01KTZ740T5H8B4YYZAW8MAMERX",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "f76c8d71cb41c2b8096c1d94db7dd3774a8dcc5ecc2d694645ef25ae5dcf7e23",
+          "call_id": "fc-01KTZ7419B0JSTNJTKNTCRAPT0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "117b5b078fd23031cce42be727ebcafcbf4c8a319c76360812b394a9e7d0a257",
+          "call_id": "fc-01KTZ741R1BTXJ1RADWFC4847T",
+          "dashboard_url": null
+        },
+        {
+          "year": 2090,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2090.h5",
+          "reservation_token_hash": "72991ddc8ab3fb506d1c96a4d91304b01678ab8a2aa664fd1a7a8146b6d0a105",
+          "call_id": "fc-01KTZ7427HS90Q50F4YQPPGC5C",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "c9b2644c57ee930e2eaea2aae7be98ebf8ef81e227dbfc456b7fd5b7838bb076",
+          "call_id": "fc-01KTZ742P8CAQ9PN0ZAXZTXTGK",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "76c1001d065690c5b24142af9a8f46b4f7a19d4922ac900fb50ca78ad1dda6b9",
+          "call_id": "fc-01KTZ74378E7EKT9CTKJSH67G0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "d3db00c6923502b99302cc44d0a5e6af4a809926308fc9f7aa429382f77b2806",
+          "call_id": "fc-01KTZ743PH6V4SJS6YNPN9RBFM",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "212a0ac22e9a062399c9229cccc10142a6bae2bd3f0ffdb46e4e166944c0d49a",
+          "call_id": "fc-01KTZ7445208ETAB7ZVJ0TG9KF",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "89bb7f8d2c1dfa73a34910ee52dd91ad0f2e16acbb22cf30b01005c3b2bca749",
+          "call_id": "fc-01KTZ744N4T9P0VEHGY360HNCM",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "70004b62108112568ac4331352a3576cb553c387260c5597e1166ffe822594de",
+          "call_id": "fc-01KTZ7457P0H478TSNRYX593WC",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "0fb2ace17d61d96e69b4698d1f07f1d6a4b9e8281334b8dc054a871c4c7c780a",
+          "call_id": "fc-01KTZ745RGCAN3TE7QA2J9EYPJ",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "74f66e6847565078516f6b49b02fff71f676544d4bcee865f85a226cf362cf6a",
+          "call_id": "fc-01KTZ7466K3GK1ZP68AXZS4K88",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "1cf8c2853938dd1f5c192ee400cbb35f09739d1c94ef78c03cb92c1829ac7cd9",
+          "call_id": "fc-01KTZ746N1PEHHE2JEQP3XDF1D",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "ff8fc717237b562353c02bdd4ba59a12b1fccef6fff91bb718af57b6e6f6cdd0",
+          "call_id": "fc-01KTZ747BKGFDE2GPCTKGBMS6X",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "b304b9a9f7f67648ac87b272929192d978e9e6ab6458c6a857e2ba73088d1c8c",
+          "call_id": "fc-01KTZ747X3BT7T9RAZCZ99SRWY",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "164dc62612c47636af5e30420c02ac072475c8882de2f123160dc93cc492b06c",
+          "call_id": "fc-01KTZ748EVACG470BD3K8NFE35",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "9a4e34007be087f6a0b7994020fd78a4ee31b966aa482f28f63cabc4037f852e",
+          "call_id": "fc-01KTZ748YKM6BAK8QYMBYD870V",
+          "dashboard_url": null
+        },
+        {
+          "year": 2095,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2095.h5",
+          "reservation_token_hash": "80f8219735b37caf16e22a64634c93e269b600954a7ea7b5d3ebe1595358e692",
+          "call_id": "fc-01KTZ749E9XR25Y8K1YHZ2Q7V4",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option1",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "41d849e67934b08272ebdf97095f0b8cae6bb4f31eba7f36005d8e5a038a6f03",
+          "call_id": "fc-01KTZ74A4EYXGJZFVF35XFSM18",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option10",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "011f720c7a24166a2c65724d96321cdc6936840f016d145e9232d9486f38df9e",
+          "call_id": "fc-01KTZ74APSNWQ1GBWRPF49MH7R",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option11",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "dc637a60453969fb96566839d20efa9f6e798dccca81147893fd29dbaa2aaf3f",
+          "call_id": "fc-01KTZ74B4RPM6GJRDGQ03JH41P",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option12",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "d205740b6eaacb7ba6716d46928d04df30fea4f8b1f343437331c86e4dc3d538",
+          "call_id": "fc-01KTZ74BQC2XH4GRJD0AVB9Y2B",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option2",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "26ef534f63cd3a110cd1cf702ade903bae356cf4f13c8f6c6a401c6134ce5a85",
+          "call_id": "fc-01KTZ74C6FTYAEEEPS8BCP4GAT",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option3",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "14e365b1a181fb92f5b32ce72164da079bb4b4707aa2afdce120de1ca8bebaaa",
+          "call_id": "fc-01KTZ74CNMGJ7P73MAHJJM8478",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option4",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "bb18c36de15f7d5e1cafb004086ed790c74a8a8e7bebaee2cac8dcefc1d60fc9",
+          "call_id": "fc-01KTZ74DB12YZ5B0X12TT557Q0",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option5",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "da463ba6145899ffe9d480c1cd341ce5e0e1b0ada58324a5b34a8613f1ef06c5",
+          "call_id": "fc-01KTZ74DVGK3V7A3QF47CZEMSC",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option6",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "4ceaa9b3fde532db0e6d0c3504583263b5b6a395f1f0931d1bd9f1e156bb150b",
+          "call_id": "fc-01KTZ74E9NSTHYDZ1SWWGBGNFJ",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option7",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "1d1ab2d6799b9e5535933c67d6a906f14efcc06596a7120932edd983a36bcc75",
+          "call_id": "fc-01KTZ74ER6HE2ER6SAN2A6YPJH",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option8",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "7eeefbf7aeefac33469dc5b59f7a2ef32f2251d79310a53d1ac2e35a8f7ed759",
+          "call_id": "fc-01KTZ74F6Z1K1C18V30QA129W5",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "option9",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "714e49b9f7f57d7be8328939d69e264aea9c12cf30db1fd13e6f6d403a4e1679",
+          "call_id": "fc-01KTZ74FRCDJ3G4HAZDF3SXDHS",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "reverse_roth",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "4bedbb2e1aefcbd2653945b36cc30623fdc45ec6e58755bc4cf4494b33d4c4eb",
+          "call_id": "fc-01KTZ74G7VC2Q420JMHWMKHSW1",
+          "dashboard_url": null
+        },
+        {
+          "year": 2100,
+          "reform": "tax93",
+          "scoring_type": "static",
+          "dataset_path": "/baselines/crfb-longrun-v2pop-tr2026-noclone-20260612/2100.h5",
+          "reservation_token_hash": "dc20c6e59a8d3abe779418558b0d711762dee0bd429023858bd6cbfc04b71232",
+          "call_id": "fc-01KTZ74GPVPD7454E7ZM1B8XMK",
+          "dashboard_url": null
+        }
+      ],
+      "spawned_call_ids": [
+        "fc-01KTZ734Q9NZRQAP4Z4WS8V2BC",
+        "fc-01KTZ7356R131E20S8X177A3PY",
+        "fc-01KTZ735PJEXE2MA0CKT8PKGJA",
+        "fc-01KTZ7367C8P764F6QDADPGR4J",
+        "fc-01KTZ736PTP62C8MN20H0CN36T",
+        "fc-01KTZ737866Z40BDZ3T02M7EWT",
+        "fc-01KTZ737SMTYESTP2QK553SW88",
+        "fc-01KTZ738BJ8RKQZQH011SJD00W",
+        "fc-01KTZ738WH5HFPWFE82XMH41C2",
+        "fc-01KTZ739B88WJ68C0QD4XTPR94",
+        "fc-01KTZ739W09KH4GG9Z4RG575KX",
+        "fc-01KTZ73AR8TXHKD8ZGRSS5EVQV",
+        "fc-01KTZ73B933Y93RZQRP2822ZME",
+        "fc-01KTZ73C296B3KWCSH92N34WNV",
+        "fc-01KTZ73CDFXAXZREGMDK4BF0Y9",
+        "fc-01KTZ73D0PN7KYGDKA7X6Q91ET",
+        "fc-01KTZ73DJGQWHE0NZ1VV1XKZ2K",
+        "fc-01KTZ73E0X4SA08F3DP19BD6Q7",
+        "fc-01KTZ73EK4SES8W0YKC64J5A0N",
+        "fc-01KTZ73F2NYF2EVTTP2F7BXZQ6",
+        "fc-01KTZ73FJ49S0RVAXWKG3HTMT5",
+        "fc-01KTZ73G2EZVXQ77X9XV1WDCXG",
+        "fc-01KTZ73GNK0XHQH44Q2KQP80PN",
+        "fc-01KTZ73H77Y15SKJT3NR4EW9CX",
+        "fc-01KTZ73HEE1CZ89FZ5HSAH6MQ5",
+        "fc-01KTZ73HYWHG4M82M4A99XG869",
+        "fc-01KTZ73JEV91PMGAYQ9H628W6X",
+        "fc-01KTZ73JYVWXKHJSQV21G4NMJJ",
+        "fc-01KTZ73KE16JXYQDTPZRWQY35E",
+        "fc-01KTZ73KXK87ZMXYFY3QRZP01F",
+        "fc-01KTZ73MDAQ152DZF023AY6SQQ",
+        "fc-01KTZ73MZ1CQMYJ4JCMMHMNB7E",
+        "fc-01KTZ73NGE8FVHQ6YWB096QVY4",
+        "fc-01KTZ73P0QJZPGVV537ZY1T4QM",
+        "fc-01KTZ73PH12V8NJXQAJJDJEF3W",
+        "fc-01KTZ73Q02SHDEGGYXPJK74FRW",
+        "fc-01KTZ73QFX6QZG4P6M1BWVHC1C",
+        "fc-01KTZ73R7170D5JC7APC1B8NHA",
+        "fc-01KTZ73RV3V6YH7GASGVREH2V5",
+        "fc-01KTZ73SMHWHAXAZN4AK1AGZ4E",
+        "fc-01KTZ73TAJ5R10Y7BT0RTZC6PZ",
+        "fc-01KTZ73V4JB0MVXAYR4MWSSD6K",
+        "fc-01KTZ73VQ7YKHNG2F2M661EDN0",
+        "fc-01KTZ73W7PJEVABXSXXM7ZRY2K",
+        "fc-01KTZ73WQD978G38CFQZN84EKK",
+        "fc-01KTZ73X6V1RCMEAN03QB0HQM0",
+        "fc-01KTZ73XVFJHNDVXEGQK9328CR",
+        "fc-01KTZ73Y9S5APRHENVYF1KGM9Z",
+        "fc-01KTZ73YSA8K5MTVWDDW11X114",
+        "fc-01KTZ73Z8VNMXPQXB4TB9GAWHN",
+        "fc-01KTZ73ZSY6W9ZE6FX7DWR6PG2",
+        "fc-01KTZ7407M3EKNZ0Z24DN1SMN9",
+        "fc-01KTZ740T5H8B4YYZAW8MAMERX",
+        "fc-01KTZ7419B0JSTNJTKNTCRAPT0",
+        "fc-01KTZ741R1BTXJ1RADWFC4847T",
+        "fc-01KTZ7427HS90Q50F4YQPPGC5C",
+        "fc-01KTZ742P8CAQ9PN0ZAXZTXTGK",
+        "fc-01KTZ74378E7EKT9CTKJSH67G0",
+        "fc-01KTZ743PH6V4SJS6YNPN9RBFM",
+        "fc-01KTZ7445208ETAB7ZVJ0TG9KF",
+        "fc-01KTZ744N4T9P0VEHGY360HNCM",
+        "fc-01KTZ7457P0H478TSNRYX593WC",
+        "fc-01KTZ745RGCAN3TE7QA2J9EYPJ",
+        "fc-01KTZ7466K3GK1ZP68AXZS4K88",
+        "fc-01KTZ746N1PEHHE2JEQP3XDF1D",
+        "fc-01KTZ747BKGFDE2GPCTKGBMS6X",
+        "fc-01KTZ747X3BT7T9RAZCZ99SRWY",
+        "fc-01KTZ748EVACG470BD3K8NFE35",
+        "fc-01KTZ748YKM6BAK8QYMBYD870V",
+        "fc-01KTZ749E9XR25Y8K1YHZ2Q7V4",
+        "fc-01KTZ74A4EYXGJZFVF35XFSM18",
+        "fc-01KTZ74APSNWQ1GBWRPF49MH7R",
+        "fc-01KTZ74B4RPM6GJRDGQ03JH41P",
+        "fc-01KTZ74BQC2XH4GRJD0AVB9Y2B",
+        "fc-01KTZ74C6FTYAEEEPS8BCP4GAT",
+        "fc-01KTZ74CNMGJ7P73MAHJJM8478",
+        "fc-01KTZ74DB12YZ5B0X12TT557Q0",
+        "fc-01KTZ74DVGK3V7A3QF47CZEMSC",
+        "fc-01KTZ74E9NSTHYDZ1SWWGBGNFJ",
+        "fc-01KTZ74ER6HE2ER6SAN2A6YPJH",
+        "fc-01KTZ74F6Z1K1C18V30QA129W5",
+        "fc-01KTZ74FRCDJ3G4HAZDF3SXDHS",
+        "fc-01KTZ74G7VC2Q420JMHWMKHSW1",
+        "fc-01KTZ74GPVPD7454E7ZM1B8XMK"
+      ],
+      "archived_at": "2026-06-13T00:57:27.981778+00:00"
     }
   ]
 }
