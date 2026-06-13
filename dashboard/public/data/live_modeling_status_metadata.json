@@ -1,6 +1,6 @@
 {
   "schema": "crfb_live_modeling_status/v1",
-  "generated_at": "2026-06-12T05:58:55.209182+00:00",
+  "generated_at": "2026-06-13T10:06:25.531846+00:00",
   "selected_years": [
     2026,
     2030,
@@ -45,7 +45,7 @@
   "reform_status_csv": "dashboard/public/data/live_reform_status.csv",
   "metadata_source_dir": "projected_datasets_v2pop",
   "baseline_aggregates_source": "dashboard/public/data/baseline_aggregates.csv",
-  "submission_manifest_glob": "results/modal_submissions/reform_full_h5_v2pop_tr2026_20260611.json",
+  "submission_manifest_glob": "tmp/static_manifests/reform_full_h5_v2pop_tr2026*.json",
   "notes": [
     "Baseline H5 moments are read from per-year calibration metadata.",
     "Dashboard post-OBBBA TOB fields are included separately from H5 Trustees current-law constraints.",

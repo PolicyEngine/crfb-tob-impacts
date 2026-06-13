@@ -123,7 +123,10 @@ def build_contract(
         }
 
     anchor_years = sorted(
-        display.loc[display["full_h5_result_type"] == "exact_full_h5", "year"]
+        int(y)
+        for y in display.loc[
+            display["full_h5_result_type"] == "exact_full_h5", "year"
+        ]
         .astype(int)
         .unique()
     )
