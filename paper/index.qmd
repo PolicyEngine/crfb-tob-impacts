@@ -6,16 +6,20 @@ author:
   - "Ben Ogorek"
   - "Pavel Makarchuk"
   - "David Trimmer"
-date: 2026-04-15
+date: 2026-06-13
 lang: en
 abstract: |
   This draft manuscript is the narrative companion to the interactive Social
-  Security taxation-of-benefits dashboard. It documents the full reform menu,
-  the long-run microsimulation and calibration strategy, the validation and
-  benchmark framework, and the publication architecture for the current CRFB
-  analysis package. The dashboard remains the live current-results explorer;
-  this paper is the stable long-form surface intended for citation, SSRN-style
-  circulation, and formal external reference once shared exhibits are frozen.
+  Security taxation-of-benefits dashboard. It documents the fourteen-reform
+  menu, the long-run microsimulation and calibration strategy, the validation
+  and benchmark framework, and the publication architecture for the current
+  CRFB analysis package. The current build runs on PolicyEngine's
+  primary-source populace microdata and calibrates each `2026`–`2100` year to
+  the 2026 Social Security and Medicare Trustees current-law projections, which
+  already incorporate the 2025 reconciliation act. The dashboard remains the
+  live current-results explorer; this paper is the stable long-form surface
+  intended for citation, SSRN-style circulation, and formal external reference
+  once shared exhibits are frozen.
 keywords:
   - Social Security
   - Taxation of benefits
