@@ -84,14 +84,13 @@ The rebuild is supposed to fail closed on these checks:
 
 - exact calibration quality for delivered years
 - required profile `ss-payroll-tob`
-- required target source `trustees_2025_current_law`
+- required target source from the v2/TR2026 baseline manifest
 - required tax assumption `trustees-2025-core-thresholds-v1`
 - pinned `policyengine-us` worktree via `CRFB_POLICYENGINE_US_PATH`
 - late-year household and policy-target support gates, including separate
   OASDI/HI taxation-of-benefits contributor checks documented in
   [late-year-support-gates.md](late-year-support-gates.md)
-- donor-backed support augmentation only when it is metadata-stamped and the
-  final calibration remains exact
+- no synthetic or donor-clone support in the current v2/populace published H5s
 - a reproducibility bundle stamped before submission, including dirty sibling
   repo overrides if they exist
 - launch-time env vars for required target source and tax assumption derived

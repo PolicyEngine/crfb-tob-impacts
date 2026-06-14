@@ -16,8 +16,9 @@ DEFAULT_FULL_H5_AGGREGATE = (
     / "full_h5_v2pop_tr2026_panel_20260612.csv"
 )
 DEFAULT_REFERENCE_STATIC = (
-    REPO / "results" / "all_static_results_full_h5_selected_panel_display_20260522.csv"
+    REPO / "results" / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
 )
+EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
 DEFAULT_EXACT_OUTPUT = (
     REPO / "results" / "all_static_results_full_h5_v2pop_panel_20260612.csv"
@@ -177,6 +178,7 @@ def publish_full_h5_static_results(
     _validate_exact_panel(aggregate, require_complete=require_complete)
     exact = _scale_dollars_to_billions(aggregate)
     exact["full_h5_result_type"] = "exact_full_h5"
+    exact["baseline_source"] = EXACT_BASELINE_SOURCE
 
     annual_standard = _annual_display_from_exact(exact)
     combined = annual_standard.copy()

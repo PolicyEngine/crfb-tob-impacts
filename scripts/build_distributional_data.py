@@ -6,7 +6,9 @@ reform-output H5 (already cached locally from the aggregation runs) against
 that baseline by household. The result is the average and percentage change
 in household net income within each baseline income decile.
 
-All weighting goes through MicroDataFrame; no raw weight arrays are touched.
+All weighting goes through MicroSeries/MicroDataFrame. The script never fetches
+PolicyEngine weight variables directly; weights are carried from the calculated
+baseline MicroSeries into the joined distributional table.
 
 Usage:
     uv run python scripts/build_distributional_data.py \
@@ -22,7 +24,6 @@ import sys
 from pathlib import Path
 
 import microdf as mdf
-import numpy as np
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[1]
@@ -60,7 +61,7 @@ def scenario_path(year: int, reform: str) -> Path:
 
 
 def baseline_households(year: int) -> pd.DataFrame:
-    """Baseline household net income + decile + weight, by household_id."""
+    """Baseline household net income + weighted decile, by household_id."""
     from policyengine_us import Microsimulation
 
     from src.v2_pipeline import _tax_assumption_reform
@@ -69,22 +70,19 @@ def baseline_households(year: int) -> pd.DataFrame:
         dataset=str(BASELINE_DIR / f"{year}.h5"),
         reform=_tax_assumption_reform(year),
     )
-    hh_id = np.asarray(sim.calculate("household_id", period=year).values)
-    net = np.asarray(
-        sim.calculate("household_net_income", period=year).values, dtype=float
-    )
-    weight = np.asarray(
-        sim.calculate("household_weight", period=year).values, dtype=float
-    )
-    frame = pd.DataFrame(
-        {"household_id": hh_id, "baseline_net_income": net, "household_weight": weight}
+    hh_id = sim.calc("household_id", period=year).reset_index(drop=True)
+    net = sim.calc("household_net_income", period=year)
+    weights = net.weights.reset_index(drop=True)
+    net = net.reset_index(drop=True)
+    frame = mdf.MicroDataFrame(
+        {
+            "household_id": pd.Series(hh_id).reset_index(drop=True),
+            "baseline_net_income": pd.Series(net).reset_index(drop=True),
+        },
+        weights=weights,
     )
     # Population-weighted income deciles on baseline household net income.
-    mdf_frame = mdf.MicroDataFrame(
-        frame[["baseline_net_income"]], weights=frame["household_weight"]
-    )
-    ranks = mdf_frame["baseline_net_income"].rank(pct=True)
-    frame["decile"] = np.clip(np.ceil(np.asarray(ranks) * 10), 1, 10).astype(int)
+    frame["decile"] = frame["baseline_net_income"].decile_rank().astype(int)
     del sim
     gc.collect()
     return frame
@@ -108,7 +106,7 @@ def decile_impacts(baseline: pd.DataFrame, reform: pd.DataFrame) -> list[dict]:
     merged["change"] = merged["reform_net_income"] - merged["baseline_net_income"]
     rows: list[dict] = []
     for decile in range(1, 11):
-        group = merged[merged["decile"] == decile]
+        group = merged.loc[merged["decile"] == decile]
         if group.empty:
             rows.append(
                 {
@@ -119,15 +117,9 @@ def decile_impacts(baseline: pd.DataFrame, reform: pd.DataFrame) -> list[dict]:
                 }
             )
             continue
-        weighted = mdf.MicroDataFrame(
-            group[["change", "baseline_net_income"]],
-            weights=group["household_weight"],
-        )
-        total_change = float(weighted["change"].sum())
-        total_baseline = float(weighted["baseline_net_income"].sum())
-        # Weighted mean change per household — sum(w*x)/sum(w) via MicroDataFrame,
-        # never a raw sum of the weight column.
-        avg_change = float(weighted["change"].mean())
+        total_change = float(group["change"].sum())
+        total_baseline = float(group["baseline_net_income"].sum())
+        avg_change = float(group["change"].mean())
         rows.append(
             {
                 "decile": decile,

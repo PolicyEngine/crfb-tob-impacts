@@ -15,10 +15,14 @@ The intended current delivery surface is:
 
 The public/release result paths are:
 
-- `results/results_full_h5_selected_panel_display_20260522.csv`
-- `results/results_full_h5_selected_panel_display_20260522_metadata.json`
+- `results/results_full_h5_v2pop_panel_display_20260612.csv`
+- `results/results_full_h5_v2pop_panel_display_20260612_metadata.json`
+- `results/all_static_results_full_h5_v2pop_panel_display_20260612.csv`
+- `results/behavioral_endpoint_ratio_display_20260612.csv`
 - `results.csv`
 - `dashboard/public/data/results.csv`
+- `dashboard/public/data/results_contract.json`
+- `dashboard/public/data/distributional.json`
 - `results/release_packages/crfb_tob_release_<timestamp>/`
 
 Behind the scenes, the builder combines static and labor-supply response source
@@ -90,9 +94,10 @@ Use this simple rule:
   carried forward
 - the live audit note reflects the final release state:
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md)
-- independent review should start from the controlling
-  [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md) and
-  [reform-modeling-progress.json](reform-modeling-progress.json)
+- independent review should start from
+  [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md),
+  [v2-baseline-method.md](v2-baseline-method.md), and
+  `dashboard/public/data/results_contract.json`
 
 ## Archive Boundary
 

@@ -1,6 +1,6 @@
 {
   "schema": "crfb_behavioral_endpoint_ratio_publication/v1",
-  "generated_at": "2026-06-13T10:05:57.018678+00:00",
+  "generated_at": "2026-06-14T12:06:24.152543+00:00",
   "endpoint_aggregate_path": "results/modal_runs_production/full_h5_v2pop_tr2026_behavioral_endpoints_20260612.csv",
   "static_display_path": "results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
   "exact_output_path": "results/behavioral_endpoint_full_h5_exact_20260612.csv",

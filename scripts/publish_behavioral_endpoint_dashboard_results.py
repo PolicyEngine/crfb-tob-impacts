@@ -27,21 +27,24 @@ RESULTS = REPO / "results"
 DEFAULT_BEHAVIORAL_ENDPOINT_AGGREGATE = (
     RESULTS
     / "modal_runs_production"
-    / "full_h5_5a35713_behavioral_endpoints_20260522.csv"
+    / "full_h5_v2pop_tr2026_behavioral_endpoints_20260612.csv"
 )
 DEFAULT_STATIC_DISPLAY = (
-    RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
+    RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
 )
 DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
 DEFAULT_BEHAVIORAL_EXACT_OUTPUT = (
-    RESULTS / "behavioral_endpoint_full_h5_exact_20260522.csv"
+    RESULTS / "behavioral_endpoint_full_h5_exact_20260612.csv"
 )
 DEFAULT_BEHAVIORAL_DISPLAY_OUTPUT = (
-    RESULTS / "behavioral_endpoint_ratio_display_20260522.csv"
+    RESULTS / "behavioral_endpoint_ratio_display_20260612.csv"
 )
 DEFAULT_METADATA_OUTPUT = (
-    RESULTS / "behavioral_endpoint_ratio_display_20260522_metadata.json"
+    RESULTS / "behavioral_endpoint_ratio_display_20260612_metadata.json"
 )
+INTERPOLATED_RUN_PREFIX = "behavioral_endpoint_ratio_interpolation_20260612"
+INTERPOLATED_BASELINE_SOURCE = "v2pop_tr2026_static_full_h5_display"
+EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 
 ENDPOINT_YEARS = (2026, 2100)
 IMPACT_RATIO_COLUMNS = (
@@ -124,6 +127,7 @@ def _published_behavioral_endpoints(
     exact["scoring_type"] = "behavioral"
     exact["source"] = "exact_behavioral_endpoint_full_h5"
     exact["full_h5_result_type"] = "exact_behavioral_endpoint_full_h5"
+    exact["baseline_source"] = EXACT_BASELINE_SOURCE
     return exact.sort_values(["reform_name", "year"]).reset_index(drop=True)
 
 
@@ -242,8 +246,8 @@ def _behavioral_annual_for_reform(
                 "output_h5_sha256",
             ):
                 row[column] = ""
-            row["run_prefix"] = "behavioral_endpoint_ratio_interpolation_20260522"
-            row["baseline_source"] = "static_display_baseline"
+            row["run_prefix"] = INTERPOLATED_RUN_PREFIX
+            row["baseline_source"] = INTERPOLATED_BASELINE_SOURCE
             row["source"] = "linear_interpolation_between_behavioral_endpoint_ratios"
             row["full_h5_result_type"] = (
                 "linear_interpolation_between_behavioral_endpoint_ratios"

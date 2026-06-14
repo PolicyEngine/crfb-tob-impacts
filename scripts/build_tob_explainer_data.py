@@ -27,8 +27,6 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
@@ -144,17 +142,18 @@ def build_context(baseline_dir: Path) -> list[dict]:
         sim = Microsimulation(
             dataset=str(dataset), reform=_tax_assumption_reform(year)
         )
-        ss_hh = sim.calculate("social_security", period=year, map_to="household")
-        tob_hh = sim.calculate(
+        ss_hh = sim.calc("social_security", period=year, map_to="household")
+        tob_oasdi_hh = sim.calc(
             "tob_revenue_oasdi", period=year, map_to="household"
-        ) + sim.calculate("tob_revenue_medicare_hi", period=year, map_to="household")
-        ss_values = np.asarray(ss_hh.values)
-        tob_values = np.asarray(tob_hh.values)
-        weights = np.asarray(ss_hh.weights, dtype=float)
-        beneficiary_households = float(weights[ss_values > 0].sum())
-        paying_households = float(
-            weights[(ss_values > 0) & (tob_values > 0)].sum()
         )
+        tob_hi_hh = sim.calc(
+            "tob_revenue_medicare_hi", period=year, map_to="household"
+        )
+        tob_hh = tob_oasdi_hh + tob_hi_hh
+        tob_oasdi_total = sim.calc("tob_revenue_oasdi", period=year)
+        tob_hi_total = sim.calc("tob_revenue_medicare_hi", period=year)
+        beneficiary_households = float((ss_hh > 0).sum())
+        paying_households = float(((ss_hh > 0) & (tob_hh > 0)).sum())
         records.append(
             {
                 "year": year,
@@ -163,24 +162,8 @@ def build_context(baseline_dir: Path) -> list[dict]:
                 "share_of_beneficiary_households_paying": round(
                     paying_households / beneficiary_households, 4
                 ),
-                "tob_oasdi_billions": round(float(tob_hh.sum()) / 1e9, 1)
-                if False
-                else round(
-                    float(
-                        sim.calculate("tob_revenue_oasdi", period=year).sum()
-                    )
-                    / 1e9,
-                    1,
-                ),
-                "tob_medicare_hi_billions": round(
-                    float(
-                        sim.calculate(
-                            "tob_revenue_medicare_hi", period=year
-                        ).sum()
-                    )
-                    / 1e9,
-                    1,
-                ),
+                "tob_oasdi_billions": round(float(tob_oasdi_total.sum()) / 1e9, 1),
+                "tob_medicare_hi_billions": round(float(tob_hi_total.sum()) / 1e9, 1),
             }
         )
         print(

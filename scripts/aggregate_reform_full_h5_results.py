@@ -25,23 +25,24 @@ DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_stat
 DEFAULT_EXISTING_RESULTS = (
     REPO
     / "results"
-    / "all_static_results_full_h5_selected_panel_20260522.csv"
+    / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
 )
-DEFAULT_BASELINE_DIR = REPO / "tmp" / "baseline_selected_5a35713_download"
-DEFAULT_CACHE_DIR = REPO / "tmp" / "reform_full_h5_r2_cache"
+DEFAULT_BASELINE_DIR = REPO / "projected_datasets_v2pop"
+DEFAULT_CACHE_DIR = REPO / "tmp" / "reform_full_h5_r2_cache_v2pop"
 DEFAULT_OUTPUT = (
     REPO
     / "results"
     / "modal_runs_production"
-    / "full_h5_5a35713_standard_selected_panel_live_20260522.csv"
+    / "full_h5_v2pop_tr2026_panel_20260612.csv"
 )
 DEFAULT_SUMMARY = (
     REPO
     / "results"
     / "modal_runs_production"
-    / "full_h5_5a35713_standard_selected_panel_live_20260522_summary.json"
+    / "full_h5_v2pop_tr2026_panel_20260612_summary.json"
 )
 DEFAULT_R2_BUCKET = "axiom-corpus"
+BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 
 
 @dataclass(frozen=True)
@@ -283,11 +284,7 @@ def aggregate_live_full_h5_results(
                 "complete_uri": record.get("complete_uri", ""),
                 "output_h5_sha256": record.get("output_h5_sha256", ""),
                 "run_prefix": record.get("run_prefix", ""),
-                "baseline_source": (
-                    "computed_from_baseline_h5"
-                    if year not in initial_baseline_years
-                    else "existing_selected_panel_results"
-                ),
+                "baseline_source": BASELINE_SOURCE,
             }
         )
         rows.append(row)

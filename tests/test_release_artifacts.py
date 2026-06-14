@@ -37,7 +37,6 @@ RELEASE_RESULT_ARTIFACTS = [
     DASHBOARD_RESULTS,
 ]
 ALLOWED_CSV_ARTIFACTS = {
-    "dashboard/public/data/balanced_fix_baseline.csv",
     "dashboard/public/data/baseline_aggregates.csv",
     "dashboard/public/data/baseline_calibration_diagnostics.csv",
     "dashboard/public/data/baseline_calibration_targets.csv",
@@ -232,14 +231,84 @@ def test_csv_release_surface_contains_only_current_full_h5_artifacts_and_inputs(
     discovered = {
         path
         for path in tracked_csvs
-        if Path(path).parent == Path(".")
-        or any((REPO_ROOT / path).is_relative_to(root) for root in roots)
+        if (REPO_ROOT / path).exists()
+        and (
+            Path(path).parent == Path(".")
+            or any((REPO_ROOT / path).is_relative_to(root) for root in roots)
+        )
     }
 
     stale = discovered - ALLOWED_CSV_ARTIFACTS
     missing = ALLOWED_CSV_ARTIFACTS - discovered
     assert not stale, f"Unexpected stale CSV artifacts: {sorted(stale)}"
     assert not missing, f"Expected current CSV artifacts missing: {sorted(missing)}"
+
+
+def test_current_public_results_have_current_release_provenance():
+    current_results = [
+        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
+        RESULTS / "behavioral_endpoint_ratio_display_20260612.csv",
+        RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
+        DASHBOARD_RESULTS,
+        REPO_ROOT / "results.csv",
+    ]
+    forbidden_fragments = [
+        "20260522",
+        "5a35713",
+        "selected_panel",
+        "existing_selected_panel_results",
+    ]
+
+    for path in current_results:
+        text = path.read_text(encoding="utf-8")
+        for fragment in forbidden_fragments:
+            assert fragment not in text, f"{fragment!r} leaked into {path}"
+
+    results = load_dashboard_results()
+    assert set(results["baseline_source"].dropna()) == {
+        "v2pop_tr2026_baseline_h5",
+        "v2pop_tr2026_static_full_h5_display",
+    }
+    behavioral = results[results["scoring_type"].eq("behavioral")]
+    interpolated = behavioral[
+        behavioral["full_h5_result_type"].eq(
+            "linear_interpolation_between_behavioral_endpoint_ratios"
+        )
+    ]
+    assert set(interpolated["run_prefix"]) == {
+        "behavioral_endpoint_ratio_interpolation_20260612"
+    }
+
+
+def test_current_publication_scripts_do_not_default_to_legacy_20260522_inputs():
+    guarded_scripts = [
+        REPO_ROOT / "scripts" / "publish_full_h5_static_dashboard_results.py",
+        REPO_ROOT / "scripts" / "publish_behavioral_endpoint_dashboard_results.py",
+        REPO_ROOT / "scripts" / "publish_dashboard_results.py",
+        REPO_ROOT / "scripts" / "build_release_package.py",
+    ]
+    for path in guarded_scripts:
+        text = path.read_text(encoding="utf-8")
+        assert "20260522" not in text
+        assert "5a35713" not in text
+        assert "selected_panel_display_20260522" not in text
+
+
+def test_tob_explainer_context_uses_microseries_aggregates_only():
+    source = (REPO_ROOT / "scripts" / "build_tob_explainer_data.py").read_text(
+        encoding="utf-8"
+    )
+    forbidden_fragments = [
+        "import numpy",
+        "np.asarray",
+        ".values",
+        ".weights",
+        "weights[",
+        'calculate("household_weight"',
+        'calc("household_weight"',
+    ]
+    for forbidden in forbidden_fragments:
+        assert forbidden not in source
 
 
 def test_public_parameter_csv_uses_behavioral_not_conventional_labeling():
@@ -525,6 +594,8 @@ def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():
     assert 'id: "option13"' not in reforms
     assert 'id: "option14_stacked"' not in reforms
     assert "Balanced Fix baseline" not in shell
+    assert "Balanced fix baseline" not in shell
+    assert "balancedFix" not in shell
 
 
 def test_dashboard_exposes_requested_trust_fund_split_modes():

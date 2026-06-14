@@ -1,6 +1,6 @@
 {
   "schema": "crfb_dashboard_results/v1",
-  "generated_at": "2026-06-13T10:14:10.035573+00:00",
+  "generated_at": "2026-06-14T12:06:24.363491+00:00",
   "static_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
   "conventional_source": null,
   "behavioral_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/behavioral_endpoint_ratio_display_20260612.csv",

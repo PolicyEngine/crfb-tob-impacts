@@ -7,7 +7,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import microdf as mdf
+import pandas as pd
 import pytest
+
+from scripts.build_distributional_data import decile_impacts
 
 REPO = Path(__file__).resolve().parents[1]
 DIST_PATH = REPO / "dashboard" / "public" / "data" / "distributional.json"
@@ -23,6 +27,40 @@ def dist() -> dict:
 
 def test_all_reforms_present(dist: dict) -> None:
     assert set(STANDARD_REFORMS).issubset(dist["data"].keys())
+
+
+def test_distributional_builder_does_not_fetch_policyengine_weights_directly() -> None:
+    source = (REPO / "scripts" / "build_distributional_data.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'calc("household_weight"' not in source
+    assert 'calculate("household_weight"' not in source
+    assert "weights=group" not in source
+    assert "household_weight" not in source
+
+
+def test_decile_impacts_preserves_microdataframe_weights_after_merge() -> None:
+    baseline = mdf.MicroDataFrame(
+        {
+            "household_id": [1, 2],
+            "baseline_net_income": [10_000_000_000, 20_000_000_000],
+            "decile": [1, 1],
+        },
+        weights=[1, 3],
+    )
+    reform = pd.DataFrame(
+        {
+            "household_id": [1, 2],
+            "reform_net_income": [11_000_000_000, 24_000_000_000],
+        }
+    )
+
+    decile_1 = decile_impacts(baseline, reform)[0]
+
+    assert decile_1["avg_change"] == 3_250_000_000
+    assert decile_1["total_change_billions"] == 13.0
+    assert decile_1["pct_change"] == 18.571
 
 
 def test_each_reform_year_has_ten_deciles(dist: dict) -> None:
