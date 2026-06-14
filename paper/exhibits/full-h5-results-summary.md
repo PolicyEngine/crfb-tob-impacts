@@ -43,9 +43,9 @@ The structural employer-payroll swap family (`option5`, `option6`, and `option12
 
 ## Behavioral endpoint results
 
-The corrected behavioral endpoint run `full_h5_5a35713_behavioral_endpoints_lsrbasefix_20260522_0748` completed all `24` endpoint cells: `2026` and `2100` for `option1` through `option12`. Each endpoint cell saved durable R2 `scenario.h5`, `metadata.json`, and `complete.json` artifacts before aggregation. The `876` non-endpoint behavioral display rows use documented linear interpolation of behavioral/static ratios between those exact endpoints.
+The current behavioral endpoint run `full_h5_v2pop_tr2026_behavioral_endpoints_20260612` completed all `28` endpoint cells: `2026` and `2100` for all fourteen current reform rows. Each endpoint cell saved durable R2 `scenario.h5`, `metadata.json`, and `complete.json` artifacts before aggregation. The `1,022` non-endpoint behavioral display rows use documented linear interpolation of behavioral/static ratios between those exact endpoints.
 
-The prior 06:43 ET behavioral endpoint batch is quarantined because its labor-supply response baseline branch used raw `policyengine-us` default law rather than the Trustees/current-law baseline used for the CRFB run. All `2100` corrected metadata files record `behavioral_baseline_installation.installed: true`; `2026` records explicitly state that no baseline reform was required.
+The public combined `results.csv` keeps static and behavioral rows in one file and distinguishes them with `scoring_type`. Behavioral endpoint rows use the current v2 populace/TR2026 baseline H5s; non-endpoint behavioral rows are derived only from the documented endpoint-ratio interpolation.
 
 ### Ten-year behavioral revenue impacts
 
@@ -85,4 +85,4 @@ The largest endpoint behavioral movement versus static is `option1` in `2100` at
 
 ### Cost estimate
 
-Completed static worker metadata sums to `59.83` successful worker-hours. At the public Modal CPU and memory prices recorded in `results/full_h5_modal_cost_estimate_20260522.json`, estimated successful compute is `$41.89`. Including the failed/preempted/canceled attempt allowance, the working Modal estimate is `$43.05`. The full-H5 R2 objects total `6.00` GB, about `$0.09` per month of standard R2 storage before operation charges.
+Fresh cost reporting should come from the Modal usage page for the current v2 populace/TR2026 apps. The dashboard release artifacts no longer carry the stale May 2026 cost estimate.

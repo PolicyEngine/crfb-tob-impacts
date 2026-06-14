@@ -51,7 +51,13 @@ function baselineSpotlightRows(rows: LiveBaselineResult[]): LiveBaselineResult[]
   return rows.filter((row) => SPOTLIGHT_YEARS.has(row.year));
 }
 
-function YearProgress({ rows }: { rows: LiveReformStatus[] }) {
+function YearProgress({
+  rows,
+  targetCount,
+}: {
+  rows: LiveReformStatus[];
+  targetCount: number;
+}) {
   const byYear = useMemo(() => {
     const groups = new Map<number, LiveReformStatus[]>();
     for (const row of rows) {
@@ -81,7 +87,7 @@ function YearProgress({ rows }: { rows: LiveReformStatus[] }) {
                 <td className="py-2 pr-4 font-medium text-[var(--pe-color-text-title)]">
                   {year}
                 </td>
-                <td className="py-2 pr-4">{complete}/12</td>
+                <td className="py-2 pr-4">{complete}/{targetCount}</td>
                 <td className="py-2 pr-4">{counts.submitted ?? 0}</td>
                 <td className="py-2 pr-4">{counts.failed ?? 0}</td>
               </tr>
@@ -140,6 +146,7 @@ export function LiveModelingProgress() {
   const failed = reformCounts.failed ?? 0;
   const pending = reformCounts.pending ?? 0;
   const spotlight = baselineSpotlightRows(data.baseline);
+  const targetCount = data.metadata.standard_reform_count ?? 0;
 
   return (
     <div className="space-y-5 px-5 py-4 text-sm text-[var(--pe-color-text-secondary)]">
@@ -235,7 +242,7 @@ export function LiveModelingProgress() {
           Reform H5 progress by year
         </h4>
         <div className="mt-2">
-          <YearProgress rows={data.reformStatus} />
+          <YearProgress rows={data.reformStatus} targetCount={targetCount} />
         </div>
       </div>
 
