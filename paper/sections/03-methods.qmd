@@ -196,23 +196,20 @@ requires all published files to come from validated year-level H5 artifacts.
 
 ## Far-horizon support: no synthetic records
 
-Earlier drafts of this work augmented the late-year survey support with
-jittered clones of real taxation-of-benefits contributor households, because a
-reweighting-heavy construction on the Enhanced CPS could match the far-horizon
-aggregates only by concentrating weight on a small number of contributors. The
-populace base plus value scaling removes that need. Because the economics enter
-through record values rather than weights, the taxation-of-benefits-contributing
-population stays broad even at `2100`, and **every record in every published
-year is a real survey household — no synthetic rows.**
+A reweighting-heavy construction on the Enhanced CPS can match the far-horizon
+taxation-of-benefits aggregates only by concentrating weight on a small number
+of contributors, which would force a choice between thin support and synthetic
+augmentation. The populace base plus value scaling removes that dilemma. Because
+the economics enter through record values rather than weights, the
+taxation-of-benefits-contributing population stays broad even at `2100`, and
+**every record in every published year is a real survey household — no synthetic
+rows.**
 
-We verified this directly by building the hardest year, `2100`, with the
-clone machinery disabled. It passes every publication gate with margin:
-taxation-of-benefits contributor effective sample sizes of `153` (OASDI) and
-`127` (HI) against the `50` floor, and a top-10 weight share of `3.4%`. All six
-far-horizon years (`2075`–`2100`) pass with contributor effective sample sizes
-of `107`–`156`. The clone machinery has therefore been removed from the
-pipeline; its implementation remains in the project's git history for any future
-base that cannot support the far horizon on its own.
+We verified this directly by building the hardest year, `2100`. It passes every
+publication gate with margin: taxation-of-benefits contributor effective sample
+sizes of `153` (OASDI) and `127` (HI) against the `50` floor, and a top-10
+weight share of `3.4%`. All six far-horizon years (`2075`–`2100`) pass with
+contributor effective sample sizes of `107`–`156`.
 
 The CRFB runtime still applies publication gates to both aggregate household
 weights and policy-target contributors. For OASDI and HI taxation-of-benefits

@@ -5,7 +5,6 @@ import sys
 
 from . import (
     dashboard_baseline_assumptions,
-    modal_refresh,
     reform_full_h5_artifacts,
     repro_bundle_cli,
     selected_cells,
@@ -29,7 +28,6 @@ def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
     command_handlers = {
-        "modal-refresh": modal_refresh.main,
         "write-repro-bundle": repro_bundle_cli.main,
         "build-dashboard-baseline-assumptions": dashboard_baseline_assumptions.main,
         "write-selected-cells": selected_cells.main,
@@ -40,12 +38,6 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(prog="crfb-tob")
     subparsers = parser.add_subparsers(dest="command", required=True)
-
-    modal_parser = subparsers.add_parser(
-        "modal-refresh",
-        help="Snapshot calibrated H5s, validate the model contract, and launch Modal.",
-    )
-    modal_parser.set_defaults(handler=modal_refresh.main)
 
     repro_parser = subparsers.add_parser(
         "write-repro-bundle",

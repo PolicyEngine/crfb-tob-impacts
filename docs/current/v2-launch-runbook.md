@@ -10,13 +10,13 @@ current law).
 Panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × 14 reforms
 (`option1–option12`, `reverse_roth`, `tax93`) × `static` = 224 cells,
 followed by behavioral endpoints (`2026, 2100` × 14 = 28 cells). The
-current public release is the full-H5 v2/populace/TR2026 no-clone run
+current public release is the full-H5 v2/populace/TR2026 run
 documented in `docs/current/REFORM_MODELING_BIBLE.md`; historical May
 ledgers are not part of the current release surface.
 
 ## Sequence
 
-1. **Build datasets** — produce the 16 v2/populace/TR2026 no-clone baseline
+1. **Build datasets** — produce the 16 v2/populace/TR2026 baseline
    H5s and metadata sidecars; every year must pass its build-time gates.
 2. **Local proof** — run one static proof cell against a local v2 dataset and
    record the expected schema manifest under
@@ -45,5 +45,5 @@ ledgers are not part of the current release surface.
 - Post-H5 aggregation uses MicroDF/MicroSeries weighted operations only.
 - The expected-schema manifest comes from the local proof, never from a
   paid candidate H5; per-year entity rows come from the baseline manifest.
-- The current release uses the v2/populace no-clone long-run data. Historical
-  donor-clone and selected-panel artifacts are archival only.
+- The current release uses the v2/populace long-run data. Historical
+  selected-panel artifacts are archival only.

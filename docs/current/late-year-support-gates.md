@@ -48,31 +48,3 @@ The max-share gate is intentionally less restrictive than the top-10 and
 top-100 checks: it catches single-record domination without rejecting exact
 late-year artifacts where a broad contributor pool is stable but the largest
 taxable-benefits contributor is still just over `10%`.
-
-## Donor-Augmentation Gates
-
-Production delivery should not rely on donor-backed approximate artifacts, but
-the runtime still validates any dataset carrying
-`donor-backed-composite-v1` metadata. The donor gates are intentionally
-separate from the aggregate household gates because donor pools are smaller by
-construction.
-
-| Donor metric | Default publication gate |
-| --- | ---: |
-| Donor-family ESS | at least `300` |
-| Top-10 donor-family weight share | at most `15%` |
-| Max donor-family weight share | at most `10%` |
-| Positive clone donor-family count | at least `300` |
-| Clone donor-family ESS | at least `10` |
-| Top-10 clone donor-family weight share | at most `85%` |
-| Top-100 clone donor-family weight share | at most `98%` |
-| Max clone donor-family weight share | at most `20%` |
-| Positive older-donor clone count | at least `50` |
-| Older-donor clone ESS | at least `5` |
-| Max older-donor clone weight share | at most `30%` |
-| Positive worker-donor clone count | at least `50` |
-| Worker-donor clone ESS | at least `10` |
-| Max worker-donor clone weight share | at most `20%` |
-
-These checks are safety rails for diagnostics and provenance, not a replacement
-for exact production data.

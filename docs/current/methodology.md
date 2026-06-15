@@ -63,7 +63,7 @@ for the CRFB long-run TOB work, not default statutory current law.
 
 ## Late-Year Support
 
-The v2/populace construction does not use synthetic or donor-clone support in
+The v2/populace construction does not use synthetic household support in
 the published years. Demographics are carried through household weights; broad
 economic growth is carried through input values before a final light calibration
 to TR2026 benefits, taxable payroll, and TOB targets. Late-year support gates

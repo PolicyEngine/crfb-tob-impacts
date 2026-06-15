@@ -6,9 +6,8 @@ This page describes how the current outputs are supposed to be built.
 
 1. Generate exact yearly H5 datasets in the pinned `policyengine-us-data`
    worktree using the Trustees current-law target source and
-   `trustees-2025-core-thresholds-v1`. For `2075+`, apply the
-   `donor-backed-composite-v1` support supplement before the final exact
-   calibration.
+   `trustees-2025-core-thresholds-v1`. Every year, including `2075+`, calibrates
+   real populace survey households with no synthetic support.
 2. Validate dataset metadata and exact coverage before any scoring run is
    submitted.
 3. Freeze a run-level reproducibility bundle that captures code SHAs, dirty
@@ -34,30 +33,14 @@ confirmed by email to PolicyEngine on May 5, 2026 that the long-range
 assumption applies both to income-tax rate brackets and to federal income-tax
 thresholds such as standard deductions.
 
-Late-year support augmentation is part of the current exact-data contract, not
-a downstream patch to scored results. The production support recipe is:
-
-- support profile `donor-backed-composite-v1`
-- fixed support target year `2100`
-- support activation from `2075`
-- top `120` synthetic target types
-- `20` real donor tax units per target
-- base-household prior scale `0.15`
-- support-solve tolerance `5%`
-
-The parallel production wrapper strips those support flags for pre-`2075`
-subprocesses, so the 10-year budget window and mid-horizon sampled years still
-use the base CPS support. The final calibration must remain exact for every
-delivered year.
+The current pipeline uses no synthetic support at any horizon. Every delivered
+year — including `2075`–`2100` — calibrates real survey households only and
+clears the publication gates with margin (far-horizon taxation-of-benefits
+contributor effective sample sizes of `107`–`156`). The final calibration must
+remain exact for every delivered year.
 
 ## Key Scripts
 
-- [scripts/run_modal_refresh.py](../../scripts/run_modal_refresh.py)
-  - snapshots calibrated H5 datasets, writes the reproducibility bundle, and
-    launches standard static or behavioral reform panels on Modal
-- [scripts/recover_modal_cells_run.py](../../scripts/recover_modal_cells_run.py)
-  - recovers Modal cell-run outputs from the results volume and combines them
-    into local CSV artifacts
 - [scripts/write_repro_bundle.py](../../scripts/write_repro_bundle.py)
   - writes the same reproducibility bundle for non-standard or local run paths
 - [scripts/freeze_repro_bundle.py](../../scripts/freeze_repro_bundle.py)
@@ -90,7 +73,7 @@ The rebuild is supposed to fail closed on these checks:
 - late-year household and policy-target support gates, including separate
   OASDI/HI taxation-of-benefits contributor checks documented in
   [late-year-support-gates.md](late-year-support-gates.md)
-- no synthetic or donor-clone support in the current v2/populace published H5s
+- no synthetic household support in the current v2/populace published H5s
 - a reproducibility bundle stamped before submission, including dirty sibling
   repo overrides if they exist
 - launch-time env vars for required target source and tax assumption derived
@@ -115,9 +98,6 @@ The release process should include:
 
 ## What We No Longer Treat As Acceptable
 
-- donor-augmented approximate late-year runs in the production delivery path
-- unstamped donor-backed support or any donor support that defines its own final
-  scoring target instead of passing the published calibration gates
 - patching the stale stitched standard file into the dashboard as if it were a
   clean rebuild
 - using the deleted legacy Jupyter Book as the current operational guide
