@@ -12,9 +12,9 @@ import pandas as pd
 from policyengine_core.data import Dataset
 from policyengine_core.periods.config import ETERNITY
 from policyengine_core.reforms import Reform
-from policyengine_us import Microsimulation
 
 try:
+    from .engine import dataset_microsimulation
     from .reforms import (
         get_option10_conventional_dict,
         get_option10_reform,
@@ -51,6 +51,7 @@ try:
         tax_assumption_contract_for_dataset,
     )
 except ImportError:  # pragma: no cover - script execution fallback
+    from engine import dataset_microsimulation
     from reforms import (
         get_option10_conventional_dict,
         get_option10_reform,
@@ -1080,7 +1081,7 @@ def compute_scenario_household_metrics_aggregate_and_raw_h5(
     raw_h5_output_path: str | Path | None = None,
 ) -> tuple[ScenarioHouseholdMetrics, ScenarioAggregate, dict[str, Any] | None]:
     dataset = _normalize_dataset(dataset_name)
-    sim = Microsimulation(dataset=dataset, reform=reform)
+    sim = dataset_microsimulation(dataset, reform=reform)
 
     def log_step(message: str) -> None:
         if progress_label:
@@ -1839,7 +1840,7 @@ def save_reform_raw_h5_only(
         (baseline_reform, reform) if baseline_reform is not None else reform
     )
     dataset = _normalize_dataset(dataset_name)
-    sim = Microsimulation(dataset=dataset, reform=combined_reform)
+    sim = dataset_microsimulation(dataset, reform=combined_reform)
     materialized, skipped = _materialize_raw_h5_variables(
         sim,
         year=year,

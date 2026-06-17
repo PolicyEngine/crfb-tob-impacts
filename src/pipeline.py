@@ -1,4 +1,4 @@
-"""Year-dataset builder for the v2 baseline (see src/v2_projection.py).
+"""Year-dataset builder for the baseline (see src/projection.py).
 
 Stage flow per year:
 
@@ -28,7 +28,7 @@ import h5py
 import numpy as np
 import pandas as pd
 
-from src.v2_projection import (
+from src.projection import (
     aggregate_age_targets,
     build_age_bins,
     build_household_age_bin_matrix,
@@ -483,10 +483,11 @@ def household_structure(df: pd.DataFrame, year: int):
 def write_year_h5(df: pd.DataFrame, year: int, output_path: Path) -> None:
     """Materialize the input dataframe into a runnable PolicyEngine H5."""
     from policyengine_core.data.dataset import Dataset
-    from policyengine_us import Microsimulation
+
+    from src.engine import base_microsimulation
 
     dataset = Dataset.from_dataframe(df, year)
-    sim = Microsimulation()
+    sim = base_microsimulation()
     sim.dataset = dataset
     sim.build_from_dataset()
 
@@ -585,24 +586,19 @@ def _household_vectors(sim, year: int):
     }
 
 
-def _sim_from_frame(
-    df: pd.DataFrame, year: int, reform, scaffold_dataset: str | None = None
-):
+def _sim_from_frame(df: pd.DataFrame, year: int, reform):
     """In-memory simulation over the current frame (no file round-trip).
 
-    The constructor needs some dataset to scaffold entities before the
-    frame replaces it; ``scaffold_dataset`` (normally the build's base
-    dataset file) avoids resolving the HuggingFace default, which is both
-    slower and a network dependency.
+    The constructor needs a dataset to scaffold entities before the frame
+    replaces it; the certified populace base (via policyengine.py) supplies it
+    from the managed cache, with no bare-HuggingFace network dependency.
     """
     from policyengine_core.data.dataset import Dataset
-    from policyengine_us import Microsimulation
+
+    from src.engine import base_microsimulation
 
     dataset = Dataset.from_dataframe(df, year)
-    kwargs = {"dataset": scaffold_dataset} if scaffold_dataset else {}
-    if reform is not None:
-        kwargs["reform"] = reform
-    sim = Microsimulation(**kwargs)
+    sim = base_microsimulation(reform=reform)
     sim.dataset = dataset
     sim.build_from_dataset()
     return sim
@@ -617,7 +613,6 @@ def _solve_other_income_gamma(
     demographic_weights: np.ndarray,
     person_household_index: np.ndarray,
     tob_targets: dict[str, float],
-    scaffold_dataset: str | None = None,
 ) -> tuple[float, list[dict]]:
     """Scale beneficiary households' other income toward the Trustees
     taxation-of-benefits target.
@@ -636,7 +631,7 @@ def _solve_other_income_gamma(
         probe_df = df.copy()
         scaled = probe_df.loc[beneficiary_person_mask, other_income_columns] * gamma
         probe_df.loc[beneficiary_person_mask, other_income_columns] = scaled
-        sim = _sim_from_frame(probe_df, year, reform, scaffold_dataset)
+        sim = _sim_from_frame(probe_df, year, reform)
         vectors = _household_vectors(sim, year)
         del sim
         gc.collect()
@@ -747,7 +742,7 @@ def build_year(
     policyengine_us_version: str | None = None,
 ) -> dict:
     """Build one calibrated year dataset; returns the sentinel record."""
-    from policyengine_us import Microsimulation
+    from src.engine import base_microsimulation, dataset_microsimulation
 
     start_time = time.monotonic()
     output_dir = Path(output_dir)
@@ -763,8 +758,13 @@ def build_year(
     # ----- Stage A: materialize -----
     # The input frame must be extracted before any other calculation:
     # calculated caches would otherwise leak into the frame as stored
-    # outputs and shadow their formulas downstream.
-    sim = Microsimulation(dataset=base_dataset)
+    # outputs and shadow their formulas downstream. The certified populace base
+    # is the default; an explicit local base_dataset path (a candidate build not
+    # yet certified) is loaded as an unmanaged dataset, for sentinels.
+    if base_dataset and Path(str(base_dataset)).is_file():
+        sim = dataset_microsimulation(base_dataset)
+    else:
+        sim = base_microsimulation()
     df = materialize_year_frame(sim, year)
     enum_log = sanitize_enum_inputs(df, sim, year)
     for variable, count in enum_log.items():
@@ -882,7 +882,6 @@ def build_year(
         demographic_weights,
         person_household_index,
         tob_targets,
-        scaffold_dataset=base_dataset,
     )
     df.loc[beneficiary_person_mask, other_income_columns] = (
         df.loc[beneficiary_person_mask, other_income_columns] * gamma
@@ -899,7 +898,7 @@ def build_year(
     write_year_h5(df, year, output_path)
 
     # ----- Stage C2: artifact-true validation -----
-    sim2 = Microsimulation(dataset=str(output_path), reform=reform)
+    sim2 = dataset_microsimulation(str(output_path), reform=reform)
     vectors = _household_vectors(sim2, year)
     sim2_household_ids = np.asarray(
         sim2.calculate("household_id", period=year, map_to="household").values
@@ -1004,13 +1003,7 @@ def build_year(
             f"top-10 {audit['top_10_contribution_share_pct']:.0f}%"
         )
 
-    from src.v2_projection import CONTRIBUTOR_GATE_START_YEAR
-
-    gates = evaluate_publication_gates(
-        audit_d,
-        contributor_audits,
-        apply_contributor_gates=year >= CONTRIBUTOR_GATE_START_YEAR,
-    )
+    gates = evaluate_publication_gates(audit_d, contributor_audits)
     if not gates["passed"]:
         for failure in gates["failures"]:
             _log(f"    GATE FAILURE: {failure}")
@@ -1049,7 +1042,7 @@ def build_year(
 
     metadata = {
         "contract_version": 2,
-        "method": "v2-demographic-reweight-value-scaling",
+        "method": "demographic-reweight-value-scaling",
         "year": year,
         "base_dataset_path": base_dataset_label or str(base_dataset),
         "calibration_audit": {
@@ -1091,7 +1084,7 @@ def build_year(
             "beneficiary_person_rows": int(beneficiary_person_mask.sum()),
         },
         "profile": {
-            "name": "v2-demo-values",
+            "name": "demo-values",
             "description": (
                 "Light demographic entropy reweight to Trustees age "
                 "distribution, value rescaling to Trustees taxable payroll "

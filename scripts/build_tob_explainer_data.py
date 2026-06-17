@@ -131,7 +131,7 @@ def build_curves() -> list[dict]:
 def build_context(baseline_dir: Path) -> list[dict]:
     from policyengine_us import Microsimulation
 
-    from src.v2_pipeline import _tax_assumption_reform
+    from src.pipeline import _tax_assumption_reform
 
     records = []
     for year in CONTEXT_YEARS:

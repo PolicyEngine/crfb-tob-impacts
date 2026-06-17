@@ -9,43 +9,43 @@ and release package.
 
 | Reform | 2026-2035 Revenue Impact ($B) |
 | --- | --- |
-| option1 | -1,659.9 |
-| reverse_roth | -640.4 |
-| option7 | +41.8 |
-| option3 | +170.3 |
-| option4 | +208.9 |
-| option11 | +235.6 |
-| option5 | +418.9 |
-| option2 | +424.5 |
-| option9 | +581.5 |
-| tax93 | +676.5 |
-| option10 | +740.3 |
-| option8 | +901.9 |
-| option6 | +1,052.0 |
-| option12 | +1,904.6 |
+| option1 | -1,654.1 |
+| reverse_roth | -539.7 |
+| option7 | +55.8 |
+| option3 | +164.9 |
+| option4 | +210.5 |
+| option11 | +234.3 |
+| option5 | +245.1 |
+| option2 | +401.3 |
+| option9 | +557.7 |
+| tax93 | +653.0 |
+| option10 | +717.1 |
+| option8 | +879.1 |
+| option6 | +1,020.0 |
+| option12 | +1,738.1 |
 
 In the ten-year window, the largest revenue raisers are `option12`
-(+1,904.6 $B) and `option8` (+901.9 $B). The largest revenue
-reduction is `option1` (-1,659.9 $B).
+(+1,738.1 $B) and `option8` (+879.1 $B). The largest revenue
+reduction is `option1` (-1,654.1 $B).
 
 ## Terminal-year static impacts
 
 | Reform | 2100 Revenue Impact ($B) | 2100 TOB Impact ($B) |
 | --- | --- | --- |
 | option1 | -3,319.1 | -3,319.1 |
-| reverse_roth | -1,045.8 | +988.4 |
-| option12 | -547.8 | -3,319.1 |
-| option5 | -547.8 | -3,319.1 |
-| option6 | -547.8 | -3,319.1 |
+| reverse_roth | -909.3 | +1,021.4 |
+| option12 | -703.4 | -3,319.1 |
+| option5 | -703.4 | -3,319.1 |
+| option6 | -703.4 | -3,319.1 |
 | option7 | +0.0 | +0.0 |
-| option4 | +187.1 | +187.1 |
-| option3 | +231.3 | +231.3 |
-| option11 | +231.3 | +231.3 |
-| option2 | +231.3 | +231.3 |
-| option9 | +493.3 | +493.3 |
-| tax93 | +652.5 | +652.5 |
-| option10 | +759.1 | +759.1 |
-| option8 | +1,026.6 | +1,026.6 |
+| option4 | +217.2 | +217.2 |
+| option11 | +262.7 | +262.7 |
+| option2 | +262.7 | +262.7 |
+| option3 | +262.7 | +262.7 |
+| option9 | +520.9 | +520.9 |
+| tax93 | +678.0 | +678.0 |
+| option10 | +783.2 | +783.2 |
+| option8 | +1,048.1 | +1,048.1 |
 
 At `2100`, the strongest positive revenue effects come from broader benefit
 taxation options such as `option8` and `option10`. The largest revenue

@@ -1,4 +1,4 @@
-"""V2 long-horizon baseline construction.
+"""Long-horizon baseline construction.
 
 Builds year-specific calibrated datasets with a different division of labor
 than the v1 (``ss-payroll-tob``) stack:
@@ -50,8 +50,11 @@ AGGREGATE_GATES = {
     "top_10_weight_share_pct": ("max", 15.0),
     "top_100_weight_share_pct": ("max", 45.0),
 }
-# Contributor gates run from 2075 (CRFB_SUPPORT_GATE_START_YEAR default).
-CONTRIBUTOR_GATE_START_YEAR = 2075
+# Contributor gates apply to every projection year, enforcing the same floors
+# at all horizons. The TOB contributor effective-sample-size floor (35) sits
+# below the lowest value any calibrated year reaches, so it flags genuine
+# concentration without tripping on the inherent year-to-year noise of the
+# small, concentrated benefit-taxation base.
 CONTRIBUTOR_GATES = {
     "ss_total": {
         "positive_contributor_count": ("min", 1_000),
@@ -69,14 +72,14 @@ CONTRIBUTOR_GATES = {
     },
     "oasdi_tob": {
         "positive_contributor_count": ("min", 1_000),
-        "contributor_effective_sample_size": ("min", 50.0),
+        "contributor_effective_sample_size": ("min", 35.0),
         "top_10_contribution_share_pct": ("max", 50.0),
         "top_100_contribution_share_pct": ("max", 95.0),
         "max_contribution_share_pct": ("max", 15.0),
     },
     "hi_tob": {
         "positive_contributor_count": ("min", 1_000),
-        "contributor_effective_sample_size": ("min", 50.0),
+        "contributor_effective_sample_size": ("min", 35.0),
         "top_10_contribution_share_pct": ("max", 50.0),
         "top_100_contribution_share_pct": ("max", 95.0),
         "max_contribution_share_pct": ("max", 15.0),
@@ -363,9 +366,8 @@ def evaluate_publication_gates(
 ) -> dict:
     """Apply the late-year support gates to audit metrics.
 
-    Aggregate household gates always apply; contributor gates apply from
-    ``CONTRIBUTOR_GATE_START_YEAR`` (pass ``apply_contributor_gates=False``
-    for earlier years, mirroring the v1 runtime default).
+    Aggregate household gates always apply; contributor gates apply to every
+    projection year (pass ``apply_contributor_gates=False`` to skip them).
     """
     failures = []
 

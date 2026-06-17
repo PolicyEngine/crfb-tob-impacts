@@ -27,7 +27,17 @@ def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def load_static() -> pd.DataFrame:
-    df = pd.read_csv(FINAL_STATIC).sort_values(["year", "reform_name"]).reset_index(drop=True)
+    # New certified-base panel (dashboard results.csv is the canonical surface).
+    src = REPO / "dashboard" / "public" / "data" / "results.csv"
+    df = pd.read_csv(src)
+    df = df[df["scoring_type"] == "static"].copy()
+    # Provenance columns the rebuilt pipeline does not yet capture per cell
+    # (saved-microdata lineage is a cleanup item) — placeholders so number
+    # exhibits render and lineage exhibits degrade gracefully rather than crash.
+    for col in ("source", "scenario_h5_uri", "baseline_source"):
+        if col not in df.columns:
+            df[col] = ""
+    df = df.sort_values(["year", "reform_name"]).reset_index(drop=True)
     return df[df["reform_name"].isin(STANDARD_REFORMS)].copy()
 
 

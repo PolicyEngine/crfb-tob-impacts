@@ -6,7 +6,7 @@ validates against, recording per-year H5 and metadata-sidecar SHA-256
 hashes plus entity row counts read from each artifact.
 
 Usage:
-    uv run python scripts/build_v2_baseline_manifest.py \
+    uv run python scripts/build_baseline_manifest.py \
         --dataset-dir projected_datasets_v2 \
         --run-id crfb-longrun-v2-YYYYMMDD-<sha> \
         --created-at 2026-06-10T00:00:00Z \

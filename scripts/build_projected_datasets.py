@@ -1,9 +1,9 @@
-"""Build the v2 calibrated year datasets.
+"""Build the calibrated year datasets.
 
 Usage:
-    uv run python scripts/build_v2_projected_datasets.py \
+    uv run python scripts/build_projected_datasets.py \
         --years 2026,2030,2035-2100:5 \
-        --output-dir projected_datasets_v2
+        --output-dir projected_datasets
 
 Year specs accept comma-separated entries; each entry is a year, a range
 ``A-B``, or a stepped range ``A-B:STEP``.
@@ -21,11 +21,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-DEFAULT_BASE_REVISION = "21280dca5995e978d706740a8a4b9b7860cfd7b6"
-DEFAULT_BASE = (
-    "hf://policyengine/policyengine-us-data/enhanced_cps_2024.h5"
-    f"@{DEFAULT_BASE_REVISION}"
-)
+# The base is the certified populace dataset pinned by the policyengine.py
+# release manifest; build_year loads it through the managed path. The optional
+# --base-dataset flag only overrides the provenance label in the build manifest.
 
 
 def parse_years(spec: str) -> list[int]:
@@ -47,8 +45,8 @@ def parse_years(spec: str) -> list[int]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--years", default="2026,2030,2035-2100:5")
-    parser.add_argument("--output-dir", default="projected_datasets_v2")
-    parser.add_argument("--base-dataset", default=DEFAULT_BASE)
+    parser.add_argument("--output-dir", default="projected_datasets")
+    parser.add_argument("--base-dataset", default=None)
     parser.add_argument(
         "--keep-going",
         action="store_true",
@@ -56,7 +54,10 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    from src.v2_pipeline import build_year
+    from src.engine import certified_base_uri
+    from src.pipeline import build_year
+
+    base_dataset = args.base_dataset or certified_base_uri()
 
     try:
         from importlib.metadata import version
@@ -69,7 +70,7 @@ def main() -> int:
     output_dir = REPO_ROOT / args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"building {len(years)} years -> {output_dir}")
-    print(f"base dataset: {args.base_dataset}")
+    print(f"base dataset: {base_dataset}")
 
     sentinels: list[dict] = []
     failures: dict[int, str] = {}
@@ -77,9 +78,9 @@ def main() -> int:
         try:
             sentinel = build_year(
                 year,
-                args.base_dataset,
+                base_dataset,
                 output_dir,
-                base_dataset_label=args.base_dataset,
+                base_dataset_label=base_dataset,
                 policyengine_us_version=pe_us_version,
             )
             sentinels.append(sentinel)
@@ -93,7 +94,7 @@ def main() -> int:
         import pandas as pd
 
         table = pd.DataFrame(sentinels)
-        sentinel_path = output_dir / "v2_build_sentinels.csv"
+        sentinel_path = output_dir / "build_sentinels.csv"
         table.to_csv(sentinel_path, index=False)
         print(f"\nwrote {sentinel_path}")
         columns = [
@@ -110,7 +111,7 @@ def main() -> int:
         print(table[columns].to_string(index=False))
 
     manifest = {
-        "base_dataset": args.base_dataset,
+        "base_dataset": base_dataset,
         "years_requested": years,
         "years_built": [s["year"] for s in sentinels],
         "failures": failures,
@@ -124,7 +125,7 @@ def main() -> int:
             "sha256": hashlib.sha256(h5_path.read_bytes()).hexdigest(),
             "bytes": h5_path.stat().st_size,
         }
-    manifest_path = output_dir / "v2_build_manifest.json"
+    manifest_path = output_dir / "build_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"wrote {manifest_path}")
 

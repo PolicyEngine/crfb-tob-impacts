@@ -115,19 +115,21 @@ def test_option8_reform():
 
 def test_reverse_roth_reform():
     """Test the reverse-Roth Social Security proposal."""
-    reform = get_reverse_roth_reform()
-    assert reform is not None
-    params = reform.parameter_values
+    # A two-reform set: parameter reform + the OASDI-deduction variable reform.
+    param_reform, deduction_reform = get_reverse_roth_reform()
+    assert param_reform is not None and deduction_reform is not None
+    params = param_reform.parameter_values
     assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
     assert any("taxability.rate.additional" in str(k) for k in params.keys())
-    assert reform.name == "Reverse Roth Social Security proposal"
+    assert param_reform.name == "Reverse Roth Social Security proposal"
 
 
 def test_reverse_roth_conventional_reform_includes_elasticities():
-    """Test reverse-Roth behavioral scoring uses a custom Reform class."""
-    reform = get_reverse_roth_conventional_reform()
-    assert reform is not None
-    params = reform.parameter_values
+    """Reverse-Roth behavioral scoring: params + elasticities, then the
+    deduction variable, as a flat reform set (no nested from_dict)."""
+    param_reform, deduction_reform = get_reverse_roth_conventional_reform()
+    assert param_reform is not None and deduction_reform is not None
+    params = param_reform.parameter_values
     assert any("simulation.labor_supply_responses" in str(k) for k in params.keys())
     assert any("taxability.rate.additional" in str(k) for k in params.keys())
 

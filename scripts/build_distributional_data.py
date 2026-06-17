@@ -64,7 +64,7 @@ def baseline_households(year: int) -> pd.DataFrame:
     """Baseline household net income + weighted decile, by household_id."""
     from policyengine_us import Microsimulation
 
-    from src.v2_pipeline import _tax_assumption_reform
+    from src.pipeline import _tax_assumption_reform
 
     sim = Microsimulation(
         dataset=str(BASELINE_DIR / f"{year}.h5"),

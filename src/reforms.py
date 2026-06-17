@@ -416,16 +416,24 @@ def deduct_employee_social_security_payroll_tax(
             )
             return baseline_deductions + employee_social_security_tax
 
-    class reform(Reform):
+    class deduction_reform(Reform):
         country_id = "us"
 
         def apply(self):
-            parameter_reform.apply(self)
             self.update_variable(above_the_line_deductions)
 
-    reform.parameter_values = parameter_values
-    reform.name = name
-    return reform
+    parameter_reform.parameter_values = parameter_values
+    parameter_reform.name = name
+    deduction_reform.name = name
+
+    # Return a two-reform set (parameters, then the OASDI-deduction variable)
+    # rather than nesting parameter_reform.apply() inside a single custom
+    # reform. policyengine-us's labor-supply path re-applies reforms, and a
+    # from_dict reform nested inside another reform's apply() gets its parameter
+    # dict rebound to the class object, raising "type object 'reform' has no
+    # attribute 'items'". Applied as a flat set, each reform is simple and
+    # behavioral (conventional) scoring works.
+    return (parameter_reform, deduction_reform)
 
 
 # CBO labor supply elasticities (for conventional scoring)

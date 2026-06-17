@@ -140,11 +140,10 @@ def install_behavioral_baseline_tax_system(
             "reason": "simulation has no baseline branch",
         }
 
-    from policyengine_us import Microsimulation
-
-    baseline_system = Microsimulation.default_tax_benefit_system(
-        reform=baseline_reform
-    )
+    # Build the baseline model system from the running managed simulation's
+    # class (no separate policyengine_us construction), preserving the certified
+    # model<->data pairing the simulation was created with.
+    baseline_system = type(sim).default_tax_benefit_system(reform=baseline_reform)
     baseline_system.simulation = sim.baseline
     sim.baseline.tax_benefit_system = baseline_system
     sim.baseline.reform = baseline_reform
@@ -558,7 +557,9 @@ def _boto3_client(config: ObjectStoreConfig) -> Any:
     try:
         import boto3
     except ImportError as error:  # pragma: no cover - Modal image supplies boto3
-        raise RuntimeError("Full reform H5 object-store persistence requires boto3.") from error
+        raise RuntimeError(
+            "Full reform H5 object-store persistence requires boto3."
+        ) from error
 
     return boto3.client(
         "s3",
@@ -852,9 +853,13 @@ def run_reform_full_h5_cell(
             )
         load_expected_schema_manifest(expected_schema_manifest_path)
     elif guard_ledger:
-        raise RuntimeError("expected_schema_manifest_path is required for approved runs.")
+        raise RuntimeError(
+            "expected_schema_manifest_path is required for approved runs."
+        )
     if guard_ledger and baseline_dataset_manifest_path is None:
-        raise RuntimeError("baseline_dataset_manifest_path is required for approved runs.")
+        raise RuntimeError(
+            "baseline_dataset_manifest_path is required for approved runs."
+        )
     baseline_dataset_validation = None
     if baseline_dataset_manifest_path is not None:
         baseline_dataset_validation = validate_baseline_dataset_against_manifest(
@@ -873,7 +878,9 @@ def run_reform_full_h5_cell(
     )
     if launch_mode == "full":
         if not ledger_pip_freeze_sha:
-            raise RuntimeError("approved_pip_freeze_sha256 is required for full launch workers.")
+            raise RuntimeError(
+                "approved_pip_freeze_sha256 is required for full launch workers."
+            )
         expected_pip_freeze_sha256 = str(ledger_pip_freeze_sha)
     if (
         expected_pip_freeze_sha256
@@ -939,9 +946,9 @@ def run_reform_full_h5_cell(
         tax_contract = tax_assumption_contract_for_dataset(dataset_path, year)
     combined_reform = _compose_reforms(current_law_reform, policy_reform)
 
-    from policyengine_us import Microsimulation
+    from .engine import dataset_microsimulation
 
-    sim = Microsimulation(dataset=str(dataset_path), reform=combined_reform)
+    sim = dataset_microsimulation(dataset_path, reform=combined_reform)
     behavioral_baseline_installation = None
     if scoring_type == "behavioral":
         behavioral_baseline_installation = install_behavioral_baseline_tax_system(

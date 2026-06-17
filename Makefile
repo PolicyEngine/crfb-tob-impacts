@@ -1,6 +1,11 @@
-.PHONY: all install data dashboard dashboard-dev paper site test lint format clean help
+.PHONY: all install panel data dashboard dashboard-dev paper site test lint format clean help
 
 all: install dashboard paper
+
+panel:
+	@echo "Building full reform panel on Modal (resumable: builds missing"
+	@echo "baselines, self-pipelines reform scoring per year, assembles panel)..."
+	modal run --detach modal_batch/run_panel.py $(ARGS)
 
 install:
 	@echo "Installing Python package and dashboard dependencies..."
@@ -57,6 +62,7 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  install       - Install Python package and dashboard dependencies"
+	@echo "  panel         - Build full reform panel on Modal (resumable; ARGS='--years ... --reforms ...')"
 	@echo "  data          - Generate policy impact data"
 	@echo "  dashboard     - Build the Next dashboard"
 	@echo "  dashboard-dev - Run the Next dashboard locally"

@@ -2,10 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dashboard",
-      "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "dashboard",
+      "name": "crfb-dashboard",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd dashboard && bun run dev"],
       "port": 3000
     }
   ]

@@ -8,7 +8,7 @@ the dashboard can show how every baseline series evolves through 2100 and
 how far the free series sit from external references.
 
 Usage:
-    uv run python scripts/build_v2_baseline_diagnostics.py \
+    uv run python scripts/build_baseline_diagnostics.py \
         --dataset-dir projected_datasets_v2 \
         --output dashboard/public/data/v2_baseline_diagnostics.csv
 """
@@ -57,7 +57,7 @@ DOLLAR_AGGREGATES = (
 def year_aggregates(dataset_path: Path, year: int) -> dict:
     from policyengine_us import Microsimulation
 
-    from src.v2_pipeline import _tax_assumption_reform
+    from src.pipeline import _tax_assumption_reform
 
     reform = _tax_assumption_reform(year)
     sim = Microsimulation(dataset=str(dataset_path), reform=reform)

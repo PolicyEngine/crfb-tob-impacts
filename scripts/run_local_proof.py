@@ -1,4 +1,4 @@
-"""Run the free local full-H5 proof cell against a v2 baseline dataset.
+"""Run the free local full-H5 proof cell against a baseline dataset.
 
 This is the pre-sentinel step required by the reform-modeling Bible: it
 proves the worker payload on the new baselines without any paid Modal
@@ -6,7 +6,7 @@ call, then writes the pre-approved expected-schema manifest from the
 proof artifact.
 
 Usage:
-    uv run python scripts/run_v2_local_proof.py \
+    uv run python scripts/run_local_proof.py \
         --year 2026 --reform option1 \
         --dataset projected_datasets_v2/2026.h5 \
         --baseline-manifest docs/current/manifests/baseline-dataset-manifest-v2.json \
@@ -65,7 +65,7 @@ def main() -> int:
             h5_path=scenario_path,
             output_path=REPO_ROOT / args.schema_output,
             source=(
-                "v2 local proof "
+                "local proof "
                 f"{args.year}/{args.reform}/{args.scoring_type} on "
                 f"{args.dataset}"
             ),

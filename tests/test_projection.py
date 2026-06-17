@@ -1,11 +1,12 @@
-"""Tests for the v2 baseline projection pipeline (demographic reweight +
+"""Tests for the baseline projection pipeline (demographic reweight +
 value scaling + light final calibration)."""
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from src.v2_projection import (
+from src.projection import (
+    CONTRIBUTOR_GATES,
     build_household_age_bin_matrix,
     calibrate_entropy_constraints,
     entropy_weight_audit,
@@ -260,13 +261,88 @@ def test_publication_gates_fail_on_concentration():
     assert len(result["failures"]) >= 3
 
 
+def _healthy_aggregate_audit() -> dict:
+    return {
+        "positive_weight_count": 30_000,
+        "effective_sample_size": 5_000.0,
+        "top_10_weight_share_pct": 2.0,
+        "top_100_weight_share_pct": 10.0,
+    }
+
+
+def _hi_tob_contributor_audit(cess: float) -> dict:
+    # Healthy on every hi_tob contributor sub-gate except the effective sample
+    # size, the dimension under test.
+    return {
+        "hi_tob": {
+            "positive_contributor_count": 16_000,
+            "contributor_effective_sample_size": cess,
+            "top_10_contribution_share_pct": 25.0,
+            "top_100_contribution_share_pct": 60.0,
+            "max_contribution_share_pct": 5.0,
+        }
+    }
+
+
+def test_contributor_gates_apply_by_default():
+    # No late-year carve-out: contributor gates are enforced by default for
+    # every year, so a sub-threshold contributor audit is caught without any
+    # year-based opt-in (the inconsistency that let 2045 escape is gone).
+    result = evaluate_publication_gates(
+        _healthy_aggregate_audit(),
+        _hi_tob_contributor_audit(30.0),
+    )
+    assert result["passed"] is False
+    assert any(
+        "hi_tob" in failure and "contributor_effective_sample_size" in failure
+        for failure in result["failures"]
+    )
+
+
+def test_tob_contributor_floor_is_35():
+    # Both benefit-taxation contributor metrics share the lowered floor.
+    assert CONTRIBUTOR_GATES["hi_tob"]["contributor_effective_sample_size"] == (
+        "min",
+        35.0,
+    )
+    assert CONTRIBUTOR_GATES["oasdi_tob"]["contributor_effective_sample_size"] == (
+        "min",
+        35.0,
+    )
+
+
+def test_hi_tob_contributor_passes_in_35_to_50_band():
+    # The far-horizon hi_tob effective sample size of 46.7 (the 2090 case) sits
+    # in the noisy 35-50 band and must pass the lowered floor.
+    result = evaluate_publication_gates(
+        _healthy_aggregate_audit(),
+        _hi_tob_contributor_audit(46.7),
+        apply_contributor_gates=True,
+    )
+    assert result["passed"] is True, result["failures"]
+
+
+def test_hi_tob_contributor_still_fails_below_35():
+    # Genuine concentration below the floor still fails.
+    result = evaluate_publication_gates(
+        _healthy_aggregate_audit(),
+        _hi_tob_contributor_audit(30.0),
+        apply_contributor_gates=True,
+    )
+    assert result["passed"] is False
+    assert any(
+        "hi_tob" in failure and "contributor_effective_sample_size" in failure
+        for failure in result["failures"]
+    )
+
+
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 
 
 def test_repair_zeroes_corrupt_miscellaneous_income():
 
-    from src.v2_pipeline import repair_corrupt_inputs
+    from src.pipeline import repair_corrupt_inputs
 
     year = 2026
     df = pd.DataFrame(
@@ -289,8 +365,8 @@ def test_growth_cap_call_site_present():
     # every build at metadata assembly.
     import inspect
 
-    from src import v2_pipeline
+    from src import pipeline
 
-    source = inspect.getsource(v2_pipeline.build_year)
+    source = inspect.getsource(pipeline.build_year)
     assert "cap_longrun_income_growth(df, sim, year)" in source
-    assert '"longrun_growth_caps": growth_caps' in inspect.getsource(v2_pipeline)
+    assert '"longrun_growth_caps": growth_caps' in inspect.getsource(pipeline)
