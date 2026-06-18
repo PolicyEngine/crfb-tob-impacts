@@ -96,7 +96,7 @@ For the labor-supply response release, the intended differences from plain upstr
 
 Labor-supply response scoring should therefore be interpreted as a
 partial-equilibrium estimate under PolicyEngine's elasticity assumptions, not
-as a separate legacy workflow or as an exact replica of JCT/CBO conventional
+as a separate legacy workflow or as an exact replica of JCT/CBO scorekeeping
 practice.
 
 Operationally:

@@ -114,7 +114,7 @@ def test_save_complete_microsimulation_h5_writes_entity_tables(tmp_path: Path):
     assert manifest["entities"]["household"]["required_weight_column_present"] is True
 
 
-def test_behavioral_scoring_uses_behavioral_reform_alias(monkeypatch):
+def test_behavioral_scoring_uses_behavioral_reform(monkeypatch):
     marker = object()
 
     monkeypatch.setattr(
@@ -144,14 +144,24 @@ def test_behavioral_scoring_accepts_custom_reform(monkeypatch):
 def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     baseline_reform = object()
     baseline_system = SimpleNamespace(simulation=None)
-    sim = SimpleNamespace(baseline=SimpleNamespace())
+    fallback_system = SimpleNamespace(simulation=None)
 
     monkeypatch.setattr(
         "policyengine_us.Microsimulation.default_tax_benefit_system",
         staticmethod(
-            lambda reform: baseline_system if reform is baseline_reform else None
+            lambda reform: fallback_system if reform is baseline_reform else None
         ),
     )
+
+    class _ManagedSimulation:
+        def __init__(self):
+            self.baseline = SimpleNamespace()
+
+        @staticmethod
+        def default_tax_benefit_system(*, reform):
+            return baseline_system if reform is baseline_reform else None
+
+    sim = _ManagedSimulation()
 
     result = install_behavioral_baseline_tax_system(
         sim,
@@ -160,6 +170,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
 
     assert result["installed"] is True
     assert sim.baseline.tax_benefit_system is baseline_system
+    assert sim.baseline.tax_benefit_system is not fallback_system
     assert baseline_system.simulation is sim.baseline
     assert sim.baseline.reform is baseline_reform
 

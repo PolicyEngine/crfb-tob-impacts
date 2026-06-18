@@ -23,9 +23,8 @@ uv venv --python 3.13
 source .venv/bin/activate
 uv pip install -e .
 
-# Build reform data on Modal, then assemble locally (see `make data`)
-make panel
-python scripts/assemble_reform_panel.py
+# Aggregate previously approved full-H5 artifacts, then rebuild dashboard data
+python scripts/aggregate_reform_full_h5_results.py
 python scripts/build_dashboard_results.py
 
 # Run Next dashboard
@@ -34,9 +33,10 @@ cd dashboard && bun install && bun run dev
 
 ## Canonical Reform Pipeline
 
-The active CRFB reform-modeling path is `modal_batch/run_panel.py`, with
-separate local assembly scripts. These constraints are part of the production
-contract:
+The active CRFB reform-modeling path is
+`modal_batch/reform_full_h5.py::submit_reform_full_h5`. Every paid production
+cell must persist a full reform-output H5 plus metadata before any aggregate
+table is accepted. These constraints are part of the production contract:
 
 - Static scoring covers the full selected-cells panel: annual 2026-2035, every
   five years from 2040-2100, and the option12 transition junctures.
@@ -49,8 +49,8 @@ contract:
 - Long Modal baseline/scoring cells are nonpreemptible, because preemption lost
   prior far-horizon work before it could commit.
 - The public result surface is `results.csv` plus
-  `dashboard/public/data/results.csv`; raw Modal cell CSVs live under
-  `results/modal_runs_production/`.
+  `dashboard/public/data/results.csv`; those CSVs are derived from the durable
+  full-H5 cells, not treated as source artifacts.
 
 ## Project Structure
 

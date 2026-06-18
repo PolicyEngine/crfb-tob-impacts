@@ -3,10 +3,7 @@ from pathlib import Path
 import h5py
 import json
 import numpy as np
-import pandas as pd
 import pytest
-from policyengine_core.periods import period
-from policyengine_core.periods.config import ETERNITY
 
 from src.year_runner import (
     BaselineResult,
@@ -18,7 +15,6 @@ from src.year_runner import (
     load_baseline,
     load_baseline_from_metrics,
     load_scenario_household_metrics,
-    save_microsimulation_raw_h5,
     save_scenario_household_metrics,
     scenario_aggregate_from_dict,
     scenario_aggregate_to_dict,
@@ -65,45 +61,6 @@ def test_save_scenario_household_metrics_round_trips_npz(tmp_path: Path):
     np.testing.assert_array_equal(loaded.tob_medicare_hi, np.array([1.0]))
     np.testing.assert_array_equal(loaded.tob_oasdi, np.array([2.0]))
     np.testing.assert_array_equal(loaded.household_weight, np.array([1.0]))
-
-
-def test_save_microsimulation_raw_h5_writes_entity_tables(tmp_path: Path):
-    year_period = period("2040")
-    other_period = period("2041")
-    eternity_period = period(ETERNITY)
-    simulation = _FakeSimulation(
-        {
-            "person_id": _FakeHolder({("default", eternity_period): np.array([1, 2])}),
-            "person_household_id": _FakeHolder(
-                {("default", eternity_period): np.array([1, 1])}
-            ),
-            "household_id": _FakeHolder({("default", eternity_period): np.array([1])}),
-            "household_weight": _FakeHolder(
-                {("default", year_period): np.array([100.0])}
-            ),
-            "income_tax": _FakeHolder({("default", year_period): np.array([250.0])}),
-            "wrong_period": _FakeHolder({("default", other_period): np.array([999.0])}),
-        }
-    )
-    output_path = tmp_path / "raw" / "scenario.h5"
-
-    metadata = save_microsimulation_raw_h5(
-        simulation,
-        output_path,
-        year=2040,
-    )
-
-    assert metadata["artifact_type"] == ("policyengine_us_entity_table_raw_scenario_h5")
-    assert metadata["variable_count"] == 5
-    with pd.HDFStore(output_path, mode="r") as store:
-        person = store["person"]
-        household = store["household"]
-        tax_unit = store["tax_unit"]
-    assert list(person.columns) == ["person_household_id", "person_id"]
-    assert list(household.columns) == ["household_id", "household_weight"]
-    assert list(tax_unit.columns) == ["income_tax"]
-    assert "wrong_period" not in household.columns
-    np.testing.assert_array_equal(tax_unit["income_tax"].to_numpy(), np.array([250.0]))
 
 
 def test_scenario_aggregate_json_round_trip():
@@ -199,63 +156,6 @@ def _single_household_aggregate(revenue: float = 10.0) -> ScenarioAggregate:
         employer_ss_tax_revenue=3.0,
         employer_medicare_tax_revenue=4.0,
     )
-
-
-class _FakeEntity:
-    def __init__(self, key: str):
-        self.key = key
-
-
-class _FakeVariable:
-    def __init__(self, entity_key: str):
-        self.entity = _FakeEntity(entity_key)
-
-
-class _FakePopulation:
-    def __init__(self, entity_key: str, count: int):
-        self.entity = _FakeEntity(entity_key)
-        self.count = count
-
-
-class _FakeHolder:
-    def __init__(self, arrays):
-        self.arrays = arrays
-
-    def get_known_branch_periods(self):
-        return list(self.arrays)
-
-    def get_array(self, known_period, branch_name="default"):
-        return self.arrays[(branch_name, known_period)]
-
-
-class _FakeTaxBenefitSystem:
-    def __init__(self, variable_entities: dict[str, str]):
-        self.variables = {
-            name: _FakeVariable(entity_key)
-            for name, entity_key in variable_entities.items()
-        }
-
-
-class _FakeSimulation:
-    def __init__(self, holders: dict[str, _FakeHolder]):
-        variable_entities = {
-            "person_id": "person",
-            "person_household_id": "person",
-            "household_id": "household",
-            "household_weight": "household",
-            "income_tax": "tax_unit",
-            "wrong_period": "household",
-        }
-        self.tax_benefit_system = _FakeTaxBenefitSystem(variable_entities)
-        self.holders = holders
-        self.populations = {
-            "person": _FakePopulation("person", 2),
-            "household": _FakePopulation("household", 1),
-            "tax_unit": _FakePopulation("tax_unit", 1),
-        }
-
-    def get_holder(self, variable_name: str):
-        return self.holders[variable_name]
 
 
 def test__given_active_tax_assumption_metadata__then_load_baseline_applies_matching_reform(

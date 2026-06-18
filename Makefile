@@ -3,9 +3,9 @@
 all: install dashboard paper
 
 panel:
-	@echo "Building full reform panel on Modal (resumable: builds missing"
-	@echo "baselines, self-pipelines reform scoring per year, assembles panel)..."
-	modal run --detach modal_batch/run_panel.py $(ARGS)
+	@echo "The old aggregate-only panel launcher is archived and fail-closed."
+	@echo "Use modal_batch/reform_full_h5.py::submit_reform_full_h5 after ledger approval."
+	@exit 1
 
 install:
 	@echo "Installing Python package and dashboard dependencies..."
@@ -15,10 +15,8 @@ install:
 	cd dashboard && bun install
 
 data:
-	@echo "Reform data is produced by the Modal pipeline, not a single script:"
-	@echo "  1. make panel   (build baselines + score reforms on Modal)"
-	@echo "  2. python scripts/publish_dashboard_results.py (root + dashboard results.csv)"
-	@echo "See modal_batch/run_panel.py for the full flow."
+	@echo "Reform data is produced from durable reform_full_h5 artifacts."
+	@echo "Use scripts/aggregate_reform_full_h5_results.py only after full-H5 cells exist."
 
 dashboard:
 	@echo "Building Next dashboard..."
@@ -64,8 +62,8 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  install       - Install Python package and dashboard dependencies"
-	@echo "  panel         - Build full reform panel on Modal (resumable; ARGS='--years ... --reforms ...')"
-	@echo "  data          - Generate policy impact data"
+	@echo "  panel         - Archived fail-closed legacy aggregate launcher"
+	@echo "  data          - Explain current full-H5 data assembly"
 	@echo "  dashboard     - Build the Next dashboard"
 	@echo "  dashboard-dev - Run the Next dashboard locally"
 	@echo "  paper         - Render the Quarto paper HTML"

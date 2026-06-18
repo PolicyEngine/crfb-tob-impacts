@@ -39,47 +39,82 @@ Marc's words -> option ids: "Phased Roth" = **option12**, "repeal" = **option1**
 ## [B1] Build EVERY sim with the Trustees current-law reform stacked
 The new certified base stores INPUT data only; the Trustees long-run tax assumption is applied
 at calibration time, not baked into the H5. Both new-base scoring paths stack it explicitly:
-`modal_batch/decomposition.py` (~line 91) and `modal_batch/run_panel.py` (~line 275) use
+`src.reform_full_h5_worker.materialize_tob_revenue_pair` uses
 `current_law = _tax_assumption_reform(year)` (returns **None before 2035**;
 `TAX_ASSUMPTION_START_YEAR = 2035` in src/pipeline.py).
-- The old `batch/run_option13_modal.py` builds `Microsimulation(dataset=...)` with NO reform
-  (~line 535). **Do not copy that.** On the new base it yields literal current-law SS
+- Historical option13 scripts built `Microsimulation(dataset=...)` with NO reform.
+  **Do not copy that.** On the new base it yields literal current-law SS
   thresholds, not the Trustees wage-indexed path the base was calibrated against, so every gap,
   TOB, multiplier, and rate would be silently wrong while still "closing to ~0".
 - REQUIRED: build the baseline as
   `dataset_microsimulation({year}.h5, reform=_tax_assumption_reform(year))`
   and stack everything else on top of that current-law reform.
 
-## [B2] Gap-closing as a hand-built two-sim delta (the benefit cut is a set_input)
-The old Stage-1 benefit cut is NOT a parameter reform — it is
-`sim.set_input("social_security", year, reduced_values)` after construction
-(run_option13_modal.py ~625-629, 761-766). The Stage-2 rate increase IS a parameter reform
-(OASDI + HI payroll rates). So the solvent baseline = current-law reform + rate reform +
-set_input benefit cut. The cut **cannot** be a tuple component; the spec's old
-`income_tax((solvent, reform))` one-liner is wrong. Construct explicitly:
+## [B2] Gap-closing as a hand-built sim sequence (the benefit cut is a set_input)
+The Stage-1 benefit cut is NOT a parameter reform. It is
+`sim.set_input("social_security", year, reduced_values)` after construction.
+The Stage-2 rate increase IS a parameter reform (OASDI + HI payroll rates).
+So the solvent baseline = current-law reform + rate reform + set_input benefit
+cut. The cut **cannot** be a tuple component; the spec's old
+`income_tax((solvent, reform))` one-liner is wrong.
+
+The exact mechanics are inlined here. Do not depend on any archived Option
+13/14 runner; those entry points are fail-closed and not part of the current
+pipeline.
 
 1. `base = dataset_microsimulation({year}.h5, reform=_tax_assumption_reform(year))`.
 2. From `base`, read `ss = base.calculate("social_security", year)` and compute the gaps
    (direct `.calculate(...).sum()` on `base` — these variables self-branch natively, so do NOT
    wrap them in materialize_tob_revenue_pair for the GAP math):
-   - SS gap = (employee_ss_tax + employer_ss_tax + tob_revenue_oasdi) - ss_benefits
-   - HI gap = (employee_hi_tax + employer_hi_tax + tob_revenue_medicare_hi) - medicare_expenditures
-3. Derive, ONCE per year (port the exact 50/50 mechanics from run_option13_modal.py
-   compute_option13_and_14_year): the benefit `multiplier`, `reduced_ss = ss * multiplier`, and
-   the OASDI + HI rate increases (the `rate_reform` dict). Hold `reduced_ss` and `rate_reform`
-   fixed for the whole year.
-4. Define one helper used for ALL sims:
+   - SS income = employee_social_security_tax + employer_social_security_tax
+     + self_employment_social_security_tax + tob_revenue_oasdi
+   - SS gap = SS income - ss_benefits
+   - HI income = employee_medicare_tax + employer_medicare_tax
+     + self_employment_medicare_tax + additional_medicare_tax
+     + tob_revenue_medicare_hi
+   - HI gap = HI income - medicare_expenditures
+3. Derive the benefit cut ONCE per year:
+   - `ss_benefits = ss.sum()`
+   - `ss_values = np.asarray(ss.values)`
+   - `ss_shortfall = abs(min(ss_gap, 0))`
+   - `benefit_cut = ss_shortfall * 0.5`
+   - `benefit_multiplier = 1 - benefit_cut / ss_benefits`
+   - `reduced_ss = ss_values * benefit_multiplier`
+4. Build a Stage-1 sim with the Trustees current-law reform and the benefit cut
+   only. This is a separate heavy sim whose only purpose is to measure gaps after
+   benefit cuts and TOB feedback:
+   ```
+   stage1 = dataset_microsimulation(
+       {year}.h5,
+       reform=_tax_assumption_reform(year),
+       start_instant=f"{year}-01-01",
+   )
+   stage1.set_input("social_security", year, reduced_ss)
+   ```
+   Then recompute the same SS/HI income formulas from Stage 1 and define:
+   - `remaining_ss_gap = stage1_ss_income - stage1_social_security`
+   - `remaining_hi_gap = stage1_hi_income - medicare_expenditures`
+5. Build the Stage-2 rate reform from the remaining gaps:
+   - OASDI taxable payroll = `taxable_earnings_for_social_security`
+   - HI taxable payroll = `payroll_tax_gross_wages`
+   - If `remaining_ss_gap < 0`, `ss_rate_increase = abs(remaining_ss_gap) / oasdi_taxable_payroll`; otherwise 0.
+   - If `remaining_hi_gap < 0`, `hi_rate_increase = abs(remaining_hi_gap) / hi_taxable_payroll`; otherwise `-remaining_hi_gap / hi_taxable_payroll`.
+   - New employee/employer rates = current rates + half the corresponding rate increase.
+   - Convert the rate dict with `Reform.from_dict(..., country_id="us")`; do not put a raw dict inside a reform tuple.
+6. Define one helper used for ALL solvent sims:
    ```
    def solvent_sim(year, extra_reform=None):
-       reforms = [_tax_assumption_reform(year), rate_reform]
+       reforms = [_tax_assumption_reform(year), rate_reform_object]
        if extra_reform is not None: reforms.append(extra_reform)
-       sim = dataset_microsimulation({year}.h5, reform=tuple(r for r in reforms if r))
+       sim = dataset_microsimulation(
+           {year}.h5,
+           reform=tuple(r for r in reforms if r),
+           start_instant=f"{year}-01-01",
+       )
        sim.set_input("social_security", year, reduced_ss)   # SAME reduced_ss for every sim
        return sim
    ```
-   (Confirm on year 2035 whether `start_instant` is needed for set_input to align arrays on the
-   new base; the old script passed `start_instant=f"{year}-01-01"`.)
-5. Solvent baseline income tax = `income_tax(solvent_sim(year))`; for each reform,
+7. Solvent baseline income tax = `income_tax(solvent_sim(year))`; for each reform,
    delta = `income_tax(solvent_sim(year, reform)) - income_tax(solvent_sim(year))`.
    reduced_ss is computed from the BASELINE social_security and reused in both sims — never
    recompute it per-sim (the reform must not perturb the benefit base).
@@ -92,10 +127,11 @@ results.csv current-law 2035 baseline (within ~0.1%). If they don't match, STOP:
 stack/base is wrong. Do this as part of the 2035-only gate (below).
 
 ## [B3] HI expenditure vintage — DECISION REQUIRED before fan-out
-`get_hi_data` reads `data/hi_expenditures_tr2025.csv` (run_option13_modal.py ~266), but the new
-base is calibrated to **TR2026** (src/projection.py 16-19, 42-44; `social_security_aux_tr2026.csv`
-carries hi_tob_* but NOT HI cost/expenditures). Subtracting TR2025 Medicare expenditures from a
-TR2026 SS base is a silent vintage mix on the single most important HI input.
+Historical option13 code read `data/hi_expenditures_tr2025.csv`, but the new
+base is calibrated to **TR2026** (src/projection.py 16-19, 42-44;
+`social_security_aux_tr2026.csv` carries hi_tob_* but NOT HI cost/expenditures).
+Subtracting TR2025 Medicare expenditures from a TR2026 SS base is a silent
+vintage mix on the single most important HI input.
 - PREFERRED: source the 2026 Medicare Trustees HI cost series -> add
   `data/hi_expenditures_tr2026.csv`, update `get_hi_data`. Cite the TR2026 table.
 - FALLBACK (only if TR2026 HI costs are not readily available): keep TR2025 and record in the
@@ -113,12 +149,12 @@ TR2026 SS base is a silent vintage mix on the single most important HI input.
 - Years: **2035, 2040, ..., 2100 (14 years)** — a subset of the 27 `default_selected_years()`
   (NOT "16"). The gap exists only 2035+ (pre-2035 `_tax_assumption_reform` is None -> no gap ->
   no solvency row; the dashboard simply shows no solvency data before 2035).
-- BEFORE fan-out: survey `crfb-baseline-builds` (reuse run_panel.survey) and assert each of the
+- BEFORE fan-out: survey `crfb-baseline-builds` and assert each of the
   14 years has `{year}.h5` + `.sentinel.json`; fail loudly if any is missing (don't pay for a
   container that will FileNotFoundError).
 - Modal function: cpu=4, **memory>=65536**, **timeout=10800-21600 (3-6h)**,
   **nonpreemptible=True**, retries=2. Detached. (The old script used memory=65536,
-  timeout=21600 — these cells are heavy; do not inherit decomposition.py's short-cell assumption.)
+  timeout=21600 — these cells are heavy; do not inherit old short-cell assumptions.)
 - Solvent-state handoff: the solvent baseline is a DERIVED scenario (current-law H5 + rate
   reform + set_input cut), not a storable input dataset — so each reform cell RE-DERIVES the
   solvent state via `solvent_sim` from `{year}.h5`. Persist the per-year solvent params
@@ -126,13 +162,15 @@ TR2026 SS base is a silent vintage mix on the single most important HI input.
   years and the output CSV can report them (matching the old `balanced_fix_baseline.csv` schema).
 
 ## Cost — estimate in SIMS, not cells; hard 2035-only gate
-Each year needs: 1 current-law base sim + (for the solvent baseline + each of 4 reforms) a
-`solvent_sim`, i.e. ~1 + 5 = ~6 heavy sims/year, each triggering native double-branch TOB
-formulas (~10-15 min). 14 years -> ~84 heavy sims, realistically **$150-400** (the old
-"$50-150 / 70-80 cells" was undercounted). PRINT the explicit sim count and confirm before
-fan-out. **Run year 2035 ONLY first**: verify (a) both gaps close to ~0 after the fix, and
-(b) the [B2] cross-check passes (2035 base matches the live panel). Only then fan out 2040-2100.
-Static only (no behavioral) unless the user asks.
+Each year needs: 1 current-law base sim + 1 Stage-1 benefit-cut sim + (for
+the solvent baseline + each of 4 reforms) 5 `solvent_sim`s, i.e. **7 heavy
+sims/year**, each triggering native double-branch TOB formulas (~10-15 min).
+14 years -> **98 heavy sims**, realistically **$150-400** (the old "$50-150 /
+70-80 cells" was undercounted). PRINT the explicit sim count and confirm before
+fan-out. **Run year 2035 ONLY first**: verify (a) both gaps close to ~0 after
+the fix, and (b) the [B2] cross-check passes (2035 base matches the live
+panel). Only then fan out 2040-2100. Static only (no behavioral) unless the
+user asks.
 
 ## Dashboard surface restore (per-file git provenance — they differ)
 - `balanced-fix-section.tsx`, `balanced-fix-data.ts`: restore from **`ceea4a2~1`** (newer,
@@ -157,6 +195,6 @@ Static only (no behavioral) unless the user asks.
 
 ## Constraints
 - Reuse existing functions (dataset_microsimulation, _tax_assumption_reform,
-  materialize_tob_revenue_pair, the run_option13_modal 50/50 mechanics) — the rebuild's costly
-  mistakes came from reinventing.
+  materialize_tob_revenue_pair) and the self-contained 50/50 mechanics above —
+  the rebuild's costly mistakes came from reinventing.
 - Commit in logical chunks; do not push (user controls push).

@@ -128,7 +128,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--years",
         help=(
-            "Optional year range/list using the same syntax as modal-refresh. "
+            "Optional year range/list using selected-cell syntax. "
             "Defaults to annual 2026-2035, every five years 2040-2100, "
             "and 2048,2049,2062,2063 junctures."
         ),

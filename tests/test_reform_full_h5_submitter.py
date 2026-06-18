@@ -41,6 +41,7 @@ def test_full_h5_modal_submitter_is_guarded_and_not_legacy_aggregate_path():
         "DEFAULT_R2_MODAL_SECRET_NAME",
         "modal_batch/reform_full_h5.py",
         "uv.lock",
+        'nonpreemptible=_env_bool("CRFB_REFORM_FULL_H5_MODAL_NONPREEMPTIBLE", True)',
     ]
     for text in required:
         assert text in source

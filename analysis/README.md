@@ -1,28 +1,14 @@
-# Analysis Notebooks
+# Analysis Notes
 
-This folder contains notebooks used to **generate data files** for the project. These notebooks are not part of the public dashboard or Quarto paper build and are not executed during CI because of their long execution times.
+This folder contains historical analysis notes and execution specs. It is **not**
+the source of the public dashboard data.
 
-## Notebooks
+The current CRFB result pipeline is the canonical full-H5 pipeline documented in
+the repo root README and `docs/current/REFORM_MODELING_BIBLE.md`:
 
-### `policy-impacts-dynamic.ipynb`
-Generates policy impact estimates using three scoring methodologies:
-- **Static**: No behavioral responses (2026-2035, 10 years)
-- **Dynamic**: With CBO labor supply elasticities, uniform by age (2026 only, ~2 hours)
-- **Dynamic with Age Multipliers**: Age-heterogeneous elasticities (2x for 65+, 2026 only, ~2 hours)
+- Static scoring uses the full selected-cell panel.
+- Behavioral scoring uses 2026/2100 full-H5 endpoints, with downstream
+  multiplier interpolation.
+- Dashboard/public data are generated from the canonical `results.csv` surface.
 
-**Execution time**: 4-6 hours total for all calculations.
-
-**Output files** (saved to `data/`):
-- `policy_impacts_static.csv`
-- `policy_impacts_dynamic.csv`
-- `policy_impacts_dynamic_multiplier.csv`
-- `policy_impacts_comparison.csv`
-- `policy_impacts_summary.csv`
-
-**How to run**:
-```bash
-cd analysis
-jupyter nbconvert --to notebook --execute --inplace policy-impacts-dynamic.ipynb
-```
-
-**Note**: These data files are committed to the repo, so you don't need to regenerate them unless reforms or parameters change.
+Do not regenerate or publish data from old notebooks or ad hoc CSV exports.

@@ -567,7 +567,7 @@ def _compute_reform_full_h5_payload(payload: dict[str, Any]) -> dict[str, Any]:
     timeout=int(os.environ.get("CRFB_REFORM_FULL_H5_MODAL_TIMEOUT_SECONDS", "21600")),
     volumes=function_volumes,
     secrets=modal_secrets,
-    nonpreemptible=_env_bool("CRFB_REFORM_FULL_H5_MODAL_NONPREEMPTIBLE", False),
+    nonpreemptible=_env_bool("CRFB_REFORM_FULL_H5_MODAL_NONPREEMPTIBLE", True),
 )
 def compute_reform_full_h5_cell_remote(payload: dict[str, Any]) -> dict[str, Any]:
     return _compute_reform_full_h5_payload(payload)
@@ -580,7 +580,7 @@ def compute_reform_full_h5_cell_remote(payload: dict[str, Any]) -> dict[str, Any
     timeout=int(os.environ.get("CRFB_REFORM_FULL_H5_MODAL_TIMEOUT_SECONDS", "21600")),
     volumes=function_volumes,
     secrets=modal_secrets,
-    nonpreemptible=_env_bool("CRFB_REFORM_FULL_H5_MODAL_NONPREEMPTIBLE", False),
+    nonpreemptible=_env_bool("CRFB_REFORM_FULL_H5_MODAL_NONPREEMPTIBLE", True),
 )
 def compute_reform_full_h5_cell_from_json(payload_json: str) -> str:
     result = _compute_reform_full_h5_payload(json.loads(payload_json))

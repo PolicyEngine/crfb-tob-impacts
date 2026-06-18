@@ -911,15 +911,22 @@ def get_reverse_roth_behavioral_reform():
 #
 #   1. Running a baseline simulation to calculate actual SS/HI gaps each year
 #   2. Computing tax rate increases from real gaps
-#   3. Applying benefit cuts via set_input() with TOB feedback adjustment
+#   3. Applying benefit cuts via set_input(), then measuring remaining gaps
+#      after TOB feedback in a separate Stage-1 sim
 #
-# The correct implementation is in: batch/run_option13_modal.py
+# The current self-contained implementation spec is:
+# analysis/balanced_fix_recompute_spec.md. The old Option 13/14 runner is
+# archived fail-closed and must not be used for current results.
 #
 # Gap Closing Formula (per year):
-#   - SS Gap = (employee_ss_tax + employer_ss_tax + tob_oasdi) - ss_benefits
-#   - HI Gap = (employee_hi_tax + employer_hi_tax + tob_hi) - medicare_expenditures
-#   - 50% closed via payroll tax increases (split employee/employer)
-#   - 50% closed via SS benefit cuts (with TOB feedback: cut / (1 - 0.175))
+#   - SS income = employee_social_security_tax + employer_social_security_tax
+#       + self_employment_social_security_tax + tob_revenue_oasdi
+#   - HI income = employee_medicare_tax + employer_medicare_tax
+#       + self_employment_medicare_tax + additional_medicare_tax
+#       + tob_revenue_medicare_hi
+#   - 50% of the initial SS shortfall is closed via benefit cuts.
+#   - Remaining Stage-1 SS/HI gaps are closed via employee/employer payroll
+#     rate changes.
 #
 # To run publishable Modal jobs, use the package CLI so runtime contracts are checked.
 # =============================================================================
@@ -1070,7 +1077,7 @@ def get_reverse_roth_reform():
 
 # NOTE: get_option13_reform() and get_balanced_fix_reform() have been removed.
 # See comment block above for why Option 13 cannot be implemented here.
-# Use batch/run_option13_modal.py instead.
+# Use analysis/balanced_fix_recompute_spec.md for the current implementation spec.
 
 
 # Dictionary mapping reform IDs to configurations
@@ -1131,5 +1138,6 @@ REFORMS = {
         "name": "Taxation of 93% of Social Security Benefits",
         "func": get_tax93_reform,
     },
-    # NOTE: option13 and balanced_fix removed - use batch/run_option13_modal.py
+    # NOTE: option13 and balanced_fix removed; see
+    # analysis/balanced_fix_recompute_spec.md.
 }

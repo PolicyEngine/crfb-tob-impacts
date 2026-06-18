@@ -27,7 +27,7 @@ export const reproducibilityRoadmap = {
   currentNotes: [
     "Options 1-12 have 276/276 exact full reform H5 cells in R2 for 2026-2035 and every fifth year from 2040-2100.",
     "The current production run is reproducible from recorded SHAs, manifests, R2 URIs, and worker metadata, but it is not yet exposed through a policyengine.py bundle.",
-    "Reform workers produce raw reform H5s plus metadata. Aggregate review is a separate MicroSeries/MicroDF-only step.",
+    "Reform workers produce full reform H5s plus metadata. Aggregate review is a separate MicroSeries/MicroDF-only step.",
   ],
   flow: [
     "Published stack",
@@ -56,8 +56,8 @@ export const reproducibilityRoadmap = {
       target: "results/production_logs/policyengine_py_bundle_verification.json",
     },
     {
-      label: "Reform raw H5 metadata",
-      target: "reform_raw_h5/year=YYYY/reform=OPTION/metadata.json",
+      label: "Reform full-H5 metadata",
+      target: "reform_full_h5/year=YYYY/reform=OPTION/metadata.json",
     },
   ],
   steps: [
@@ -141,10 +141,10 @@ export const reproducibilityRoadmap = {
       status: "complete",
       icon: "play",
       outcome:
-        "Run reform workers from the documented v2 populace/TR2026 stack. Each worker saves raw reform H5 plus metadata; aggregate tables are derived afterward.",
+        "Run reform workers from the documented v2 populace/TR2026 stack. Each worker saves the full reform H5 plus metadata; aggregate tables are derived afterward.",
       gate:
         "All current static selected-year cells and behavioral endpoints complete in R2. No aggregation uses raw household weights directly.",
-      logTarget: "reform_raw_h5/year=YYYY/reform=OPTION/metadata.json",
+      logTarget: "reform_full_h5/year=YYYY/reform=OPTION/metadata.json",
     },
   ] satisfies RoadmapStep[],
 };

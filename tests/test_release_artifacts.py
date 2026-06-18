@@ -1,3 +1,4 @@
+import ast
 import json
 from pathlib import Path
 import subprocess
@@ -556,14 +557,127 @@ def test_dashboard_defaults_to_full_75_year_surface():
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
 
 
-def test_legacy_batch_paths_use_behavioral_scoring_contract():
-    compute_year = (REPO_ROOT / "batch" / "compute_year.py").read_text(encoding="utf-8")
-    submit_years = (REPO_ROOT / "batch" / "submit_years.py").read_text(encoding="utf-8")
+def test_reproducibility_roadmap_points_to_full_reform_h5_artifacts():
+    roadmap = (
+        REPO_ROOT / "dashboard" / "src" / "lib" / "reproducibility-roadmap-data.ts"
+    ).read_text(encoding="utf-8")
 
-    assert "dynamic_functions" not in compute_year
-    assert "behavioral_functions=behavioral_functions" in compute_year
-    assert 'choices=["static", "behavioral"]' in submit_years
-    assert 'choices=["static", "dynamic"]' not in submit_years
+    assert "reform_full_h5/year=YYYY/reform=OPTION/metadata.json" in roadmap
+    assert "full reform H5 plus metadata" in roadmap
+    assert "reform_raw_h5" not in roadmap
+    assert "raw reform H5" not in roadmap
+
+
+def test_legacy_reform_raw_h5_helpers_are_removed():
+    for path in [
+        REPO_ROOT / "src" / "year_runner.py",
+        REPO_ROOT / "src" / "modal_batch_helpers.py",
+    ]:
+        text = path.read_text(encoding="utf-8")
+        assert "reform_raw_h5" not in text
+        assert "raw_h5_output_path" not in text
+        assert "save_reform_raw_h5_only" not in text
+        assert "CRFB_REFORM_RAW_H5" not in text
+
+
+def test_canonical_progress_ledger_is_tracked_and_fail_closed():
+    ledger = json.loads(
+        (REPO_ROOT / "docs" / "current" / "reform-modeling-progress.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert ledger["paid_modal_launch_allowed"] is False
+    assert ledger["sentinel_launch_allowed"] is False
+    assert ledger["full_launch_allowed"] is False
+    assert ledger["allowed_paid_call_count"] == 0
+    assert ledger["approved_cells"] == []
+    assert ledger["approved_worker_entrypoint"] == (
+        "src.reform_full_h5_worker.run_reform_full_h5_cell"
+    )
+
+
+def test_legacy_gcp_batch_paths_are_fail_closed():
+    script_expectations = {
+        REPO_ROOT / "batch" / "compute_year.py": "modal_batch/reform_full_h5.py",
+        REPO_ROOT / "batch" / "submit_years.py": "modal_batch/reform_full_h5.py",
+    }
+    for script, expected_pointer in script_expectations.items():
+        text = script.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+        cloud_imports = [
+            node
+            for node in ast.walk(tree)
+            if (
+                isinstance(node, ast.Import)
+                and any(alias.name.startswith("google.cloud") for alias in node.names)
+            )
+            or (
+                isinstance(node, ast.ImportFrom)
+                and node.module is not None
+                and node.module.startswith("google.cloud")
+            )
+        ]
+        assert "archived and fail-closed" in text
+        assert expected_pointer in text
+        assert cloud_imports == []
+        assert "client.create_job" not in text
+        assert "BatchServiceClient" not in text
+
+
+def test_legacy_special_case_modal_runners_are_fail_closed():
+    script_expectations = {
+        REPO_ROOT / "batch" / "run_option12_standalone.py": "canonical full-H5",
+        REPO_ROOT / "batch" / "run_option13_modal.py": "balanced_fix_recompute_spec.md",
+        REPO_ROOT / "batch" / "run_option14_only.py": "balanced_fix_recompute_spec.md",
+        REPO_ROOT
+        / "scripts"
+        / "recover_special_case_run.py": "balanced_fix_recompute_spec.md",
+        REPO_ROOT
+        / "scripts"
+        / "assemble_special_case_results.py": "balanced_fix_recompute_spec.md",
+        REPO_ROOT
+        / "scripts"
+        / "run_attribution_grid.py": "modal_batch/reform_full_h5.py",
+        REPO_ROOT / "scripts" / "recover_modal_scenario_artifacts.py": "reform_full_h5",
+        REPO_ROOT / "modal_batch" / "decomposition.py": "reform_full_h5",
+        REPO_ROOT / "scripts" / "run_local_static_panel.py": "reform_full_h5",
+    }
+    for script, expected_pointer in script_expectations.items():
+        text = script.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+        modal_imports = [
+            node
+            for node in ast.walk(tree)
+            if (
+                isinstance(node, ast.Import)
+                and any(alias.name == "modal" for alias in node.names)
+            )
+            or (isinstance(node, ast.ImportFrom) and node.module == "modal")
+        ]
+        assert "archived and fail-closed" in text
+        assert expected_pointer in text
+        assert modal_imports == []
+        assert "modal.App" not in text
+        assert "run_modal_refresh.py" not in text
+        assert "run_cells" not in text
+
+
+def test_legacy_gcloud_monitor_scripts_are_fail_closed():
+    for script in ["monitor_all.sh", "monitor_option4.sh"]:
+        text = (REPO_ROOT / script).read_text(encoding="utf-8")
+        assert "archived and fail-closed" in text
+        assert "gcloud" not in text
+        assert "gsutil" not in text
+        assert "option4_dynamic" not in text
+
+
+def test_legacy_dynamic_notebook_path_is_removed():
+    assert not (REPO_ROOT / "analysis" / "policy-impacts-dynamic.ipynb").exists()
+    analysis_readme = (REPO_ROOT / "analysis" / "README.md").read_text(encoding="utf-8")
+    assert "policy-impacts-dynamic.ipynb" not in analysis_readme
+    assert "policy_impacts_dynamic" not in analysis_readme
+    assert "jupyter nbconvert" not in analysis_readme
 
 
 def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():

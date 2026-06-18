@@ -10,7 +10,6 @@ from typing import AbstractSet, Any, Callable, Mapping
 import numpy as np
 import pandas as pd
 from policyengine_core.data import Dataset
-from policyengine_core.periods.config import ETERNITY
 from policyengine_core.reforms import Reform
 
 try:
@@ -179,28 +178,6 @@ SCENARIO_HOUSEHOLD_VALUE_VARIABLES = tuple(
     name for name in SCENARIO_HOUSEHOLD_METRIC_VARIABLES if name != "household_ids"
 )
 
-DEFAULT_REFORM_RAW_H5_MATERIALIZE_VARIABLES = (
-    "household_id",
-    "household_weight",
-    "income_tax",
-    "tob_revenue_medicare_hi",
-    "tob_revenue_oasdi",
-    "social_security",
-    "taxable_wages_for_social_security",
-    "taxable_earnings_for_social_security",
-    "taxable_self_employment_income_for_social_security",
-    "social_security_taxable_self_employment_income",
-    "employer_ss_tax_income_tax_revenue",
-    "employer_medicare_tax_income_tax_revenue",
-    "employee_social_security_tax",
-    "employee_medicare_tax",
-    "employer_social_security_tax",
-    "employer_medicare_tax",
-    "self_employment_tax",
-    "payroll_tax",
-    "household_net_income",
-)
-
 
 @dataclass(frozen=True)
 class ScenarioAggregate:
@@ -212,143 +189,6 @@ class ScenarioAggregate:
     taxable_payroll: float
     employer_ss_tax_revenue: float
     employer_medicare_tax_revenue: float
-
-
-US_ENTITY_KEYS = (
-    "person",
-    "household",
-    "tax_unit",
-    "spm_unit",
-    "family",
-    "marital_unit",
-)
-
-
-def _raw_h5_period_matches(period: Any, year: int) -> bool:
-    return getattr(period, "unit", None) == ETERNITY or str(period) == str(year)
-
-
-def _raw_h5_period_sort_key(period: Any, year: int) -> tuple[int, str]:
-    if str(period) == str(year):
-        return (0, str(period))
-    if getattr(period, "unit", None) == ETERNITY:
-        return (1, str(period))
-    return (2, str(period))
-
-
-def _raw_h5_array(values: Any) -> np.ndarray:
-    array = np.asarray(values)
-    if array.dtype == object:
-        array = array.astype(str)
-    return array
-
-
-def save_microsimulation_raw_h5(
-    sim: Any,
-    output_path: str | Path,
-    *,
-    year: int,
-) -> dict[str, Any]:
-    """Persist cached scenario microdata in PolicyEngine-US entity-table H5 form.
-
-    This records native-entity arrays already materialized by the scenario
-    simulation, including source inputs and formula dependencies reached while
-    computing CRFB metrics. It does not trigger broad extra calculations.
-    """
-
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    entity_counts: dict[str, int] = {}
-    for population in sim.populations.values():
-        entity_key = population.entity.key
-        if entity_key in US_ENTITY_KEYS:
-            entity_counts[entity_key] = int(population.count)
-
-    entity_columns: dict[str, dict[str, np.ndarray]] = {
-        entity_key: {} for entity_key in entity_counts
-    }
-    skipped_wrong_shape: list[dict[str, Any]] = []
-
-    for variable_name, variable in sorted(sim.tax_benefit_system.variables.items()):
-        entity_key = getattr(variable.entity, "key", None)
-        if entity_key not in entity_columns:
-            continue
-
-        holder = sim.get_holder(variable_name)
-        candidate_periods = [
-            period
-            for branch_name, period in holder.get_known_branch_periods()
-            if branch_name == "default" and _raw_h5_period_matches(period, year)
-        ]
-        if not candidate_periods:
-            continue
-
-        period = sorted(
-            candidate_periods,
-            key=lambda known_period: _raw_h5_period_sort_key(known_period, year),
-        )[0]
-        array = holder.get_array(period, "default")
-        if array is None:
-            continue
-        values = _raw_h5_array(array)
-        expected_length = entity_counts[entity_key]
-        if values.ndim != 1 or len(values) != expected_length:
-            skipped_wrong_shape.append(
-                {
-                    "variable": variable_name,
-                    "entity": entity_key,
-                    "period": str(period),
-                    "shape": list(values.shape),
-                    "expected_length": expected_length,
-                }
-            )
-            continue
-        entity_columns[entity_key][variable_name] = values
-
-    entities_written: dict[str, dict[str, Any]] = {}
-    tmp_path = output_path.with_name(f"{output_path.name}.tmp")
-    tmp_path.unlink(missing_ok=True)
-    with pd.HDFStore(tmp_path, mode="w") as store:
-        for entity_key in US_ENTITY_KEYS:
-            columns = entity_columns.get(entity_key, {})
-            if not columns:
-                continue
-            dataframe = pd.DataFrame(columns)
-            store.put(entity_key, dataframe, format="table")
-            entities_written[entity_key] = {
-                "rows": int(len(dataframe)),
-                "columns": list(dataframe.columns),
-                "column_count": int(len(dataframe.columns)),
-            }
-        store.put("_time_period", pd.Series([int(year)]), format="table")
-
-    if not entities_written:
-        tmp_path.unlink(missing_ok=True)
-        raise ValueError(
-            f"No cached simulation arrays were available to save to {output_path}."
-        )
-
-    tmp_path.replace(output_path)
-    size_bytes = output_path.stat().st_size
-    return {
-        "artifact_type": "policyengine_us_entity_table_raw_scenario_h5",
-        "artifact_version": 1,
-        "path": str(output_path),
-        "year": int(year),
-        "size_bytes": int(size_bytes),
-        "entities": entities_written,
-        "entity_count": int(len(entities_written)),
-        "variable_count": int(
-            sum(entity["column_count"] for entity in entities_written.values())
-        ),
-        "skipped_wrong_shape": skipped_wrong_shape[:100],
-        "skipped_wrong_shape_count": int(len(skipped_wrong_shape)),
-        "capture_policy": (
-            "native-entity arrays cached by the completed scenario simulation "
-            "for the requested year or ETERNITY; no broad extra calculations"
-        ),
-    }
 
 
 def _normalize_dataset(dataset: Any) -> Any:
@@ -1063,7 +903,7 @@ def compute_scenario_household_metrics_and_aggregate(
     reform: Any | None = None,
     progress_label: str | None = None,
 ) -> tuple[ScenarioHouseholdMetrics, ScenarioAggregate]:
-    metrics, aggregate, _ = compute_scenario_household_metrics_aggregate_and_raw_h5(
+    metrics, aggregate = _compute_scenario_household_metrics_and_aggregate(
         year=year,
         dataset_name=dataset_name,
         reform=reform,
@@ -1072,14 +912,13 @@ def compute_scenario_household_metrics_and_aggregate(
     return metrics, aggregate
 
 
-def compute_scenario_household_metrics_aggregate_and_raw_h5(
+def _compute_scenario_household_metrics_and_aggregate(
     *,
     year: int,
     dataset_name: Any,
     reform: Any | None = None,
     progress_label: str | None = None,
-    raw_h5_output_path: str | Path | None = None,
-) -> tuple[ScenarioHouseholdMetrics, ScenarioAggregate, dict[str, Any] | None]:
+) -> tuple[ScenarioHouseholdMetrics, ScenarioAggregate]:
     dataset = _normalize_dataset(dataset_name)
     sim = dataset_microsimulation(dataset, reform=reform)
 
@@ -1164,16 +1003,6 @@ def compute_scenario_household_metrics_aggregate_and_raw_h5(
     )
     log_step("employer_medicare_tax_income_tax_revenue done")
 
-    raw_h5_metadata = None
-    if raw_h5_output_path is not None:
-        log_step(f"raw H5 save start ({raw_h5_output_path})")
-        raw_h5_metadata = save_microsimulation_raw_h5(
-            sim,
-            raw_h5_output_path,
-            year=year,
-        )
-        log_step("raw H5 save done")
-
     del sim, household_microseries
 
     metrics = ScenarioHouseholdMetrics(
@@ -1202,7 +1031,7 @@ def compute_scenario_household_metrics_aggregate_and_raw_h5(
             employer_medicare_tax_revenue_microseries.sum()
         ),
     )
-    return metrics, aggregate, raw_h5_metadata
+    return metrics, aggregate
 
 
 def compute_scenario_aggregate(
@@ -1666,7 +1495,6 @@ def compute_reform_result(
     baseline_reform: Any | None = None,
     progress_label: str | None = None,
     metrics_output_path: str | Path | None = None,
-    raw_h5_output_path: str | Path | None = None,
     baseline_metrics: ScenarioHouseholdMetrics | None = None,
     metric_change_tolerance: float = 1e-9,
 ) -> dict[str, float | int | str]:
@@ -1686,24 +1514,12 @@ def compute_reform_result(
     combined_reform = (
         (baseline_reform, reform) if baseline_reform is not None else reform
     )
-    if raw_h5_output_path is None:
-        metrics, reform_totals = compute_scenario_household_metrics_and_aggregate(
-            year=year,
-            dataset_name=dataset_name,
-            reform=combined_reform,
-            progress_label=progress_label,
-        )
-        raw_h5_metadata = None
-    else:
-        metrics, reform_totals, raw_h5_metadata = (
-            compute_scenario_household_metrics_aggregate_and_raw_h5(
-                year=year,
-                dataset_name=dataset_name,
-                reform=combined_reform,
-                progress_label=progress_label,
-                raw_h5_output_path=raw_h5_output_path,
-            )
-        )
+    metrics, reform_totals = compute_scenario_household_metrics_and_aggregate(
+        year=year,
+        dataset_name=dataset_name,
+        reform=combined_reform,
+        progress_label=progress_label,
+    )
     result = build_reform_result_from_aggregates(
         reform_id=reform_id,
         year=year,
@@ -1745,128 +1561,6 @@ def compute_reform_result(
                 ),
             }
         )
-    if raw_h5_output_path is not None:
-        if raw_h5_metadata is None:
-            raise RuntimeError(
-                f"Raw reform H5 was requested but not saved: {raw_h5_output_path}"
-            )
-        result.update(
-            {
-                "reform_raw_h5_saved": True,
-                "reform_raw_h5_path": str(raw_h5_output_path),
-                "reform_raw_h5_size_bytes": raw_h5_metadata["size_bytes"],
-                "reform_raw_h5_entity_count": raw_h5_metadata["entity_count"],
-                "reform_raw_h5_variable_count": raw_h5_metadata["variable_count"],
-                "reform_raw_h5_artifact_type": raw_h5_metadata["artifact_type"],
-            }
-        )
     del reform
 
     return result
-
-
-def _materialize_raw_h5_variables(
-    sim: Any,
-    *,
-    year: int,
-    variable_names: tuple[str, ...] = DEFAULT_REFORM_RAW_H5_MATERIALIZE_VARIABLES,
-    progress_label: str | None = None,
-) -> tuple[list[str], list[dict[str, str]]]:
-    materialized: list[str] = []
-    skipped: list[dict[str, str]] = []
-
-    def log_step(message: str) -> None:
-        if progress_label:
-            print(f"[raw-h5:{progress_label}] {message}", flush=True)
-
-    available = sim.tax_benefit_system.variables
-    for variable_name in variable_names:
-        if variable_name not in available:
-            skipped.append({"variable": variable_name, "reason": "missing"})
-            continue
-        log_step(f"{variable_name} start")
-        try:
-            sim.calculate(variable_name, period=year)
-        except Exception as period_error:
-            try:
-                sim.calculate(variable_name)
-            except Exception as fallback_error:
-                skipped.append(
-                    {
-                        "variable": variable_name,
-                        "reason": (
-                            f"period={type(period_error).__name__}: "
-                            f"{str(period_error)[:160]}; "
-                            f"fallback={type(fallback_error).__name__}: "
-                            f"{str(fallback_error)[:160]}"
-                        ),
-                    }
-                )
-                log_step(f"{variable_name} skipped")
-                continue
-        materialized.append(variable_name)
-        log_step(f"{variable_name} done")
-
-    return materialized, skipped
-
-
-def save_reform_raw_h5_only(
-    *,
-    reform_id: str,
-    year: int,
-    scoring_type: str,
-    dataset_name: Any,
-    reform_functions: dict[str, Callable[[], Any]],
-    behavioral_functions: dict[str, Callable[[], dict[str, Any]]],
-    raw_h5_output_path: str | Path,
-    baseline_reform: Any | None = None,
-    progress_label: str | None = None,
-    materialize_variables: tuple[
-        str, ...
-    ] = DEFAULT_REFORM_RAW_H5_MATERIALIZE_VARIABLES,
-) -> dict[str, Any]:
-    baseline_reform = _resolve_baseline_reform_for_dataset(
-        year=year,
-        dataset_name=dataset_name,
-        baseline_reform=baseline_reform,
-    )
-    reform = build_reform(
-        reform_id,
-        scoring_type,
-        reform_functions,
-        behavioral_functions,
-    )
-    combined_reform = (
-        (baseline_reform, reform) if baseline_reform is not None else reform
-    )
-    dataset = _normalize_dataset(dataset_name)
-    sim = dataset_microsimulation(dataset, reform=combined_reform)
-    materialized, skipped = _materialize_raw_h5_variables(
-        sim,
-        year=year,
-        variable_names=materialize_variables,
-        progress_label=progress_label,
-    )
-    if not materialized:
-        raise RuntimeError(
-            f"No variables materialized before raw H5 save for {reform_id} {year}."
-        )
-    metadata = save_microsimulation_raw_h5(
-        sim,
-        raw_h5_output_path,
-        year=year,
-    )
-    metadata.update(
-        {
-            "reform_id": reform_id,
-            "scoring_type": scoring_type,
-            "materialization_policy": "explicit_crfb_reform_raw_h5_variables",
-            "requested_materialized_variables": list(materialize_variables),
-            "materialized_variables": materialized,
-            "skipped_materialized_variables": skipped,
-            "baseline_aggregate_metrics_computed": False,
-            "baseline_reconciliation_computed": False,
-        }
-    )
-    del sim, reform
-    return metadata

@@ -7,10 +7,11 @@ Use the current Modal/full-H5 pipeline instead:
 
 - Public results: `results.csv`
 - Dashboard copy: `dashboard/public/data/results.csv`
-- Raw provenance inputs:
-  - `results/modal_runs_production/static_cells.csv`
-  - `results/modal_runs_production/behavioral_endpoint_cells.csv`
-- Orchestrator: `modal_batch/run_panel.py`
-- Result publisher: `scripts/publish_dashboard_results.py`
+- Durable provenance inputs:
+  - `reform_full_h5/year=YYYY/reform=OPTION/scenario.h5`
+  - `reform_full_h5/year=YYYY/reform=OPTION/metadata.json`
+  - `reform_full_h5/year=YYYY/reform=OPTION/complete.json`
+- Production launcher: `modal_batch/reform_full_h5.py::submit_reform_full_h5`
+- Result aggregation: `scripts/aggregate_reform_full_h5_results.py`
 
 Do not restart the old Cloud Batch workflow for current CRFB work.
