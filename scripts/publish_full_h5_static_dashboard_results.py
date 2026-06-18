@@ -10,25 +10,14 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_FULL_H5_AGGREGATE = (
-    REPO
-    / "results"
-    / "modal_runs_production"
-    / "full_h5_v2pop_tr2026_panel_20260612.csv"
+    REPO / "results" / "modal_runs_production" / "static_cells.csv"
 )
-DEFAULT_REFERENCE_STATIC = (
-    REPO / "results" / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-)
+DEFAULT_REFERENCE_STATIC = REPO / "results.csv"
 EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
-DEFAULT_EXACT_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_v2pop_panel_20260612.csv"
-)
-DEFAULT_DISPLAY_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-)
-DEFAULT_METADATA_OUTPUT = (
-    REPO / "results" / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json"
-)
+DEFAULT_EXACT_OUTPUT = REPO / "tmp" / "static_exact_preview.csv"
+DEFAULT_DISPLAY_OUTPUT = REPO / "tmp" / "static_display_preview.csv"
+DEFAULT_METADATA_OUTPUT = REPO / "tmp" / "static_display_preview.metadata.json"
 
 STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
     "reverse_roth",
@@ -108,9 +97,7 @@ def _validate_exact_panel(frame: pd.DataFrame, require_complete: bool) -> None:
 
     missing: list[tuple[str, int]] = []
     for reform in STANDARD_REFORMS:
-        years = set(
-            standard.loc[standard["reform_name"] == reform, "year"].astype(int)
-        )
+        years = set(standard.loc[standard["reform_name"] == reform, "year"].astype(int))
         for year in REQUIRED_EXACT_YEARS:
             if year not in years:
                 missing.append((reform, year))
@@ -131,11 +118,7 @@ def _interpolate_standard_reform(group: pd.DataFrame) -> pd.DataFrame:
     merged["reform_name"] = reform_name
     merged["scoring_type"] = "static"
 
-    numeric_columns = [
-        column
-        for column in DOLLAR_COLUMNS
-        if column in merged.columns
-    ]
+    numeric_columns = [column for column in DOLLAR_COLUMNS if column in merged.columns]
     for column in numeric_columns:
         merged[column] = pd.to_numeric(merged[column], errors="coerce").interpolate(
             method="index",
@@ -144,7 +127,9 @@ def _interpolate_standard_reform(group: pd.DataFrame) -> pd.DataFrame:
 
     exact_years = set(group.index.astype(int))
     merged["full_h5_result_type"] = [
-        "exact_full_h5" if year in exact_years else "linear_interpolation_between_full_h5_years"
+        "exact_full_h5"
+        if year in exact_years
+        else "linear_interpolation_between_full_h5_years"
         for year in merged.index.astype(int)
     ]
     merged["source"] = merged["full_h5_result_type"]
@@ -160,7 +145,9 @@ def _annual_display_from_exact(exact: pd.DataFrame) -> pd.DataFrame:
             continue
         rows.append(_interpolate_standard_reform(group))
     if not rows:
-        return pd.DataFrame(columns=[*DASHBOARD_COLUMNS, "full_h5_result_type", "source"])
+        return pd.DataFrame(
+            columns=[*DASHBOARD_COLUMNS, "full_h5_result_type", "source"]
+        )
     return pd.concat(rows, ignore_index=True)
 
 
@@ -246,7 +233,9 @@ def publish_full_h5_static_results(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--full-h5-aggregate", type=Path, default=DEFAULT_FULL_H5_AGGREGATE)
+    parser.add_argument(
+        "--full-h5-aggregate", type=Path, default=DEFAULT_FULL_H5_AGGREGATE
+    )
     parser.add_argument(
         "--reference-static",
         type=Path,

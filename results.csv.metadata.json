@@ -1,13 +1,13 @@
 {
   "schema": "crfb_dashboard_results/v1",
-  "generated_at": "2026-06-14T12:06:24.363491+00:00",
-  "static_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-  "conventional_source": null,
-  "behavioral_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/behavioral_endpoint_ratio_display_20260612.csv",
-  "output_results": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/results_full_h5_v2pop_panel_display_20260612.csv",
+  "generated_at": "2026-06-18T10:06:29.715801+00:00",
+  "static_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/static_cells.csv",
+  "behavioral_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/behavioral_endpoint_cells.csv",
+  "tob_baseline": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/data/ssa_tob_baseline_75year.csv",
+  "output_results": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results.csv",
   "dashboard_output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/dashboard/public/data/results.csv",
-  "root_compat_output": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results.csv",
   "rows": 2100,
+  "post_obbba_tob_baseline_applied": false,
   "scoring_types": [
     "behavioral",
     "static"

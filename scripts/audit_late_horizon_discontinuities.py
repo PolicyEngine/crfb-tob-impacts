@@ -6,12 +6,11 @@ import pandas as pd
 
 
 REPO = Path(__file__).resolve().parents[1]
-RESULTS = REPO / "results"
 DASHBOARD_DATA = REPO / "dashboard" / "public" / "data"
-STATIC = RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
+STATIC = REPO / "results.csv"
 OASDI_PAYROLL = DASHBOARD_DATA / "ssa_economic_projections.csv"
 HI_PAYROLL = DASHBOARD_DATA / "hi_taxable_payroll.csv"
-OUT_CSV = RESULTS / "late_horizon_discontinuity_audit_20260430.csv"
+OUT_CSV = REPO / "tmp" / "late_horizon_discontinuity_audit.csv"
 OUT_MD = REPO / "docs" / "current" / "late-horizon-discontinuity-audit.md"
 
 FOCUS_TRANSITIONS = {(2049, 2050), (2074, 2075), (2099, 2100)}
@@ -27,8 +26,8 @@ PUBLICATION_REFORMS = {
     "option10",
     "option11",
     "option12",
-    "option13",
-    "option14_stacked",
+    "reverse_roth",
+    "tax93",
 }
 
 
@@ -52,6 +51,7 @@ def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
 
 def load_inputs() -> pd.DataFrame:
     static = pd.read_csv(STATIC)
+    static = static[static["scoring_type"].eq("static")].copy()
     static = static[static["reform_name"].isin(PUBLICATION_REFORMS)].copy()
     oasdi = pd.read_csv(OASDI_PAYROLL)[["year", "taxable_payroll", "gdp"]]
     hi = pd.read_csv(HI_PAYROLL)[["year", "hi_taxable_payroll"]]
@@ -66,7 +66,9 @@ def load_inputs() -> pd.DataFrame:
 
 def build_transition_audit(df: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
-    by_reform = {reform: group.set_index("year") for reform, group in df.groupby("reform_name")}
+    by_reform = {
+        reform: group.set_index("year") for reform, group in df.groupby("reform_name")
+    }
 
     for reform, group in by_reform.items():
         for from_year in range(2026, 2100):
@@ -168,7 +170,7 @@ of OASDI taxable payroll. It focuses on the CRFB review transitions
 `2049->2050`, `2074->2075`, and `2099->2100`, and excludes the legacy short
 phase-in Roth variant (`option6`) from the publication-facing summary.
 
-Generated CSV: `results/late_horizon_discontinuity_audit_20260430.csv`.
+Generated CSV: `tmp/late_horizon_discontinuity_audit.csv`.
 
 ## Focus Transitions
 
@@ -195,6 +197,7 @@ Generated CSV: `results/late_horizon_discontinuity_audit_20260430.csv`.
 def main() -> int:
     df = load_inputs()
     audit = build_transition_audit(df)
+    OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     audit.to_csv(OUT_CSV, index=False)
     OUT_MD.write_text(build_markdown(audit).strip() + "\n", encoding="utf-8")
     print(f"Wrote {OUT_CSV}")

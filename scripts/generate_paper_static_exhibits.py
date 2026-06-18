@@ -9,7 +9,6 @@ REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
-FINAL_STATIC = RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
 STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + ("reverse_roth", "tax93")
 
 
@@ -71,9 +70,17 @@ def build_results_overview(df: pd.DataFrame) -> str:
         ],
     )
 
-    top_option12 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option12", "revenue_impact"].iloc[0]))
-    top_option8 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option8", "revenue_impact"].iloc[0]))
-    option1 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0]))
+    top_option12 = fmt_b(
+        float(
+            ten_year.loc[ten_year.reform_name == "option12", "revenue_impact"].iloc[0]
+        )
+    )
+    top_option8 = fmt_b(
+        float(ten_year.loc[ten_year.reform_name == "option8", "revenue_impact"].iloc[0])
+    )
+    option1 = fmt_b(
+        float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0])
+    )
 
     return f"""
 The current release surface contains the fourteen contract-standard reforms:
@@ -114,8 +121,7 @@ def build_revenue_impacts(df: pd.DataFrame) -> str:
         "option12",
     ]
     milestone = df[
-        df["year"].isin(milestone_years)
-        & df["reform_name"].isin(milestone_reforms)
+        df["year"].isin(milestone_years) & df["reform_name"].isin(milestone_reforms)
     ].copy()
 
     revenue_rows: list[list[str]] = []
@@ -124,8 +130,7 @@ def build_revenue_impacts(df: pd.DataFrame) -> str:
         for year in milestone_years:
             value = float(
                 milestone.loc[
-                    (milestone["reform_name"] == reform)
-                    & (milestone["year"] == year),
+                    (milestone["reform_name"] == reform) & (milestone["year"] == year),
                     "revenue_impact",
                 ].iloc[0]
             )
@@ -213,14 +218,12 @@ contract. Older non-contract artifacts are not part of the release surface.
 def build_external_benchmarks(df: pd.DataFrame) -> str:
     first_decade = df[df["year"].between(2026, 2035)]
     ten_year = (
-        first_decade
-        .groupby("reform_name", as_index=False)["revenue_impact"]
+        first_decade.groupby("reform_name", as_index=False)["revenue_impact"]
         .sum()
         .set_index("reform_name")["revenue_impact"]
     )
     ten_year_tob = (
-        first_decade
-        .groupby("reform_name", as_index=False)["tob_total_impact"]
+        first_decade.groupby("reform_name", as_index=False)["tob_total_impact"]
         .sum()
         .set_index("reform_name")["tob_total_impact"]
     )
@@ -228,21 +231,75 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     option1_table = markdown_table(
         ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
         [
-            ["PolicyEngine", "option1 full repeal", "Static", "2026-2035", fmt_b(float(ten_year["option1"]))],
-            ["CBO [@cbo2024options]", "Full repeal", "Conventional", "2025-2034", "-1,600.0"],
-            ["SSA Trustees [@ssa2024trustees]", "Full repeal", "Conventional", "2025-2034", "-1,800.0"],
-            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Conventional", "2025-2034", "-1,400.0"],
-            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Macroeconomic", "2025-2034", "-1,300.0"],
+            [
+                "PolicyEngine",
+                "option1 full repeal",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option1"])),
+            ],
+            [
+                "CBO [@cbo2024options]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,600.0",
+            ],
+            [
+                "SSA Trustees [@ssa2024trustees]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,800.0",
+            ],
+            [
+                "Tax Foundation [@taxfoundation2024trump]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,400.0",
+            ],
+            [
+                "Tax Foundation [@taxfoundation2024trump]",
+                "Full repeal",
+                "Macroeconomic",
+                "2025-2034",
+                "-1,300.0",
+            ],
         ],
     )
 
     option2_table = markdown_table(
         ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
         [
-            ["PolicyEngine", "option2 tax 85% uniformly", "Static", "2026-2035", fmt_b(float(ten_year["option2"]))],
-            ["PolicyEngine", "option8 tax 100% of benefits", "Static", "2026-2035", fmt_b(float(ten_year["option8"]))],
-            ["JCT [@jct2024expenditures]", "Current SS tax expenditure", "Conventional", "2024-2028", "+318.4"],
-            ["CBO [@cbo2024pension]", "Pension-style basis recovery", "Conventional", "2021-2030", "+458.7"],
+            [
+                "PolicyEngine",
+                "option2 tax 85% uniformly",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option2"])),
+            ],
+            [
+                "PolicyEngine",
+                "option8 tax 100% of benefits",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option8"])),
+            ],
+            [
+                "JCT [@jct2024expenditures]",
+                "Current SS tax expenditure",
+                "Conventional",
+                "2024-2028",
+                "+318.4",
+            ],
+            [
+                "CBO [@cbo2024pension]",
+                "Pension-style basis recovery",
+                "Conventional",
+                "2021-2030",
+                "+458.7",
+            ],
         ],
     )
 
@@ -328,7 +385,6 @@ def main() -> None:
 
     write_exhibit("results-overview.md", build_results_overview(df))
     write_exhibit("revenue-impacts.md", build_revenue_impacts(df))
-    write_exhibit("validation-sentinels.md", build_validation_sentinels(df))
     write_exhibit("external-benchmarks.md", build_external_benchmarks(df))
     write_exhibit("labor-supply-response-status.md", build_response_status())
     write_exhibit("household-impacts.md", build_household_impacts())

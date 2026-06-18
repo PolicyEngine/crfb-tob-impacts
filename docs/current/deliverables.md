@@ -15,21 +15,19 @@ The intended current delivery surface is:
 
 The public/release result paths are:
 
-- `results/results_full_h5_v2pop_panel_display_20260612.csv`
-- `results/results_full_h5_v2pop_panel_display_20260612_metadata.json`
-- `results/all_static_results_full_h5_v2pop_panel_display_20260612.csv`
-- `results/behavioral_endpoint_ratio_display_20260612.csv`
 - `results.csv`
+- `results.csv.metadata.json`
 - `dashboard/public/data/results.csv`
 - `dashboard/public/data/results_contract.json`
 - `dashboard/public/data/distributional.json`
 - `results/release_packages/crfb_tob_release_<timestamp>/`
 
 Behind the scenes, the builder combines static and labor-supply response source
-artifacts into the unified `results.csv`. Public-facing code and docs should
-not ask readers to choose between separate static and response artifact
-families. Labor-supply response rows are included only when regenerated from the
-current full-H5 production contract.
+artifacts into the unified `results.csv`. The raw Modal source CSVs live under
+`results/modal_runs_production/` as provenance inputs, not public result
+surfaces. Public-facing code and docs should not ask readers to choose between
+separate static and response artifact families. Labor-supply response rows are
+included only when regenerated from the current full-H5 production contract.
 
 ## Delivery Rules
 

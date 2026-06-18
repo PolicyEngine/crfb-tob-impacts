@@ -35,38 +35,10 @@ class ReleasePackage:
 
 
 REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
-    (
-        "results",
-        RESULTS / "all_static_results_full_h5_v2pop_panel_20260612.csv",
-    ),
-    (
-        "results",
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_full_h5_exact_20260612.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260612.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260612_metadata.json",
-    ),
-    (
-        "results",
-        RESULTS / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json",
-    ),
-    (
-        "results",
-        RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
-    ),
-    (
-        "results",
-        RESULTS / "results_full_h5_v2pop_panel_display_20260612_metadata.json",
-    ),
+    ("results", REPO / "results.csv"),
+    ("results", REPO / "results.csv.metadata.json"),
+    ("results", RESULTS / "modal_runs_production" / "static_cells.csv"),
+    ("results", RESULTS / "modal_runs_production" / "behavioral_endpoint_cells.csv"),
     ("dashboard_data", REPO / "dashboard" / "public" / "data" / "results.csv"),
     (
         "dashboard_data",

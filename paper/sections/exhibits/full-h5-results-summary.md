@@ -43,7 +43,7 @@ The structural employer-payroll swap family (`option5`, `option6`, and `option12
 
 ## Behavioral endpoint results
 
-The current behavioral endpoint run `full_h5_v2pop_tr2026_behavioral_endpoints_20260612` completed all `28` endpoint cells: `2026` and `2100` for all fourteen current reform rows. Each endpoint cell saved durable R2 `scenario.h5`, `metadata.json`, and `complete.json` artifacts before aggregation. The `1,022` non-endpoint behavioral display rows use documented linear interpolation of behavioral/static ratios between those exact endpoints.
+The current behavioral endpoint run completed all `28` endpoint cells: `2026` and `2100` for all fourteen current reform rows. Each endpoint cell saved durable R2 `scenario.h5`, `metadata.json`, and `complete.json` artifacts before aggregation. The `1,022` non-endpoint behavioral display rows use documented linear interpolation of behavioral/static ratios between those exact endpoints.
 
 The public combined `results.csv` keeps static and behavioral rows in one file and distinguishes them with `scoring_type`. Behavioral endpoint rows use the current v2 populace/TR2026 baseline H5s; non-endpoint behavioral rows are derived only from the documented endpoint-ratio interpolation.
 

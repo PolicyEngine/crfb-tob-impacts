@@ -54,7 +54,6 @@ Current public exact behavioral endpoint rows come from:
 
 The unified public results are:
 
-- `results/results_full_h5_v2pop_panel_display_20260612.csv`
 - `results.csv`
 - `dashboard/public/data/results.csv`
 

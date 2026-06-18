@@ -37,11 +37,10 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
     baseline_contract = manifest["post_obbba_tob_baseline"]
 
     expected_files = [
-        "results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-        "results/behavioral_endpoint_full_h5_exact_20260612.csv",
-        "results/behavioral_endpoint_ratio_display_20260612.csv",
-        "results/behavioral_endpoint_ratio_display_20260612_metadata.json",
-        "results/results_full_h5_v2pop_panel_display_20260612.csv",
+        "results.csv",
+        "results.csv.metadata.json",
+        "results/modal_runs_production/static_cells.csv",
+        "results/modal_runs_production/behavioral_endpoint_cells.csv",
         "dashboard/public/data/results.csv",
         "dashboard/public/data/baseline_aggregates.csv",
         "dashboard/public/data/baseline_indexed_parameters.csv",

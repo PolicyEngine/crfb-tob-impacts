@@ -240,21 +240,17 @@ repo now vendors an explicit TOB baseline table at:
 
 - `data/ssa_tob_baseline_75year.csv`
 
-That file carries the annual OASDI and HI TOB baseline totals used for the
-baseline-share allocation logic. To stamp those values into the shipped CSVs and
-regenerate the combined export, run:
+That file carries the annual OASDI and HI TOB baseline totals used as a
+diagnostic target. The shipped `results.csv` is direct microsimulation output,
+not a post-hoc calibrated result. To regenerate the diagnostic baseline table
+and write preview-adjusted CSVs under `tmp/` without touching the canonical
+results, run:
 
 ```bash
 cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
 python3 scripts/apply_post_obbba_tob_baseline.py
 ```
 
-This updates both:
-
-- the repo-level `all_static_results.csv` / `all_dynamic_results.csv`
-- the published dashboard copies under `dashboard/public/data/`
-
-and then rebuilds `dashboard_data_combined.csv`.
-
-It does not update `results/oact_static_current.csv`; that file remains the
-legacy published-output comparison point for the saved-H5 rescoring checks.
+The canonical dashboard export remains `results.csv` plus
+`dashboard/public/data/results.csv`; do not stamp the diagnostic target into
+those files.

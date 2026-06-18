@@ -18,9 +18,7 @@ RESULTS = REPO_ROOT / "results"
 DASHBOARD_DATA = REPO_ROOT / "dashboard" / "public" / "data"
 DASHBOARD_OUT = REPO_ROOT / "dashboard" / "out" / "data"
 VERCEL_SITE = REPO_ROOT / ".vercel-site"
-STATIC_METADATA = (
-    RESULTS / "all_static_results_full_h5_v2pop_panel_20260612_metadata.json"
-)
+RESULTS_METADATA = REPO_ROOT / "results.csv.metadata.json"
 DASHBOARD_RESULTS = DASHBOARD_DATA / "results.csv"
 DASHBOARD_BASELINE_METADATA = DASHBOARD_DATA / "baseline_assumptions_metadata.json"
 PUBLIC_BASELINE_MANIFEST = DASHBOARD_DATA / "post_obbba_tob_baseline_manifest.json"
@@ -32,8 +30,7 @@ CORE_WAGE_INDEXED_TAX_PARAMETERS = {
     "gov.irs.income.amt.exemption.amount.SINGLE": "AMT exemption",
 }
 RELEASE_RESULT_ARTIFACTS = [
-    RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-    RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
+    REPO_ROOT / "results.csv",
     DASHBOARD_RESULTS,
 ]
 ALLOWED_CSV_ARTIFACTS = {
@@ -64,13 +61,8 @@ ALLOWED_CSV_ARTIFACTS = {
     "data/tob_current_law_tr2025.csv",
     "data/trust_fund_gaps.csv",
     "results.csv",
-    "results/all_static_results_full_h5_v2pop_panel_20260612.csv",
-    "results/all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-    "results/behavioral_endpoint_full_h5_exact_20260612.csv",
-    "results/behavioral_endpoint_ratio_display_20260612.csv",
-    "results/modal_runs_production/full_h5_v2pop_tr2026_behavioral_endpoints_20260612.csv",
-    "results/modal_runs_production/full_h5_v2pop_tr2026_panel_20260612.csv",
-    "results/results_full_h5_v2pop_panel_display_20260612.csv",
+    "results/modal_runs_production/behavioral_endpoint_cells.csv",
+    "results/modal_runs_production/static_cells.csv",
 }
 BASELINE_AUDIT_PUBLIC_FILES = [
     DASHBOARD_DATA / "baseline_aggregates.csv",
@@ -136,9 +128,7 @@ def assert_post_obbba_tob_target_is_diagnostic_only(results: pd.DataFrame) -> No
 
 def assert_release_artifact_matches_raw_full_h5(path: Path) -> None:
     results = pd.read_csv(path)
-    raw = pd.read_csv(
-        RESULTS / "modal_runs_production" / "full_h5_v2pop_tr2026_panel_20260612.csv"
-    )
+    raw = pd.read_csv(RESULTS / "modal_runs_production" / "static_cells.csv")
     raw["baseline_revenue_raw_billions"] = raw["baseline_revenue"] / 1e9
     raw["baseline_tob_total_raw_billions"] = raw["baseline_tob_total"] / 1e9
     exact = results[results["full_h5_result_type"].eq("exact_full_h5")].merge(
@@ -168,14 +158,11 @@ def assert_income_tax_baseline_is_direct_microsim(path: Path) -> None:
 
 
 def test_release_artifacts_keep_post_obbba_tob_as_diagnostic_target_only():
-    static = pd.read_csv(
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-    )
     dashboard_static = load_dashboard_results("static")
     dashboard_behavioral = load_dashboard_results("behavioral")
 
     assert load_dashboard_results("conventional").empty
-    for results in [static, dashboard_static, dashboard_behavioral]:
+    for results in [dashboard_static, dashboard_behavioral]:
         assert_post_obbba_tob_target_is_diagnostic_only(results)
 
 
@@ -246,9 +233,6 @@ def test_csv_release_surface_contains_only_current_full_h5_artifacts_and_inputs(
 
 def test_current_public_results_have_current_release_provenance():
     current_results = [
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv",
-        RESULTS / "behavioral_endpoint_ratio_display_20260612.csv",
-        RESULTS / "results_full_h5_v2pop_panel_display_20260612.csv",
         DASHBOARD_RESULTS,
         REPO_ROOT / "results.csv",
     ]
@@ -382,9 +366,7 @@ def test_baseline_assumption_public_audit_files_exist_and_cover_core_contract():
 
 
 def test_income_tax_direct_microsim_guard_rejects_adulterated_exact_rows(tmp_path):
-    good = pd.read_csv(
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-    )
+    good = load_dashboard_results("static")
     bad_results = tmp_path / "bad_results.csv"
     bad = good.copy()
     mask = (
@@ -438,14 +420,14 @@ def test_release_and_dashboard_metadata_carry_baseline_hash_contract():
     manifest = load_post_obbba_manifest()
     expected_sha = manifest["baseline_sha256"]
 
-    static_metadata = json.loads(STATIC_METADATA.read_text(encoding="utf-8"))
+    results_metadata = json.loads(RESULTS_METADATA.read_text(encoding="utf-8"))
     dashboard_metadata = json.loads(
         DASHBOARD_BASELINE_METADATA.read_text(encoding="utf-8")
     )
     public_manifest = json.loads(PUBLIC_BASELINE_MANIFEST.read_text(encoding="utf-8"))
 
-    assert static_metadata["post_obbba_tob_baseline_applied"] is False
-    assert "post_obbba_tob_baseline_sha256" not in static_metadata
+    assert results_metadata["post_obbba_tob_baseline_applied"] is False
+    assert "post_obbba_tob_baseline_sha256" not in results_metadata
     assert dashboard_metadata["post_obbba_tob_baseline_sha256"] == expected_sha
     assert dashboard_metadata["scenario_id"] == manifest["scenario_id"]
     assert dashboard_metadata["baseline_kind"] == "calibration_target"
@@ -501,9 +483,7 @@ def test_release_pipeline_has_no_ambiguous_raw_trustees_cli_or_dashboard_referen
 
 
 def test_static_release_exposes_all_static_reforms_in_dashboard_metadata():
-    static = pd.read_csv(
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-    )
+    static = load_dashboard_results("static")
     reforms_ts = REPO_ROOT / "dashboard" / "src" / "lib" / "reforms.ts"
     reform_text = reforms_ts.read_text(encoding="utf-8")
 
@@ -647,19 +627,12 @@ def test_option7_dashboard_accounting_preserves_federal_total_and_residual():
     assert "accounting split" in methods
 
 
-def test_validation_exhibit_uses_current_full_h5_contract_not_old_sentinel_csvs():
-    exhibit = (REPO_ROOT / "paper" / "exhibits" / "validation-sentinels.md").read_text(
+def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhibit():
+    generator = (REPO_ROOT / "scripts" / "generate_paper_static_exhibits.py").read_text(
         encoding="utf-8"
     )
-    static = pd.read_csv(
-        RESULTS / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-    )
-    standard = static[static["reform_name"].isin({f"option{i}" for i in range(1, 13)})]
 
-    assert len(standard[standard["source"].eq("exact_full_h5")]) == 192
-    assert "current full-H5 production" in exhibit
-    assert "contract" in exhibit
-    assert "Older non-contract artifacts are not" in exhibit
+    assert "validation-sentinels.md" not in generator
 
 
 def test_labor_supply_response_exhibit_uses_current_contract():

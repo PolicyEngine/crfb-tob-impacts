@@ -22,24 +22,12 @@ from src.year_runner import (
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_status.csv"
-DEFAULT_EXISTING_RESULTS = (
-    REPO
-    / "results"
-    / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-)
+DEFAULT_EXISTING_RESULTS = REPO / "results.csv"
 DEFAULT_BASELINE_DIR = REPO / "projected_datasets_v2pop"
 DEFAULT_CACHE_DIR = REPO / "tmp" / "reform_full_h5_r2_cache_v2pop"
-DEFAULT_OUTPUT = (
-    REPO
-    / "results"
-    / "modal_runs_production"
-    / "full_h5_v2pop_tr2026_panel_20260612.csv"
-)
+DEFAULT_OUTPUT = REPO / "results" / "modal_runs_production" / "static_cells.csv"
 DEFAULT_SUMMARY = (
-    REPO
-    / "results"
-    / "modal_runs_production"
-    / "full_h5_v2pop_tr2026_panel_20260612_summary.json"
+    REPO / "results" / "modal_runs_production" / "static_cells_summary.json"
 )
 DEFAULT_R2_BUCKET = "axiom-corpus"
 BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
@@ -316,7 +304,9 @@ def parse_args() -> argparse.Namespace:
         description="Aggregate completed CRFB full reform H5 artifacts from R2."
     )
     parser.add_argument("--live-status", type=Path, default=DEFAULT_LIVE_STATUS)
-    parser.add_argument("--existing-results", type=Path, default=DEFAULT_EXISTING_RESULTS)
+    parser.add_argument(
+        "--existing-results", type=Path, default=DEFAULT_EXISTING_RESULTS
+    )
     parser.add_argument("--baseline-dir", type=Path, default=DEFAULT_BASELINE_DIR)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)

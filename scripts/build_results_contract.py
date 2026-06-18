@@ -9,7 +9,7 @@ aggregation / period / value / source).
 
 Usage:
     uv run python scripts/build_results_contract.py \
-        --display results/all_static_results_full_h5_v2pop_panel_display_20260612.csv \
+        --display results.csv \
         --output dashboard/public/data/results_contract.json
 """
 
@@ -39,9 +39,7 @@ DEFAULT_BASELINE_MANIFEST = (
     / "manifests"
     / "baseline-dataset-manifest-v2pop-noclone.json"
 )
-DEFAULT_DISPLAY = (
-    REPO / "results" / "all_static_results_full_h5_v2pop_panel_display_20260612.csv"
-)
+DEFAULT_DISPLAY = REPO / "results.csv"
 DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_status.csv"
 DEFAULT_OUTPUT = REPO / "dashboard" / "public" / "data" / "results_contract.json"
 TR2026_AUX = REPO / "data" / "social_security_aux_tr2026.csv"
