@@ -13,7 +13,13 @@ from pathlib import Path
 import sys
 from typing import Any
 
-import modal
+try:
+    import modal
+
+    _MODAL_IMPORT_FAILED = False
+except ModuleNotFoundError:  # pragma: no cover - exercised by import-only tests.
+    modal = None  # type: ignore[assignment]
+    _MODAL_IMPORT_FAILED = True
 
 
 LOCAL_PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -380,6 +386,69 @@ def compute_reform_full_h5_bundle_sha(
     ).hexdigest()
 
 
+class _MissingModalDependency:
+    def __getattr__(self, name: str) -> Any:
+        raise RuntimeError(
+            "The 'modal' package is required for paid full-H5 launches. "
+            "Install Modal or run through `modal run modal_batch/reform_full_h5.py`."
+        )
+
+
+class _MissingModalImage(_MissingModalDependency):
+    @classmethod
+    def debian_slim(cls, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return cls()
+
+    def env(self, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return self
+
+    def pip_install(self, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return self
+
+    def add_local_dir(self, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return self
+
+    def add_local_file(self, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return self
+
+    def run_commands(self, *_args: Any, **_kwargs: Any) -> "_MissingModalImage":
+        return self
+
+
+class _MissingModalApp(_MissingModalDependency):
+    def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+        pass
+
+    def function(self, *_args: Any, **_kwargs: Any) -> Any:
+        return lambda function: function
+
+    def local_entrypoint(self, *_args: Any, **_kwargs: Any) -> Any:
+        return lambda function: function
+
+
+class _MissingModalVolume(_MissingModalDependency):
+    @classmethod
+    def from_name(cls, *_args: Any, **_kwargs: Any) -> "_MissingModalVolume":
+        return cls()
+
+
+class _MissingModalSecret(_MissingModalDependency):
+    @classmethod
+    def from_name(cls, *_args: Any, **_kwargs: Any) -> "_MissingModalSecret":
+        return cls()
+
+
+if modal is None:
+
+    class _MissingModalModule:
+        Image = _MissingModalImage
+        App = _MissingModalApp
+        Volume = _MissingModalVolume
+        Secret = _MissingModalSecret
+
+    modal = _MissingModalModule()  # type: ignore[assignment]
+
+
 policyengine_us_path = os.environ.get("CRFB_POLICYENGINE_US_PATH")
 projected_datasets_path = Path(
     os.environ.get(
@@ -535,6 +604,11 @@ def submit_reform_full_h5(
     wait_for_completion: bool = True,
     dry_run: bool = False,
 ) -> None:
+    if _MODAL_IMPORT_FAILED:
+        raise RuntimeError(
+            "The 'modal' package is required for paid full-H5 launches. "
+            "Install Modal or run through `modal run modal_batch/reform_full_h5.py`."
+        )
     requested_cells = (
         _parse_cell_keys(cells)
         if cells

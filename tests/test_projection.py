@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import src.projection as projection
 from src.projection import (
     CONTRIBUTOR_GATES,
     build_household_age_bin_matrix,
@@ -301,6 +302,7 @@ def test_contributor_gates_apply_by_default():
 
 def test_tob_contributor_floor_is_35():
     # Both benefit-taxation contributor metrics share the lowered floor.
+    assert not hasattr(projection, "CONTRIBUTOR_GATE_START_YEAR")
     assert CONTRIBUTOR_GATES["hi_tob"]["contributor_effective_sample_size"] == (
         "min",
         35.0,

@@ -140,10 +140,19 @@ def install_behavioral_baseline_tax_system(
             "reason": "simulation has no baseline branch",
         }
 
-    # Build the baseline model system from the running managed simulation's
-    # class (no separate policyengine_us construction), preserving the certified
-    # model<->data pairing the simulation was created with.
-    baseline_system = type(sim).default_tax_benefit_system(reform=baseline_reform)
+    # Prefer the running simulation class so managed simulations preserve their
+    # certified model<->data pairing. Fall back to policyengine_us.Microsimulation
+    # for lightweight tests and simulation wrappers that proxy the baseline branch.
+    default_tax_benefit_system = getattr(
+        type(sim),
+        "default_tax_benefit_system",
+        None,
+    )
+    if default_tax_benefit_system is None:
+        from policyengine_us import Microsimulation
+
+        default_tax_benefit_system = Microsimulation.default_tax_benefit_system
+    baseline_system = default_tax_benefit_system(reform=baseline_reform)
     baseline_system.simulation = sim.baseline
     sim.baseline.tax_benefit_system = baseline_system
     sim.baseline.reform = baseline_reform

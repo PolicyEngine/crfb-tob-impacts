@@ -9,8 +9,8 @@ SAME function the prior pipeline used; we do not reinvent it.
 The split ratio is stable across years, so it is computed only at 2026 and 2100
 (28 cells = 14 reforms x 2 endpoints), then interpolated across years and
 applied to the exact static revenue panel by scripts/assemble_reform_panel.py.
-Static only (no labor-supply response); runs preemptible since cells are short
-to redo.
+Static only (no labor-supply response); cells run nonpreemptible because the
+clone-system branch split is long enough that preemptions wasted prior runs.
 
 Run:
     modal run --detach modal_batch/decomposition.py
@@ -46,9 +46,20 @@ baselines = modal.Volume.from_name("crfb-baseline-builds", create_if_missing=Fal
 decomp = modal.Volume.from_name("crfb-decomposition", create_if_missing=True)
 
 REFORMS = [
-    "option1", "option2", "option3", "option4", "option5", "option6",
-    "option7", "option8", "option9", "option10", "option11", "option12",
-    "tax93", "reverse_roth",
+    "option1",
+    "option2",
+    "option3",
+    "option4",
+    "option5",
+    "option6",
+    "option7",
+    "option8",
+    "option9",
+    "option10",
+    "option11",
+    "option12",
+    "tax93",
+    "reverse_roth",
 ]
 ENDPOINTS = [2026, 2100]
 # Weighted-sum variables that feed the trust-fund decomposition columns.
@@ -100,10 +111,14 @@ def decompose_cell(reform_id: str, year: int) -> dict:
         materialize_tob_revenue_pair(sim, year=year)
 
         def s(variable: str) -> float:
-            try:
-                return float(sim.calculate(variable, year).sum())
-            except Exception:  # noqa: BLE001 — absent variable -> 0 contribution
+            variables = getattr(
+                getattr(sim, "tax_benefit_system", None),
+                "variables",
+                {},
+            )
+            if variable not in variables:
                 return 0.0
+            return float(sim.calculate(variable, year).sum())
 
         return {v: s(v) for v in SUM_VARS}
 
@@ -128,7 +143,10 @@ def main(reforms: str = "", years: str = "") -> None:
     rlist = reforms.split(",") if reforms else REFORMS
     ylist = [int(y) for y in years.split(",")] if years else ENDPOINTS
     cells = [(r, y) for r in rlist for y in ylist]
-    print(f"decomposing {len(cells)} cells ({len(rlist)} reforms x {len(ylist)} endpoints)", flush=True)
+    print(
+        f"decomposing {len(cells)} cells ({len(rlist)} reforms x {len(ylist)} endpoints)",
+        flush=True,
+    )
     done = 0
     for rec in decompose_cell.starmap(cells):
         if rec:
@@ -136,6 +154,9 @@ def main(reforms: str = "", years: str = "") -> None:
             b, f = rec["baseline"], rec["reform"]
             d_oasdi = (f["tob_revenue_oasdi"] - b["tob_revenue_oasdi"]) / 1e9
             d_hi = (f["tob_revenue_medicare_hi"] - b["tob_revenue_medicare_hi"]) / 1e9
-            print(f"  {rec['reform_id']:13s} {rec['year']}: "
-                  f"tob_oasdi {d_oasdi:+.1f}B  tob_hi {d_hi:+.1f}B", flush=True)
+            print(
+                f"  {rec['reform_id']:13s} {rec['year']}: "
+                f"tob_oasdi {d_oasdi:+.1f}B  tob_hi {d_hi:+.1f}B",
+                flush=True,
+            )
     print(f"done: {done}/{len(cells)} cells -> volume crfb-decomposition", flush=True)

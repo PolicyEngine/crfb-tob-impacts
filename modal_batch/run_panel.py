@@ -4,7 +4,17 @@
     modal run modal_batch/run_panel.py --years 2026,2030,2035-2100:5 --reforms option1,tax93
     modal run --detach modal_batch/run_panel.py            # survives client disconnect
 
-What it does, end to end:
+Canonical scoring contract:
+
+- Static scoring runs the full selected-cells panel.
+- Behavioral / conventional labor-supply-response scoring runs only the 2026
+  and 2100 endpoints. Annual behavioral rows are constructed downstream by
+  interpolating each reform's endpoint behavioral/static multiplier. NEVER fan
+  behavioral scoring out to every year.
+- TOB trust-fund decomposition is a separate endpoint pass that reuses
+  ``materialize_tob_revenue_pair``; do not duplicate the split formulas here.
+- Long baseline/scoring Modal cells run nonpreemptible because preemption lost
+  prior far-horizon work before it could commit.
 
 1. Surveys the two Volumes to see which baselines are already built and which
    (reform, year) cells are already scored — so a re-run only does what's
@@ -19,9 +29,10 @@ What it does, end to end:
    modes that stalled earlier runs (spot preemption killing long far-horizon
    builds, and scoring cells thrashing on preemption to zero commits) cannot
    recur.
-5. When every cell is present, assembles the delta-by-reform-by-year panel,
-   writes it (provenance-stamped with the certified base build id) to
-   ``results/reform_panel.json``, and prints the table.
+5. When every requested cell is present, assembles a raw orchestrator dump
+   (provenance-stamped with the certified base build id) to
+   ``results/run_panel_raw.json`` and prints the table. The canonical dashboard
+   panel remains owned by ``scripts/assemble_reform_panel.py``.
 
 Reform revenue is scored as the income-tax delta vs the current-law baseline;
 for years >= 2035 the Trustees long-run tax assumption (current law) is stacked
@@ -36,6 +47,16 @@ import sys
 import time
 
 import modal
+
+from modal_batch.panel_spec import (
+    BEHAVIORAL_ENDPOINT_YEARS,
+    PANEL_REFORMS,
+    cell_key as _cell_key,
+    needed_baseline_years,
+    validate_scoring_year,
+    wanted_cell_keys,
+    years_for_scoring as _years_for_scoring,
+)
 
 LOCAL_PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP_NAME = "crfb-panel"
@@ -60,11 +81,7 @@ scores = modal.Volume.from_name("crfb-reform-scores", create_if_missing=True)
 BUILDS = "/builds"
 SCORES = "/scores"
 
-REFORMS = [
-    "option1", "option2", "option3", "option4", "option5", "option6",
-    "option7", "option8", "option9", "option10", "option11", "option12",
-    "tax93", "reverse_roth",
-]
+REFORMS = list(PANEL_REFORMS)
 # Default years are NOT a flat 5-year grid: src.selected_cells is the single
 # source of truth — annual 2026-2035 (catches the OBBBA senior-deduction sunset
 # in 2029 and the 2034/35 tax-assumption switch), every five years 2040-2100,
@@ -77,13 +94,6 @@ REFORMS = [
 # for zero added accuracy and is the over-run this guard exists to prevent:
 # every spawn site below derives behavioral years from this tuple, never the
 # full panel. Static scoring uses the full year list.
-BEHAVIORAL_ENDPOINT_YEARS = (2026, 2100)
-
-
-def _years_for_scoring(scoring_type: str, year_list) -> list[int]:
-    if scoring_type == "static":
-        return list(year_list)
-    return [y for y in BEHAVIORAL_ENDPOINT_YEARS if y in year_list]
 
 
 # --------------------------------------------------------------------------- #
@@ -109,13 +119,6 @@ def _parse_years(spec: str) -> list[int]:
 
 def _parse_reforms(spec: str) -> list[str]:
     return [r.strip() for r in spec.split(",") if r.strip()] if spec else list(REFORMS)
-
-
-def _cell_key(reform_id: str, year: int, scoring_type: str = "static") -> str:
-    # Static cells keep the bare name so the already-computed static panel is
-    # reused; behavioral (conventional) cells get a scoring suffix.
-    suffix = "" if scoring_type == "static" else f"_{scoring_type}"
-    return f"{reform_id}_{year}{suffix}"
 
 
 def _json_safe(value):
@@ -175,7 +178,10 @@ def collect() -> list[dict]:
     nonpreemptible=True,
 )
 def build_one_year(
-    year: int, reforms: list[str], scoring_types: tuple[str, ...] = ("static",)
+    year: int,
+    reforms: list[str],
+    scoring_types: tuple[str, ...] = ("static",),
+    force: bool = False,
 ) -> dict:
     """Build {year}'s baseline on the certified base if missing, then spawn its
     reform-scoring cells (every scoring type, only those not already scored)."""
@@ -189,12 +195,19 @@ def build_one_year(
     sentinel_path = dest / f"{year}.sentinel.json"
 
     baselines.reload()
-    if sentinel_path.exists():
+    if sentinel_path.exists() and not force:
         sentinel = json.loads(sentinel_path.read_text())
         built = False
     else:
         from src.pipeline import build_year
 
+        for stale in (
+            sentinel_path,
+            dest / f"{year}.h5",
+            dest / f"{year}.h5.metadata.json",
+        ):
+            if stale.exists():
+                stale.unlink()
         out = Path("/tmp/out")
         out.mkdir(parents=True, exist_ok=True)
         base_uri = certified_base_uri()
@@ -212,6 +225,22 @@ def build_one_year(
         baselines.commit()
         built = True
 
+    if force:
+        scores.reload()
+        deleted = []
+        for scoring_type in scoring_types:
+            if year not in _years_for_scoring(scoring_type, [year]):
+                continue
+            for reform_id in reforms:
+                score_path = (
+                    Path(SCORES) / f"{_cell_key(reform_id, year, scoring_type)}.json"
+                )
+                if score_path.exists():
+                    score_path.unlink()
+                    deleted.append(score_path.stem)
+        if deleted:
+            scores.commit()
+
     # Self-pipeline: kick off this year's reform cells now that the baseline
     # exists. score_cell is idempotent, so already-scored cells are no-ops.
     scores.reload()
@@ -224,7 +253,7 @@ def build_one_year(
             continue
         for reform_id in reforms:
             if _cell_key(reform_id, year, scoring_type) not in scored:
-                score_cell.spawn(reform_id, year, scoring_type)
+                score_cell.spawn(reform_id, year, scoring_type, force)
                 spawned.append(_cell_key(reform_id, year, scoring_type))
 
     return {
@@ -248,24 +277,27 @@ def build_one_year(
     retries=2,
     nonpreemptible=True,
 )
-def score_cell(reform_id: str, year: int, scoring_type: str = "static") -> dict:
+def score_cell(
+    reform_id: str,
+    year: int,
+    scoring_type: str = "static",
+    force: bool = False,
+) -> dict:
     sys.path.insert(0, "/app")
     # Last line of defense for the costly bug: behavioral (conventional) scoring
     # is endpoint-only. Even a direct score_cell call (bypassing the orchestrator
     # guards) must refuse a non-endpoint LSR cell — behavioral is derived by
     # interpolating the endpoint multipliers, never computed per year.
-    if scoring_type != "static" and year not in BEHAVIORAL_ENDPOINT_YEARS:
-        raise ValueError(
-            f"{scoring_type!r} scoring is endpoint-only {BEHAVIORAL_ENDPOINT_YEARS}; "
-            f"refusing per-year LSR cell for year {year}"
-        )
+    validate_scoring_year(scoring_type, year)
     out = Path(SCORES)
     out.mkdir(parents=True, exist_ok=True)
     cell_path = out / f"{_cell_key(reform_id, year, scoring_type)}.json"
 
     scores.reload()
-    if cell_path.exists():
+    if cell_path.exists() and not force:
         return json.loads(cell_path.read_text())
+    if cell_path.exists():
+        cell_path.unlink()
 
     from src import reforms as R
     from src.engine import dataset_microsimulation
@@ -311,7 +343,9 @@ def score_cell(reform_id: str, year: int, scoring_type: str = "static") -> dict:
             if component is None:
                 continue
             parts.extend(component if isinstance(component, tuple) else [component])
-        reform_arg = None if not parts else (parts[0] if len(parts) == 1 else tuple(parts))
+        reform_arg = (
+            None if not parts else (parts[0] if len(parts) == 1 else tuple(parts))
+        )
         sim = (
             dataset_microsimulation(h5, reform=reform_arg)
             if reform_arg is not None
@@ -360,18 +394,14 @@ def main(
     scoring_types = tuple(s.strip() for s in scoring.split(",") if s.strip()) or (
         "static",
     )
-    want_cells = {
-        _cell_key(r, y, st)
-        for st in scoring_types
-        for y in _years_for_scoring(st, year_list)
-        for r in reform_list
-    }
+    want_cells = wanted_cell_keys(reform_list, year_list, scoring_types)
 
     state = survey.remote()
     built = set(state["built"])
     scored = set(state["scored"])
-    need_build = [y for y in year_list if redo_baselines or y not in built]
-    have_baseline_now = [y for y in year_list if y in built and not redo_baselines]
+    baseline_years = needed_baseline_years(year_list, scoring_types)
+    need_build = [y for y in baseline_years if redo_baselines or y not in built]
+    have_baseline_now = [y for y in baseline_years if y in built and not redo_baselines]
 
     print(
         f"panel: {len(year_list)} years x {len(reform_list)} reforms "
@@ -389,14 +419,15 @@ def main(
     # when it finishes, so the only scores we spawn here are for years whose
     # baseline ALREADY exists (no build will fire for them).
     build_calls = {
-        y: build_one_year.spawn(y, reform_list, scoring_types) for y in need_build
+        y: build_one_year.spawn(y, reform_list, scoring_types, redo_baselines)
+        for y in need_build
     }
     head_start = 0
     for st in scoring_types:
         for y in _years_for_scoring(st, have_baseline_now):
             for r in reform_list:
                 if redo_scores or _cell_key(r, y, st) not in scored:
-                    score_cell.spawn(r, y, st)
+                    score_cell.spawn(r, y, st, redo_scores)
                     head_start += 1
     if head_start:
         print(f"  spawned {head_start} cells for already-built years", flush=True)
@@ -469,10 +500,14 @@ def _assemble(year_list, reform_list, scoring_types, failed_builds) -> None:
     }
     missing = []
     for st in scoring_types:
+        scoring_years = set(_years_for_scoring(st, year_list))
         block = {}
         for r in reform_list:
             row = {}
             for y in year_list:
+                if y not in scoring_years:
+                    row[str(y)] = None
+                    continue
                 rec = by_key.get(_cell_key(r, y, st))
                 if rec is None:
                     if y not in failed_builds:
@@ -492,22 +527,29 @@ def _assemble(year_list, reform_list, scoring_types, failed_builds) -> None:
     out_path.write_text(json.dumps(panel, indent=2, sort_keys=True))
 
     for st in scoring_types:
+        scoring_years = _years_for_scoring(st, year_list)
         block = panel["scoring"][st]
         print(f"\n=== {st} reform panel (Δ income tax, $B) ===", flush=True)
-        print("reform        " + "".join(f"{y:>9}" for y in year_list), flush=True)
+        print("reform        " + "".join(f"{y:>9}" for y in scoring_years), flush=True)
         for r in reform_list:
             cells = "".join(
-                (f"{block[r][str(y)] / 1e9:>9.1f}"
-                 if block[r][str(y)] is not None else f"{'—':>9}")
-                for y in year_list
+                (
+                    f"{block[r][str(y)] / 1e9:>9.1f}"
+                    if block[r][str(y)] is not None
+                    else f"{'—':>9}"
+                )
+                for y in scoring_years
             )
             print(f"{r:<14}{cells}", flush=True)
     print(f"\nwrote {out_path}", flush=True)
     if failed_builds:
         print(f"FAILED baselines: {sorted(failed_builds)}", flush=True)
     if missing:
-        print(f"MISSING {len(missing)} cells (rerun to fill): {missing[:15]}"
-              + (" ..." if len(missing) > 15 else ""), flush=True)
+        print(
+            f"MISSING {len(missing)} cells (rerun to fill): {missing[:15]}"
+            + (" ..." if len(missing) > 15 else ""),
+            flush=True,
+        )
     else:
         print("all cells present.", flush=True)
 

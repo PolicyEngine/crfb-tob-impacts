@@ -18,14 +18,27 @@ import argparse
 import csv
 import json
 from pathlib import Path
+import warnings
 
 ROOT = Path(__file__).resolve().parents[1]
 REFORMS = [
-    "option1", "option2", "option3", "option4", "option5", "option6",
-    "option7", "option8", "option9", "option10", "option11", "option12",
-    "tax93", "reverse_roth",
+    "option1",
+    "option2",
+    "option3",
+    "option4",
+    "option5",
+    "option6",
+    "option7",
+    "option8",
+    "option9",
+    "option10",
+    "option11",
+    "option12",
+    "tax93",
+    "reverse_roth",
 ]
 ENDPOINTS = (2026, 2100)
+NEAR_ZERO_STATIC_DELTA_TOLERANCE = 1_000_000.0
 # Reforms whose behavioral delta is taken equal to the static delta (ratio 1.0)
 # rather than from a computed LSR endpoint ratio. reverse_roth's labor-supply
 # response is assumed negligible, consistent with the ~1.00 endpoint multipliers
@@ -41,8 +54,31 @@ def load_cells(scores_dir: Path) -> dict:
             d = json.loads(path.read_text())
         except Exception:  # noqa: BLE001
             continue
-        cells[(d["reform_id"], int(d["year"]), d.get("scoring_type", "static"))] = float(d["delta"])
+        cells[(d["reform_id"], int(d["year"]), d.get("scoring_type", "static"))] = (
+            float(d["delta"])
+        )
     return cells
+
+
+def behavioral_static_ratio(
+    *,
+    reform_id: str,
+    year: int,
+    static_delta: float | None,
+    behavioral_delta: float | None,
+    tolerance: float = NEAR_ZERO_STATIC_DELTA_TOLERANCE,
+) -> float | None:
+    if behavioral_delta is None:
+        return None
+    if static_delta is None or abs(static_delta) < tolerance:
+        warnings.warn(
+            f"{reform_id}_{year} static endpoint delta is near zero "
+            f"({static_delta}); using behavioral/static ratio 1.0.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return 1.0
+    return behavioral_delta / static_delta
 
 
 def main() -> None:
@@ -54,7 +90,11 @@ def main() -> None:
     years = sorted({y for (_, y, _) in cells})
     lo, hi = ENDPOINTS
 
-    panel = {"years": years, "method": "static exact; behavioral = static x linear-interpolated endpoint ratio (2026,2100)", "reforms": {}}
+    panel = {
+        "years": years,
+        "method": "static exact; behavioral = static x linear-interpolated endpoint ratio (2026,2100)",
+        "reforms": {},
+    }
     missing_endpoints = []
 
     for r in REFORMS:
@@ -63,7 +103,9 @@ def main() -> None:
         # endpoint behavioral/static ratios
         ratios = {}
         if assumed_static:
-            ratios = {ep: 1.0 for ep in ENDPOINTS}  # behavioral == static, by assumption
+            ratios = {
+                ep: 1.0 for ep in ENDPOINTS
+            }  # behavioral == static, by assumption
         else:
             for ep in ENDPOINTS:
                 s = cells.get((r, ep, "static"))
@@ -71,10 +113,13 @@ def main() -> None:
                 if c is None:
                     missing_endpoints.append(f"{r}_{ep}_conventional")
                     ratios[ep] = None
-                elif s in (None, 0.0):
-                    ratios[ep] = 1.0  # no static base -> no behavioral adjustment
                 else:
-                    ratios[ep] = c / s
+                    ratios[ep] = behavioral_static_ratio(
+                        reform_id=r,
+                        year=ep,
+                        static_delta=s,
+                        behavioral_delta=c,
+                    )
         row = {}
         for y in years:
             s = static.get(y)
@@ -101,7 +146,15 @@ def main() -> None:
 
     with out_csv.open("w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["reform", "year", "static_delta_usd", "behavioral_delta_usd", "behavioral_static_ratio"])
+        w.writerow(
+            [
+                "reform",
+                "year",
+                "static_delta_usd",
+                "behavioral_delta_usd",
+                "behavioral_static_ratio",
+            ]
+        )
         for r in REFORMS:
             for y in years:
                 cell = panel["reforms"][r]["by_year"][str(y)]
@@ -109,12 +162,15 @@ def main() -> None:
 
     # console summary
     print("endpoint behavioral/static ratios (the per-reform multipliers):")
-    print(f'{"reform":14}{"ratio@2026":>12}{"ratio@2100":>12}')
+    print(f"{'reform':14}{'ratio@2026':>12}{'ratio@2100':>12}")
     for r in REFORMS:
         p = panel["reforms"][r]
-        r26 = p["endpoint_ratio_2026"]; r100 = p["endpoint_ratio_2100"]
-        print(f'{r:14}{(f"{r26:.4f}" if r26 is not None else "MISSING"):>12}'
-              f'{(f"{r100:.4f}" if r100 is not None else "MISSING"):>12}')
+        r26 = p["endpoint_ratio_2026"]
+        r100 = p["endpoint_ratio_2100"]
+        print(
+            f"{r:14}{(f'{r26:.4f}' if r26 is not None else 'MISSING'):>12}"
+            f"{(f'{r100:.4f}' if r100 is not None else 'MISSING'):>12}"
+        )
     print(f"\nwrote {out_csv}\nwrote {out_json}")
     if missing_endpoints:
         print(f"\nMISSING endpoint conventional cells: {missing_endpoints}")
