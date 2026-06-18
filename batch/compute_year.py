@@ -14,7 +14,7 @@ Usage:
 
 Arguments:
     YEAR: Year to compute (e.g., 2026)
-    SCORING_TYPE: 'static' or 'dynamic'
+    SCORING_TYPE: 'static' or 'behavioral'
     BUCKET_NAME: Cloud Storage bucket name
     JOB_ID: Unique job identifier
     REFORMS: Space-separated list of reform IDs (e.g., 'option1 option2 option3 option4')
@@ -82,7 +82,7 @@ def main() -> None:
     bucket_name = sys.argv[3]
     job_id = sys.argv[4]
 
-    reform_functions, dynamic_functions = get_reform_lookups()
+    reform_functions, behavioral_functions = get_reform_lookups()
     reform_ids = sys.argv[5:] if len(sys.argv) > 5 else list(reform_functions.keys())
     unsupported = sorted(set(reform_ids) & SPECIAL_BASELINE_REFORMS)
     if unsupported:
@@ -135,7 +135,7 @@ def main() -> None:
                 dataset_name=dataset_name,
                 baseline=baseline,
                 reform_functions=reform_functions,
-                dynamic_functions=dynamic_functions,
+                behavioral_functions=behavioral_functions,
                 employer_net_reforms=BATCH_EMPLOYER_NET_REFORMS,
                 default_net_impact_mode="direct",
             )

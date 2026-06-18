@@ -8,8 +8,8 @@ static panel. Two LSR runs per reform produce the whole behavioral column.
 
 Inputs: per-cell score JSONs (reform_id, year, scoring_type, delta) downloaded
 from the crfb-reform-scores volume into a local directory.
-Outputs: results/reform_panel.csv (reform, year, static, behavioral, ratio) and
-results/reform_panel.json.
+Outputs preview artifacts under tmp/ by default. The canonical public result
+surface is built by scripts/publish_dashboard_results.py.
 """
 
 from __future__ import annotations
@@ -84,6 +84,8 @@ def behavioral_static_ratio(
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scores", default="/tmp/scores_dl")
+    ap.add_argument("--out-json", type=Path, default=ROOT / "tmp" / "reform_panel.json")
+    ap.add_argument("--out-csv", type=Path, default=ROOT / "tmp" / "reform_panel.csv")
     args = ap.parse_args()
 
     cells = load_cells(Path(args.scores))
@@ -109,9 +111,9 @@ def main() -> None:
         else:
             for ep in ENDPOINTS:
                 s = cells.get((r, ep, "static"))
-                c = cells.get((r, ep, "conventional"))
+                c = cells.get((r, ep, "behavioral"))
                 if c is None:
-                    missing_endpoints.append(f"{r}_{ep}_conventional")
+                    missing_endpoints.append(f"{r}_{ep}_behavioral")
                     ratios[ep] = None
                 else:
                     ratios[ep] = behavioral_static_ratio(
@@ -139,8 +141,8 @@ def main() -> None:
             "by_year": row,
         }
 
-    out_json = ROOT / "results" / "reform_panel.json"
-    out_csv = ROOT / "results" / "reform_panel.csv"
+    out_json = args.out_json
+    out_csv = args.out_csv
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(panel, indent=2, sort_keys=True))
 
@@ -173,7 +175,7 @@ def main() -> None:
         )
     print(f"\nwrote {out_csv}\nwrote {out_json}")
     if missing_endpoints:
-        print(f"\nMISSING endpoint conventional cells: {missing_endpoints}")
+        print(f"\nMISSING endpoint behavioral cells: {missing_endpoints}")
     else:
         print("\nall endpoint multipliers present.")
 

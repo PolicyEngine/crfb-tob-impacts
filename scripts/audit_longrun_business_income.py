@@ -76,7 +76,9 @@ def audit_h5(path: Path, year: int, variables: list[str]) -> list[dict[str, obje
     return rows
 
 
-def write_outputs(rows: list[dict[str, object]], csv_path: Path, json_path: Path) -> None:
+def write_outputs(
+    rows: list[dict[str, object]], csv_path: Path, json_path: Path
+) -> None:
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     json_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -212,7 +214,9 @@ def main() -> int:
     args = parse_args()
     variables = [item.strip() for item in args.variables.split(",") if item.strip()]
     rows = audit_h5(args.h5.expanduser().resolve(), args.year, variables)
-    write_outputs(rows, args.csv.expanduser().resolve(), args.json.expanduser().resolve())
+    write_outputs(
+        rows, args.csv.expanduser().resolve(), args.json.expanduser().resolve()
+    )
     for row in rows:
         if row.get("error"):
             print(f"{row['variable']}: {row['error']}")

@@ -109,10 +109,7 @@ def reform_household_metrics_artifact_dir(
     else:
         root = volume_path
     return (
-        root
-        / REFORM_HOUSEHOLD_METRICS_DIRNAME
-        / f"year={year}"
-        / f"reform={reform_id}"
+        root / REFORM_HOUSEHOLD_METRICS_DIRNAME / f"year={year}" / f"reform={reform_id}"
     )
 
 

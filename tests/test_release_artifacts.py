@@ -556,6 +556,16 @@ def test_dashboard_defaults_to_full_75_year_surface():
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
 
 
+def test_legacy_batch_paths_use_behavioral_scoring_contract():
+    compute_year = (REPO_ROOT / "batch" / "compute_year.py").read_text(encoding="utf-8")
+    submit_years = (REPO_ROOT / "batch" / "submit_years.py").read_text(encoding="utf-8")
+
+    assert "dynamic_functions" not in compute_year
+    assert "behavioral_functions=behavioral_functions" in compute_year
+    assert 'choices=["static", "behavioral"]' in submit_years
+    assert 'choices=["static", "dynamic"]' not in submit_years
+
+
 def test_dashboard_uses_crfb_roth_naming_and_hides_legacy_special_cases():
     shell = (
         REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"

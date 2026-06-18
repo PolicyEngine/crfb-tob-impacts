@@ -13,7 +13,6 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[1]
 DASHBOARD_DATA = REPO / "dashboard" / "public" / "data"
-DEFAULT_METADATA_DIR = REPO / "tmp" / "current_5a35713_metadata" / "all"
 DEFAULT_BASELINE_AGGREGATES = DASHBOARD_DATA / "baseline_aggregates.csv"
 DEFAULT_SENTINEL_GLOB = "tmp/reform_full_h5_result_*.json"
 DEFAULT_SUBMISSION_GLOB = "results/modal_submissions/reform_full_h5_*.json"
@@ -591,7 +590,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--metadata-dir",
         type=Path,
-        default=DEFAULT_METADATA_DIR,
+        required=True,
         help="Directory containing YYYY.h5.metadata.json baseline metadata files.",
     )
     parser.add_argument(

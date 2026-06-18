@@ -73,24 +73,16 @@ def test_save_microsimulation_raw_h5_writes_entity_tables(tmp_path: Path):
     eternity_period = period(ETERNITY)
     simulation = _FakeSimulation(
         {
-            "person_id": _FakeHolder(
-                {("default", eternity_period): np.array([1, 2])}
-            ),
+            "person_id": _FakeHolder({("default", eternity_period): np.array([1, 2])}),
             "person_household_id": _FakeHolder(
                 {("default", eternity_period): np.array([1, 1])}
             ),
-            "household_id": _FakeHolder(
-                {("default", eternity_period): np.array([1])}
-            ),
+            "household_id": _FakeHolder({("default", eternity_period): np.array([1])}),
             "household_weight": _FakeHolder(
                 {("default", year_period): np.array([100.0])}
             ),
-            "income_tax": _FakeHolder(
-                {("default", year_period): np.array([250.0])}
-            ),
-            "wrong_period": _FakeHolder(
-                {("default", other_period): np.array([999.0])}
-            ),
+            "income_tax": _FakeHolder({("default", year_period): np.array([250.0])}),
+            "wrong_period": _FakeHolder({("default", other_period): np.array([999.0])}),
         }
     )
     output_path = tmp_path / "raw" / "scenario.h5"
@@ -101,9 +93,7 @@ def test_save_microsimulation_raw_h5_writes_entity_tables(tmp_path: Path):
         year=2040,
     )
 
-    assert metadata["artifact_type"] == (
-        "policyengine_us_entity_table_raw_scenario_h5"
-    )
+    assert metadata["artifact_type"] == ("policyengine_us_entity_table_raw_scenario_h5")
     assert metadata["variable_count"] == 5
     with pd.HDFStore(output_path, mode="r") as store:
         person = store["person"]
@@ -372,7 +362,7 @@ def test__given_active_tax_assumption_metadata__then_reform_scoring_rejects_unta
             dataset_name=dataset_path,
             baseline=baseline,
             reform_functions={},
-            conventional_functions={},
+            behavioral_functions={},
             employer_net_reforms=frozenset(),
         )
 
@@ -421,7 +411,7 @@ def test__given_tagged_tax_assumption_baseline__then_reform_scoring_stacks_basel
         dataset_name=dataset_path,
         baseline=baseline,
         reform_functions={"option1": lambda: policy_reform},
-        conventional_functions={},
+        behavioral_functions={},
         employer_net_reforms=frozenset(),
     )
 
@@ -489,7 +479,7 @@ def test_compute_reform_result_saves_requested_household_metrics(
         dataset_name=dataset_path,
         baseline=baseline,
         reform_functions={"option1": lambda: policy_reform},
-        conventional_functions={},
+        behavioral_functions={},
         employer_net_reforms=frozenset(),
         metrics_output_path=metrics_path,
         baseline_metrics=_single_household_metrics(revenue=10.0),
@@ -591,14 +581,10 @@ def _write_microdata(path: Path) -> None:
                 "2025": np.array([1, 2, 3, 4], dtype=np.float32),
                 "2027": np.array([5, 6, 7, 8], dtype=np.float32),
             },
-            "spm_unit_id": {
-                "2027": np.array([1001, 2001, 3001, 4001], dtype=np.int32)
-            },
+            "spm_unit_id": {"2027": np.array([1001, 2001, 3001, 4001], dtype=np.int32)},
             "spm_value": {"2027": np.array([9, 10, 11, 12], dtype=np.float32)},
             "family_id": {"2027": np.array([11, 21, 31, 41], dtype=np.float32)},
-            "marital_unit_id": {
-                "2027": np.array([12, 22, 32, 42], dtype=np.int32)
-            },
+            "marital_unit_id": {"2027": np.array([12, 22, 32, 42], dtype=np.int32)},
         }
         for variable_name, periods in arrays.items():
             group = file.create_group(variable_name)

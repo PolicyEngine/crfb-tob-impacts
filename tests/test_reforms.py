@@ -9,7 +9,7 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
-    get_reverse_roth_conventional_reform,
+    get_reverse_roth_behavioral_reform,
     get_reverse_roth_reform,
     REFORMS,
 )
@@ -124,10 +124,10 @@ def test_reverse_roth_reform():
     assert param_reform.name == "Reverse Roth Social Security proposal"
 
 
-def test_reverse_roth_conventional_reform_includes_elasticities():
+def test_reverse_roth_behavioral_reform_includes_elasticities():
     """Reverse-Roth behavioral scoring: params + elasticities, then the
     deduction variable, as a flat reform set (no nested from_dict)."""
-    param_reform, deduction_reform = get_reverse_roth_conventional_reform()
+    param_reform, deduction_reform = get_reverse_roth_behavioral_reform()
     assert param_reform is not None and deduction_reform is not None
     params = param_reform.parameter_values
     assert any("simulation.labor_supply_responses" in str(k) for k in params.keys())
@@ -165,9 +165,7 @@ def test_tax93_rates_sit_between_neighbors():
         get_tax93_dict,
     )
 
-    rate_keys = [
-        key for key in get_tax93_dict() if ".taxability.rate." in key
-    ]
+    rate_keys = [key for key in get_tax93_dict() if ".taxability.rate." in key]
     assert rate_keys
     for key in rate_keys:
         low = list(get_option9_dict()[key].values())[0]

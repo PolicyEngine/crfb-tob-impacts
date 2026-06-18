@@ -17,8 +17,7 @@ install:
 data:
 	@echo "Reform data is produced by the Modal pipeline, not a single script:"
 	@echo "  1. make panel   (build baselines + score reforms on Modal)"
-	@echo "  2. python scripts/assemble_reform_panel.py   (static + behavioral multipliers)"
-	@echo "  3. python scripts/build_dashboard_results.py (dashboard results.csv + decomposition)"
+	@echo "  2. python scripts/publish_dashboard_results.py (root + dashboard results.csv)"
 	@echo "See modal_batch/run_panel.py for the full flow."
 
 dashboard:

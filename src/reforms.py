@@ -432,11 +432,11 @@ def deduct_employee_social_security_payroll_tax(
     # from_dict reform nested inside another reform's apply() gets its parameter
     # dict rebound to the class object, raising "type object 'reform' has no
     # attribute 'items'". Applied as a flat set, each reform is simple and
-    # behavioral (conventional) scoring works.
+    # behavioral scoring works.
     return (parameter_reform, deduction_reform)
 
 
-# CBO labor supply elasticities (for conventional scoring)
+# CBO labor supply elasticities (for behavioral scoring)
 #
 # Use the labor-supply elasticity schema supported by current policyengine-us.
 # Earlier local branches split income elasticities into a base value and age
@@ -482,7 +482,7 @@ CBO_ELASTICITIES = {
 }
 
 
-# Dict-returning functions for each option (used for conventional scoring)
+# Dict-returning functions for each option (used for behavioral scoring)
 # These return complete parameter dictionaries with CBO elasticities pre-merged
 
 
@@ -722,8 +722,8 @@ def get_reverse_roth_dict():
     return tax_100_percent_ss()
 
 
-# Complete conventional scoring dictionaries with CBO elasticities pre-merged
-def get_option1_conventional_dict():
+# Complete behavioral scoring dictionaries with CBO elasticities pre-merged
+def get_option1_behavioral_dict():
     """Return complete parameter dict for Option 1 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -731,7 +731,7 @@ def get_option1_conventional_dict():
     return result
 
 
-def get_option2_conventional_dict():
+def get_option2_behavioral_dict():
     """Return complete parameter dict for Option 2 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -739,7 +739,7 @@ def get_option2_conventional_dict():
     return result
 
 
-def get_option3_conventional_dict():
+def get_option3_behavioral_dict():
     """Return complete parameter dict for Option 3 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -748,7 +748,7 @@ def get_option3_conventional_dict():
     return result
 
 
-def get_option4_conventional_dict(credit_amount=500):
+def get_option4_behavioral_dict(credit_amount=500):
     """Return complete parameter dict for Option 4 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -758,7 +758,7 @@ def get_option4_conventional_dict(credit_amount=500):
     return result
 
 
-def get_option5_conventional_dict():
+def get_option5_behavioral_dict():
     """Return complete parameter dict for Option 5 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -767,7 +767,7 @@ def get_option5_conventional_dict():
     return result
 
 
-def get_option6_conventional_dict():
+def get_option6_behavioral_dict():
     """Return complete parameter dict for Option 6 with CBO elasticities."""
     reform_dict = {
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
@@ -829,7 +829,7 @@ def get_option6_conventional_dict():
     return reform_dict
 
 
-def get_option7_conventional_dict():
+def get_option7_behavioral_dict():
     """Return complete parameter dict for Option 7 with CBO elasticities."""
     result = {}
     result.update(eliminate_senior_deduction())
@@ -837,7 +837,7 @@ def get_option7_conventional_dict():
     return result
 
 
-def get_option8_conventional_dict():
+def get_option8_behavioral_dict():
     """Return complete parameter dict for Option 8 with CBO elasticities."""
     result = {}
     result.update(tax_100_percent_ss())
@@ -845,7 +845,7 @@ def get_option8_conventional_dict():
     return result
 
 
-def get_option9_conventional_dict():
+def get_option9_behavioral_dict():
     """Return complete parameter dict for Option 9 with CBO elasticities."""
     result = {}
     result.update(tax_90_percent_ss())
@@ -853,7 +853,7 @@ def get_option9_conventional_dict():
     return result
 
 
-def get_option10_conventional_dict():
+def get_option10_behavioral_dict():
     """Return complete parameter dict for Option 10 with CBO elasticities."""
     result = {}
     result.update(tax_95_percent_ss())
@@ -861,14 +861,14 @@ def get_option10_conventional_dict():
     return result
 
 
-def get_tax93_conventional_dict():
+def get_tax93_behavioral_dict():
     """Return complete parameter dict for the 93% option with CBO elasticities."""
     result = get_tax93_dict()
     result.update(CBO_ELASTICITIES)
     return result
 
 
-def get_option11_conventional_dict():
+def get_option11_behavioral_dict():
     """Return complete parameter dict for Option 11 with CBO elasticities.
 
     $700 credit with 6% phase-out above $150k (joint) / $75k (other).
@@ -882,7 +882,7 @@ def get_option11_conventional_dict():
     return result
 
 
-def get_option12_conventional_dict():
+def get_option12_behavioral_dict():
     """Return complete parameter dict for Option 12 with CBO elasticities.
 
     Extended Roth-Style Swap with specific phase-out schedule.
@@ -892,7 +892,7 @@ def get_option12_conventional_dict():
     return result
 
 
-def get_reverse_roth_conventional_reform():
+def get_reverse_roth_behavioral_reform():
     """Return reverse-Roth reform with CBO labor-supply elasticities."""
     result = get_reverse_roth_dict()
     result.update(CBO_ELASTICITIES)
@@ -906,7 +906,7 @@ def get_reverse_roth_conventional_reform():
 # OPTION 13 / BALANCED FIX - NOT IMPLEMENTED HERE
 # =============================================================================
 #
-# Option 13 (Balanced Fix Baseline) requires conventional year-by-year gap closing
+# Option 13 (Balanced Fix Baseline) requires behavioral year-by-year gap closing
 # that CANNOT be implemented via Reform.from_dict(). The implementation requires:
 #
 #   1. Running a baseline simulation to calculate actual SS/HI gaps each year

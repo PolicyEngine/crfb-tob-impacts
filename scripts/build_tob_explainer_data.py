@@ -103,9 +103,7 @@ def build_curves() -> list[dict]:
                         filing_status, ss_benefit, other_income
                     )
                 )
-                taxable = float(
-                    sim.calculate("taxable_social_security", CURVE_YEAR)[0]
-                )
+                taxable = float(sim.calculate("taxable_social_security", CURVE_YEAR)[0])
                 points.append(
                     {
                         "other_income": other_income,
@@ -139,16 +137,10 @@ def build_context(baseline_dir: Path) -> list[dict]:
         if not dataset.exists():
             print(f"context {year}: dataset missing, skipping", file=sys.stderr)
             continue
-        sim = Microsimulation(
-            dataset=str(dataset), reform=_tax_assumption_reform(year)
-        )
+        sim = Microsimulation(dataset=str(dataset), reform=_tax_assumption_reform(year))
         ss_hh = sim.calc("social_security", period=year, map_to="household")
-        tob_oasdi_hh = sim.calc(
-            "tob_revenue_oasdi", period=year, map_to="household"
-        )
-        tob_hi_hh = sim.calc(
-            "tob_revenue_medicare_hi", period=year, map_to="household"
-        )
+        tob_oasdi_hh = sim.calc("tob_revenue_oasdi", period=year, map_to="household")
+        tob_hi_hh = sim.calc("tob_revenue_medicare_hi", period=year, map_to="household")
         tob_hh = tob_oasdi_hh + tob_hi_hh
         tob_oasdi_total = sim.calc("tob_revenue_oasdi", period=year)
         tob_hi_total = sim.calc("tob_revenue_medicare_hi", period=year)
@@ -179,9 +171,7 @@ def build_context(baseline_dir: Path) -> list[dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-dir", default="projected_datasets_v2pop")
-    parser.add_argument(
-        "--output", default="dashboard/public/data/tob_explainer.json"
-    )
+    parser.add_argument("--output", default="dashboard/public/data/tob_explainer.json")
     args = parser.parse_args()
 
     from importlib.metadata import version

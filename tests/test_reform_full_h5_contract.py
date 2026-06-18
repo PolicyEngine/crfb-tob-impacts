@@ -137,14 +137,22 @@ def test_submitter_consumes_approval_and_worker_consumes_reservation(tmp_path: P
     )
 
 
-def test_reform_cell_normalizes_conventional_to_behavioral():
-    cell = ReformCell(year=2026, reform="option1", scoring_type="conventional")
+def test_reform_cell_keeps_behavioral_label():
+    cell = ReformCell(year=2026, reform="option1", scoring_type="behavioral")
 
     assert cell.scoring_type == "behavioral"
     assert cell.key() == "year=2026/reform=option1/scoring=behavioral"
-    assert ReformCell.from_any(
-        {"year": 2026, "reform": "option1", "scoring_type": "conventional"}
-    ) == cell
+    assert (
+        ReformCell.from_any(
+            {"year": 2026, "reform": "option1", "scoring_type": "behavioral"}
+        )
+        == cell
+    )
+
+
+def test_reform_cell_rejects_conventional_label():
+    with pytest.raises(ValueError, match="Unsupported scoring_type"):
+        ReformCell(year=2026, reform="option1", scoring_type="conventional")
 
 
 def test_submitter_approval_is_single_use_even_for_same_cell(tmp_path: Path):

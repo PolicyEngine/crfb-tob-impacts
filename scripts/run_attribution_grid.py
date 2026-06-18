@@ -18,11 +18,13 @@ def parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("--reforms", required=True, help="Comma-separated reform IDs.")
-    parser.add_argument("--years", required=True, help="Year range or comma-separated years.")
+    parser.add_argument(
+        "--years", required=True, help="Year range or comma-separated years."
+    )
     parser.add_argument(
         "--scoring",
         default="static",
-        choices=["static", "conventional"],
+        choices=["static", "behavioral"],
         help="Scoring mode to run.",
     )
     parser.add_argument(

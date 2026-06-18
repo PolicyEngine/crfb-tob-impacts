@@ -44,9 +44,7 @@ def _canonical_schema_hash(entities: dict[str, dict[str, Any]]) -> str:
         entity: {
             "rows": details["rows"],
             "columns": details["columns"],
-            "required_weight_column_present": details[
-                "required_weight_column_present"
-            ],
+            "required_weight_column_present": details["required_weight_column_present"],
         }
         for entity, details in sorted(entities.items())
     }
@@ -312,7 +310,10 @@ def _put_object_once(
             )
         except Exception:
             raise error
-        if hashlib.sha256(existing_bytes).hexdigest() != hashlib.sha256(body).hexdigest():
+        if (
+            hashlib.sha256(existing_bytes).hexdigest()
+            != hashlib.sha256(body).hexdigest()
+        ):
             raise error
 
 

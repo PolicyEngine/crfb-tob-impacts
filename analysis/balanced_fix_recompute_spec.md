@@ -12,15 +12,19 @@ Repo: /Users/maxghenis/PolicyEngine/crfb-tob-impacts, branch v2-baseline-method.
 > fixes are inlined below and marked **[B1]/[B2]/[B3]**. Read the whole thing before running.
 
 ## Status of the no-compute pieces (already done — verify, do not redo)
-- **General-fund column is ALREADY LIVE.** `scripts/build_dashboard_results.py` already computes
-  `general_fund_impact = revenue_impact - tob_oasdi_impact - tob_medicare_hi_impact`
-  (`add_general_fund_impact`) and validates reconciliation to 1e-8; `dashboard/public/data/
-  results.csv` already carries the column and reconciles. VERIFIED 2026-06-18: existing
-  columns zero-drift; Reverse Roth 2026 revenue -$46.81B = OASDI +$4.44B + HI +$53.37B +
-  **general fund -$104.63B** (the above-the-line employee-OASDI payroll-tax deduction — this is
-  the answer to Marc #3). Just confirm it's present and reconciles; **add nothing**.
-- reverse_roth is answered by the current-law general-fund column ONLY. Do NOT score it against
-  the solvent baseline (that would add a 5th, costlier reform for no ask).
+- The current-law panel already exposes general-fund effects in the dashboard by
+  deriving `revenue_impact - tob_oasdi_impact - tob_medicare_hi_impact` at read
+  time from `results.csv`; there is **not** a persisted `general_fund_impact`
+  column in the canonical CSV. VERIFIED 2026-06-18: existing columns reconcile
+  to zero drift; Reverse Roth 2026 revenue -$46.81B = OASDI +$4.44B + HI
+  +$53.37B + **general fund -$104.63B** (the above-the-line employee-OASDI
+  payroll-tax deduction — this is the answer to Marc #3).
+- For any new solvency-baseline output, either persist `general_fund_impact` in
+  the new solvency file or document that the dashboard derives it the same way.
+  In both cases, validate OASDI + HI + general fund = total to 1e-8.
+- reverse_roth is answered by the current-law general-fund derivation ONLY. Do
+  NOT score it against the solvent baseline (that would add a 5th, costlier
+  reform for no ask).
 
 ## Reforms to score against the solvent baseline (exactly four)
 Marc's words -> option ids: "Phased Roth" = **option12**, "repeal" = **option1**,

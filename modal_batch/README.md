@@ -57,8 +57,8 @@ crfb-tob modal-refresh \
   --modal-target run_reforms \
   --reforms option9 \
   --years 2030 \
-  --scoring conventional \
-  --output results/option9_2030_conventional.csv
+  --scoring behavioral \
+  --output results/option9_2030_behavioral.csv
 ```
 
 ### Full Run (All Years)
@@ -69,8 +69,8 @@ Run all years for specified reforms:
 # New options only (static)
 crfb-tob modal-refresh --modal-target run_reforms --reforms option9,option10,option11 --years 2026-2035 --scoring static --output results/new_options_static.csv
 
-# New options only (conventional)
-crfb-tob modal-refresh --modal-target run_reforms --reforms option9,option10,option11 --years 2026-2035 --scoring conventional --output results/new_options_conventional.csv
+# New options only (behavioral)
+crfb-tob modal-refresh --modal-target run_reforms --reforms option9,option10,option11 --years 2026-2035 --scoring behavioral --output results/new_options_behavioral.csv
 
 # Custom year range
 crfb-tob modal-refresh --modal-target run_reforms --reforms option9 --years 2026-2035 --scoring static --output results/option9_static.csv

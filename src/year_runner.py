@@ -16,33 +16,33 @@ from policyengine_core.reforms import Reform
 try:
     from .engine import dataset_microsimulation
     from .reforms import (
-        get_option10_conventional_dict,
+        get_option10_behavioral_dict,
         get_option10_reform,
-        get_option11_conventional_dict,
+        get_option11_behavioral_dict,
         get_option11_reform,
-        get_option12_conventional_dict,
+        get_option12_behavioral_dict,
         get_option12_reform,
-        get_option1_conventional_dict,
+        get_option1_behavioral_dict,
         get_option1_reform,
-        get_option2_conventional_dict,
+        get_option2_behavioral_dict,
         get_option2_reform,
-        get_option3_conventional_dict,
+        get_option3_behavioral_dict,
         get_option3_reform,
-        get_option4_conventional_dict,
+        get_option4_behavioral_dict,
         get_option4_reform,
-        get_option5_conventional_dict,
+        get_option5_behavioral_dict,
         get_option5_reform,
-        get_option6_conventional_dict,
+        get_option6_behavioral_dict,
         get_option6_reform,
-        get_option7_conventional_dict,
+        get_option7_behavioral_dict,
         get_option7_reform,
-        get_option8_conventional_dict,
+        get_option8_behavioral_dict,
         get_option8_reform,
-        get_option9_conventional_dict,
+        get_option9_behavioral_dict,
         get_option9_reform,
-        get_reverse_roth_conventional_reform,
+        get_reverse_roth_behavioral_reform,
         get_reverse_roth_reform,
-        get_tax93_conventional_dict,
+        get_tax93_behavioral_dict,
         get_tax93_reform,
     )
     from .tax_assumption_loader import (
@@ -53,33 +53,33 @@ try:
 except ImportError:  # pragma: no cover - script execution fallback
     from engine import dataset_microsimulation
     from reforms import (
-        get_option10_conventional_dict,
+        get_option10_behavioral_dict,
         get_option10_reform,
-        get_option11_conventional_dict,
+        get_option11_behavioral_dict,
         get_option11_reform,
-        get_option12_conventional_dict,
+        get_option12_behavioral_dict,
         get_option12_reform,
-        get_option1_conventional_dict,
+        get_option1_behavioral_dict,
         get_option1_reform,
-        get_option2_conventional_dict,
+        get_option2_behavioral_dict,
         get_option2_reform,
-        get_option3_conventional_dict,
+        get_option3_behavioral_dict,
         get_option3_reform,
-        get_option4_conventional_dict,
+        get_option4_behavioral_dict,
         get_option4_reform,
-        get_option5_conventional_dict,
+        get_option5_behavioral_dict,
         get_option5_reform,
-        get_option6_conventional_dict,
+        get_option6_behavioral_dict,
         get_option6_reform,
-        get_option7_conventional_dict,
+        get_option7_behavioral_dict,
         get_option7_reform,
-        get_option8_conventional_dict,
+        get_option8_behavioral_dict,
         get_option8_reform,
-        get_option9_conventional_dict,
+        get_option9_behavioral_dict,
         get_option9_reform,
-        get_reverse_roth_conventional_reform,
+        get_reverse_roth_behavioral_reform,
         get_reverse_roth_reform,
-        get_tax93_conventional_dict,
+        get_tax93_behavioral_dict,
         get_tax93_reform,
     )
     from tax_assumption_loader import (
@@ -106,21 +106,21 @@ STATIC_REFORM_FUNCTIONS = {
     "tax93": get_tax93_reform,
 }
 
-CONVENTIONAL_REFORM_DICT_FUNCTIONS = {
-    "option1": get_option1_conventional_dict,
-    "option2": get_option2_conventional_dict,
-    "option3": get_option3_conventional_dict,
-    "option4": get_option4_conventional_dict,
-    "option5": get_option5_conventional_dict,
-    "option6": get_option6_conventional_dict,
-    "option7": get_option7_conventional_dict,
-    "option8": get_option8_conventional_dict,
-    "option9": get_option9_conventional_dict,
-    "option10": get_option10_conventional_dict,
-    "option11": get_option11_conventional_dict,
-    "option12": get_option12_conventional_dict,
-    "reverse_roth": get_reverse_roth_conventional_reform,
-    "tax93": get_tax93_conventional_dict,
+BEHAVIORAL_REFORM_FUNCTIONS = {
+    "option1": get_option1_behavioral_dict,
+    "option2": get_option2_behavioral_dict,
+    "option3": get_option3_behavioral_dict,
+    "option4": get_option4_behavioral_dict,
+    "option5": get_option5_behavioral_dict,
+    "option6": get_option6_behavioral_dict,
+    "option7": get_option7_behavioral_dict,
+    "option8": get_option8_behavioral_dict,
+    "option9": get_option9_behavioral_dict,
+    "option10": get_option10_behavioral_dict,
+    "option11": get_option11_behavioral_dict,
+    "option12": get_option12_behavioral_dict,
+    "reverse_roth": get_reverse_roth_behavioral_reform,
+    "tax93": get_tax93_behavioral_dict,
 }
 
 OPTION6_PHASE_IN_RATES = {
@@ -1289,12 +1289,12 @@ def get_reform_lookups(
         for reform_id, func in STATIC_REFORM_FUNCTIONS.items()
         if reform_id not in excluded_reforms
     }
-    conventional_functions = {
+    behavioral_functions = {
         reform_id: func
-        for reform_id, func in CONVENTIONAL_REFORM_DICT_FUNCTIONS.items()
+        for reform_id, func in BEHAVIORAL_REFORM_FUNCTIONS.items()
         if reform_id not in excluded_reforms
     }
-    return reform_functions, conventional_functions
+    return reform_functions, behavioral_functions
 
 
 def load_baseline(
@@ -1499,7 +1499,7 @@ def build_reform(
     reform_id: str,
     scoring_type: str,
     reform_functions: dict[str, Callable[[], Any]],
-    conventional_functions: dict[str, Callable[[], Any]],
+    behavioral_functions: dict[str, Callable[[], Any]],
 ) -> Any:
     if scoring_type == "static":
         reform_func = reform_functions.get(reform_id)
@@ -1507,11 +1507,11 @@ def build_reform(
             raise KeyError(f"Unknown reform: {reform_id}")
         return reform_func()
 
-    if scoring_type == "conventional":
-        conventional_dict_func = conventional_functions.get(reform_id)
-        if conventional_dict_func is None:
-            raise KeyError(f"No conventional dict for: {reform_id}")
-        reform_definition = conventional_dict_func()
+    if scoring_type == "behavioral":
+        behavioral_func = behavioral_functions.get(reform_id)
+        if behavioral_func is None:
+            raise KeyError(f"No behavioral reform for: {reform_id}")
+        reform_definition = behavioral_func()
         if isinstance(reform_definition, dict):
             return Reform.from_dict(reform_definition, country_id="us")
         return reform_definition
@@ -1660,7 +1660,7 @@ def compute_reform_result(
     dataset_name: Any,
     baseline: BaselineResult,
     reform_functions: dict[str, Callable[[], Any]],
-    conventional_functions: dict[str, Callable[[], dict[str, Any]]],
+    behavioral_functions: dict[str, Callable[[], dict[str, Any]]],
     employer_net_reforms: AbstractSet[str],
     default_net_impact_mode: str = "zero",
     baseline_reform: Any | None = None,
@@ -1681,7 +1681,7 @@ def compute_reform_result(
         dataset_name=dataset_name,
     )
     reform = build_reform(
-        reform_id, scoring_type, reform_functions, conventional_functions
+        reform_id, scoring_type, reform_functions, behavioral_functions
     )
     combined_reform = (
         (baseline_reform, reform) if baseline_reform is not None else reform
@@ -1817,7 +1817,7 @@ def save_reform_raw_h5_only(
     scoring_type: str,
     dataset_name: Any,
     reform_functions: dict[str, Callable[[], Any]],
-    conventional_functions: dict[str, Callable[[], dict[str, Any]]],
+    behavioral_functions: dict[str, Callable[[], dict[str, Any]]],
     raw_h5_output_path: str | Path,
     baseline_reform: Any | None = None,
     progress_label: str | None = None,
@@ -1834,7 +1834,7 @@ def save_reform_raw_h5_only(
         reform_id,
         scoring_type,
         reform_functions,
-        conventional_functions,
+        behavioral_functions,
     )
     combined_reform = (
         (baseline_reform, reform) if baseline_reform is not None else reform

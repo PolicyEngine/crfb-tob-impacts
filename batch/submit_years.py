@@ -203,7 +203,10 @@ def main():
         help="Comma-separated reform IDs (e.g., option1,option2,option3,option4)",
     )
     parser.add_argument(
-        "--scoring", required=True, choices=["static", "dynamic"], help="Scoring type"
+        "--scoring",
+        required=True,
+        choices=["static", "behavioral"],
+        help="Scoring type",
     )
     parser.add_argument(
         "--bucket", default="crfb-ss-analysis-results", help="Cloud Storage bucket"

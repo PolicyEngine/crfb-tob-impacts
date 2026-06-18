@@ -196,8 +196,8 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
 
     bundle = create_repro_bundle(
         repo_root=repo_root,
-        output_path=repo_root / "results" / "demo_conventional.csv",
-        scoring="conventional",
+        output_path=repo_root / "results" / "demo_behavioral.csv",
+        scoring="behavioral",
         reforms="option1,option2",
         years="2026-2027",
         modal_target="submit_cells",

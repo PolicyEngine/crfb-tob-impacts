@@ -96,14 +96,20 @@ def load_current_law_series() -> pd.DataFrame:
             f"Missing current-law TOB columns in {CURRENT_LAW_PATH.name}: {sorted(missing_columns)}"
         )
 
-    payroll = pd.read_csv(SSA_ECONOMIC_PROJECTIONS_PATH, usecols=["year", "taxable_payroll"])
+    payroll = pd.read_csv(
+        SSA_ECONOMIC_PROJECTIONS_PATH, usecols=["year", "taxable_payroll"]
+    )
     payroll_2025 = pd.DataFrame([{"year": 2025, "taxable_payroll": 10621.0}])
     payroll = pd.concat([payroll_2025, payroll], ignore_index=True)
 
     merged = current_law.merge(payroll, on="year", how="left", validate="one_to_one")
-    missing_payroll_years = merged.loc[merged["taxable_payroll"].isna(), "year"].tolist()
+    missing_payroll_years = merged.loc[
+        merged["taxable_payroll"].isna(), "year"
+    ].tolist()
     if missing_payroll_years:
-        raise ValueError(f"Missing taxable payroll values for years: {missing_payroll_years}")
+        raise ValueError(
+            f"Missing taxable payroll values for years: {missing_payroll_years}"
+        )
 
     merged = merged.rename(
         columns={
@@ -196,27 +202,31 @@ def build_tob_baseline_tr2026() -> pd.DataFrame:
         "TR2026 intermediate assumptions carry OBBBA in current law; "
         "values are the raw Trustees/CMS series with no bridge."
     )
-    return df[
-        [
-            "year",
-            "tob_oasdi_billions",
-            "tob_hi_billions",
-            "tob_total_billions",
-            "oasdi_share",
-            "hi_share",
-            "current_law_oasdi_billions",
-            "current_law_hi_billions",
-            "current_law_total_billions",
-            "taxable_payroll",
-            "oasdi_nominal_delta_billions",
-            "oasdi_delta_method",
-            "hi_method",
-            "oasdi_source",
-            "hi_source",
-            "current_law_source",
-            "notes",
+    return (
+        df[
+            [
+                "year",
+                "tob_oasdi_billions",
+                "tob_hi_billions",
+                "tob_total_billions",
+                "oasdi_share",
+                "hi_share",
+                "current_law_oasdi_billions",
+                "current_law_hi_billions",
+                "current_law_total_billions",
+                "taxable_payroll",
+                "oasdi_nominal_delta_billions",
+                "oasdi_delta_method",
+                "hi_method",
+                "oasdi_source",
+                "hi_source",
+                "current_law_source",
+                "notes",
+            ]
         ]
-    ].sort_values("year").reset_index(drop=True)
+        .sort_values("year")
+        .reset_index(drop=True)
+    )
 
 
 def build_tob_baseline(hi_method: str) -> pd.DataFrame:
@@ -227,7 +237,9 @@ def build_tob_baseline(hi_method: str) -> pd.DataFrame:
     oact_deltas = load_oact_oasdi_deltas()
 
     df = current_law.merge(oact_deltas, on="year", how="left", validate="one_to_one")
-    missing_delta_years = df.loc[df["oasdi_nominal_delta_billions"].isna(), "year"].tolist()
+    missing_delta_years = df.loc[
+        df["oasdi_nominal_delta_billions"].isna(), "year"
+    ].tolist()
     if missing_delta_years:
         raise ValueError(f"Missing OACT OASDI deltas for years: {missing_delta_years}")
 
@@ -244,39 +256,47 @@ def build_tob_baseline(hi_method: str) -> pd.DataFrame:
     df["current_law_source"] = SOURCE_CURRENT_LAW
     df["notes"] = hi_method_note
 
-    return df[
-        [
-            "year",
-            "tob_oasdi_billions",
-            "tob_hi_billions",
-            "tob_total_billions",
-            "oasdi_share",
-            "hi_share",
-            "current_law_oasdi_billions",
-            "current_law_hi_billions",
-            "current_law_total_billions",
-            "taxable_payroll",
-            "oasdi_nominal_delta_billions",
-            "oasdi_delta_method",
-            "hi_method",
-            "oasdi_source",
-            "hi_source",
-            "current_law_source",
-            "notes",
+    return (
+        df[
+            [
+                "year",
+                "tob_oasdi_billions",
+                "tob_hi_billions",
+                "tob_total_billions",
+                "oasdi_share",
+                "hi_share",
+                "current_law_oasdi_billions",
+                "current_law_hi_billions",
+                "current_law_total_billions",
+                "taxable_payroll",
+                "oasdi_nominal_delta_billions",
+                "oasdi_delta_method",
+                "hi_method",
+                "oasdi_source",
+                "hi_source",
+                "current_law_source",
+                "notes",
+            ]
         ]
-    ].sort_values("year").reset_index(drop=True)
+        .sort_values("year")
+        .reset_index(drop=True)
+    )
 
 
 def validate_generated_baseline(df: pd.DataFrame) -> None:
     expected_years = list(range(2025, 2101))
     years = df["year"].tolist()
     if years != expected_years:
-        raise ValueError("Generated baseline must contain one row for each year 2025-2100.")
+        raise ValueError(
+            "Generated baseline must contain one row for each year 2025-2100."
+        )
 
     totals = df["tob_total_billions"]
     if (totals <= 0).any():
         bad_years = df.loc[totals <= 0, "year"].tolist()
-        raise ValueError(f"Generated baseline has non-positive totals for years: {bad_years}")
+        raise ValueError(
+            f"Generated baseline has non-positive totals for years: {bad_years}"
+        )
 
     if not np.allclose(
         df["tob_oasdi_billions"] + df["tob_hi_billions"],
@@ -313,7 +333,9 @@ def validate_generated_baseline(df: pd.DataFrame) -> None:
             )
 
 
-def write_tob_baseline(df: pd.DataFrame, output_path: Path = GENERATED_BASELINE_PATH) -> None:
+def write_tob_baseline(
+    df: pd.DataFrame, output_path: Path = GENERATED_BASELINE_PATH
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False, float_format="%.10f")
 
@@ -400,8 +422,12 @@ def build_tob_baseline_manifest(
         "builder": {
             "module": _relative_to_repo(Path(__file__)),
             "module_sha256": file_sha256(Path(__file__)),
-            "script": _relative_to_repo(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
-            "script_sha256": file_sha256(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
+            "script": _relative_to_repo(
+                REPO_ROOT / "scripts" / "build_tob_baseline.py"
+            ),
+            "script_sha256": file_sha256(
+                REPO_ROOT / "scripts" / "build_tob_baseline.py"
+            ),
             "git_head": _git_value("rev-parse", "HEAD"),
             "git_dirty": bool(_git_value("status", "--short")),
         },
@@ -422,7 +448,9 @@ def load_tob_baseline_manifest(
     manifest_path: Path = GENERATED_BASELINE_MANIFEST_PATH,
 ) -> dict[str, object]:
     if not manifest_path.exists():
-        raise FileNotFoundError(f"Generated TOB baseline manifest not found: {manifest_path}")
+        raise FileNotFoundError(
+            f"Generated TOB baseline manifest not found: {manifest_path}"
+        )
     return json.loads(manifest_path.read_text(encoding="utf-8"))
 
 

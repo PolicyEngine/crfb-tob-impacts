@@ -18,12 +18,7 @@ def _write_scenario(
     volume_prefix: str = "run-prefix",
     scoring: str = "static",
 ) -> None:
-    artifact_dir = (
-        output_dir
-        / "scenarios"
-        / f"year={year}"
-        / f"scenario={scenario_id}"
-    )
+    artifact_dir = output_dir / "scenarios" / f"year={year}" / f"scenario={scenario_id}"
     artifact_dir.mkdir(parents=True)
     np.savez_compressed(
         artifact_dir / "metrics.npz",

@@ -20,11 +20,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--scoring",
         default="static",
-        choices=["static", "conventional"],
+        choices=["static", "behavioral"],
         help="Scoring mode for the run contract.",
     )
     parser.add_argument("--reforms", required=True, help="Comma-separated reform IDs.")
-    parser.add_argument("--years", required=True, help="Year range or comma-separated years.")
+    parser.add_argument(
+        "--years", required=True, help="Year range or comma-separated years."
+    )
     parser.add_argument(
         "--modal-target",
         default="run_reforms",

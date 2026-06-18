@@ -40,17 +40,17 @@ contract:
 
 - Static scoring covers the full selected-cells panel: annual 2026-2035, every
   five years from 2040-2100, and the option12 transition junctures.
-- Behavioral scoring is endpoint-only: compute 2026 and 2100, then let
-  `scripts/assemble_reform_panel.py` interpolate each reform's behavioral/static
+- Behavioral scoring is endpoint-only: compute 2026 and 2100, then publish
+  annual behavioral rows by interpolating each reform's behavioral/static
   multiplier across display years. Do not fan labor-supply-response scoring out
   per year.
 - OASDI/HI decomposition is an endpoint pass that reuses
   `materialize_tob_revenue_pair`; do not duplicate trust-fund split formulas.
 - Long Modal baseline/scoring cells are nonpreemptible, because preemption lost
   prior far-horizon work before it could commit.
-- `results/reform_panel.json` is assembled by
-  `scripts/assemble_reform_panel.py`; `modal_batch/run_panel.py` writes only the
-  raw orchestrator dump at `results/run_panel_raw.json`.
+- The public result surface is `results.csv` plus
+  `dashboard/public/data/results.csv`; raw Modal cell CSVs live under
+  `results/modal_runs_production/`.
 
 ## Project Structure
 

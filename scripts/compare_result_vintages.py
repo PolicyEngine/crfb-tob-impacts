@@ -45,7 +45,9 @@ def parse_args() -> argparse.Namespace:
 
 def load_results(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    missing = [column for column in [*KEY_COLUMNS, *VALUE_COLUMNS] if column not in df.columns]
+    missing = [
+        column for column in [*KEY_COLUMNS, *VALUE_COLUMNS] if column not in df.columns
+    ]
     if missing:
         raise ValueError(f"{path} is missing required columns: {missing}")
     return df[KEY_COLUMNS + VALUE_COLUMNS].copy()

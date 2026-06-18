@@ -1041,11 +1041,11 @@ def _static_reform_dict_functions():
     }
 
 
-def _conventional_reform_dict_functions():
+def _behavioral_reform_dict_functions():
     from src import reforms
 
     return {
-        f"option{index}": getattr(reforms, f"get_option{index}_conventional_dict")
+        f"option{index}": getattr(reforms, f"get_option{index}_behavioral_dict")
         for index in range(1, 13)
     }
 
@@ -1055,7 +1055,7 @@ def build_reform_parameter_tables(parameters) -> tuple[pd.DataFrame, pd.DataFram
     touched: dict[str, dict[str, set[str]]] = {}
     for scoring_type, functions in [
         ("static", _static_reform_dict_functions()),
-        ("behavioral", _conventional_reform_dict_functions()),
+        ("behavioral", _behavioral_reform_dict_functions()),
     ]:
         for reform_name, function in functions.items():
             reform_dict = function()

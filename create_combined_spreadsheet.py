@@ -1,5 +1,5 @@
 """
-Create a combined spreadsheet with all reform data for both static and dynamic scoring.
+Create a combined spreadsheet preview from the canonical CRFB results.csv.
 
 Uses the same allocation logic as dataLoader.ts in the dashboard.
 """
@@ -16,9 +16,8 @@ REPO_ROOT = Path(__file__).resolve().parent
 DATA_DIR = REPO_ROOT / "dashboard" / "public" / "data"
 ECONOMIC_PROJECTIONS_PATH = DATA_DIR / "ssa_economic_projections.csv"
 HI_TAXABLE_PAYROLL_PATH = DATA_DIR / "hi_taxable_payroll.csv"
-STATIC_RESULTS_PATH = DATA_DIR / "all_static_results.csv"
-DYNAMIC_RESULTS_PATH = DATA_DIR / "all_dynamic_results.csv"
-OUTPUT_PATH = REPO_ROOT / "dashboard_data_combined.csv"
+RESULTS_PATH = REPO_ROOT / "results.csv"
+OUTPUT_PATH = REPO_ROOT / "tmp" / "dashboard_data_combined.csv"
 DEFAULT_ECONOMIC_ROW = {"taxable_payroll": 0.0, "hi_taxable_payroll": 0.0, "gdp": 0.0}
 
 
@@ -30,16 +29,16 @@ def load_economic_projections() -> dict[int, dict[str, float]]:
 
 
 def load_results() -> pd.DataFrame:
-    static_df = pd.read_csv(STATIC_RESULTS_PATH)
-    dynamic_df = pd.read_csv(DYNAMIC_RESULTS_PATH)
-    return pd.concat([static_df, dynamic_df], ignore_index=True)
+    return pd.read_csv(RESULTS_PATH)
 
 
 def percentage(value: float, denominator: float) -> float:
     return (value / denominator * 100) if denominator > 0 else 0.0
 
 
-def resolve_hi_taxable_payroll(econ_row: dict[str, float], taxable_payroll: float) -> float:
+def resolve_hi_taxable_payroll(
+    econ_row: dict[str, float], taxable_payroll: float
+) -> float:
     hi_taxable_payroll = float(econ_row.get("hi_taxable_payroll", taxable_payroll))
     if pd.isna(hi_taxable_payroll) or hi_taxable_payroll <= 0:
         return taxable_payroll
@@ -91,7 +90,9 @@ def build_combined_dataframe(
     return result_df.sort_values(["Reform", "Type", "Year"])
 
 
-def print_sample(result_df: pd.DataFrame, reform: str, scoring_type: str, year: int) -> None:
+def print_sample(
+    result_df: pd.DataFrame, reform: str, scoring_type: str, year: int
+) -> None:
     sample = result_df[
         (result_df["Reform"] == reform)
         & (result_df["Type"] == scoring_type)
@@ -118,6 +119,7 @@ def main() -> None:
     economic_projections = load_economic_projections()
     combined = load_results()
     result_df = build_combined_dataframe(combined, economic_projections)
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     result_df.to_csv(OUTPUT_PATH, index=False)
     print_summary(result_df)
 

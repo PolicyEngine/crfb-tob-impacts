@@ -246,8 +246,7 @@ def run_contract(args: argparse.Namespace) -> dict[str, str]:
         ),
         "projected_datasets_path": os.environ.get("CRFB_PROJECTED_DATASETS_PATH", ""),
         "dataset_template": os.environ.get("CRFB_DATASET_TEMPLATE", ""),
-        "required_policyengine_us_version": args.required_policyengine_us_version
-        or "",
+        "required_policyengine_us_version": args.required_policyengine_us_version or "",
         "required_calibration_profile": args.required_calibration_profile or "",
         "required_target_source": args.required_target_source or "",
         "required_tax_assumption": args.required_tax_assumption or "",
@@ -325,12 +324,12 @@ def apply_publishable_contract(args: argparse.Namespace) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Run static/conventional CRFB reform scores locally."
+        description="Run static/behavioral CRFB reform scores locally."
     )
     parser.add_argument("--years", required=True)
     parser.add_argument("--reforms", default="standard")
     parser.add_argument("--output", required=True)
-    parser.add_argument("--scoring", choices=["static", "conventional"], default="static")
+    parser.add_argument("--scoring", choices=["static", "behavioral"], default="static")
     parser.add_argument("--max-roundtrip-pct-error", type=float, default=1.0)
     parser.add_argument("--default-net-impact-mode", default="direct")
     parser.add_argument(
@@ -379,7 +378,9 @@ def main(argv: list[str] | None = None) -> int:
     completed = existing_rows(output)
     write_metadata(args, years, reforms)
 
-    reform_functions, conventional_functions = get_reform_lookups(MODAL_UNSUPPORTED_REFORMS)
+    reform_functions, behavioral_functions = get_reform_lookups(
+        MODAL_UNSUPPORTED_REFORMS
+    )
     fieldnames: list[str] | None = None
     if output.exists() and output.stat().st_size > 0:
         with output.open(newline="", encoding="utf-8") as file:
@@ -437,7 +438,7 @@ def main(argv: list[str] | None = None) -> int:
                     dataset_name=dataset,
                     baseline=baseline,
                     reform_functions=reform_functions,
-                    conventional_functions=conventional_functions,
+                    behavioral_functions=behavioral_functions,
                     employer_net_reforms=MODAL_EMPLOYER_NET_REFORMS,
                     default_net_impact_mode=args.default_net_impact_mode,
                     progress_label=f"{reform}-{year}-{args.scoring}",

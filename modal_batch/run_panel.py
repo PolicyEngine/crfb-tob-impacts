@@ -7,7 +7,7 @@
 Canonical scoring contract:
 
 - Static scoring runs the full selected-cells panel.
-- Behavioral / conventional labor-supply-response scoring runs only the 2026
+- Behavioral labor-supply-response scoring runs only the 2026
   and 2100 endpoints. Annual behavioral rows are constructed downstream by
   interpolating each reform's endpoint behavioral/static multiplier. NEVER fan
   behavioral scoring out to every year.
@@ -31,7 +31,7 @@ Canonical scoring contract:
    recur.
 5. When every requested cell is present, assembles a raw orchestrator dump
    (provenance-stamped with the certified base build id) to
-   ``results/run_panel_raw.json`` and prints the table. The canonical dashboard
+   ``tmp/run_panel_raw.json`` and prints the table. The canonical dashboard
    panel remains owned by ``scripts/assemble_reform_panel.py``.
 
 Reform revenue is scored as the income-tax delta vs the current-law baseline;
@@ -53,6 +53,8 @@ from modal_batch.panel_spec import (
     PANEL_REFORMS,
     cell_key as _cell_key,
     needed_baseline_years,
+    normalize_scoring_type,
+    normalize_scoring_types,
     validate_scoring_year,
     wanted_cell_keys,
     years_for_scoring as _years_for_scoring,
@@ -87,7 +89,7 @@ REFORMS = list(PANEL_REFORMS)
 # in 2029 and the 2034/35 tax-assumption switch), every five years 2040-2100,
 # and the option12 OASDI->HI phase junctures (2048, 2049, 2062, 2063).
 
-# Behavioral (conventional / labor-supply-response) scoring is ENDPOINT-ONLY BY
+# Behavioral labor-supply-response scoring is ENDPOINT-ONLY BY
 # CONSTRUCTION. The behavioral/static revenue ratio is stable, so it is computed
 # only at these two endpoints and interpolated across years downstream
 # (scripts/assemble_reform_panel.py). Fanning LSR out per year is ~25x the cost
@@ -185,6 +187,7 @@ def build_one_year(
 ) -> dict:
     """Build {year}'s baseline on the certified base if missing, then spawn its
     reform-scoring cells (every scoring type, only those not already scored)."""
+    scoring_types = normalize_scoring_types(scoring_types)
     sys.path.insert(0, "/app")
     import importlib.metadata as metadata
     import shutil
@@ -284,10 +287,11 @@ def score_cell(
     force: bool = False,
 ) -> dict:
     sys.path.insert(0, "/app")
-    # Last line of defense for the costly bug: behavioral (conventional) scoring
+    # Last line of defense for the costly bug: behavioral scoring
     # is endpoint-only. Even a direct score_cell call (bypassing the orchestrator
-    # guards) must refuse a non-endpoint LSR cell — behavioral is derived by
+    # guards) must refuse a non-endpoint LSR cell; behavioral is derived by
     # interpolating the endpoint multipliers, never computed per year.
+    scoring_type = normalize_scoring_type(scoring_type)
     validate_scoring_year(scoring_type, year)
     out = Path(SCORES)
     out.mkdir(parents=True, exist_ok=True)
@@ -310,17 +314,17 @@ def score_cell(
     install_lsr = None
     if scoring_type == "static":
         policy = getattr(R, f"get_{reform_id}_reform")()
-    elif scoring_type == "conventional":
-        # CBO conventional (behavioral) scoring: policy + labor-supply
+    elif scoring_type == "behavioral":
+        # Behavioral scoring: policy + labor-supply
         # elasticities, with the LSR comparison anchored to the same
         # current-law baseline used for static aggregation.
         from policyengine_core.reforms import Reform
         from src.reform_full_h5_worker import install_behavioral_baseline_tax_system
-        from src.year_runner import CONVENTIONAL_REFORM_DICT_FUNCTIONS
+        from src.year_runner import BEHAVIORAL_REFORM_FUNCTIONS
 
         install_lsr = install_behavioral_baseline_tax_system
-        builder = CONVENTIONAL_REFORM_DICT_FUNCTIONS.get(reform_id) or getattr(
-            R, f"get_{reform_id}_conventional_reform"
+        builder = BEHAVIORAL_REFORM_FUNCTIONS.get(reform_id) or getattr(
+            R, f"get_{reform_id}_behavioral_reform"
         )
         definition = builder()
         # Coerce only a raw param dict via from_dict; a builder that already
@@ -356,7 +360,7 @@ def score_cell(
         return float(sim.calculate("income_tax", year).sum())
 
     baseline_it = income_tax(current_law)
-    reformed_it = income_tax(current_law, policy, lsr=(scoring_type == "conventional"))
+    reformed_it = income_tax(current_law, policy, lsr=(scoring_type == "behavioral"))
     record = {
         "reform_id": reform_id,
         "year": year,
@@ -394,6 +398,7 @@ def main(
     scoring_types = tuple(s.strip() for s in scoring.split(",") if s.strip()) or (
         "static",
     )
+    scoring_types = normalize_scoring_types(scoring_types)
     want_cells = wanted_cell_keys(reform_list, year_list, scoring_types)
 
     state = survey.remote()
@@ -518,11 +523,10 @@ def _assemble(year_list, reform_list, scoring_types, failed_builds) -> None:
             block[r] = row
         panel["scoring"][st] = block
 
-    # Distinct from results/reform_panel.json (the canonical multiplier panel
-    # written by scripts/assemble_reform_panel.py and read by the dashboard
-    # builder). This is the raw orchestrator dump in a different schema; never
-    # overwrite the canonical file.
-    out_path = LOCAL_PROJECT_ROOT / "results" / "run_panel_raw.json"
+    # Distinct from the canonical public results.csv produced by
+    # scripts/publish_dashboard_results.py. This is the raw orchestrator dump in
+    # a different schema; never overwrite the canonical file.
+    out_path = LOCAL_PROJECT_ROOT / "tmp" / "run_panel_raw.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(panel, indent=2, sort_keys=True))
 

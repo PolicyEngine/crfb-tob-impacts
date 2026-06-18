@@ -9,7 +9,7 @@ from typing import Any
 
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = REPO / "results" / "full_h5_modal_cost_estimate_20260522.json"
+DEFAULT_OUTPUT = REPO / "tmp" / "full_h5_modal_cost_estimate.json"
 DEFAULT_BUCKET = "axiom-corpus"
 DEFAULT_PREFIX = "crfb/reform_full_h5/"
 
@@ -172,7 +172,9 @@ def estimate_cost(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--bucket", default=os.environ.get("CRFB_R2_BUCKET", DEFAULT_BUCKET))
+    parser.add_argument(
+        "--bucket", default=os.environ.get("CRFB_R2_BUCKET", DEFAULT_BUCKET)
+    )
     parser.add_argument("--prefix", default=DEFAULT_PREFIX)
     parser.add_argument("--cpu-cores", type=float, default=4.0)
     parser.add_argument("--memory-gib", type=float, default=64.0)

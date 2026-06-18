@@ -101,9 +101,7 @@ def _option_behavioral_reform(reform_id: str) -> Any:
 
     function = getattr(crfb_reforms, f"get_{reform_id}_behavioral_reform", None)
     if function is None:
-        function = getattr(crfb_reforms, f"get_{reform_id}_conventional_reform", None)
-    if function is None:
-        function = getattr(crfb_reforms, f"get_{reform_id}_conventional_dict", None)
+        function = getattr(crfb_reforms, f"get_{reform_id}_behavioral_dict", None)
     if function is None:
         raise KeyError(f"Unknown behavioral reform: {reform_id}")
     return _coerce_policy_reform(function())

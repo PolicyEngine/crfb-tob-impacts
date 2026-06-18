@@ -123,14 +123,18 @@ def test_behavioral_scoring_uses_behavioral_reform_alias(monkeypatch):
     )
 
     assert build_policy_reform("option1", "behavioral") == ("option1", marker)
-    assert build_policy_reform("option1", "conventional") == ("option1", marker)
+
+
+def test_conventional_scoring_label_is_not_accepted():
+    with pytest.raises(ValueError, match="Unsupported scoring_type"):
+        build_policy_reform("option1", "conventional")
 
 
 def test_behavioral_scoring_accepts_custom_reform(monkeypatch):
     marker = object()
 
     monkeypatch.setattr(
-        "src.reforms.get_reverse_roth_conventional_reform",
+        "src.reforms.get_reverse_roth_behavioral_reform",
         lambda: marker,
     )
 
@@ -144,7 +148,9 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
 
     monkeypatch.setattr(
         "policyengine_us.Microsimulation.default_tax_benefit_system",
-        staticmethod(lambda reform: baseline_system if reform is baseline_reform else None),
+        staticmethod(
+            lambda reform: baseline_system if reform is baseline_reform else None
+        ),
     )
 
     result = install_behavioral_baseline_tax_system(
@@ -185,11 +191,7 @@ def test_full_h5_paths_use_required_production_shape():
     )
 
     assert path == (
-        Path("/results")
-        / "run"
-        / FULL_H5_DIRNAME
-        / "year=2100"
-        / "reform=option12"
+        Path("/results") / "run" / FULL_H5_DIRNAME / "year=2100" / "reform=option12"
     )
 
 
