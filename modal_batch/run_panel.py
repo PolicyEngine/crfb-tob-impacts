@@ -250,6 +250,15 @@ def build_one_year(
 )
 def score_cell(reform_id: str, year: int, scoring_type: str = "static") -> dict:
     sys.path.insert(0, "/app")
+    # Last line of defense for the costly bug: behavioral (conventional) scoring
+    # is endpoint-only. Even a direct score_cell call (bypassing the orchestrator
+    # guards) must refuse a non-endpoint LSR cell — behavioral is derived by
+    # interpolating the endpoint multipliers, never computed per year.
+    if scoring_type != "static" and year not in BEHAVIORAL_ENDPOINT_YEARS:
+        raise ValueError(
+            f"{scoring_type!r} scoring is endpoint-only {BEHAVIORAL_ENDPOINT_YEARS}; "
+            f"refusing per-year LSR cell for year {year}"
+        )
     out = Path(SCORES)
     out.mkdir(parents=True, exist_ok=True)
     cell_path = out / f"{_cell_key(reform_id, year, scoring_type)}.json"
@@ -278,12 +287,18 @@ def score_cell(reform_id: str, year: int, scoring_type: str = "static") -> dict:
         from src.year_runner import CONVENTIONAL_REFORM_DICT_FUNCTIONS
 
         install_lsr = install_behavioral_baseline_tax_system
-        if reform_id in CONVENTIONAL_REFORM_DICT_FUNCTIONS:
-            policy = Reform.from_dict(
-                CONVENTIONAL_REFORM_DICT_FUNCTIONS[reform_id](), country_id="us"
-            )
-        else:  # reverse_roth carries its own conventional builder
-            policy = getattr(R, f"get_{reform_id}_conventional_reform")()
+        builder = CONVENTIONAL_REFORM_DICT_FUNCTIONS.get(reform_id) or getattr(
+            R, f"get_{reform_id}_conventional_reform"
+        )
+        definition = builder()
+        # Coerce only a raw param dict via from_dict; a builder that already
+        # returns a Reform or a reform-set tuple (e.g. reverse_roth) is used as-is
+        # — wrapping a tuple in Reform.from_dict raises "'tuple' has no .items()".
+        policy = (
+            Reform.from_dict(definition, country_id="us")
+            if isinstance(definition, dict)
+            else definition
+        )
     else:
         raise ValueError(f"unknown scoring_type {scoring_type!r}")
 
