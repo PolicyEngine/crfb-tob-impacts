@@ -23,8 +23,10 @@ uv venv --python 3.13
 source .venv/bin/activate
 uv pip install -e .
 
-# Generate policy impact data (takes 15-30 minutes)
-python scripts/generate_policy_impacts.py
+# Build reform data on Modal, then assemble locally (see `make data`)
+make panel
+python scripts/assemble_reform_panel.py
+python scripts/build_dashboard_results.py
 
 # Run Next dashboard
 cd dashboard && bun install && bun run dev
