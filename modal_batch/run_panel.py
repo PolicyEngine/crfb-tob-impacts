@@ -483,7 +483,11 @@ def _assemble(year_list, reform_list, scoring_types, failed_builds) -> None:
             block[r] = row
         panel["scoring"][st] = block
 
-    out_path = LOCAL_PROJECT_ROOT / "results" / "reform_panel.json"
+    # Distinct from results/reform_panel.json (the canonical multiplier panel
+    # written by scripts/assemble_reform_panel.py and read by the dashboard
+    # builder). This is the raw orchestrator dump in a different schema; never
+    # overwrite the canonical file.
+    out_path = LOCAL_PROJECT_ROOT / "results" / "run_panel_raw.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(panel, indent=2, sort_keys=True))
 
