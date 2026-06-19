@@ -7,7 +7,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from typing import Any
+from typing import Any, Callable
 import hashlib
 import json
 import os
@@ -220,7 +220,12 @@ def _calculate_unweighted(
     return _as_1d_array(values)
 
 
-def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
+def materialize_tob_revenue_pair(
+    sim: Any,
+    *,
+    year: int,
+    progress: Callable[[str], None] | None = None,
+) -> dict[str, Any]:
     """Materialize TOB revenue variables without duplicate branch formulas.
 
     This computes raw tax-unit arrays only. It performs no weighted aggregation.
@@ -228,17 +233,24 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
 
     from policyengine_core.periods import period as get_period
 
+    def emit(message: str) -> None:
+        if progress is not None:
+            progress(message)
+
     period = get_period(year)
+    emit("materialize TOB: tax_unit_social_security")
     gross_ss = _calculate_unweighted(
         sim,
         "tax_unit_social_security",
         year=year,
     )
+    emit("materialize TOB: tax_unit_taxable_social_security")
     taxable_ss = _calculate_unweighted(
         sim,
         "tax_unit_taxable_social_security",
         year=year,
     )
+    emit("materialize TOB: full income_tax")
     tax_full_ss = _calculate_unweighted(sim, "income_tax", year=year)
     parameters = sim.tax_benefit_system.parameters(period).gov.ssa.revenue
     capped_taxable_ss = np.minimum(
@@ -247,6 +259,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
     )
 
     no_ss_branch_name = "crfb_tob_no_taxable_ss"
+    emit("materialize TOB: no-taxable-SS branch")
     branch_no_ss = sim.get_branch(no_ss_branch_name, clone_system=True)
     try:
         branch_no_ss.tax_benefit_system.neutralize_variable(
@@ -258,6 +271,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
         sim.branches.pop(no_ss_branch_name, None)
 
     capped_branch_name = "crfb_tob_capped_taxable_ss"
+    emit("materialize TOB: capped-taxable-SS branch")
     branch_capped = sim.get_branch(capped_branch_name, clone_system=True)
     try:
         capped_deleted = _delete_non_input_cached_arrays(branch_capped)
@@ -268,6 +282,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
     finally:
         sim.branches.pop(capped_branch_name, None)
 
+    emit("materialize TOB: cache OASDI/HI arrays")
     oasdi = np.maximum(tax_capped_ss - tax_no_ss, 0)
     medicare_hi = np.maximum(tax_full_ss - tax_capped_ss, 0)
     sim.populations["tax_unit"].get_holder("tob_revenue_oasdi").put_in_cache(

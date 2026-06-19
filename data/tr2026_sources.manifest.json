@@ -21,12 +21,23 @@
       "file": "data/SSPopJul_TR2026_interim.csv",
       "sha256": "fa1b088ad7ac9f8f621f861bdb9fef33e81e74ac5862e75654e10977c5e40c12",
       "source": ""
+    },
+    {
+      "file": "data/sources/tr2026/HI Cost and Income Rates.csv",
+      "sha256": "99d53da9667e20b79db78b3aef236e7c07c54fdfa157b146b7f5ff7dec64c556",
+      "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
+    },
+    {
+      "file": "data/hi_expenditures_tr2026.csv",
+      "sha256": "61e706279b5a4270a39f8e47c33cd1a7fa6be54a27919f22adb3a2e0ac85d76d",
+      "source": "Derived from data/sources/tr2026/HI Cost and Income Rates.csv cost rates times dashboard/public/data/hi_taxable_payroll.csv TR2026-scaled HI taxable payroll."
     }
   ],
   "notes": [
     "OASDI TOB dollars = IV.B2 percent of taxable payroll times VI.G1 taxable payroll.",
     "HI TOB from the CMS 2026 Medicare Trustees expanded tables, annual through 2100 (no carry-forward bridge needed).",
     "Single-year-age population is interim: TR2024 single-year shape rescaled to TR2026 V.A3 group totals until SSA posts the TR2026 single-year file.",
-    "TR2026 incorporates OBBBA in current law, so these TOB targets replace the TR2025 post-OBBBA bridge entirely."
+    "TR2026 incorporates OBBBA in current law, so these TOB targets replace the TR2025 post-OBBBA bridge entirely.",
+    "HI expenditures for balanced-fix scoring use TR2026 HI cost rates times the TR2026-adjusted HI taxable payroll denominator series."
   ]
 }

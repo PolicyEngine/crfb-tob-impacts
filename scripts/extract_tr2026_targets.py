@@ -54,6 +54,7 @@ ECONOMIC_PROJECTIONS_OUTPUTS = (
 HI_PAYROLL_OUTPUT = (
     REPO_ROOT / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv"
 )
+HI_EXPENDITURES_TR2026_OUTPUT = REPO_ROOT / "data" / "hi_expenditures_tr2026.csv"
 TRUST_FUND_GAPS_OUTPUT = REPO_ROOT / "data" / "trust_fund_gaps.csv"
 
 SOURCE_URLS = {
@@ -62,6 +63,11 @@ SOURCE_URLS = {
         " (retrieved via web.archive.org, 2026-06-10)"
     ),
     MEDICARE_CSV.name: (
+        "https://www.cms.gov/files/zip/"
+        "2026-expanded-supplementary-tables-figures.zip (retrieved direct, "
+        "2026-06-10)"
+    ),
+    HI_RATES_CSV.name: (
         "https://www.cms.gov/files/zip/"
         "2026-expanded-supplementary-tables-figures.zip (retrieved direct, "
         "2026-06-10)"
@@ -335,6 +341,15 @@ def write_dashboard_denominators(aux: pd.DataFrame) -> None:
     print(f"wrote {TRUST_FUND_GAPS_OUTPUT} ({len(gap_rows)} years)")
 
 
+def write_hi_expenditures_tr2026() -> None:
+    """Write the Medicare HI expenditure file used by balanced-fix scoring."""
+
+    from scripts.build_hi_expenditures_tr2026 import build_hi_expenditures_tr2026
+
+    frame = build_hi_expenditures_tr2026(output_path=HI_EXPENDITURES_TR2026_OUTPUT)
+    print(f"wrote {HI_EXPENDITURES_TR2026_OUTPUT} ({len(frame)} years)")
+
+
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -349,6 +364,7 @@ def main() -> int:
     print(sample.to_string(index=False))
 
     write_dashboard_denominators(aux)
+    write_hi_expenditures_tr2026()
 
     groups = extract_population_groups()
     interim = build_interim_single_year_population(groups)
@@ -369,7 +385,14 @@ def main() -> int:
                 "sha256": file_sha256(path),
                 "source": SOURCE_URLS.get(path.name, ""),
             }
-            for path in (WORKBOOK, MEDICARE_CSV, AUX_OUTPUT, POPULATION_OUTPUT)
+            for path in (
+                WORKBOOK,
+                MEDICARE_CSV,
+                HI_RATES_CSV,
+                AUX_OUTPUT,
+                POPULATION_OUTPUT,
+                HI_EXPENDITURES_TR2026_OUTPUT,
+            )
         ],
         "notes": [
             "OASDI TOB dollars = IV.B2 percent of taxable payroll times "
@@ -381,6 +404,9 @@ def main() -> int:
             "the TR2026 single-year file.",
             "TR2026 incorporates OBBBA in current law, so these TOB "
             "targets replace the TR2025 post-OBBBA bridge entirely.",
+            "HI expenditures for balanced-fix scoring use TR2026 HI cost "
+            "rates times the TR2026-adjusted HI taxable payroll denominator "
+            "series.",
         ],
     }
     MANIFEST_OUTPUT.write_text(json.dumps(manifest, indent=2) + "\n")

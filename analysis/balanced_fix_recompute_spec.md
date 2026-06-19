@@ -126,32 +126,48 @@ panel's 2035 baseline — compare `base` `tob_revenue_oasdi` and `income_tax` to
 results.csv current-law 2035 baseline (within ~0.1%). If they don't match, STOP: the
 stack/base is wrong. Do this as part of the 2035-only gate (below).
 
-## [B3] HI expenditure vintage — DECISION REQUIRED before fan-out
+## [B3] HI expenditure vintage — resolved for this run
 Historical option13 code read `data/hi_expenditures_tr2025.csv`, but the new
 base is calibrated to **TR2026** (src/projection.py 16-19, 42-44;
 `social_security_aux_tr2026.csv` carries hi_tob_* but NOT HI cost/expenditures).
 Subtracting TR2025 Medicare expenditures from a TR2026 SS base is a silent
 vintage mix on the single most important HI input.
-- PREFERRED: source the 2026 Medicare Trustees HI cost series -> add
-  `data/hi_expenditures_tr2026.csv`, update `get_hi_data`. Cite the TR2026 table.
-- FALLBACK (only if TR2026 HI costs are not readily available): keep TR2025 and record in the
-  output metadata + the dashboard/paper footnote "HI gap uses TR2025 Medicare expenditures
-  against a TR2026 SS base (approximation)."
-- This is a conscious methodology call — surface it to the user; do not silently inherit TR2025.
-  (Note: the reforms tax SS *benefits*, so the OASDI split is the headline; HI is the above-cap
-  remainder, less sensitive — but the gap math still uses HI costs.)
+- Decision: **use TR2026, no TR2025 fallback**. Build
+  `data/hi_expenditures_tr2026.csv` from
+  `data/sources/tr2026/HI Cost and Income Rates.csv` times the HI taxable payroll
+  series, add both raw and derived files to `data/tr2026_sources.manifest.json`,
+  and make `get_hi_data` read the TR2026 file.
+- This is a conscious methodology call. Do not silently inherit TR2025. (Note:
+  the reforms tax SS *benefits*, so the OASDI split is the headline; HI is the
+  above-cap remainder, less sensitive — but the gap math still uses HI costs.)
 
 ## New-base wiring + Modal config
-- Baselines: `crfb-baseline-builds` Volume, `/baselines/{year}.h5`. Load via
-  `src.engine.dataset_microsimulation`. Decompose OASDI/HI for the OUTPUT rows via
-  `src.reform_full_h5_worker.materialize_tob_revenue_pair` (consistent with the live panel);
-  general_fund = revenue - oasdi - hi.
-- Years: **2035, 2040, ..., 2100 (14 years)** — a subset of the 27 `default_selected_years()`
-  (NOT "16"). The gap exists only 2035+ (pre-2035 `_tax_assumption_reform` is None -> no gap ->
-  no solvency row; the dashboard simply shows no solvency data before 2035).
-- BEFORE fan-out: survey `crfb-baseline-builds` and assert each of the
-  14 years has `{year}.h5` + `.sentinel.json`; fail loudly if any is missing (don't pay for a
-  container that will FileNotFoundError).
+- Baselines: the certified manifest-backed `policyengine-us-data-long-term`
+  Volume. Resolve the exact H5 **per year from the live static panel's
+  `run_prefix`**, not from one hard-coded manifest. The current live panel uses
+  `v2pop_tr2026_20260611` through 2070 and
+  `v2pop_tr2026_noclone_20260612` for 2075+, so the balanced-fix recompute must
+  map those run prefixes back to the matching baseline manifests before scoring.
+  Load via `src.engine.dataset_microsimulation`. Decompose OASDI/HI for the
+  OUTPUT rows via `src.reform_full_h5_worker.materialize_tob_revenue_pair`
+  (consistent with the live panel); general_fund = revenue - oasdi - hi.
+- Runtime: score under the same certified runtime recorded by the baseline H5
+  metadata and live full-H5 cells (`policyengine==4.5.1`,
+  `policyengine-us==1.700.2`, `policyengine-core==3.26.1`). Do not "upgrade"
+  the balanced-fix worker to the repo-local/latest dev environment unless the
+  live current-law [B2] cross-check is intentionally rebaselined; the 2035 gate
+  caught a real ~0.5% OASDI TOB drift when the worker used `policyengine-us`
+  1.729.0 against H5s built under 1.700.2.
+- Years: **endpoints-first anchors only**: `2035`, `2050`, `2075`, `2100`.
+  Interpolate the solvent/current-law ratio across intermediate years and apply
+  it to the existing live current-law deltas. Spot-check one interpolated year
+  against a direct compute; expand anchors only if the drift is material and
+  report that decision.
+- BEFORE fan-out: survey the manifest volume and assert each anchor year has the H5 plus
+  its readiness sidecar (`{year}.h5.metadata.json`), that the H5 SHA matches the
+  per-year resolved baseline manifest, and that H5 metadata's
+  `policyengine_us.version` matches the Modal worker runtime; fail loudly if any
+  is missing or stale (don't pay for a container that will score the wrong base).
 - Modal function: cpu=4, **memory>=65536**, **timeout=10800-21600 (3-6h)**,
   **nonpreemptible=True**, retries=2. Detached. (The old script used memory=65536,
   timeout=21600 — these cells are heavy; do not inherit old short-cell assumptions.)
@@ -162,15 +178,14 @@ vintage mix on the single most important HI input.
   years and the output CSV can report them (matching the old `balanced_fix_baseline.csv` schema).
 
 ## Cost — estimate in SIMS, not cells; hard 2035-only gate
-Each year needs: 1 current-law base sim + 1 Stage-1 benefit-cut sim + (for
+Each anchor needs: 1 current-law base sim + 1 Stage-1 benefit-cut sim + (for
 the solvent baseline + each of 4 reforms) 5 `solvent_sim`s, i.e. **7 heavy
-sims/year**, each triggering native double-branch TOB formulas (~10-15 min).
-14 years -> **98 heavy sims**, realistically **$150-400** (the old "$50-150 /
-70-80 cells" was undercounted). PRINT the explicit sim count and confirm before
-fan-out. **Run year 2035 ONLY first**: verify (a) both gaps close to ~0 after
-the fix, and (b) the [B2] cross-check passes (2035 base matches the live
-panel). Only then fan out 2040-2100. Static only (no behavioral) unless the
-user asks.
+sims/anchor**, each triggering native double-branch TOB formulas (~10-15 min).
+4 anchors -> **28 heavy sims**. PRINT the explicit sim count and estimate before
+fan-out. **Run year 2035 ONLY first**: first run a current-law-only check, then
+the full 2035 sentinel, verifying (a) both gaps close to ~0 after the fix, and
+(b) the [B2] cross-check passes (2035 base matches the live panel). Only then
+fan out 2050/2075/2100. Static only (no behavioral) unless the user asks.
 
 ## Dashboard surface restore (per-file git provenance — they differ)
 - `balanced-fix-section.tsx`, `balanced-fix-data.ts`: restore from **`ceea4a2~1`** (newer,
