@@ -3,6 +3,7 @@ import Papa from "papaparse";
 export type ScoringType = "static" | "behavioral";
 export type AllocationMode = "currentLaw" | "baselineShares" | "allOasdi" | "allHi";
 export type DisplayUnit = "dollars" | "pctPayroll" | "pctGdp";
+export type BaselineScenario = "currentLaw" | "ssSolvent";
 
 export interface YearlyImpact {
   year: number;
@@ -64,9 +65,16 @@ const allocationEligibleOptions = new Set([
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
 const directBranchingOptions = new Set(["option12"]);
+const balancedFixEligibleOptions = new Set([
+  "option1",
+  "option2",
+  "option8",
+  "option12",
+]);
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const ALLOCATION_ELIGIBLE_OPTIONS = [...allocationEligibleOptions];
+export const BALANCED_FIX_ELIGIBLE_OPTIONS = [...balancedFixEligibleOptions];
 
 let projectionCache: Promise<Map<number, EconomicProjection>> | null = null;
 const csvCache = new Map<string, Promise<string>>();
@@ -221,9 +229,14 @@ function splitRevenueImpacts(
 export async function loadDashboardData(
   scoringType: ScoringType,
   allocationMode: AllocationMode,
+  baselineScenario: BaselineScenario = "currentLaw",
 ): Promise<Record<string, YearlyImpact[]>> {
   const [csvContent, projections] = await Promise.all([
-    fetchCsv("/data/results.csv"),
+    fetchCsv(
+      baselineScenario === "ssSolvent"
+        ? "/data/balanced_fix_results.csv"
+        : "/data/results.csv",
+    ),
     loadEconomicProjections(),
   ]);
 
@@ -236,6 +249,9 @@ export async function loadDashboardData(
 
   for (const row of parsed.data) {
     if ((row.scoring_type ?? "") !== scoringType) continue;
+    if (baselineScenario === "ssSolvent" && row.baseline_scenario !== "ss_solvent") {
+      continue;
+    }
 
     const reformName = row.reform_name ?? "";
     if (!reformName) continue;
@@ -251,8 +267,22 @@ export async function loadDashboardData(
       oasdiNetImpact: asNumber(row.oasdi_net_impact),
       hiNetImpact: asNumber(row.hi_net_impact),
     };
-    const split = splitRevenueImpacts(allocationRow, allocationMode);
-    const generalFundImpact = split.revenueImpact - split.tobTotalImpact;
+    const split =
+      baselineScenario === "ssSolvent"
+        ? {
+            revenueImpact: asNumber(row.revenue_impact),
+            tobOasdiImpact: asNumber(row.solvent_oasdi_impact),
+            tobMedicareHiImpact: asNumber(row.solvent_medicare_hi_impact),
+            tobTotalImpact:
+              asNumber(row.solvent_oasdi_impact) +
+              asNumber(row.solvent_medicare_hi_impact),
+            generalFundImpact: asNumber(row.solvent_general_fund_impact),
+          }
+        : splitRevenueImpacts(allocationRow, allocationMode);
+    const generalFundImpact =
+      "generalFundImpact" in split
+        ? split.generalFundImpact
+        : split.revenueImpact - split.tobTotalImpact;
     const economicProjection = projections.get(year) ?? {
       year,
       oasdiTaxablePayroll: 0,

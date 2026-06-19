@@ -894,7 +894,7 @@ def build_calibration_diagnostics(
                         )
                     )
 
-    hi_expenditures = REPO / "data" / "hi_expenditures_tr2025.csv"
+    hi_expenditures = REPO / "data" / "hi_expenditures_tr2026.csv"
     if hi_expenditures.exists():
         hi = pd.read_csv(hi_expenditures)
         for row in hi.itertuples(index=False):
@@ -909,7 +909,7 @@ def build_calibration_diagnostics(
                             value=float(getattr(row, diagnostic_id)) / 1e9,
                             group="HI Trustees diagnostic",
                             unit="billions of nominal dollars",
-                            source="data/hi_expenditures_tr2025.csv",
+                            source="data/hi_expenditures_tr2026.csv",
                         )
                     )
 

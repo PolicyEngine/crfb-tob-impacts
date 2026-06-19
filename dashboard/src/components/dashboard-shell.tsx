@@ -29,8 +29,10 @@ import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
 import {
   ALLOCATION_ELIGIBLE_OPTIONS,
+  BALANCED_FIX_ELIGIBLE_OPTIONS,
   calculateTotals,
   type AllocationMode,
+  type BaselineScenario,
   type DisplayUnit,
   loadDashboardData,
   spotlightRows,
@@ -426,6 +428,8 @@ export function DashboardShell() {
   const [selectedReform, setSelectedReform] = useState("option1");
   const [scoringType, setScoringType] = useState<ScoringType>("static");
   const [allocationMode, setAllocationMode] = useState<AllocationMode>("baselineShares");
+  const [baselineScenario, setBaselineScenario] =
+    useState<BaselineScenario>("currentLaw");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("pctPayroll");
   const [viewMode, setViewMode] = useState<ViewMode>("75year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
@@ -434,7 +438,7 @@ export function DashboardShell() {
 
   useEffect(() => {
     let active = true;
-    loadDashboardData(scoringType, allocationMode)
+    loadDashboardData(scoringType, allocationMode, baselineScenario)
       .then((result) => {
         if (!active) return;
         setData(result);
@@ -454,12 +458,21 @@ export function DashboardShell() {
     return () => {
       active = false;
     };
-  }, [allocationMode, scoringType]);
+  }, [allocationMode, baselineScenario, scoringType]);
 
   function handleAllocationModeChange(next: AllocationMode) {
     setLoading(true);
     setError(null);
     setAllocationMode(next);
+  }
+
+  function handleBaselineScenarioChange(next: BaselineScenario) {
+    setLoading(true);
+    setError(null);
+    setBaselineScenario(next);
+    if (next === "ssSolvent") {
+      setScoringType("static");
+    }
   }
 
   function handleViewModeChange(next: ViewMode) {
@@ -481,13 +494,20 @@ export function DashboardShell() {
   const showGeneralFundResidual = selectedData.some(
     (row) => Math.abs(row.generalFundImpact) > 0.005,
   );
-  const showAllocationToggle = ALLOCATION_ELIGIBLE_OPTIONS.includes(effectiveReformId);
-  const isStaticOnlyReform = false;
+  const showAllocationToggle =
+    baselineScenario === "currentLaw" &&
+    ALLOCATION_ELIGIBLE_OPTIONS.includes(effectiveReformId);
+  const showBaselineScenarioToggle =
+    BALANCED_FIX_ELIGIBLE_OPTIONS.includes(effectiveReformId);
+  const isStaticOnlyReform = baselineScenario === "ssSolvent";
   const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
   const mobileViewValue = activeTab === "baseline" ? "baseline" : selectedReform;
 
   function handleReformSelect(nextReform: string) {
     setActiveTab("reforms");
+    if (!BALANCED_FIX_ELIGIBLE_OPTIONS.includes(nextReform)) {
+      setBaselineScenario("currentLaw");
+    }
     setSelectedReform(nextReform);
   }
 
@@ -752,6 +772,20 @@ export function DashboardShell() {
                     />
                   )}
                 </div>
+                {showBaselineScenarioToggle && (
+                  <div className="flex items-center">
+                    <ControlLabel>Baseline scenario</ControlLabel>
+                    <Segment
+                      label="Baseline scenario"
+                      value={baselineScenario}
+                      onChange={handleBaselineScenarioChange}
+                      options={[
+                        { label: "Current law", value: "currentLaw" },
+                        { label: "SS solvent", value: "ssSolvent" },
+                      ]}
+                    />
+                  </div>
+                )}
                 <div className="flex items-center">
                   <ControlLabel>Unit</ControlLabel>
                   <Segment

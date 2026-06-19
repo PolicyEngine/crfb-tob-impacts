@@ -43,6 +43,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/baseline_indexing_growth.csv",
     "dashboard/public/data/baseline_policy_parameters.csv",
     "dashboard/public/data/baseline_reform_parameters.csv",
+    "dashboard/public/data/balanced_fix_results.csv",
     "dashboard/public/data/hi_taxable_payroll.csv",
     "dashboard/public/data/live_baseline_results.csv",
     "dashboard/public/data/live_reform_status.csv",
@@ -52,6 +53,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "data/SSPopJul_TR2024.csv",
     "data/SSPopJul_TR2026_interim.csv",
     "data/hi_expenditures_tr2025.csv",
+    "data/hi_expenditures_tr2026.csv",
     "data/oasdi_oact_20250805_nominal_delta.csv",
     "data/social_security_aux_tr2025.csv",
     "data/social_security_aux_tr2026.csv",
@@ -62,6 +64,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "data/tob_current_law_tr2025.csv",
     "data/trust_fund_gaps.csv",
     "results.csv",
+    "results/modal_runs_production/balanced_fix_results.csv",
     "results/modal_runs_production/behavioral_endpoint_cells.csv",
     "results/modal_runs_production/static_cells.csv",
 }
@@ -263,6 +266,64 @@ def test_current_public_results_have_current_release_provenance():
     assert set(interpolated["run_prefix"]) == {
         "behavioral_endpoint_ratio_interpolation_20260612"
     }
+
+
+def test_balanced_fix_public_results_are_additive_and_reconciled():
+    public_path = DASHBOARD_DATA / "balanced_fix_results.csv"
+    production_path = RESULTS / "modal_runs_production" / "balanced_fix_results.csv"
+
+    assert public_path.exists()
+    assert production_path.exists()
+    assert public_path.read_text(encoding="utf-8") == production_path.read_text(
+        encoding="utf-8"
+    )
+
+    balanced = pd.read_csv(public_path)
+    current = load_dashboard_results()
+
+    assert "ss_solvent" not in set(current.get("baseline_scenario", []))
+    assert set(balanced["baseline_scenario"]) == {"ss_solvent"}
+    assert set(balanced["reform_name"]) == {
+        "option1",
+        "option2",
+        "option8",
+        "option12",
+    }
+    assert set(balanced["scoring_type"]) == {"static"}
+
+    by_reform = balanced.groupby("reform_name")["year"].agg(["min", "max", "count"])
+    assert by_reform["min"].eq(2035).all()
+    assert by_reform["max"].eq(2100).all()
+    assert by_reform["count"].eq(66).all()
+
+    exact = balanced[
+        balanced["balanced_fix_result_type"].eq("exact_solvent_baseline_full_h5")
+    ]
+    assert set(exact["year"]) == {2035, 2050, 2065, 2075, 2100}
+    assert exact.groupby("reform_name")["year"].nunique().eq(5).all()
+
+    split_total = (
+        balanced["solvent_oasdi_impact"]
+        + balanced["solvent_medicare_hi_impact"]
+        + balanced["solvent_general_fund_impact"]
+    )
+    assert (split_total - balanced["revenue_impact"]).abs().max() < 1e-8
+
+
+def test_dashboard_exposes_balanced_fix_as_baseline_scenario_not_allocation_mode():
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    data_loader = (
+        REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
+    ).read_text(encoding="utf-8")
+
+    assert "Baseline scenario" in shell
+    assert '"ssSolvent"' in shell
+    assert 'baselineScenario === "currentLaw"' in shell
+    assert "type BaselineScenario" in data_loader
+    assert '"/data/balanced_fix_results.csv"' in data_loader
+    assert "solvent_general_fund_impact" in data_loader
 
 
 def test_current_publication_scripts_do_not_default_to_legacy_20260522_inputs():

@@ -39,7 +39,20 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("results", REPO / "results.csv.metadata.json"),
     ("results", RESULTS / "modal_runs_production" / "static_cells.csv"),
     ("results", RESULTS / "modal_runs_production" / "behavioral_endpoint_cells.csv"),
+    ("results", RESULTS / "modal_runs_production" / "balanced_fix_results.csv"),
+    (
+        "results",
+        RESULTS / "modal_runs_production" / "balanced_fix_results_metadata.json",
+    ),
     ("dashboard_data", REPO / "dashboard" / "public" / "data" / "results.csv"),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_results.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_results_metadata.json",
+    ),
     (
         "dashboard_data",
         REPO / "dashboard" / "public" / "data" / "ssa_economic_projections.csv",
@@ -122,16 +135,21 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("paper", REPO / "paper" / "sections" / "06-publication-boundary.qmd"),
     ("scripts", REPO / "scripts" / "build_dashboard_baseline_assumptions.py"),
     ("scripts", REPO / "scripts" / "build_dashboard_payroll_denominators.py"),
+    ("scripts", REPO / "scripts" / "build_hi_expenditures_tr2026.py"),
     ("scripts", REPO / "scripts" / "build_distributional_data.py"),
     ("scripts", REPO / "scripts" / "build_results_contract.py"),
     ("scripts", REPO / "scripts" / "build_tob_explainer_data.py"),
+    ("scripts", REPO / "scripts" / "publish_balanced_fix_results.py"),
     ("scripts", REPO / "scripts" / "publish_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_behavioral_endpoint_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_full_h5_static_dashboard_results.py"),
+    ("modal", REPO / "modal_batch" / "balanced_fix.py"),
     ("package", REPO / "pyproject.toml"),
+    ("package", REPO / "src" / "balanced_fix.py"),
     ("package", REPO / "src" / "cli.py"),
     ("package", REPO / "src" / "dashboard_baseline_assumptions.py"),
     ("package", REPO / "src" / "runtime_config.py"),
+    ("package", REPO / "src" / "hi_expenditures.py"),
     ("package", REPO / "src" / "tax_assumption_loader.py"),
     ("package", REPO / "src" / "tob_baseline.py"),
     ("tests", REPO / "tests" / "test_release_artifacts.py"),
@@ -143,6 +161,7 @@ OPTIONAL_FILES: tuple[tuple[str, Path], ...] = ()
 
 DATA_SOURCE_GLOBS: tuple[str, ...] = (
     "data/*.csv",
+    "data/tr2026_sources.manifest.json",
     "reproducibility.lock.toml",
 )
 
