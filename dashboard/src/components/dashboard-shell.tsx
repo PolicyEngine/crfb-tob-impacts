@@ -18,12 +18,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import type {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 import { useEffect, useState } from "react";
 
 import { BaselineAssumptionsSection } from "@/components/baseline-assumptions-section";
 import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-section";
-import { TobExplainerSection } from "@/components/tob-explainer-section";
+import { HomeOverview } from "@/components/home-overview";
 import { ComparisonTable } from "@/components/comparison-table";
 import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
@@ -43,7 +46,7 @@ import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { sitePath } from "@/lib/site-path";
 import { useElementSize } from "@/lib/use-element-size";
 
-type DashboardTab = "reforms" | "baseline";
+type DashboardTab = "home" | "reforms" | "baseline" | "methodology";
 type ViewMode = "10year" | "75year";
 type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
@@ -67,9 +70,19 @@ const BENEFIT_RULE_IDS = [
 ];
 const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];
 
+const BENEFIT_REFORM_LINKS = STANDARD_REFORMS.filter((reform) =>
+  BENEFIT_RULE_IDS.includes(reform.id),
+);
+const STRUCTURAL_REFORM_LINKS = STANDARD_REFORMS.filter((reform) =>
+  STRUCTURAL_IDS.includes(reform.id),
+);
+
 const LONG_RUN_X_AXIS_TICKS = [
   2026,
-  ...Array.from({ length: (2100 - 2030) / 5 + 1 }, (_, index) => 2030 + index * 5),
+  ...Array.from(
+    { length: (2100 - 2030) / 5 + 1 },
+    (_, index) => 2030 + index * 5,
+  ),
 ];
 
 function formatBillions(value: number) {
@@ -172,7 +185,9 @@ function MetricTile({
       <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--pe-color-text-tertiary)]">
         {label}
       </p>
-      <p className={`mt-2 text-[28px] font-bold leading-none tracking-[-0.02em] ${toneClass}`}>
+      <p
+        className={`mt-2 text-[28px] font-bold leading-none tracking-[-0.02em] ${toneClass}`}
+      >
         {value}
       </p>
       {caption ? (
@@ -195,7 +210,9 @@ function SeriesChart({
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
-  const showGeneralFund = data.some((row) => Math.abs(row.generalFundImpact) > 0.005);
+  const showGeneralFund = data.some(
+    (row) => Math.abs(row.generalFundImpact) > 0.005,
+  );
 
   const chartData = data.map((row) => ({
     year: row.year,
@@ -218,13 +235,17 @@ function SeriesChart({
         <h3 className="text-lg font-semibold tracking-[-0.02em] text-[var(--pe-color-text-title)]">
           Annual revenue path
         </h3>
-        <p className="text-xs text-[var(--pe-color-text-tertiary)]">{unitLabel}</p>
+        <p className="text-xs text-[var(--pe-color-text-tertiary)]">
+          {unitLabel}
+        </p>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-[var(--pe-color-text-secondary)]">
         <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
         <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
         <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
-        {showGeneralFund ? <LegendSwatch color="#2563eb" label="General fund" /> : null}
+        {showGeneralFund ? (
+          <LegendSwatch color="#2563eb" label="General fund" />
+        ) : null}
       </div>
 
       <div ref={ref} className="mt-4 h-[22rem]">
@@ -237,12 +258,28 @@ function SeriesChart({
           >
             <defs>
               <linearGradient id="oasdiFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="var(--pe-color-primary-500)" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="var(--pe-color-primary-500)" stopOpacity={0} />
+                <stop
+                  offset="0%"
+                  stopColor="var(--pe-color-primary-500)"
+                  stopOpacity={0.28}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--pe-color-primary-500)"
+                  stopOpacity={0}
+                />
               </linearGradient>
               <linearGradient id="hiFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="var(--pe-color-gray-500)" stopOpacity={0.22} />
-                <stop offset="100%" stopColor="var(--pe-color-gray-500)" stopOpacity={0} />
+                <stop
+                  offset="0%"
+                  stopColor="var(--pe-color-gray-500)"
+                  stopOpacity={0.22}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--pe-color-gray-500)"
+                  stopOpacity={0}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -266,7 +303,9 @@ function SeriesChart({
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) =>
-                displayUnit === "dollars" ? formatAxisDollars(value) : `${value.toFixed(1)}%`
+                displayUnit === "dollars"
+                  ? formatAxisDollars(value)
+                  : `${value.toFixed(1)}%`
               }
             />
             <ReferenceLine
@@ -281,7 +320,9 @@ function SeriesChart({
                 boxShadow: "0 18px 48px rgba(16, 24, 40, 0.12)",
                 fontSize: "13px",
               }}
-              formatter={(value, name) => formatTooltipEntry(value, name, displayUnit)}
+              formatter={(value, name) =>
+                formatTooltipEntry(value, name, displayUnit)
+              }
             />
             <Area
               type="monotone"
@@ -424,10 +465,11 @@ function SidebarGroup({
 }
 
 export function DashboardShell() {
-  const [activeTab, setActiveTab] = useState<DashboardTab>("reforms");
+  const [activeTab, setActiveTab] = useState<DashboardTab>("home");
   const [selectedReform, setSelectedReform] = useState("option1");
   const [scoringType, setScoringType] = useState<ScoringType>("static");
-  const [allocationMode, setAllocationMode] = useState<AllocationMode>("baselineShares");
+  const [allocationMode, setAllocationMode] =
+    useState<AllocationMode>("baselineShares");
   const [baselineScenario, setBaselineScenario] =
     useState<BaselineScenario>("currentLaw");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("pctPayroll");
@@ -513,7 +555,7 @@ export function DashboardShell() {
       ? "2035-2100 cumulative"
       : "2026-2100 cumulative";
   const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
-  const mobileViewValue = activeTab === "baseline" ? "baseline" : selectedReform;
+  const mobileViewValue = activeTab === "reforms" ? selectedReform : activeTab;
 
   function handleReformSelect(nextReform: string) {
     setActiveTab("reforms");
@@ -524,8 +566,12 @@ export function DashboardShell() {
   }
 
   function handleMobileViewChange(nextValue: string) {
-    if (nextValue === "baseline") {
-      setActiveTab("baseline");
+    if (
+      nextValue === "home" ||
+      nextValue === "baseline" ||
+      nextValue === "methodology"
+    ) {
+      setActiveTab(nextValue);
       return;
     }
     handleReformSelect(nextValue);
@@ -557,7 +603,10 @@ export function DashboardShell() {
       row.generalFundImpact.toFixed(2),
       row.tobTotalImpact.toFixed(2),
     ]);
-    const content = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const content = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
     const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -580,37 +629,47 @@ export function DashboardShell() {
         {/* ------------ Sidebar ------------ */}
         <aside className="hidden w-[16rem] shrink-0 self-start xl:sticky xl:top-4 xl:block">
           <nav className="space-y-5">
+            <SidebarNavItem
+              active={activeTab === "home"}
+              label="Overview"
+              onClick={() => setActiveTab("home")}
+            />
             <SidebarGroup title="Benefit tax rules">
-              {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
-                (option) => (
-                  <SidebarNavItem
-                    key={option.id}
-                    active={
-                      option.id === selectedReform && activeTab === "reforms"
-                    }
-                    label={option.shortName}
-                    onClick={() => handleReformSelect(option.id)}
-                  />
-                ),
-              )}
+              {STANDARD_REFORMS.filter((r) =>
+                BENEFIT_RULE_IDS.includes(r.id),
+              ).map((option) => (
+                <SidebarNavItem
+                  key={option.id}
+                  active={
+                    option.id === selectedReform && activeTab === "reforms"
+                  }
+                  label={option.shortName}
+                  onClick={() => handleReformSelect(option.id)}
+                />
+              ))}
             </SidebarGroup>
 
             <SidebarGroup title="Structural swaps">
-              {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
-                (option) => (
-                  <SidebarNavItem
-                    key={option.id}
-                    active={
-                      option.id === selectedReform && activeTab === "reforms"
-                    }
-                    label={option.shortName}
-                    onClick={() => handleReformSelect(option.id)}
-                  />
-                ),
-              )}
+              {STANDARD_REFORMS.filter((r) =>
+                STRUCTURAL_IDS.includes(r.id),
+              ).map((option) => (
+                <SidebarNavItem
+                  key={option.id}
+                  active={
+                    option.id === selectedReform && activeTab === "reforms"
+                  }
+                  label={option.shortName}
+                  onClick={() => handleReformSelect(option.id)}
+                />
+              ))}
             </SidebarGroup>
 
-            <SidebarGroup title="Context">
+            <SidebarGroup title="About">
+              <SidebarNavItem
+                active={activeTab === "methodology"}
+                label="Methodology"
+                onClick={() => setActiveTab("methodology")}
+              />
               <SidebarNavItem
                 active={activeTab === "baseline"}
                 label="Baseline model"
@@ -636,9 +695,13 @@ export function DashboardShell() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <h2 className="text-4xl font-bold tracking-[-0.04em] text-[var(--pe-color-text-title)] sm:text-[44px]">
-                  {activeTab === "baseline"
-                    ? "Baseline model and assumptions"
-                    : "Social Security taxation reform"}
+                  {activeTab === "home"
+                    ? "Taxation of Social Security benefits"
+                    : activeTab === "baseline"
+                      ? "Baseline model and assumptions"
+                      : activeTab === "methodology"
+                        ? "Methodology"
+                        : "Social Security taxation reform"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
                   {activeTab === "baseline" ? (
@@ -646,6 +709,12 @@ export function DashboardShell() {
                       Microsimulation baseline outputs, Trustees-following
                       assumptions, calibration targets, and indexed tax
                       parameters used by the long-run model.
+                    </>
+                  ) : activeTab === "methodology" ? (
+                    <>
+                      How each reform is modeled, scored, and projected to 2100
+                      — data sources, the long-run baseline, and behavioral
+                      assumptions.
                     </>
                   ) : (
                     <>
@@ -696,31 +765,44 @@ export function DashboardShell() {
               onChange={(event) => handleMobileViewChange(event.target.value)}
               className="mt-2 w-full rounded-[var(--pe-radius-container)] border border-[var(--pe-color-border-light)] bg-white px-4 py-3 text-sm font-medium text-[var(--pe-color-text-primary)] outline-none transition focus:border-[var(--pe-color-primary-400)]"
             >
+              <option value="home">Overview</option>
               <optgroup label="Benefit tax rules">
-                {STANDARD_REFORMS.filter((r) => BENEFIT_RULE_IDS.includes(r.id)).map(
-                  (option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.shortName}
-                    </option>
-                  ),
-                )}
+                {STANDARD_REFORMS.filter((r) =>
+                  BENEFIT_RULE_IDS.includes(r.id),
+                ).map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.shortName}
+                  </option>
+                ))}
               </optgroup>
               <optgroup label="Structural swaps">
-                {STANDARD_REFORMS.filter((r) => STRUCTURAL_IDS.includes(r.id)).map(
-                  (option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.shortName}
-                    </option>
-                  ),
-                )}
+                {STANDARD_REFORMS.filter((r) =>
+                  STRUCTURAL_IDS.includes(r.id),
+                ).map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.shortName}
+                  </option>
+                ))}
               </optgroup>
-              <optgroup label="Context">
+              <optgroup label="About">
+                <option value="methodology">Methodology</option>
                 <option value="baseline">Baseline model</option>
               </optgroup>
             </select>
           </section>
 
-          {activeTab === "baseline" ? (
+          {activeTab === "home" ? (
+            <HomeOverview
+              benefitReforms={BENEFIT_REFORM_LINKS}
+              structuralReforms={STRUCTURAL_REFORM_LINKS}
+              onSelectReform={handleReformSelect}
+              onOpenMethodology={() => setActiveTab("methodology")}
+              onOpenBaseline={() => setActiveTab("baseline")}
+              paperHref={PAPER_HREF}
+            />
+          ) : activeTab === "methodology" ? (
+            <MethodologySection />
+          ) : activeTab === "baseline" ? (
             <>
               <BaselineAssumptionsSection />
               <BaselineDiagnosticsSection />
@@ -742,8 +824,6 @@ export function DashboardShell() {
             </section>
           ) : (
             <>
-              <TobExplainerSection />
-
               {/* Reform name + category band — a slim editorial surface, no card */}
               <section className="border-t border-[var(--pe-color-border-light)] pt-6">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
@@ -902,64 +982,68 @@ export function DashboardShell() {
                     </h4>
                   </div>
                   <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead className="text-[var(--pe-color-text-secondary)]">
-                      <tr className="border-b border-[var(--pe-color-border-light)]">
-                        <th className="px-5 py-2 text-left text-xs font-medium uppercase tracking-wide">
-                          Year
-                        </th>
-                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                          Total
-                        </th>
-                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                          OASDI
-                        </th>
-                        <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                          HI
-                        </th>
-                        {showGeneralFundResidual ? (
-                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                            General fund
+                    <table className="min-w-full text-sm">
+                      <thead className="text-[var(--pe-color-text-secondary)]">
+                        <tr className="border-b border-[var(--pe-color-border-light)]">
+                          <th className="px-5 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                            Year
                           </th>
-                        ) : null}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--pe-color-border-light)]">
-                      {spotlight.map((row) => (
-                        <tr key={row.year}>
-                          <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
-                            {row.year}
-                          </td>
-                          <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
-                            {formatValue(
-                              getSeriesValue(row, displayUnit, "total"),
-                              displayUnit,
-                            )}
-                          </td>
-                          <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-primary-700)]">
-                            {formatValue(
-                              getSeriesValue(row, displayUnit, "oasdi"),
-                              displayUnit,
-                            )}
-                          </td>
-                          <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-text-secondary)]">
-                            {formatValue(
-                              getSeriesValue(row, displayUnit, "hi"),
-                              displayUnit,
-                            )}
-                          </td>
+                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                            Total
+                          </th>
+                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                            OASDI
+                          </th>
+                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                            HI
+                          </th>
                           {showGeneralFundResidual ? (
-                            <td className="px-5 py-2.5 text-right tabular-nums text-[#2563eb]">
+                            <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                              General fund
+                            </th>
+                          ) : null}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--pe-color-border-light)]">
+                        {spotlight.map((row) => (
+                          <tr key={row.year}>
+                            <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
+                              {row.year}
+                            </td>
+                            <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
                               {formatValue(
-                                getSeriesValue(row, displayUnit, "generalFund"),
+                                getSeriesValue(row, displayUnit, "total"),
                                 displayUnit,
                               )}
                             </td>
-                          ) : null}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-primary-700)]">
+                              {formatValue(
+                                getSeriesValue(row, displayUnit, "oasdi"),
+                                displayUnit,
+                              )}
+                            </td>
+                            <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-text-secondary)]">
+                              {formatValue(
+                                getSeriesValue(row, displayUnit, "hi"),
+                                displayUnit,
+                              )}
+                            </td>
+                            {showGeneralFundResidual ? (
+                              <td className="px-5 py-2.5 text-right tabular-nums text-[#2563eb]">
+                                {formatValue(
+                                  getSeriesValue(
+                                    row,
+                                    displayUnit,
+                                    "generalFund",
+                                  ),
+                                  displayUnit,
+                                )}
+                              </td>
+                            ) : null}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
 
                   {estimates.length > 0 && (
@@ -1005,8 +1089,6 @@ export function DashboardShell() {
                 policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
                 scoringType={scoringType}
               />
-
-              <MethodologySection />
             </>
           )}
 
@@ -1021,8 +1103,8 @@ export function DashboardShell() {
               >
                 PolicyEngine
               </a>
-              , commissioned by the Committee for a Responsible Federal Budget. Data:
-              2026 Social Security Trustees Report and populace microdata.
+              , commissioned by the Committee for a Responsible Federal Budget.
+              Data: 2026 Social Security Trustees Report and populace microdata.
             </p>
           </footer>
         </main>
