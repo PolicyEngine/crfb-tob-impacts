@@ -72,6 +72,11 @@ SOURCE_URLS = {
         "2026-expanded-supplementary-tables-figures.zip (retrieved direct, "
         "2026-06-10)"
     ),
+    HI_EXPENDITURES_TR2026_OUTPUT.name: (
+        "Derived from data/sources/tr2026/HI Cost and Income Rates.csv "
+        "cost rates times dashboard/public/data/hi_taxable_payroll.csv "
+        "TR2026-scaled HI taxable payroll."
+    ),
 }
 
 YEARS = range(2025, 2101)
@@ -271,6 +276,35 @@ def extract_hi_rates() -> pd.DataFrame:
     return frame.set_index("year")
 
 
+def _tr2025_hi_payroll_ratio_base(target_years: pd.Series) -> pd.DataFrame:
+    """Return a deterministic TR2025 HI payroll path for ratio scaling.
+
+    The TR2025 HI expenditure source stops at 2099. The TR2026 dashboard
+    denominator still needs 2100, so extrapolate the TR2025 HI payroll once from
+    the last two raw observations. Do not fall back to the existing dashboard
+    file here; doing so makes repeated target extraction shrink the 2100 value.
+    """
+
+    tr2025_hi = pd.read_csv(TR2025_HI)[["year", "hi_taxable_payroll"]]
+    tr2025_hi["year"] = tr2025_hi["year"].astype(int)
+    tr2025_hi["hi_taxable_payroll"] = tr2025_hi.hi_taxable_payroll.astype(float) / 1e9
+    tr2025_hi = tr2025_hi.sort_values("year").set_index("year")
+
+    max_target_year = int(target_years.max())
+    max_raw_year = int(tr2025_hi.index.max())
+    if max_raw_year < max_target_year:
+        if len(tr2025_hi) < 2:
+            raise ValueError("Need at least two TR2025 HI payroll rows to extrapolate")
+        previous = tr2025_hi.tail(2)["hi_taxable_payroll"]
+        growth = float(previous.iloc[-1] / previous.iloc[-2])
+        value = float(previous.iloc[-1])
+        for year in range(max_raw_year + 1, max_target_year + 1):
+            value *= growth
+            tr2025_hi.loc[year, "hi_taxable_payroll"] = value
+
+    return tr2025_hi.sort_index()
+
+
 def write_dashboard_denominators(aux: pd.DataFrame) -> None:
     """Refresh dashboard payroll/GDP denominators and trust-fund gaps."""
     projections = aux.rename(
@@ -288,18 +322,26 @@ def write_dashboard_denominators(aux: pd.DataFrame) -> None:
     # HI/OASDI payroll ratio (display denominator only; the Medicare
     # expanded tables do not publish HI payroll levels directly).
     tr2025 = pd.read_csv(TR2025_AUX).set_index("year")
-    tr2025_hi = pd.read_csv(TR2025_HI)[["year", "hi_taxable_payroll"]]
-    tr2025_hi["hi_taxable_payroll"] = tr2025_hi.hi_taxable_payroll / 1e9
-    tr2025_hi = tr2025_hi.set_index("year")
-    dashboard_hi = pd.read_csv(HI_PAYROLL_OUTPUT).set_index("year")
+    tr2025_hi = _tr2025_hi_payroll_ratio_base(projections.year)
+    bridge = pd.read_csv(HI_PAYROLL_OUTPUT).set_index("year")
+    raw_hi_start_year = int(tr2025_hi.index.min())
     rows = []
     for year in projections.year:
-        if year in tr2025_hi.index:
-            hi_2025 = float(tr2025_hi.loc[year, "hi_taxable_payroll"])
-        elif year in dashboard_hi.index:
-            hi_2025 = float(dashboard_hi.loc[year, "hi_taxable_payroll"])
-        else:
+        if year < raw_hi_start_year:
+            if year not in bridge.index:
+                raise ValueError(f"Missing HI payroll bridge value for {year}")
+            rows.append(
+                {
+                    "year": int(year),
+                    "hi_taxable_payroll": round(
+                        float(bridge.loc[year, "hi_taxable_payroll"]), 6
+                    ),
+                }
+            )
             continue
+        if year not in tr2025_hi.index:
+            raise ValueError(f"Missing TR2025 HI payroll ratio base for {year}")
+        hi_2025 = float(tr2025_hi.loc[year, "hi_taxable_payroll"])
         ratio = hi_2025 / float(
             tr2025.loc[year, "taxable_payroll_in_billion_nominal_usd"]
         )

@@ -13,6 +13,11 @@
       "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
     },
     {
+      "file": "data/sources/tr2026/HI Cost and Income Rates.csv",
+      "sha256": "99d53da9667e20b79db78b3aef236e7c07c54fdfa157b146b7f5ff7dec64c556",
+      "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
+    },
+    {
       "file": "data/social_security_aux_tr2026.csv",
       "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6",
       "source": ""
@@ -23,13 +28,8 @@
       "source": ""
     },
     {
-      "file": "data/sources/tr2026/HI Cost and Income Rates.csv",
-      "sha256": "99d53da9667e20b79db78b3aef236e7c07c54fdfa157b146b7f5ff7dec64c556",
-      "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
-    },
-    {
       "file": "data/hi_expenditures_tr2026.csv",
-      "sha256": "61e706279b5a4270a39f8e47c33cd1a7fa6be54a27919f22adb3a2e0ac85d76d",
+      "sha256": "90aa1640fa425e826c55b8097db9a561b1b9bd5ec7d9632c659053c8477bb809",
       "source": "Derived from data/sources/tr2026/HI Cost and Income Rates.csv cost rates times dashboard/public/data/hi_taxable_payroll.csv TR2026-scaled HI taxable payroll."
     }
   ],

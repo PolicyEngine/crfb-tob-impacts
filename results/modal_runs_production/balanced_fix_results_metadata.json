@@ -1,6 +1,10 @@
 {
   "anchor_sources": [
     {
+      "path": "tmp/balanced_fix_r2fix_2035/2035.csv",
+      "sha256": "34e0de5bda32c6936e1862de1da70e57febf2c6a0262bd37bc6b154f82b4071d"
+    },
+    {
       "path": "tmp/balanced_fix_r2fix_anchors/2035.csv",
       "sha256": "34e0de5bda32c6936e1862de1da70e57febf2c6a0262bd37bc6b154f82b4071d"
     },
@@ -14,7 +18,7 @@
     },
     {
       "path": "tmp/balanced_fix_r2fix_anchors/2100.csv",
-      "sha256": "8b8126f96ba58f9adc1db4668457dfbcd36a6323a738c83174dfb740abe80cfe"
+      "sha256": "fa1cc3ff6829a79abf183a76e3c098fd6e75d640c2954b9e4ce097a125a36e8c"
     },
     {
       "path": "tmp/balanced_fix_r2fix_spotcheck/2065.csv",
@@ -31,7 +35,7 @@
   "baseline_scenario": "ss_solvent",
   "current_law_results": "results.csv",
   "exact_rows": 20,
-  "generated_at": "2026-06-19T12:54:48.973496+00:00",
+  "generated_at": "2026-06-19T15:18:23.080213+00:00",
   "interpolated_rows": 244,
   "interpolation_method": "For each reform and metric, compute the solvent/current-law ratio at exact anchor years 2035, 2050, 2065, 2075, and 2100; linearly interpolate that ratio by year; multiply the live current-law static row by the interpolated ratio. 2065 was promoted from validation spot-check to exact anchor because the direct option12 split materially differed from the 2035/2050/2075/2100-only interpolation.",
   "planned_anchor_years": [
@@ -50,7 +54,7 @@
     "option12"
   ],
   "rows": 264,
-  "run_prefix": "balanced_fix_v2pop_tr2026_endpoints_first_20260618_r2fix",
+  "run_prefix": "balanced_fix_v2pop_tr2026_endpoints_first_20260619_hi2100fix",
   "schema": "crfb_balanced_fix_public_results/v1",
   "split_contract": "solvent_oasdi_impact + solvent_medicare_hi_impact + solvent_general_fund_impact equals revenue_impact for every row.",
   "year_end": 2100,

@@ -863,6 +863,23 @@ def test_hi_payroll_denominator_follows_tr2026_ratio_path():
     tr2026 = pd.read_csv(RESULTS.parent / "data" / "social_security_aux_tr2026.csv")
     tr2025 = pd.read_csv(RESULTS.parent / "data" / "social_security_aux_tr2025.csv")
     raw_hi_2025 = pd.read_csv(RESULTS.parent / "data" / "hi_expenditures_tr2025.csv")
+    raw_hi_2025 = raw_hi_2025[["year", "hi_taxable_payroll"]].copy()
+    max_dashboard_year = int(dashboard["year"].max())
+    max_raw_year = int(raw_hi_2025["year"].max())
+    if max_raw_year < max_dashboard_year:
+        previous = raw_hi_2025.sort_values("year").tail(2)
+        growth = (
+            previous["hi_taxable_payroll"].iloc[-1]
+            / previous["hi_taxable_payroll"].iloc[-2]
+        )
+        value = previous["hi_taxable_payroll"].iloc[-1]
+        extrapolated = []
+        for year in range(max_raw_year + 1, max_dashboard_year + 1):
+            value *= growth
+            extrapolated.append({"year": year, "hi_taxable_payroll": value})
+        raw_hi_2025 = pd.concat(
+            [raw_hi_2025, pd.DataFrame(extrapolated)], ignore_index=True
+        )
 
     merged = (
         dashboard.merge(
@@ -873,9 +890,10 @@ def test_hi_payroll_denominator_follows_tr2026_ratio_path():
             on="year",
             suffixes=("_tr2026", "_tr2025"),
         )
-        .merge(raw_hi_2025[["year", "hi_taxable_payroll"]], on="year")
+        .merge(raw_hi_2025, on="year")
     )
     assert len(merged) > 30
+    assert 2100 in set(merged["year"])
     ratio = (merged["hi_taxable_payroll_y"] / 1e9) / merged[
         "taxable_payroll_in_billion_nominal_usd_tr2025"
     ]
