@@ -206,6 +206,37 @@ def test_release_baseline_income_tax_comes_from_raw_full_h5():
         assert_income_tax_baseline_is_direct_microsim(path)
 
 
+def test_release_baseline_aggregates_use_public_hi_payroll_denominator():
+    baseline = pd.read_csv(DASHBOARD_DATA / "baseline_aggregates.csv")
+    hi_payroll = pd.read_csv(DASHBOARD_DATA / "hi_taxable_payroll.csv")
+    diagnostics = pd.read_csv(DASHBOARD_DATA / "baseline_calibration_diagnostics.csv")
+
+    merged = baseline[["year", "hi_taxable_payroll"]].merge(
+        hi_payroll,
+        on="year",
+        suffixes=("_baseline", "_public"),
+        validate="one_to_one",
+    )
+    assert (
+        merged["hi_taxable_payroll_baseline"] - merged["hi_taxable_payroll_public"]
+    ).abs().max() < 1e-6
+
+    expected_pct = baseline["tob_hi"] / baseline["hi_taxable_payroll"] * 100
+    diagnostic_pct = diagnostics[
+        diagnostics["diagnostic_id"].eq("tob_hi_pct_hi_payroll")
+    ][["year", "value"]]
+    checked = (
+        baseline[["year"]]
+        .assign(expected_pct=expected_pct)
+        .merge(
+            diagnostic_pct,
+            on="year",
+            validate="one_to_one",
+        )
+    )
+    assert (checked["expected_pct"] - checked["value"]).abs().max() < 1e-9
+
+
 def test_csv_release_surface_contains_only_current_full_h5_artifacts_and_inputs():
     roots = [
         REPO_ROOT / "data",

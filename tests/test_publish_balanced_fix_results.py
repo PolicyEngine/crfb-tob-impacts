@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pandas as pd
 
 from scripts.publish_balanced_fix_results import (
+    DEFAULT_RUN_PREFIX,
     build_balanced_fix_results,
     current_law_default_rows,
 )
 from src.balanced_fix import BALANCED_FIX_PUBLISH_ANCHOR_YEARS, BALANCED_FIX_REFORMS
+
+
+REPO = Path(__file__).resolve().parents[1]
 
 
 def _current_row(reform: str, year: int, revenue: float = 100.0) -> dict[str, object]:
@@ -99,3 +106,15 @@ def test_balanced_fix_publisher_interpolates_ratios_and_reconciles_split():
         + published["solvent_general_fund_impact"]
     )
     assert (split_total - published["revenue_impact"]).abs().max() < 1e-8
+
+
+def test_balanced_fix_publisher_default_prefix_matches_public_metadata():
+    metadata = json.loads(
+        (
+            REPO
+            / "results"
+            / "modal_runs_production"
+            / "balanced_fix_results_metadata.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert DEFAULT_RUN_PREFIX == metadata["run_prefix"]
