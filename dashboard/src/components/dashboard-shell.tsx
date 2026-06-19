@@ -472,10 +472,15 @@ export function DashboardShell() {
     setBaselineScenario(next);
     if (next === "ssSolvent") {
       setScoringType("static");
+      setViewMode("75year");
     }
   }
 
   function handleViewModeChange(next: ViewMode) {
+    if (baselineScenario === "ssSolvent") {
+      setViewMode("75year");
+      return;
+    }
     setViewMode(next);
     setDisplayUnit(next === "10year" ? "dollars" : "pctPayroll");
   }
@@ -500,6 +505,13 @@ export function DashboardShell() {
   const showBaselineScenarioToggle =
     BALANCED_FIX_ELIGIBLE_OPTIONS.includes(effectiveReformId);
   const isStaticOnlyReform = baselineScenario === "ssSolvent";
+  const showTenYearMetric = baselineScenario === "currentLaw";
+  const longRunMetricLabel =
+    baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect";
+  const longRunMetricCaption =
+    baselineScenario === "ssSolvent"
+      ? "2035-2100 cumulative"
+      : "2026-2100 cumulative";
   const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
   const mobileViewValue = activeTab === "baseline" ? "baseline" : selectedReform;
 
@@ -801,15 +813,21 @@ export function DashboardShell() {
                 </div>
                 <div className="flex items-center">
                   <ControlLabel>Period</ControlLabel>
-                  <Segment
-                    label="Period"
-                    value={viewMode}
-                    onChange={handleViewModeChange}
-                    options={[
-                      { label: "10-year", value: "10year" },
-                      { label: "75-year", value: "75year" },
-                    ]}
-                  />
+                  {baselineScenario === "ssSolvent" ? (
+                    <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
+                      2035-2100
+                    </span>
+                  ) : (
+                    <Segment
+                      label="Period"
+                      value={viewMode}
+                      onChange={handleViewModeChange}
+                      options={[
+                        { label: "10-year", value: "10year" },
+                        { label: "75-year", value: "75year" },
+                      ]}
+                    />
+                  )}
                 </div>
                 {showAllocationToggle && (
                   <div className="flex items-center">
@@ -839,7 +857,7 @@ export function DashboardShell() {
               {/* Metrics */}
               <section className="grid gap-4 md:grid-cols-2">
                 <MetricTile
-                  label="75-year effect"
+                  label={longRunMetricLabel}
                   value={formatValue(
                     displayUnit === "dollars"
                       ? totals.total
@@ -849,22 +867,24 @@ export function DashboardShell() {
                     displayUnit,
                   )}
                   tone={totals.total >= 0 ? "positive" : "negative"}
-                  caption="2026–2100 cumulative"
+                  caption={longRunMetricCaption}
                   accent
                 />
-                <MetricTile
-                  label="10-year effect"
-                  value={formatValue(
-                    displayUnit === "dollars"
-                      ? totals.tenYear
-                      : displayUnit === "pctPayroll"
-                        ? totals.tenYearPctPayroll
-                        : totals.tenYearPctGdp,
-                    displayUnit,
-                  )}
-                  tone={totals.tenYear >= 0 ? "positive" : "negative"}
-                  caption="2026–2035 cumulative"
-                />
+                {showTenYearMetric ? (
+                  <MetricTile
+                    label="10-year effect"
+                    value={formatValue(
+                      displayUnit === "dollars"
+                        ? totals.tenYear
+                        : displayUnit === "pctPayroll"
+                          ? totals.tenYearPctPayroll
+                          : totals.tenYearPctGdp,
+                      displayUnit,
+                    )}
+                    tone={totals.tenYear >= 0 ? "positive" : "negative"}
+                    caption="2026–2035 cumulative"
+                  />
+                ) : null}
               </section>
 
               {/* Chart + inline spotlight */}

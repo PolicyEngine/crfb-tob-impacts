@@ -642,11 +642,26 @@ def test_dashboard_defaults_to_full_75_year_surface():
     assert shell.index('{ label: "10-year", value: "10year" }') < shell.index(
         '{ label: "75-year", value: "75year" }'
     )
-    assert shell.index('label="75-year effect"') < shell.index('label="10-year effect"')
+    assert shell.index('"75-year effect"') < shell.index('label="10-year effect"')
     assert 'label="OASDI / HI split"' not in shell
     assert 'caption="2026 baseline share"' not in shell
     assert "spotlightRows(selectedData, viewMode)" in shell
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
+
+
+def test_ss_solvent_dashboard_view_is_long_run_only():
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+
+    assert 'if (next === "ssSolvent")' in shell
+    assert 'setViewMode("75year")' in shell
+    assert 'baselineScenario === "ssSolvent" ? (' in shell
+    assert "2035-2100" in shell
+    assert 'label={longRunMetricLabel}' in shell
+    assert 'caption={longRunMetricCaption}' in shell
+    assert 'label="10-year effect"' in shell
+    assert "showTenYearMetric ? (" in shell
 
 
 def test_reproducibility_roadmap_points_to_full_reform_h5_artifacts():
