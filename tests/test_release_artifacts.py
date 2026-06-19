@@ -647,6 +647,9 @@ def test_dashboard_defaults_to_full_75_year_surface():
     assert 'caption="2026 baseline share"' not in shell
     assert "spotlightRows(selectedData, viewMode)" in shell
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
+    assert "const xAxisDomain: [number, number]" in shell
+    assert "viewMode === \"75year\" ? [2026, 2100] : [2026, 2035]" in shell
+    assert 'type="number"' in shell
 
 
 def test_ss_solvent_dashboard_view_is_long_run_only():

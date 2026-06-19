@@ -210,6 +210,8 @@ function SeriesChart({
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
+  const xAxisDomain: [number, number] =
+    viewMode === "75year" ? [2026, 2100] : [2026, 2035];
   const showGeneralFund = data.some(
     (row) => Math.abs(row.generalFundImpact) > 0.005,
   );
@@ -288,12 +290,15 @@ function SeriesChart({
               vertical={false}
             />
             <XAxis
+              type="number"
               dataKey="year"
+              domain={xAxisDomain}
               ticks={xAxisTicks}
               interval={viewMode === "75year" ? 0 : undefined}
               tick={{ fill: "var(--pe-color-text-secondary)", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
+              tickFormatter={(value: number) => `${Math.round(value)}`}
             />
             <YAxis
               type="number"
