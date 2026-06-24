@@ -939,6 +939,13 @@ export function DashboardShell() {
                 {showBaselineScenarioToggle && (
                   <div className="flex items-center">
                     <ControlLabel>Baseline scenario</ControlLabel>
+                    <span
+                      title="Current law scores the reform against the law as it stands. SS solvent scores it against a baseline that closes Social Security's long-run shortfall through roughly equal benefit reductions and payroll-rate increases, so the reform's effect is measured on top of an already-solvent system."
+                      aria-label="Baseline scenario explanation"
+                      className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pe-color-border-light)] text-[var(--pe-color-text-tertiary)]"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </span>
                     <Segment
                       label="Baseline scenario"
                       value={baselineScenario}
@@ -1019,6 +1026,18 @@ export function DashboardShell() {
                   </div>
                 )}
               </section>
+
+              {baselineScenario === "ssSolvent" ? (
+                <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-[var(--pe-color-bg-secondary)] px-4 py-3 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+                  <span className="font-semibold text-[var(--pe-color-text-primary)]">
+                    SS solvent baseline:
+                  </span>{" "}
+                  Social Security is brought into long-run balance through
+                  roughly equal benefit reductions and payroll-rate increases;
+                  the reform is then scored on top of that solvent system
+                  (2035–2100).
+                </section>
+              ) : null}
 
               {/* Metric — only the selected period's total */}
               <section className="grid gap-4 md:grid-cols-2">
