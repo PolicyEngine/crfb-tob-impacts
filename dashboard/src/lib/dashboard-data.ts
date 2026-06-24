@@ -24,6 +24,7 @@ export interface YearlyImpact {
   oasdiTaxablePayroll: number;
   hiTaxablePayroll: number;
   gdp: number;
+  discountFactor: number;
   pctOfOasdiPayroll: number;
   pctOfGdp: number;
   oasdiPctOfPayroll: number;
@@ -39,6 +40,7 @@ interface EconomicProjection {
   oasdiTaxablePayroll: number;
   hiTaxablePayroll: number;
   gdp: number;
+  discountFactor: number;
 }
 
 interface AllocationInput {
@@ -126,6 +128,32 @@ async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
   return payroll;
 }
 
+async function loadDiscountFactors(): Promise<Map<number, number>> {
+  // Present-value discount factors to the start of 2026 using the TR2026
+  // assumed nominal trust-fund interest rates (standard trust-fund accounting).
+  // Each year's flow is discounted by the cumulative product of (1 + rate).
+  const csvContent = await fetchCsv("/data/tr2026_interest_rates.csv");
+  const parsed = Papa.parse<Record<string, string>>(csvContent, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  const rates = new Map<number, number>();
+  for (const row of parsed.data) {
+    rates.set(
+      asNumber(row.year),
+      asNumber(row.nominal_interest_rate_pct) / 100,
+    );
+  }
+  const years = [...rates.keys()].sort((a, b) => a - b);
+  const factors = new Map<number, number>();
+  let cumulative = 1;
+  for (const year of years) {
+    cumulative /= 1 + (rates.get(year) ?? 0);
+    factors.set(year, cumulative);
+  }
+  return factors;
+}
+
 async function loadEconomicProjections(): Promise<
   Map<number, EconomicProjection>
 > {
@@ -133,7 +161,8 @@ async function loadEconomicProjections(): Promise<
     projectionCache = Promise.all([
       fetchCsv("/data/ssa_economic_projections.csv"),
       loadHiTaxablePayroll(),
-    ]).then(([csvContent, hiTaxablePayroll]) => {
+      loadDiscountFactors(),
+    ]).then(([csvContent, hiTaxablePayroll, discountFactors]) => {
       const parsed = Papa.parse<Record<string, string>>(csvContent, {
         header: true,
         skipEmptyLines: true,
@@ -148,6 +177,7 @@ async function loadEconomicProjections(): Promise<
           oasdiTaxablePayroll,
           hiTaxablePayroll: hiTaxablePayroll.get(year) ?? oasdiTaxablePayroll,
           gdp: asNumber(row.gdp),
+          discountFactor: discountFactors.get(year) ?? 1,
         });
       }
 
@@ -305,6 +335,7 @@ export async function loadDashboardData(
       oasdiTaxablePayroll: 0,
       hiTaxablePayroll: 0,
       gdp: 0,
+      discountFactor: 1,
     };
 
     const yearlyImpact: YearlyImpact = {
@@ -323,6 +354,7 @@ export async function loadDashboardData(
       oasdiTaxablePayroll: economicProjection.oasdiTaxablePayroll,
       hiTaxablePayroll: economicProjection.hiTaxablePayroll,
       gdp: economicProjection.gdp,
+      discountFactor: economicProjection.discountFactor,
       pctOfOasdiPayroll:
         economicProjection.oasdiTaxablePayroll > 0
           ? (split.revenueImpact / economicProjection.oasdiTaxablePayroll) * 100
@@ -401,6 +433,22 @@ export function calculateTotals(data: YearlyImpact[]) {
   const totalHiPayroll = sumBy(data, "hiTaxablePayroll");
   const tenYearHiPayroll = sumBy(tenYearData, "hiTaxablePayroll");
 
+  // Present value to the start of 2026 at the TR2026 assumed nominal trust-fund
+  // interest rates (standard trust-fund accounting). Each row carries its
+  // cumulative discount factor; % figures discount numerator and denominator
+  // alike (the 75-year summarized-rate convention).
+  const pvBy = (rows: YearlyImpact[], key: keyof YearlyImpact) =>
+    rows.reduce(
+      (acc, row) => acc + (row[key] as number) * row.discountFactor,
+      0,
+    );
+  const pvTotal = pvBy(data, "revenueImpact");
+  const pvOasdi = pvBy(data, "tobOasdiImpact");
+  const pvHi = pvBy(data, "tobMedicareHiImpact");
+  const pvPayroll = pvBy(data, "oasdiTaxablePayroll");
+  const pvHiPayroll = pvBy(data, "hiTaxablePayroll");
+  const pvGdp = pvBy(data, "gdp");
+
   return {
     tenYear,
     total,
@@ -421,6 +469,13 @@ export function calculateTotals(data: YearlyImpact[]) {
       tenYearPayroll > 0 ? (tenYearOasdi / tenYearPayroll) * 100 : 0,
     tenYearHiPctPayroll:
       tenYearHiPayroll > 0 ? (tenYearHi / tenYearHiPayroll) * 100 : 0,
+    pvTotal,
+    pvOasdi,
+    pvHi,
+    pvTotalPctPayroll: pvPayroll > 0 ? (pvTotal / pvPayroll) * 100 : 0,
+    pvTotalPctGdp: pvGdp > 0 ? (pvTotal / pvGdp) * 100 : 0,
+    pvOasdiPctPayroll: pvPayroll > 0 ? (pvOasdi / pvPayroll) * 100 : 0,
+    pvHiPctPayroll: pvHiPayroll > 0 ? (pvHi / pvHiPayroll) * 100 : 0,
   };
 }
 

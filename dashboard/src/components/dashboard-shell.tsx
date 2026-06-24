@@ -593,24 +593,24 @@ export function DashboardShell() {
     baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect";
   const longRunMetricCaption =
     baselineScenario === "ssSolvent"
-      ? "2035-2100 cumulative"
-      : "2026-2100 cumulative";
+      ? "2035-2100, present value (Trustees rates)"
+      : "2026-2100, present value (Trustees rates)";
   // In "% payroll" mode the chart, table, and metric focus on ONE trust fund,
   // because OASDI and HI have different taxable-payroll denominators (capped vs
   // uncapped) — overlaying them on one axis would be misleading.
   const isPctPayroll = displayUnit === "pctPayroll";
   const fundLabel = trustFund === "oasdi" ? "OASDI" : "HI";
   const focusOasdi = trustFund === "oasdi";
-  const longRunDollar = focusOasdi ? totals.totalOasdi : totals.totalHi;
+  const longRunDollar = focusOasdi ? totals.pvOasdi : totals.pvHi;
   const tenYearDollar = focusOasdi ? totals.tenYearOasdi : totals.tenYearHi;
   const longRunValue =
     displayUnit === "dollars"
-      ? totals.total
+      ? totals.pvTotal
       : isPctPayroll
         ? focusOasdi
-          ? totals.totalOasdiPctPayroll
-          : totals.totalHiPctPayroll
-        : totals.totalPctGdp;
+          ? totals.pvOasdiPctPayroll
+          : totals.pvHiPctPayroll
+        : totals.pvTotalPctGdp;
   const tenYearValue =
     displayUnit === "dollars"
       ? totals.tenYear
@@ -619,7 +619,7 @@ export function DashboardShell() {
           ? totals.tenYearOasdiPctPayroll
           : totals.tenYearHiPctPayroll
         : totals.tenYearPctGdp;
-  const longRunPositive = (isPctPayroll ? longRunDollar : totals.total) >= 0;
+  const longRunPositive = (isPctPayroll ? longRunDollar : totals.pvTotal) >= 0;
   const tenYearPositive = (isPctPayroll ? tenYearDollar : totals.tenYear) >= 0;
   const longRunLabel = isPctPayroll
     ? `${fundLabel} · ${longRunMetricLabel}`
