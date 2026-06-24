@@ -588,7 +588,6 @@ export function DashboardShell() {
   const showBaselineScenarioToggle =
     BALANCED_FIX_ELIGIBLE_OPTIONS.includes(effectiveReformId);
   const isStaticOnlyReform = baselineScenario === "ssSolvent";
-  const showTenYearMetric = baselineScenario === "currentLaw";
   const longRunMetricLabel =
     baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect";
   const longRunMetricCaption =
@@ -1021,23 +1020,25 @@ export function DashboardShell() {
                 )}
               </section>
 
-              {/* Metrics */}
+              {/* Metric — only the selected period's total */}
               <section className="grid gap-4 md:grid-cols-2">
-                <MetricTile
-                  label={longRunLabel}
-                  value={formatValue(longRunValue, displayUnit)}
-                  tone={longRunPositive ? "positive" : "negative"}
-                  caption={longRunMetricCaption}
-                  accent
-                />
-                {showTenYearMetric ? (
+                {viewMode === "10year" ? (
                   <MetricTile
                     label={tenYearLabel}
                     value={formatValue(tenYearValue, displayUnit)}
                     tone={tenYearPositive ? "positive" : "negative"}
                     caption="2026–2035 cumulative"
+                    accent
                   />
-                ) : null}
+                ) : (
+                  <MetricTile
+                    label={longRunLabel}
+                    value={formatValue(longRunValue, displayUnit)}
+                    tone={longRunPositive ? "positive" : "negative"}
+                    caption={longRunMetricCaption}
+                    accent
+                  />
+                )}
               </section>
 
               {/* Chart + inline spotlight */}
