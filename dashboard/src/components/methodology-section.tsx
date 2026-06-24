@@ -219,12 +219,14 @@ export function MethodologySection() {
           <p>
             <strong>Static scoring:</strong> holds taxpayer behavior constant
             and isolates the mechanical effect of policy changes. This is the
-            dashboard&apos;s default scoring surface. All fourteen reforms use
-            full reform H5 microsimulation outputs computed on the calibrated
-            year datasets for 2026, 2030, and every fifth year from 2035 to
-            2100. Annual dashboard rows between anchor years are linearly
-            interpolated for display continuity; the exact anchor-year H5 rows
-            are preserved separately in the production results.
+            dashboard&apos;s default scoring surface. All fourteen reforms are
+            computed from full reform H5 microsimulation at anchor years — 2026,
+            2030, and every fifth year from 2035 to 2100. Intermediate years are
+            linearly interpolated to a complete annual series, which is both
+            what the dashboard charts and what the 75-year and present-value
+            totals aggregate. Each row is tagged as an exact anchor or an
+            interpolated fill, and the exact anchor-year H5 rows are preserved
+            in the production results.
           </p>
           <p className="mt-4">
             <strong>Supplemental labor-supply response:</strong> uses the same
