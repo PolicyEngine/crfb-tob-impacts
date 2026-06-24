@@ -203,10 +203,12 @@ function SeriesChart({
   data,
   displayUnit,
   viewMode,
+  trustFund,
 }: {
   data: YearlyImpact[];
   displayUnit: DisplayUnit;
   viewMode: ViewMode;
+  trustFund: "oasdi" | "hi";
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
@@ -224,11 +226,13 @@ function SeriesChart({
     generalFund: getSeriesValue(row, displayUnit, "generalFund"),
   }));
 
+  const fundFocus = displayUnit === "pctPayroll";
+  const fundLabel = trustFund === "oasdi" ? "OASDI" : "HI";
   const unitLabel =
     displayUnit === "dollars"
       ? "Billions of nominal dollars"
       : displayUnit === "pctPayroll"
-        ? "Percent of taxable payroll"
+        ? `Percent of ${fundLabel} taxable payroll`
         : "Percent of GDP";
 
   return (
@@ -242,12 +246,25 @@ function SeriesChart({
         </p>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-[var(--pe-color-text-secondary)]">
-        <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
-        <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
-        <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
-        {showGeneralFund ? (
-          <LegendSwatch color="#2563eb" label="General fund" />
-        ) : null}
+        {fundFocus ? (
+          <LegendSwatch
+            color={
+              trustFund === "oasdi"
+                ? "var(--pe-color-primary-500)"
+                : "var(--pe-color-gray-500)"
+            }
+            label={fundLabel}
+          />
+        ) : (
+          <>
+            <LegendSwatch color="var(--pe-color-text-primary)" label="Total" />
+            <LegendSwatch color="var(--pe-color-primary-500)" label="OASDI" />
+            <LegendSwatch color="var(--pe-color-gray-500)" label="HI" />
+            {showGeneralFund ? (
+              <LegendSwatch color="#2563eb" label="General fund" />
+            ) : null}
+          </>
+        )}
       </div>
 
       <div ref={ref} className="mt-4 h-[22rem]">
@@ -329,37 +346,55 @@ function SeriesChart({
                 formatTooltipEntry(value, name, displayUnit)
               }
             />
-            <Area
-              type="monotone"
-              dataKey="oasdi"
-              stroke="var(--pe-color-primary-500)"
-              fill="url(#oasdiFill)"
-              strokeWidth={2}
-            />
-            <Area
-              type="monotone"
-              dataKey="hi"
-              stroke="var(--pe-color-gray-500)"
-              fill="url(#hiFill)"
-              strokeWidth={2}
-            />
-            {showGeneralFund ? (
-              <Line
+            {fundFocus ? (
+              <Area
                 type="monotone"
-                dataKey="generalFund"
-                stroke="#2563eb"
+                dataKey={trustFund}
+                stroke={
+                  trustFund === "oasdi"
+                    ? "var(--pe-color-primary-500)"
+                    : "var(--pe-color-gray-500)"
+                }
+                fill={
+                  trustFund === "oasdi" ? "url(#oasdiFill)" : "url(#hiFill)"
+                }
                 strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
               />
-            ) : null}
-            <Line
-              type="monotone"
-              dataKey="total"
-              stroke="var(--pe-color-text-primary)"
-              strokeWidth={2.5}
-              dot={false}
-            />
+            ) : (
+              <>
+                <Area
+                  type="monotone"
+                  dataKey="oasdi"
+                  stroke="var(--pe-color-primary-500)"
+                  fill="url(#oasdiFill)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="hi"
+                  stroke="var(--pe-color-gray-500)"
+                  fill="url(#hiFill)"
+                  strokeWidth={2}
+                />
+                {showGeneralFund ? (
+                  <Line
+                    type="monotone"
+                    dataKey="generalFund"
+                    stroke="#2563eb"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                  />
+                ) : null}
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="var(--pe-color-text-primary)"
+                  strokeWidth={2.5}
+                  dot={false}
+                />
+              </>
+            )}
           </AreaChart>
         ) : null}
       </div>
@@ -478,6 +513,7 @@ export function DashboardShell() {
   const [baselineScenario, setBaselineScenario] =
     useState<BaselineScenario>("currentLaw");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("pctPayroll");
+  const [trustFund, setTrustFund] = useState<"oasdi" | "hi">("oasdi");
   const [viewMode, setViewMode] = useState<ViewMode>("75year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
@@ -559,6 +595,38 @@ export function DashboardShell() {
     baselineScenario === "ssSolvent"
       ? "2035-2100 cumulative"
       : "2026-2100 cumulative";
+  // In "% payroll" mode the chart, table, and metric focus on ONE trust fund,
+  // because OASDI and HI have different taxable-payroll denominators (capped vs
+  // uncapped) — overlaying them on one axis would be misleading.
+  const isPctPayroll = displayUnit === "pctPayroll";
+  const fundLabel = trustFund === "oasdi" ? "OASDI" : "HI";
+  const focusOasdi = trustFund === "oasdi";
+  const longRunDollar = focusOasdi ? totals.totalOasdi : totals.totalHi;
+  const tenYearDollar = focusOasdi ? totals.tenYearOasdi : totals.tenYearHi;
+  const longRunValue =
+    displayUnit === "dollars"
+      ? totals.total
+      : isPctPayroll
+        ? focusOasdi
+          ? totals.totalOasdiPctPayroll
+          : totals.totalHiPctPayroll
+        : totals.totalPctGdp;
+  const tenYearValue =
+    displayUnit === "dollars"
+      ? totals.tenYear
+      : isPctPayroll
+        ? focusOasdi
+          ? totals.tenYearOasdiPctPayroll
+          : totals.tenYearHiPctPayroll
+        : totals.tenYearPctGdp;
+  const longRunPositive = (isPctPayroll ? longRunDollar : totals.total) >= 0;
+  const tenYearPositive = (isPctPayroll ? tenYearDollar : totals.tenYear) >= 0;
+  const longRunLabel = isPctPayroll
+    ? `${fundLabel} · ${longRunMetricLabel}`
+    : longRunMetricLabel;
+  const tenYearLabel = isPctPayroll
+    ? `${fundLabel} · 10-year effect`
+    : "10-year effect";
   const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
   const mobileViewValue = activeTab === "reforms" ? selectedReform : activeTab;
 
@@ -896,6 +964,20 @@ export function DashboardShell() {
                     ]}
                   />
                 </div>
+                {isPctPayroll && (
+                  <div className="flex items-center">
+                    <ControlLabel>Trust fund</ControlLabel>
+                    <Segment
+                      label="Trust fund"
+                      value={trustFund}
+                      onChange={setTrustFund}
+                      options={[
+                        { label: "OASDI", value: "oasdi" },
+                        { label: "HI", value: "hi" },
+                      ]}
+                    />
+                  </div>
+                )}
                 <div className="flex items-center">
                   <ControlLabel>Period</ControlLabel>
                   {baselineScenario === "ssSolvent" ? (
@@ -942,31 +1024,17 @@ export function DashboardShell() {
               {/* Metrics */}
               <section className="grid gap-4 md:grid-cols-2">
                 <MetricTile
-                  label={longRunMetricLabel}
-                  value={formatValue(
-                    displayUnit === "dollars"
-                      ? totals.total
-                      : displayUnit === "pctPayroll"
-                        ? totals.totalPctPayroll
-                        : totals.totalPctGdp,
-                    displayUnit,
-                  )}
-                  tone={totals.total >= 0 ? "positive" : "negative"}
+                  label={longRunLabel}
+                  value={formatValue(longRunValue, displayUnit)}
+                  tone={longRunPositive ? "positive" : "negative"}
                   caption={longRunMetricCaption}
                   accent
                 />
                 {showTenYearMetric ? (
                   <MetricTile
-                    label="10-year effect"
-                    value={formatValue(
-                      displayUnit === "dollars"
-                        ? totals.tenYear
-                        : displayUnit === "pctPayroll"
-                          ? totals.tenYearPctPayroll
-                          : totals.tenYearPctGdp,
-                      displayUnit,
-                    )}
-                    tone={totals.tenYear >= 0 ? "positive" : "negative"}
+                    label={tenYearLabel}
+                    value={formatValue(tenYearValue, displayUnit)}
+                    tone={tenYearPositive ? "positive" : "negative"}
                     caption="2026–2035 cumulative"
                   />
                 ) : null}
@@ -978,6 +1046,7 @@ export function DashboardShell() {
                   data={visibleData}
                   displayUnit={displayUnit}
                   viewMode={viewMode}
+                  trustFund={trustFund}
                 />
 
                 <div className="overflow-hidden rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
@@ -993,20 +1062,28 @@ export function DashboardShell() {
                           <th className="px-5 py-2 text-left text-xs font-medium uppercase tracking-wide">
                             Year
                           </th>
-                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                            Total
-                          </th>
-                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                            OASDI
-                          </th>
-                          <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                            HI
-                          </th>
-                          {showGeneralFundResidual ? (
+                          {isPctPayroll ? (
                             <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
-                              General fund
+                              {fundLabel}
                             </th>
-                          ) : null}
+                          ) : (
+                            <>
+                              <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                                Total
+                              </th>
+                              <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                                OASDI
+                              </th>
+                              <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                                HI
+                              </th>
+                              {showGeneralFundResidual ? (
+                                <th className="px-5 py-2 text-right text-xs font-medium uppercase tracking-wide">
+                                  General fund
+                                </th>
+                              ) : null}
+                            </>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--pe-color-border-light)]">
@@ -1015,36 +1092,47 @@ export function DashboardShell() {
                             <td className="px-5 py-2.5 font-medium text-[var(--pe-color-text-primary)]">
                               {row.year}
                             </td>
-                            <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
-                              {formatValue(
-                                getSeriesValue(row, displayUnit, "total"),
-                                displayUnit,
-                              )}
-                            </td>
-                            <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-primary-700)]">
-                              {formatValue(
-                                getSeriesValue(row, displayUnit, "oasdi"),
-                                displayUnit,
-                              )}
-                            </td>
-                            <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-text-secondary)]">
-                              {formatValue(
-                                getSeriesValue(row, displayUnit, "hi"),
-                                displayUnit,
-                              )}
-                            </td>
-                            {showGeneralFundResidual ? (
-                              <td className="px-5 py-2.5 text-right tabular-nums text-[#2563eb]">
+                            {isPctPayroll ? (
+                              <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
                                 {formatValue(
-                                  getSeriesValue(
-                                    row,
-                                    displayUnit,
-                                    "generalFund",
-                                  ),
+                                  getSeriesValue(row, displayUnit, trustFund),
                                   displayUnit,
                                 )}
                               </td>
-                            ) : null}
+                            ) : (
+                              <>
+                                <td className="px-5 py-2.5 text-right font-semibold tabular-nums text-[var(--pe-color-text-primary)]">
+                                  {formatValue(
+                                    getSeriesValue(row, displayUnit, "total"),
+                                    displayUnit,
+                                  )}
+                                </td>
+                                <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-primary-700)]">
+                                  {formatValue(
+                                    getSeriesValue(row, displayUnit, "oasdi"),
+                                    displayUnit,
+                                  )}
+                                </td>
+                                <td className="px-5 py-2.5 text-right tabular-nums text-[var(--pe-color-text-secondary)]">
+                                  {formatValue(
+                                    getSeriesValue(row, displayUnit, "hi"),
+                                    displayUnit,
+                                  )}
+                                </td>
+                                {showGeneralFundResidual ? (
+                                  <td className="px-5 py-2.5 text-right tabular-nums text-[#2563eb]">
+                                    {formatValue(
+                                      getSeriesValue(
+                                        row,
+                                        displayUnit,
+                                        "generalFund",
+                                      ),
+                                      displayUnit,
+                                    )}
+                                  </td>
+                                ) : null}
+                              </>
+                            )}
                           </tr>
                         ))}
                       </tbody>

@@ -1,7 +1,11 @@
 import Papa from "papaparse";
 
 export type ScoringType = "static" | "behavioral";
-export type AllocationMode = "currentLaw" | "baselineShares" | "allOasdi" | "allHi";
+export type AllocationMode =
+  | "currentLaw"
+  | "baselineShares"
+  | "allOasdi"
+  | "allHi";
 export type DisplayUnit = "dollars" | "pctPayroll" | "pctGdp";
 export type BaselineScenario = "currentLaw" | "ssSolvent";
 
@@ -96,7 +100,9 @@ async function fetchCsv(path: string): Promise<string> {
       path,
       fetch(resolvedPath).then(async (response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch ${resolvedPath}: ${response.status}`);
+          throw new Error(
+            `Failed to fetch ${resolvedPath}: ${response.status}`,
+          );
         }
         return response.text();
       }),
@@ -120,7 +126,9 @@ async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
   return payroll;
 }
 
-async function loadEconomicProjections(): Promise<Map<number, EconomicProjection>> {
+async function loadEconomicProjections(): Promise<
+  Map<number, EconomicProjection>
+> {
   if (!projectionCache) {
     projectionCache = Promise.all([
       fetchCsv("/data/ssa_economic_projections.csv"),
@@ -169,7 +177,10 @@ function splitRevenueImpacts(
     (allocationMode === "baselineShares" &&
       allocationEligibleOptions.has(row.reformName));
 
-  if (allocationMode === "allOasdi" && allocationEligibleOptions.has(row.reformName)) {
+  if (
+    allocationMode === "allOasdi" &&
+    allocationEligibleOptions.has(row.reformName)
+  ) {
     return {
       revenueImpact: row.revenueImpact,
       tobOasdiImpact: row.revenueImpact,
@@ -178,7 +189,10 @@ function splitRevenueImpacts(
     };
   }
 
-  if (allocationMode === "allHi" && allocationEligibleOptions.has(row.reformName)) {
+  if (
+    allocationMode === "allHi" &&
+    allocationEligibleOptions.has(row.reformName)
+  ) {
     return {
       revenueImpact: row.revenueImpact,
       tobOasdiImpact: 0,
@@ -249,7 +263,10 @@ export async function loadDashboardData(
 
   for (const row of parsed.data) {
     if ((row.scoring_type ?? "") !== scoringType) continue;
-    if (baselineScenario === "ssSolvent" && row.baseline_scenario !== "ss_solvent") {
+    if (
+      baselineScenario === "ssSolvent" &&
+      row.baseline_scenario !== "ss_solvent"
+    ) {
       continue;
     }
 
@@ -316,11 +333,13 @@ export async function loadDashboardData(
           : 0,
       oasdiPctOfPayroll:
         economicProjection.oasdiTaxablePayroll > 0
-          ? (split.tobOasdiImpact / economicProjection.oasdiTaxablePayroll) * 100
+          ? (split.tobOasdiImpact / economicProjection.oasdiTaxablePayroll) *
+            100
           : 0,
       hiPctOfPayroll:
         economicProjection.hiTaxablePayroll > 0
-          ? (split.tobMedicareHiImpact / economicProjection.hiTaxablePayroll) * 100
+          ? (split.tobMedicareHiImpact / economicProjection.hiTaxablePayroll) *
+            100
           : 0,
       generalFundPctOfPayroll:
         economicProjection.oasdiTaxablePayroll > 0
@@ -335,7 +354,9 @@ export async function loadDashboardData(
           ? (split.tobMedicareHiImpact / economicProjection.gdp) * 100
           : 0,
       generalFundPctOfGdp:
-        economicProjection.gdp > 0 ? (generalFundImpact / economicProjection.gdp) * 100 : 0,
+        economicProjection.gdp > 0
+          ? (generalFundImpact / economicProjection.gdp) * 100
+          : 0,
     };
 
     if (!result[reformName]) {
@@ -352,7 +373,9 @@ export async function loadDashboardData(
 }
 
 export function calculateTotals(data: YearlyImpact[]) {
-  const tenYearData = data.filter((row) => row.year >= 2026 && row.year <= 2035);
+  const tenYearData = data.filter(
+    (row) => row.year >= 2026 && row.year <= 2035,
+  );
   const tenYear = tenYearData.reduce((sum, row) => sum + row.revenueImpact, 0);
   const total = data.reduce((sum, row) => sum + row.revenueImpact, 0);
   const tenYearPayroll = tenYearData.reduce(
@@ -360,16 +383,44 @@ export function calculateTotals(data: YearlyImpact[]) {
     0,
   );
   const tenYearGdp = tenYearData.reduce((sum, row) => sum + row.gdp, 0);
-  const totalPayroll = data.reduce((sum, row) => sum + row.oasdiTaxablePayroll, 0);
+  const totalPayroll = data.reduce(
+    (sum, row) => sum + row.oasdiTaxablePayroll,
+    0,
+  );
   const totalGdp = data.reduce((sum, row) => sum + row.gdp, 0);
+
+  // Per-trust-fund cumulative impact, each over its OWN taxable-payroll base.
+  // OASDI payroll is capped; HI payroll is uncapped — different denominators,
+  // so the two are never mixed on a single "% of payroll" axis.
+  const sumBy = (rows: YearlyImpact[], key: keyof YearlyImpact) =>
+    rows.reduce((acc, row) => acc + (row[key] as number), 0);
+  const totalOasdi = sumBy(data, "tobOasdiImpact");
+  const totalHi = sumBy(data, "tobMedicareHiImpact");
+  const tenYearOasdi = sumBy(tenYearData, "tobOasdiImpact");
+  const tenYearHi = sumBy(tenYearData, "tobMedicareHiImpact");
+  const totalHiPayroll = sumBy(data, "hiTaxablePayroll");
+  const tenYearHiPayroll = sumBy(tenYearData, "hiTaxablePayroll");
 
   return {
     tenYear,
     total,
-    tenYearPctPayroll: tenYearPayroll > 0 ? (tenYear / tenYearPayroll) * 100 : 0,
+    tenYearPctPayroll:
+      tenYearPayroll > 0 ? (tenYear / tenYearPayroll) * 100 : 0,
     tenYearPctGdp: tenYearGdp > 0 ? (tenYear / tenYearGdp) * 100 : 0,
     totalPctPayroll: totalPayroll > 0 ? (total / totalPayroll) * 100 : 0,
     totalPctGdp: totalGdp > 0 ? (total / totalGdp) * 100 : 0,
+    totalOasdi,
+    totalHi,
+    tenYearOasdi,
+    tenYearHi,
+    totalOasdiPctPayroll:
+      totalPayroll > 0 ? (totalOasdi / totalPayroll) * 100 : 0,
+    totalHiPctPayroll:
+      totalHiPayroll > 0 ? (totalHi / totalHiPayroll) * 100 : 0,
+    tenYearOasdiPctPayroll:
+      tenYearPayroll > 0 ? (tenYearOasdi / tenYearPayroll) * 100 : 0,
+    tenYearHiPctPayroll:
+      tenYearHiPayroll > 0 ? (tenYearHi / tenYearHiPayroll) * 100 : 0,
   };
 }
 
