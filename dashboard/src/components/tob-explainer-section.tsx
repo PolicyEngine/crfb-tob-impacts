@@ -73,7 +73,10 @@ function ExplainerChart({
           data={chartData}
           margin={{ top: 12, right: 24, bottom: 8, left: 8 }}
         >
-          <CartesianGrid stroke="var(--pe-color-border-light)" vertical={false} />
+          <CartesianGrid
+            stroke="var(--pe-color-border-light)"
+            vertical={false}
+          />
           <XAxis
             dataKey="otherIncome"
             tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
@@ -120,7 +123,7 @@ function ExplainerChart({
               label={{
                 value: "50% tier begins",
                 angle: -90,
-                position: "insideTopLeft",
+                position: "insideBottomLeft",
                 fontSize: 11,
                 fill: "var(--pe-color-text-tertiary)",
               }}
@@ -134,7 +137,7 @@ function ExplainerChart({
               label={{
                 value: "85% tier begins",
                 angle: -90,
-                position: "insideTopLeft",
+                position: "insideBottomLeft",
                 fontSize: 11,
                 fill: "var(--pe-color-text-tertiary)",
               }}
@@ -257,11 +260,11 @@ export function TobExplainerSection() {
           <p>
             Because the thresholds were fixed in nominal dollars in 1983 and
             1993 and have never been indexed, benefit growth and inflation pull
-            more beneficiaries above them every year — which is why the share
-            of households paying this tax rises under current law even with no
+            more beneficiaries above them every year — which is why the share of
+            households paying this tax rises under current law even with no
             change in policy. The 2025 reconciliation act&apos;s senior
-            deduction reduces many older filers&apos; overall income tax
-            through 2028, but does not change these inclusion rules.
+            deduction reduces overall income tax for many filers age 65 and
+            older through 2028, but does not change these inclusion rules.
           </p>
         </div>
       </div>
@@ -276,7 +279,9 @@ export function TobExplainerSection() {
             detail={`of beneficiary households pay some tax on benefits, raising $${(
               context2026.tob_oasdi_billions +
               context2026.tob_medicare_hi_billions
-            ).toFixed(0)}B ($${context2026.tob_oasdi_billions.toFixed(0)}B to Social Security, $${context2026.tob_medicare_hi_billions.toFixed(0)}B to Medicare).`}
+            ).toFixed(
+              0,
+            )}B ($${context2026.tob_oasdi_billions.toFixed(0)}B to Social Security, $${context2026.tob_medicare_hi_billions.toFixed(0)}B to Medicare).`}
           />
           {contextMid && (
             <StatCard
@@ -285,8 +290,13 @@ export function TobExplainerSection() {
                 contextMid.share_of_beneficiary_households_paying * 100,
               )}%`}
               detail={`of beneficiary households pay, raising $${Math.round(
-                contextMid.tob_oasdi_billions + contextMid.tob_medicare_hi_billions,
-              ).toLocaleString()}B under current law.`}
+                contextMid.tob_oasdi_billions +
+                  contextMid.tob_medicare_hi_billions,
+              ).toLocaleString()}B under current law ($${Math.round(
+                contextMid.tob_oasdi_billions,
+              ).toLocaleString()}B to Social Security, $${Math.round(
+                contextMid.tob_medicare_hi_billions,
+              ).toLocaleString()}B to Medicare).`}
             />
           )}
           <StatCard
@@ -295,8 +305,13 @@ export function TobExplainerSection() {
               contextFar.share_of_beneficiary_households_paying * 100,
             )}%`}
             detail={`of beneficiary households pay, raising $${Math.round(
-              contextFar.tob_oasdi_billions + contextFar.tob_medicare_hi_billions,
-            ).toLocaleString()}B under current law.`}
+              contextFar.tob_oasdi_billions +
+                contextFar.tob_medicare_hi_billions,
+            ).toLocaleString()}B under current law ($${Math.round(
+              contextFar.tob_oasdi_billions,
+            ).toLocaleString()}B to Social Security, $${Math.round(
+              contextFar.tob_medicare_hi_billions,
+            ).toLocaleString()}B to Medicare).`}
           />
         </div>
       )}

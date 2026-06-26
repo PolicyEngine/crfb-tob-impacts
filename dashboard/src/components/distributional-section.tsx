@@ -22,13 +22,7 @@ import { useElementSize } from "@/lib/use-element-size";
 
 type Basis = "avg_change" | "pct_change";
 
-function DecileBars({
-  rows,
-  basis,
-}: {
-  rows: DecileImpact[];
-  basis: Basis;
-}) {
+function DecileBars({ rows, basis }: { rows: DecileImpact[]; basis: Basis }) {
   const { ref, width } = useElementSize<HTMLDivElement>();
   const data = rows.map((r) => ({
     decile: r.decile,
@@ -51,7 +45,10 @@ function DecileBars({
           data={data}
           margin={{ top: 12, right: 16, bottom: 24, left: 8 }}
         >
-          <CartesianGrid stroke="var(--pe-color-border-light)" vertical={false} />
+          <CartesianGrid
+            stroke="var(--pe-color-border-light)"
+            vertical={false}
+          />
           <XAxis
             dataKey="decile"
             tick={{ fontSize: 12, fill: "var(--pe-color-text-tertiary)" }}
@@ -105,7 +102,8 @@ function interpolateDeciles(
   const lower = [...sorted].reverse().find((y) => y <= year);
   const upper = sorted.find((y) => y >= year);
   if (lower === undefined) return byYear[String(sorted[0])] ?? [];
-  if (upper === undefined) return byYear[String(sorted[sorted.length - 1])] ?? [];
+  if (upper === undefined)
+    return byYear[String(sorted[sorted.length - 1])] ?? [];
   const lo = byYear[String(lower)];
   const hi = byYear[String(upper)];
   if (!lo || !hi) return lo ?? hi ?? [];
@@ -152,12 +150,11 @@ export function DistributionalSection({
   const minYear = years.length ? Math.min(...years) : null;
   const maxYear = years.length ? Math.max(...years) : null;
   // Derive the effective year rather than syncing it through an effect; the
-  // slider scrubs every year in range and non-anchor years are interpolated.
+  // dropdown only offers exact anchor years, so every selection is modeled.
   const year =
     selectedYear !== null && minYear !== null && maxYear !== null
       ? Math.min(Math.max(selectedYear, minYear), maxYear)
       : (minYear ?? null);
-  const isAnchor = year !== null && years.includes(year);
 
   if (error || (data && !data.data[reformId])) {
     return null; // distributional data not available for this reform
@@ -210,32 +207,26 @@ export function DistributionalSection({
               % change
             </button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-semibold tabular-nums text-[var(--pe-color-text-title)]">
-                {year}
-              </span>
-              <span
-                className={`text-[10px] font-medium uppercase tracking-[0.12em] ${
-                  isAnchor
-                    ? "text-[var(--pe-color-primary-700)]"
-                    : "text-[var(--pe-color-text-tertiary)]"
-                }`}
-              >
-                {isAnchor ? "modeled" : "interpolated"}
-              </span>
-            </div>
-            <input
-              type="range"
+          <label className="flex items-center gap-2">
+            <span className="text-sm font-medium text-[var(--pe-color-text-secondary)]">
+              Year
+            </span>
+            <select
               aria-label="Year"
-              min={minYear}
-              max={maxYear}
-              step={1}
               value={year}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="w-44 accent-[var(--pe-color-primary-600)]"
-            />
-          </div>
+              className="rounded-[var(--pe-radius-element)] border border-[var(--pe-color-border-medium)] bg-white px-3 py-1.5 text-sm font-semibold tabular-nums text-[var(--pe-color-text-title)] transition focus:border-[var(--pe-color-primary-500)] focus:outline-none"
+            >
+              {Array.from(
+                { length: maxYear - minYear + 1 },
+                (_, i) => minYear + i,
+              ).map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -252,10 +243,8 @@ export function DistributionalSection({
 
       <p className="mt-3 text-xs leading-5 text-[var(--pe-color-text-tertiary)]">
         Deciles rank households by baseline net income, computed from the saved
-        reform microdata against a baseline simulation. Modeled years (2026,
-        2030, then every fifth year) use full microsimulation output;
-        in-between years are linearly interpolated for display, as on the
-        revenue path.
+        reform microdata against a baseline simulation. Each year shown is
+        computed directly from full reform microsimulation output.
       </p>
     </section>
   );

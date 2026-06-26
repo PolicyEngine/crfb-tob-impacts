@@ -214,9 +214,17 @@ function SeriesChart({
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
   const xAxisDomain: [number, number] =
     viewMode === "75year" ? [2026, 2100] : [2026, 2035];
-  const showGeneralFund = data.some(
-    (row) => Math.abs(row.generalFundImpact) > 0.005,
+  // Only surface the general-fund line when it is a deliberate mechanism of the
+  // reform (e.g. reverse Roth's payroll deduction, the credit options), not a
+  // small AGI-interaction spillover. Full repeal, for instance, has a ~0.4%
+  // general-fund residual that otherwise draws a confusing flat line near zero.
+  const maxAbsRevenue = Math.max(
+    ...data.map((row) => Math.abs(row.revenueImpact)),
+    0,
   );
+  const showGeneralFund =
+    maxAbsRevenue > 0 &&
+    data.some((row) => Math.abs(row.generalFundImpact) > 0.05 * maxAbsRevenue);
 
   const chartData = data.map((row) => ({
     year: row.year,
@@ -544,12 +552,14 @@ export function DashboardShell() {
   }, [allocationMode, baselineScenario, scoringType]);
 
   function handleAllocationModeChange(next: AllocationMode) {
+    if (next === allocationMode) return; // no-op click: don't strand the spinner
     setLoading(true);
     setError(null);
     setAllocationMode(next);
   }
 
   function handleBaselineScenarioChange(next: BaselineScenario) {
+    if (next === baselineScenario) return; // no-op click: don't strand the spinner
     setLoading(true);
     setError(null);
     setBaselineScenario(next);
@@ -626,7 +636,13 @@ export function DashboardShell() {
   const tenYearLabel = isPctPayroll
     ? `${fundLabel} · 10-year effect`
     : "10-year effect";
-  const estimates = EXTERNAL_ESTIMATES[effectiveReformId] ?? [];
+  // External (CBO / Tax Foundation) estimates are current-law scores, so they
+  // are not comparable to a reform measured against the SS-solvency baseline —
+  // hide them there rather than show a misleading gap.
+  const estimates =
+    baselineScenario === "ssSolvent"
+      ? []
+      : (EXTERNAL_ESTIMATES[effectiveReformId] ?? []);
   const mobileViewValue = activeTab === "reforms" ? selectedReform : activeTab;
 
   function handleReformSelect(nextReform: string) {
@@ -1196,12 +1212,16 @@ export function DashboardShell() {
                 reformName={reform.shortName}
               />
 
-              {/* Detailed external comparison table (if present) */}
-              <ComparisonTable
-                reformId={effectiveReformId}
-                policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
-                scoringType={scoringType}
-              />
+              {/* Detailed external comparison table — current-law only, since
+                  CBO/Tax Foundation scored against current law (not the
+                  SS-solvency baseline). */}
+              {baselineScenario !== "ssSolvent" && (
+                <ComparisonTable
+                  reformId={effectiveReformId}
+                  policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
+                  scoringType={scoringType}
+                />
+              )}
             </>
           )}
 

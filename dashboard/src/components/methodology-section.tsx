@@ -221,12 +221,16 @@ export function MethodologySection() {
             and isolates the mechanical effect of policy changes. This is the
             dashboard&apos;s default scoring surface. All fourteen reforms are
             computed from full reform H5 microsimulation at anchor years — 2026,
-            2030, and every fifth year from 2035 to 2100. Intermediate years are
-            linearly interpolated to a complete annual series, which is both
-            what the dashboard charts and what the 75-year and present-value
-            totals aggregate. Each row is tagged as an exact anchor or an
-            interpolated fill, and the exact anchor-year H5 rows are preserved
-            in the production results.
+            2028, 2029, 2030, and every fifth year from 2035 to 2100, with 2032
+            and 2033 added for the employer-payroll Roth option. The 2028 and
+            2029 anchors bracket the senior deduction&apos;s 2028 sunset so the
+            budget window reflects that step rather than smoothing across it.
+            Intermediate years are linearly interpolated to a complete annual
+            series, which is what the revenue-over-time chart traces and what
+            the 75-year and present-value totals aggregate; the distributional
+            charts interpolate between the same anchor years. Each row is tagged
+            as an exact anchor or an interpolated fill, and the exact
+            anchor-year H5 rows are preserved in the production results.
           </p>
           <p className="mt-4">
             <strong>Supplemental labor-supply response:</strong> uses the same
@@ -360,32 +364,34 @@ export function MethodologySection() {
             Internal production tracking
           </p>
         </div>
-        <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-          <summary className="cursor-pointer px-5 py-4 text-left">
-            <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-              Internal reproducibility roadmap
-            </span>
-            <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-              Gates, logs, and artifact targets for the CRFB rebuild workflow.
-            </span>
-          </summary>
-          <div className="border-t border-[var(--pe-color-border-light)]">
-            <ReproducibilityRoadmap embedded />
-          </div>
-        </details>
-        <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-          <summary className="cursor-pointer px-5 py-4 text-left">
-            <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-              Live modeling status
-            </span>
-            <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-              Baseline readiness and full-H5 reform artifact progress.
-            </span>
-          </summary>
-          <div className="border-t border-[var(--pe-color-border-light)]">
-            <LiveModelingProgress />
-          </div>
-        </details>
+        <div className="space-y-4">
+          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
+            <summary className="cursor-pointer px-5 py-4 text-left">
+              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
+                Internal reproducibility roadmap
+              </span>
+              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+                Gates, logs, and artifact targets for the CRFB rebuild workflow.
+              </span>
+            </summary>
+            <div className="border-t border-[var(--pe-color-border-light)]">
+              <ReproducibilityRoadmap embedded />
+            </div>
+          </details>
+          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
+            <summary className="cursor-pointer px-5 py-4 text-left">
+              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
+                Live modeling status
+              </span>
+              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
+                Baseline readiness and full-H5 reform artifact progress.
+              </span>
+            </summary>
+            <div className="border-t border-[var(--pe-color-border-light)]">
+              <LiveModelingProgress />
+            </div>
+          </details>
+        </div>
       </div>
     </section>
   );

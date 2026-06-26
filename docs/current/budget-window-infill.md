@@ -106,3 +106,23 @@ identical full-H5 lineage artifacts, while also avoiding the Modal spend.
 Both gates passing certifies that base, build code, model version, and scoring
 code all match the published panel, so the four budget-window anchors sit exactly
 on the published trajectory with no discontinuity.
+
+## Distributional infill (2028/2029)
+
+The decile-distribution panel (`dashboard/public/data/distributional.json`) was
+extended to the new budget-window anchors too. The main generator
+(`scripts/build_distributional_data.py`) only covers the original anchors
+(`2026`, `2030`, every fifth year) off the `projected_datasets_v2pop` baselines,
+so `2028`/`2029` were regenerated separately from the certinfill artifacts:
+
+- baseline: `crfb-cert/projected_datasets_certrepro/{2028,2029}.h5` + the worker's
+  current-law tax-assumption reform (`trustees-2025-core-thresholds-v1`)
+- reform output: the 28 certinfill `scenario.h5` household tables
+- env: the certified `crfb-cert/.venv` (pe-us `1.700.2`), matching the scenario H5s
+
+`scripts/build_distributional_cliff_infill.py` runs this and writes the per-decile
+results, which were merged into `distributional.json` (`anchor_years` becomes
+`2026, 2028, 2029, 2030, …`). The cliff is visible in the data: `option7` average
+change runs from real negative impacts in `2028` (deduction active) to ≈`$0` in
+`2029` (deduction lapsed) — which straight `2026`→`2030` interpolation smeared.
+The dashboard year selector offers every year and interpolates between anchors.
