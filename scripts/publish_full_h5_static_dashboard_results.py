@@ -24,8 +24,27 @@ STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
     "tax93",
 )
 ANNUAL_YEARS = tuple(range(2026, 2101))
-REQUIRED_EXACT_YEARS = (2026, 2030) + tuple(range(2035, 2101, 5))
-EXPECTED_EXACT_CELL_COUNT = len(STANDARD_REFORMS) * len(REQUIRED_EXACT_YEARS)
+BASE_REQUIRED_EXACT_YEARS = (2026, 2030) + tuple(range(2035, 2101, 5))
+BUDGET_WINDOW_COMMON_INFILL_YEARS = (2028, 2029)
+BUDGET_WINDOW_REFORM_INFILL_YEARS = {
+    "option6": (2032, 2033),
+}
+COMMON_REQUIRED_EXACT_YEARS = tuple(
+    sorted(set(BASE_REQUIRED_EXACT_YEARS) | set(BUDGET_WINDOW_COMMON_INFILL_YEARS))
+)
+REQUIRED_EXACT_YEARS_BY_REFORM = {
+    reform: tuple(
+        sorted(
+            set(COMMON_REQUIRED_EXACT_YEARS)
+            | set(BUDGET_WINDOW_REFORM_INFILL_YEARS.get(reform, ()))
+        )
+    )
+    for reform in STANDARD_REFORMS
+}
+REQUIRED_EXACT_YEARS = COMMON_REQUIRED_EXACT_YEARS
+EXPECTED_EXACT_CELL_COUNT = sum(
+    len(years) for years in REQUIRED_EXACT_YEARS_BY_REFORM.values()
+)
 
 DOLLAR_COLUMNS = (
     "baseline_revenue",
@@ -49,6 +68,23 @@ DOLLAR_COLUMNS = (
     "oasdi_net_impact",
     "hi_net_impact",
 )
+
+BASELINE_COLUMNS = (
+    "baseline_revenue",
+    "baseline_tob_medicare_hi",
+    "baseline_tob_oasdi",
+    "baseline_tob_total",
+)
+
+REFORM_LEVEL_COLUMNS = {
+    "reform_revenue": ("baseline_revenue", "revenue_impact"),
+    "reform_tob_medicare_hi": (
+        "baseline_tob_medicare_hi",
+        "tob_medicare_hi_impact",
+    ),
+    "reform_tob_oasdi": ("baseline_tob_oasdi", "tob_oasdi_impact"),
+    "reform_tob_total": ("baseline_tob_total", "tob_total_impact"),
+}
 
 DASHBOARD_COLUMNS = (
     "reform_name",
@@ -98,7 +134,7 @@ def _validate_exact_panel(frame: pd.DataFrame, require_complete: bool) -> None:
     missing: list[tuple[str, int]] = []
     for reform in STANDARD_REFORMS:
         years = set(standard.loc[standard["reform_name"] == reform, "year"].astype(int))
-        for year in REQUIRED_EXACT_YEARS:
+        for year in REQUIRED_EXACT_YEARS_BY_REFORM[reform]:
             if year not in years:
                 missing.append((reform, year))
 
@@ -148,7 +184,68 @@ def _annual_display_from_exact(exact: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(
             columns=[*DASHBOARD_COLUMNS, "full_h5_result_type", "source"]
         )
-    return pd.concat(rows, ignore_index=True)
+    annual = pd.concat(rows, ignore_index=True)
+    return _apply_common_baseline_series(annual, exact)
+
+
+def _baseline_anchor_series(exact: pd.DataFrame) -> pd.DataFrame:
+    available_baseline_columns = [
+        column for column in BASELINE_COLUMNS if column in exact.columns
+    ]
+    if not available_baseline_columns:
+        return pd.DataFrame(index=pd.Index(ANNUAL_YEARS, name="year"))
+
+    rows = []
+    for year, group in exact.groupby("year", sort=True):
+        row: dict[str, float | int] = {"year": int(year)}
+        for column in available_baseline_columns:
+            values = pd.to_numeric(group[column], errors="coerce").dropna()
+            if values.empty:
+                continue
+            if values.max() - values.min() > 1e-6:
+                raise ValueError(
+                    f"Exact baseline column {column} differs across reforms in {year}."
+                )
+            row[column] = float(values.iloc[0])
+        rows.append(row)
+
+    anchors = pd.DataFrame(rows).set_index("year").sort_index()
+    annual = pd.DataFrame(index=pd.Index(ANNUAL_YEARS, name="year")).join(
+        anchors,
+        how="left",
+    )
+    for column in available_baseline_columns:
+        annual[column] = pd.to_numeric(annual[column], errors="coerce").interpolate(
+            method="index",
+            limit_area="inside",
+        )
+    return annual
+
+
+def _apply_common_baseline_series(
+    annual: pd.DataFrame,
+    exact: pd.DataFrame,
+) -> pd.DataFrame:
+    baseline = _baseline_anchor_series(exact)
+    if baseline.empty:
+        return annual
+
+    output = annual.copy()
+    for column in BASELINE_COLUMNS:
+        if column in output.columns and column in baseline.columns:
+            output[column] = output["year"].map(baseline[column])
+
+    for reform_column, (
+        baseline_column,
+        impact_column,
+    ) in REFORM_LEVEL_COLUMNS.items():
+        if (
+            reform_column in output.columns
+            and baseline_column in output.columns
+            and impact_column in output.columns
+        ):
+            output[reform_column] = output[baseline_column] + output[impact_column]
+    return output
 
 
 def publish_full_h5_static_results(
@@ -191,7 +288,18 @@ def publish_full_h5_static_results(
             "Only current-contract full-H5 selected-panel rows are public. "
             "Rows from earlier non-contract releases are intentionally excluded."
         ),
+        "base_required_exact_years": list(BASE_REQUIRED_EXACT_YEARS),
+        "common_required_exact_years": list(COMMON_REQUIRED_EXACT_YEARS),
+        "budget_window_common_infill_years": list(BUDGET_WINDOW_COMMON_INFILL_YEARS),
+        "budget_window_reform_infill_years": {
+            reform: list(years)
+            for reform, years in BUDGET_WINDOW_REFORM_INFILL_YEARS.items()
+        },
         "required_exact_years": list(REQUIRED_EXACT_YEARS),
+        "required_exact_years_by_reform": {
+            reform: list(years)
+            for reform, years in REQUIRED_EXACT_YEARS_BY_REFORM.items()
+        },
         "annual_display_years": list(ANNUAL_YEARS),
         "expected_exact_cell_count": EXPECTED_EXACT_CELL_COUNT,
         "exact_standard_cell_count": int(len(exact_standard)),

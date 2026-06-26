@@ -1,6 +1,6 @@
 {
   "schema": "crfb_dashboard_results/v1",
-  "generated_at": "2026-06-18T10:06:29.715801+00:00",
+  "generated_at": "2026-06-26T01:31:26.055208+00:00",
   "static_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/static_cells.csv",
   "behavioral_source": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/results/modal_runs_production/behavioral_endpoint_cells.csv",
   "tob_baseline": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/data/ssa_tob_baseline_75year.csv",

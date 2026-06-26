@@ -49,6 +49,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/live_reform_status.csv",
     "dashboard/public/data/results.csv",
     "dashboard/public/data/ssa_economic_projections.csv",
+    "dashboard/public/data/tr2026_interest_rates.csv",
     "dashboard/public/data/v2_baseline_diagnostics.csv",
     "data/SSPopJul_TR2024.csv",
     "data/SSPopJul_TR2026_interim.csv",
@@ -148,13 +149,35 @@ def assert_release_artifact_matches_raw_full_h5(path: Path) -> None:
         how="inner",
         validate="one_to_one",
     )
-    assert len(exact) == 224
+    assert len(exact) == len(raw)
     assert (
         exact["baseline_revenue"] - exact["baseline_revenue_raw_billions"]
     ).abs().max() < 1e-6
     assert (
         exact["baseline_tob_total"] - exact["baseline_tob_total_raw_billions"]
     ).abs().max() < 1e-6
+
+
+def test_budget_window_infill_exact_rows_are_published():
+    static = load_dashboard_results("static")
+    exact = static[static["full_h5_result_type"].eq("exact_full_h5")]
+
+    common_infill_years = {2028, 2029}
+    for reform_name in sorted(static["reform_name"].unique()):
+        reform_exact_years = set(
+            exact.loc[exact["reform_name"].eq(reform_name), "year"].astype(int)
+        )
+        assert common_infill_years <= reform_exact_years
+
+    option6_exact_years = set(
+        exact.loc[exact["reform_name"].eq("option6"), "year"].astype(int)
+    )
+    assert {2032, 2033} <= option6_exact_years
+
+    option7_2029 = exact[
+        exact["reform_name"].eq("option7") & exact["year"].eq(2029)
+    ].iloc[0]
+    assert abs(option7_2029["revenue_impact"]) < 1e-5
 
 
 def assert_income_tax_baseline_is_direct_microsim(path: Path) -> None:
@@ -642,13 +665,18 @@ def test_dashboard_defaults_to_full_75_year_surface():
     assert shell.index('{ label: "10-year", value: "10year" }') < shell.index(
         '{ label: "75-year", value: "75year" }'
     )
-    assert shell.index('"75-year effect"') < shell.index('label="10-year effect"')
+    assert (
+        'baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect"'
+        in shell
+    )
+    assert "const tenYearLabel = isPctPayroll" in shell
+    assert "? `${fundLabel} · 10-year effect`" in shell
     assert 'label="OASDI / HI split"' not in shell
     assert 'caption="2026 baseline share"' not in shell
     assert "spotlightRows(selectedData, viewMode)" in shell
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
     assert "const xAxisDomain: [number, number]" in shell
-    assert "viewMode === \"75year\" ? [2026, 2100] : [2026, 2035]" in shell
+    assert 'viewMode === "75year" ? [2026, 2100] : [2026, 2035]' in shell
     assert 'type="number"' in shell
 
 
@@ -661,10 +689,14 @@ def test_ss_solvent_dashboard_view_is_long_run_only():
     assert 'setViewMode("75year")' in shell
     assert 'baselineScenario === "ssSolvent" ? (' in shell
     assert "2035-2100" in shell
-    assert 'label={longRunMetricLabel}' in shell
-    assert 'caption={longRunMetricCaption}' in shell
-    assert 'label="10-year effect"' in shell
-    assert "showTenYearMetric ? (" in shell
+    assert (
+        'baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect"'
+        in shell
+    )
+    assert "label={longRunLabel}" in shell
+    assert "caption={longRunMetricCaption}" in shell
+    assert "label={tenYearLabel}" in shell
+    assert 'viewMode === "10year" ? (' in shell
 
 
 def test_reproducibility_roadmap_points_to_full_reform_h5_artifacts():

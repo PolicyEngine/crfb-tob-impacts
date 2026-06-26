@@ -25,6 +25,7 @@ RESULTS = REPO / "results"
 PACKAGE_ROOT = RESULTS / "release_packages"
 POST_OBBBA_TOB_BASELINE = GENERATED_BASELINE_PATH
 POST_OBBBA_TOB_BASELINE_MANIFEST = POST_OBBBA_TOB_BASELINE.with_suffix(".manifest.json")
+RESULTS_CONTRACT_PATH = REPO / "dashboard" / "public" / "data" / "results_contract.json"
 
 
 @dataclass(frozen=True)
@@ -127,6 +128,23 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("docs", REPO / "docs" / "current" / "methodology.md"),
     ("docs", REPO / "docs" / "current" / "pipeline.md"),
     ("docs", REPO / "docs" / "current" / "REFORM_MODELING_BIBLE.md"),
+    ("docs", REPO / "docs" / "current" / "budget-window-infill.md"),
+    (
+        "docs",
+        REPO
+        / "docs"
+        / "current"
+        / "manifests"
+        / "baseline-dataset-manifest-v2pop-noclone.json",
+    ),
+    (
+        "docs",
+        REPO
+        / "docs"
+        / "current"
+        / "manifests"
+        / "baseline-dataset-manifest-9f1260b-certinfill.json",
+    ),
     ("docs", REPO / "docs" / "current" / "v2-baseline-method.md"),
     ("docs", REPO / "docs" / "current" / "v2-launch-runbook.md"),
     ("paper", REPO / "paper" / "sections" / "03-methods.qmd"),
@@ -231,6 +249,41 @@ def copy_tree(
             copy_file(source, package_dir, records, category)
 
 
+def _contract_local_json_path(raw_path: object) -> Path:
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(
+            f"Contract manifest path must be a non-empty string: {raw_path!r}"
+        )
+    relative = Path(raw_path)
+    if relative.is_absolute() or ".." in relative.parts or relative.suffix != ".json":
+        raise ValueError(
+            f"Contract manifest path must be package-local JSON: {raw_path}"
+        )
+    source = (REPO / relative).resolve()
+    try:
+        source.relative_to(REPO)
+    except ValueError as exc:
+        raise ValueError(
+            f"Contract manifest path escapes the repository: {raw_path}"
+        ) from exc
+    return source
+
+
+def contract_manifest_paths(
+    contract_path: Path = RESULTS_CONTRACT_PATH,
+) -> list[Path]:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    baseline_build = contract["lineage"]["baseline_build"]
+    paths = [
+        _contract_local_json_path(baseline_build["manifest_path"]),
+        *(
+            _contract_local_json_path(path)
+            for path in baseline_build.get("supplemental_manifest_paths", [])
+        ),
+    ]
+    return sorted(set(paths))
+
+
 def baseline_metadata_paths() -> list[Path]:
     paths: set[Path] = set()
     for csv_path in [
@@ -301,6 +354,18 @@ def build_release_package(
     if missing_required:
         raise FileNotFoundError(
             "Missing required release package files: " + ", ".join(missing_required)
+        )
+
+    missing_contract_manifests: list[str] = []
+    for source in contract_manifest_paths():
+        if source.exists():
+            copy_file(source, package_dir, records, "contract_lineage")
+        else:
+            missing_contract_manifests.append(str(source.relative_to(REPO)))
+    if missing_contract_manifests:
+        raise FileNotFoundError(
+            "Missing results-contract baseline manifests: "
+            + ", ".join(missing_contract_manifests)
         )
 
     copied_optional: list[str] = []

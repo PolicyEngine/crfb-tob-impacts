@@ -19,6 +19,7 @@ import argparse
 import json
 import sys
 from datetime import datetime, timezone
+from collections.abc import Iterable
 from pathlib import Path
 
 import pandas as pd
@@ -38,6 +39,13 @@ DEFAULT_BASELINE_MANIFEST = (
     / "current"
     / "manifests"
     / "baseline-dataset-manifest-v2pop-noclone.json"
+)
+DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS = (
+    REPO
+    / "docs"
+    / "current"
+    / "manifests"
+    / "baseline-dataset-manifest-9f1260b-certinfill.json",
 )
 DEFAULT_DISPLAY = REPO / "results.csv"
 DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_status.csv"
@@ -97,19 +105,81 @@ def targets_in_populace_grammar(anchor_years: list[int]) -> list[dict]:
     return targets
 
 
+def _year_sha_from_manifest(path: Path) -> dict[int, str]:
+    manifest = json.loads(path.read_text())
+    year_records = manifest.get("years") or manifest.get("datasets") or {}
+    if isinstance(year_records, list):
+        year_records = {str(r["year"]): r for r in year_records}
+    return {
+        int(y): r["h5_sha256"] for y, r in year_records.items() if r.get("h5_sha256")
+    }
+
+
+def _resolve_repo_path(path: Path) -> Path:
+    path = Path(path)
+    if path.is_absolute():
+        return path.resolve()
+    return (REPO / path).resolve()
+
+
+def _default_supplemental_baseline_manifest_paths(
+    baseline_manifest_path: Path,
+) -> tuple[Path, ...]:
+    if baseline_manifest_path.resolve() == DEFAULT_BASELINE_MANIFEST.resolve():
+        return DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS
+    return ()
+
+
+def _supplemental_baseline_manifest_paths(
+    baseline_manifest_path: Path,
+    supplemental_baseline_manifest_paths: Iterable[Path] | None,
+) -> tuple[Path, ...]:
+    default_paths = _default_supplemental_baseline_manifest_paths(
+        baseline_manifest_path
+    )
+    if supplemental_baseline_manifest_paths is None:
+        return default_paths
+    paths = [*default_paths]
+    seen = {path.resolve() for path in paths}
+    for path in supplemental_baseline_manifest_paths:
+        resolved = _resolve_repo_path(path)
+        if resolved not in seen:
+            paths.append(resolved)
+            seen.add(resolved)
+    return tuple(paths)
+
+
 def build_contract(
     display_path: Path,
     baseline_manifest_path: Path,
     live_status_path: Path,
+    supplemental_baseline_manifest_paths: Iterable[Path] | None = None,
 ) -> dict:
+    display_path = _resolve_repo_path(display_path)
+    baseline_manifest_path = _resolve_repo_path(baseline_manifest_path)
+    live_status_path = _resolve_repo_path(live_status_path)
     display = pd.read_csv(display_path)
+    if "scoring_type" in display.columns:
+        display = display[display["scoring_type"].eq("static")].copy()
     manifest = json.loads(baseline_manifest_path.read_text())
-    year_records = manifest.get("years") or manifest.get("datasets") or {}
-    if isinstance(year_records, list):
-        year_records = {str(r["year"]): r for r in year_records}
-    year_sha = {
-        int(y): r["h5_sha256"] for y, r in year_records.items() if r.get("h5_sha256")
-    }
+    year_sha = _year_sha_from_manifest(baseline_manifest_path)
+    strict_supplemental_manifests = supplemental_baseline_manifest_paths is not None
+    supplemental_baseline_manifest_paths = _supplemental_baseline_manifest_paths(
+        baseline_manifest_path,
+        supplemental_baseline_manifest_paths,
+    )
+    supplemental_manifest_paths: list[str] = []
+    for supplemental_path in supplemental_baseline_manifest_paths:
+        if not supplemental_path.exists():
+            if strict_supplemental_manifests:
+                raise FileNotFoundError(
+                    "Supplemental baseline manifest does not exist: "
+                    f"{supplemental_path}"
+                )
+            continue
+        supplemental_manifest_paths.append(str(supplemental_path.relative_to(REPO)))
+        for year, h5_sha in _year_sha_from_manifest(supplemental_path).items():
+            year_sha.setdefault(year, h5_sha)
 
     status = pd.read_csv(live_status_path)
     cell_sha: dict[tuple[str, int], dict] = {}
@@ -132,6 +202,12 @@ def build_contract(
         year = int(row["year"])
         reform = str(row["reform_name"])
         exact = row["full_h5_result_type"] == "exact_full_h5"
+        if exact and year not in year_sha:
+            raise ValueError(
+                "Exact full-H5 row lacks same-year baseline lineage: "
+                f"{reform} {year}. Add a supplemental baseline manifest covering "
+                "that exact year."
+            )
         nearest_sha_year = (
             year if year in year_sha else min(year_sha, key=lambda y: abs(y - year))
         )
@@ -140,8 +216,18 @@ def build_contract(
         }
         if exact:
             cell = cell_sha.get((reform, year), {})
-            lineage["run_prefix"] = cell.get("run_prefix")
-            sha = cell.get("scenario_h5_sha256")
+            row_run_prefix = row.get("run_prefix")
+            lineage["run_prefix"] = (
+                str(row_run_prefix)
+                if isinstance(row_run_prefix, str) and row_run_prefix
+                else cell.get("run_prefix")
+            )
+            row_sha = row.get("output_h5_sha256")
+            sha = (
+                str(row_sha)
+                if isinstance(row_sha, str) and row_sha
+                else cell.get("scenario_h5_sha256")
+            )
             lineage["scenario_h5_sha256"] = (
                 sha if isinstance(sha, str) and sha else None
             )
@@ -183,6 +269,7 @@ def build_contract(
                 "manifest_path": str(baseline_manifest_path.relative_to(REPO)),
                 "manifest_sha256": file_sha256(baseline_manifest_path),
                 "year_h5_sha256": {str(y): s for y, s in sorted(year_sha.items())},
+                "supplemental_manifest_paths": supplemental_manifest_paths,
             },
             "targets": targets_in_populace_grammar(anchor_years),
             "reform_runs": [
@@ -217,11 +304,29 @@ def main() -> int:
     parser.add_argument(
         "--baseline-manifest", type=Path, default=DEFAULT_BASELINE_MANIFEST
     )
+    parser.add_argument(
+        "--supplemental-baseline-manifest",
+        type=Path,
+        action="append",
+        default=None,
+        help=(
+            "Additional baseline manifest to merge into lineage. If omitted, "
+            "the current-release certinfill manifest is used only with the "
+            "default primary baseline manifest. If provided with the default "
+            "primary manifest, the current-release certinfill manifest is still "
+            "kept and the explicit paths are added."
+        ),
+    )
     parser.add_argument("--live-status", type=Path, default=DEFAULT_LIVE_STATUS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
-    contract = build_contract(args.display, args.baseline_manifest, args.live_status)
+    contract = build_contract(
+        args.display,
+        args.baseline_manifest,
+        args.live_status,
+        args.supplemental_baseline_manifest,
+    )
 
     import jsonschema
 

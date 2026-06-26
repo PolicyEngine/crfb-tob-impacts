@@ -38,6 +38,20 @@ years are display interpolations flagged as such; the computed anchor-year rows
 remain the cited microsimulation outputs. Legacy special-case series are
 excluded from the current dashboard, spreadsheet, and paper release surface.
 
+The budget-window infill adds exact full-H5 anchors where federal tax schedules
+have discontinuities that would otherwise be smeared by interpolation. The
+largest validation case is `option7`, which only repeals the temporary senior
+deduction: the annual panel previously interpolated its static revenue impact
+from `$8.35` billion in `2028` to `$4.18` billion in `2029`, while the exact
+full-H5 cells show `$18.22` billion in `2028` and approximately zero in `2029`,
+as expected once the deduction has already expired under current law. The same
+check moves `option4` from `$24.23` to `$34.35` billion in `2028` and from
+`$20.96` to `$17.78` billion in `2029`; `option11` from `$25.39` to `$35.86`
+billion and from `$22.67` to `$19.50` billion; and the `option6` payroll-ramp
+corner from `$133.45` to `$160.63` billion in `2032` and from `$143.82` to
+`$177.51` billion in `2033`. Each new row is marked `exact_full_h5` and carries
+its own R2 `scenario.h5`, metadata, completion marker, and SHA-256 lineage.
+
 ### Independent estimation cross-check
 
 As an additional guard against systematic error, we cross-checked a sample of

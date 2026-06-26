@@ -309,6 +309,76 @@ revenue while weakening one trust fund, or it can replace taxation-of-benefits
 revenue with employer-contribution revenue allocated differently across OASDI
 and HI.
 
+## Scoring-year anchors and the budget-window infill
+
+Reforms are scored exactly at a set of anchor years — `2026`, `2030`, and every
+fifth year from `2035` through `2100` — and intermediate years are filled by
+linear interpolation between adjacent anchors. Each delivered row records whether
+it is an exact anchor or an interpolated fill, and the long-run and
+present-value totals aggregate the complete annual series.
+
+Linear interpolation is accurate where a reform's annual impact is smooth, but it
+misrepresents a sharp within-window change. The 2025 reconciliation act created
+several temporary federal deductions — the enhanced senior deduction and the tip,
+overtime, and auto-loan-interest exclusions — that apply through `2028` and lapse
+in `2029`, alongside a state-and-local-tax cap that reverts after `2029`. A reform
+whose impact depends on those provisions therefore has a step in the budget window
+that a straight line from the `2026` anchor to the `2030` anchor cannot capture.
+The clearest case is `option7`, which only repeals the senior deduction: because
+the deduction is already absent from current law from `2029` onward, the reform's
+true impact falls to approximately zero starting in `2029`, yet interpolation
+between the `2026` and `2030` anchors shows it declining smoothly across the whole
+window, misstating the budget-window years by as much as `$11` billion.
+
+We correct this by adding exact anchors where the schedule actually bends, rather
+than by scoring every year. Querying the model for every parameter that changes
+discretely between `2027` and `2034` identifies two federal discontinuities
+relevant to these reforms: the temporary-deduction sunset at the end of `2028`
+and the state-and-local-tax reversion at the end of `2029`. Exact anchors at
+`2028` and `2029` bracket both. A third reform, `option6`, phases its
+employer-payroll-tax inclusion in annually and caps it at `2033`; exact anchors at
+`2032` and `2033` capture that corner. The remaining phased reforms are either
+immediate (`option5`, `reverse_roth`) or follow a smooth straight-line ramp
+(`option12`), so they need no additional anchors. The infill therefore adds four
+budget-window years for the affected reforms rather than the full annual panel.
+
+### Version-consistency requirement
+
+Infill anchors must be built and scored with the identical microdata base, model
+version, and projection and scoring code as the rest of the panel. If any of those
+differs, the rebuilt years carry a calibration or code difference relative to their
+neighbors, producing a discontinuity — a seam — exactly where the new anchors meet
+the published ones, which would defeat the correction. The published panel was
+produced with the populace `9f1260b` base
+(`populace-us-2024-9f1260b-20260611`), `policyengine-us` `1.700.2` under
+`policyengine.py` `4.5.1`, and this repository at commit `3de8abb6`. The infill
+years were therefore reproduced from a git worktree pinned to that commit and its
+locked environment (`uv sync` against the committed `uv.lock`), not from the
+current development head. The head of the repository carries a later,
+income-tax-calibrated revision of the projection that deliberately shifts the
+baseline income-tax level by roughly twelve percent; building the infill years
+there would not match the published anchors. The infill is a targeted interpolation
+correction on the existing panel, not a rebuild, so it adopts the panel's own
+production version.
+
+### Seam validation
+
+The reproduction is accepted only after two exact checks. First, a build gate: the
+rebuilt `2030` baseline must reproduce the published `2030` federal income tax —
+`$3,231.9` billion — to within rounding; the observed deviation is `0.00` percent.
+Second, a scoring sentinel: published-year reform cells re-scored on the rebuilt
+baseline must reproduce their published impacts to the dollar. At `2030` the
+full-repeal, senior-deduction-repeal, and 100-percent-inclusion reforms reproduce
+`−$159.4`, `$0.0`, and `$93.7` billion exactly. The sentinel is the comprehensive
+test, since a difference in base, build code, model version, or scoring code would
+all surface as a published cell that no longer reproduces. Only after both gates
+match are the four budget-window anchors scored and merged. The scoring code at the
+production commit differs from the current head only in cosmetic relabeling and
+guard logic for thirteen of the fourteen reforms, with one substantive change to
+the `reverse_roth` payroll-deduction definition; the infill cells are therefore
+produced from the pinned worktree end to end, which removes that single open
+question rather than certifying it.
+
 ## Supplemental labor-supply response scoring
 
 Static estimates are the primary scoring surface for the CRFB dashboard.

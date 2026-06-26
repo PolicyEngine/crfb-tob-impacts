@@ -7,12 +7,14 @@ one paid sentinel cell, inspect the data, then the full panel. All
 targets are the 2026 Trustees Reports (released June 9, 2026; OBBBA in
 current law).
 
-Panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × 14 reforms
+Initial launch panel: years `2026, 2030, 2035, 2040, …, 2100` (16) × 14 reforms
 (`option1–option12`, `reverse_roth`, `tax93`) × `static` = 224 cells,
 followed by behavioral endpoints (`2026, 2100` × 14 = 28 cells). The
 current public release is the full-H5 v2/populace/TR2026 run
-documented in `docs/current/REFORM_MODELING_BIBLE.md`; historical May
-ledgers are not part of the current release surface.
+documented in `docs/current/REFORM_MODELING_BIBLE.md`, plus the certified
+budget-window infill in `docs/current/budget-window-infill.md` (30 additional
+exact static cells at `2028`, `2029`, and `option6` `2032`/`2033`). Historical
+May ledgers are not part of the current release surface.
 
 ## Sequence
 

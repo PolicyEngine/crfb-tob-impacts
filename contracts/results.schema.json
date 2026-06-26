@@ -21,11 +21,29 @@
         },
         "baseline_build": {
           "type": "object",
-          "required": ["run_id", "manifest_path", "manifest_sha256", "year_h5_sha256"],
+          "required": [
+            "run_id",
+            "manifest_path",
+            "manifest_sha256",
+            "supplemental_manifest_paths",
+            "year_h5_sha256"
+          ],
           "properties": {
             "run_id": { "type": "string" },
-            "manifest_path": { "type": "string" },
+            "manifest_path": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.json$"
+            },
             "manifest_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "supplemental_manifest_paths": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.json$"
+              }
+            },
             "year_h5_sha256": {
               "type": "object",
               "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]{64}$" }

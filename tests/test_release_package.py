@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "build_release_package.py"
@@ -61,6 +63,9 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         "dashboard/public/data/results_contract.json",
         "dashboard/public/data/tob_explainer.json",
         "docs/current/REFORM_MODELING_BIBLE.md",
+        "docs/current/budget-window-infill.md",
+        "docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json",
+        "docs/current/manifests/baseline-dataset-manifest-9f1260b-certinfill.json",
         "docs/current/v2-baseline-method.md",
         "docs/current/v2-launch-runbook.md",
         "scripts/build_dashboard_baseline_assumptions.py",
@@ -91,6 +96,19 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         assert included[relative]["sha256"] == module.file_sha256(packaged)
 
     for relative in expected_files:
+        assert_packaged_file(relative)
+
+    results_contract = json.loads(
+        (package.package_dir / "dashboard/public/data/results_contract.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    contract_baseline_build = results_contract["lineage"]["baseline_build"]
+    contract_manifest_paths = {
+        contract_baseline_build["manifest_path"],
+        *contract_baseline_build.get("supplemental_manifest_paths", []),
+    }
+    for relative in contract_manifest_paths:
         assert_packaged_file(relative)
 
     built_dashboard_source = REPO_ROOT / "dashboard" / "out"
@@ -144,3 +162,62 @@ def test_release_package_includes_current_contract_outputs_and_sources(tmp_path)
         record["category"] == "special_case_raws" for record in manifest["files"]
     )
     assert package.archive_path is None
+
+
+def test_release_package_copies_contract_referenced_dynamic_manifest(
+    tmp_path, monkeypatch
+):
+    module = load_package_module()
+    dynamic_manifest = (
+        REPO_ROOT
+        / "docs"
+        / "current"
+        / "manifests"
+        / "baseline-dataset-manifest-v2pop.json"
+    )
+    static_required_paths = {source for _, source in module.REQUIRED_FILES}
+    assert dynamic_manifest.exists()
+    assert dynamic_manifest not in static_required_paths
+
+    monkeypatch.setattr(module, "contract_manifest_paths", lambda: [dynamic_manifest])
+
+    package = module.build_release_package(
+        package_root=tmp_path,
+        package_name="test-release-package-dynamic-manifest",
+        archive=False,
+    )
+    manifest = json.loads(package.manifest_path.read_text(encoding="utf-8"))
+    included = {record["path"] for record in manifest["files"]}
+
+    assert str(dynamic_manifest.relative_to(REPO_ROOT)) in included
+
+
+@pytest.mark.parametrize(
+    "bad_path",
+    [
+        "",
+        "/tmp/manifest.json",
+        "../manifest.json",
+        "docs/current/../manifest.json",
+        "docs/current/manifest.txt",
+    ],
+)
+def test_contract_manifest_paths_rejects_non_package_paths(tmp_path, bad_path):
+    module = load_package_module()
+    contract_path = tmp_path / "contract.json"
+    contract_path.write_text(
+        json.dumps(
+            {
+                "lineage": {
+                    "baseline_build": {
+                        "manifest_path": bad_path,
+                        "supplemental_manifest_paths": [],
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Contract manifest path"):
+        module.contract_manifest_paths(contract_path)
