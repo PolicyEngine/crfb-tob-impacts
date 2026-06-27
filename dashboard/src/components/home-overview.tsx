@@ -128,8 +128,8 @@ export function HomeOverview({
         <p className="text-base leading-7">
           Choose a reform from the sidebar to see its revenue impact, trust-fund
           split, and effect across the income distribution. Each reform can be
-          scored against current law or against a Social Security solvency
-          baseline. Start with the explainer below for how benefit taxation
+          scored against scheduled benefits or against a Social Security
+          solvency baseline. Start with the explainer below for how benefit taxation
           works today.
         </p>
       </section>

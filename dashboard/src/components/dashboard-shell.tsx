@@ -204,11 +204,15 @@ function SeriesChart({
   displayUnit,
   viewMode,
   trustFund,
+  solventStartYear,
 }: {
   data: YearlyImpact[];
   displayUnit: DisplayUnit;
   viewMode: ViewMode;
   trustFund: "oasdi" | "hi";
+  // When set (the SS-solvent view), mark the year the baseline switches from
+  // scheduled benefits to the solvent baseline.
+  solventStartYear?: number;
 }) {
   const { ref, width, height } = useElementSize<HTMLDivElement>();
   const xAxisTicks = viewMode === "75year" ? LONG_RUN_X_AXIS_TICKS : undefined;
@@ -343,6 +347,20 @@ function SeriesChart({
               stroke="var(--pe-color-border-medium)"
               strokeWidth={1}
             />
+            {solventStartYear && viewMode === "75year" ? (
+              <ReferenceLine
+                x={solventStartYear}
+                stroke="var(--pe-color-border-medium)"
+                strokeDasharray="4 4"
+                strokeWidth={1}
+                label={{
+                  value: "Solvent baseline →",
+                  position: "insideTopRight",
+                  fontSize: 10,
+                  fill: "var(--pe-color-text-tertiary)",
+                }}
+              />
+            ) : null}
             <Tooltip
               contentStyle={{
                 borderRadius: "12px",
@@ -602,7 +620,7 @@ export function DashboardShell() {
     baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect";
   const longRunMetricCaption =
     baselineScenario === "ssSolvent"
-      ? "2035-2100, present value (Trustees rates)"
+      ? "2026-2100, present value (Trustees rates)"
       : "2026-2100, present value (Trustees rates)";
   // In "% payroll" mode the chart, table, and metric focus on ONE trust fund,
   // because OASDI and HI have different taxable-payroll denominators (capped vs
@@ -956,7 +974,7 @@ export function DashboardShell() {
                   <div className="flex items-center">
                     <ControlLabel>Baseline scenario</ControlLabel>
                     <span
-                      title="Current law scores the reform against the law as it stands. SS solvent scores it against a baseline that closes Social Security's long-run shortfall through roughly equal benefit reductions and payroll-rate increases, so the reform's effect is measured on top of an already-solvent system."
+                      title="Scheduled benefits scores the reform against the law as it stands, with Social Security paying full scheduled benefits. SS solvent scores it against a baseline that closes Social Security's long-run shortfall through roughly equal benefit reductions and payroll-rate increases, so the reform's effect is measured on top of an already-solvent system."
                       aria-label="Baseline scenario explanation"
                       className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pe-color-border-light)] text-[var(--pe-color-text-tertiary)]"
                     >
@@ -967,7 +985,7 @@ export function DashboardShell() {
                       value={baselineScenario}
                       onChange={handleBaselineScenarioChange}
                       options={[
-                        { label: "Current law", value: "currentLaw" },
+                        { label: "Scheduled benefits", value: "currentLaw" },
                         { label: "SS solvent", value: "ssSolvent" },
                       ]}
                     />
@@ -1004,7 +1022,7 @@ export function DashboardShell() {
                   <ControlLabel>Period</ControlLabel>
                   {baselineScenario === "ssSolvent" ? (
                     <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
-                      2035-2100
+                      2026-2100
                     </span>
                   ) : (
                     <Segment
@@ -1048,10 +1066,11 @@ export function DashboardShell() {
                   <span className="font-semibold text-[var(--pe-color-text-primary)]">
                     SS solvent baseline:
                   </span>{" "}
-                  Social Security is brought into long-run balance through
-                  roughly equal benefit reductions and payroll-rate increases;
-                  the reform is then scored on top of that solvent system
-                  (2035–2100).
+                  Social Security is brought into long-run balance from 2035
+                  through roughly equal benefit reductions and payroll-rate
+                  increases. The reform is scored against scheduled benefits
+                  through 2034 and on top of the solvent system from 2035 (shown
+                  2026–2100).
                 </section>
               ) : null}
 
@@ -1083,6 +1102,9 @@ export function DashboardShell() {
                   displayUnit={displayUnit}
                   viewMode={viewMode}
                   trustFund={trustFund}
+                  solventStartYear={
+                    baselineScenario === "ssSolvent" ? 2035 : undefined
+                  }
                 />
 
                 <div className="overflow-hidden rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">

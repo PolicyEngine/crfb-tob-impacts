@@ -71,6 +71,11 @@ const allocationEligibleOptions = new Set([
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
 const directBranchingOptions = new Set(["option12"]);
+// Reforms whose general-revenue cost is attributed entirely to OASDI rather
+// than shown as a separate general-fund line. Reverse Roth makes the employee
+// OASDI payroll tax deductible, so its income-tax cost belongs to OASDI;
+// Medicare is left unchanged.
+const generalFundToOasdiOptions = new Set(["reverse_roth"]);
 const balancedFixEligibleOptions = new Set([
   "option1",
   "option2",
@@ -202,6 +207,21 @@ function splitRevenueImpacts(
     };
   }
 
+  if (generalFundToOasdiOptions.has(row.reformName)) {
+    // Fold the general-revenue cost (the employee OASDI payroll-tax deduction)
+    // into OASDI; leave the benefit-taxation HI share as scored. The whole
+    // revenue impact is then split across the trust funds with no general-fund
+    // line.
+    const generalFundDelta =
+      row.revenueImpact - (row.tobOasdiImpact + row.tobMedicareHiImpact);
+    return {
+      revenueImpact: row.revenueImpact,
+      tobOasdiImpact: row.tobOasdiImpact + generalFundDelta,
+      tobMedicareHiImpact: row.tobMedicareHiImpact,
+      tobTotalImpact: row.revenueImpact,
+    };
+  }
+
   const usesBaselineShares =
     baselineShareOptions.has(row.reformName) ||
     (allocationMode === "baselineShares" &&
@@ -275,30 +295,47 @@ export async function loadDashboardData(
   allocationMode: AllocationMode,
   baselineScenario: BaselineScenario = "currentLaw",
 ): Promise<Record<string, YearlyImpact[]>> {
-  const [csvContent, projections] = await Promise.all([
-    fetchCsv(
-      baselineScenario === "ssSolvent"
-        ? "/data/balanced_fix_results.csv"
-        : "/data/results.csv",
-    ),
-    loadEconomicProjections(),
-  ]);
+  const projections = await loadEconomicProjections();
 
-  const parsed = Papa.parse<Record<string, string>>(csvContent, {
-    header: true,
-    skipEmptyLines: true,
-  });
+  // Gather the rows to score. Under the SS-solvent baseline the options still
+  // start in 2026: the solvency fix only diverges from current law from 2035,
+  // so 2026-2034 are scored against current law (spliced from results.csv) and
+  // 2035-2100 against the solvent baseline.
+  const SOLVENT_START_YEAR = 2035;
+  const parse = (csv: string) =>
+    Papa.parse<Record<string, string>>(csv, {
+      header: true,
+      skipEmptyLines: true,
+    }).data;
+  const sourced: { row: Record<string, string>; isSolvent: boolean }[] = [];
+  if (baselineScenario === "ssSolvent") {
+    const [solventCsv, currentLawCsv] = await Promise.all([
+      fetchCsv("/data/balanced_fix_results.csv"),
+      fetchCsv("/data/results.csv"),
+    ]);
+    for (const row of parse(solventCsv)) {
+      if (row.baseline_scenario === "ss_solvent") {
+        sourced.push({ row, isSolvent: true });
+      }
+    }
+    for (const row of parse(currentLawCsv)) {
+      if (
+        asNumber(row.year) < SOLVENT_START_YEAR &&
+        balancedFixEligibleOptions.has(row.reform_name ?? "")
+      ) {
+        sourced.push({ row, isSolvent: false });
+      }
+    }
+  } else {
+    for (const row of parse(await fetchCsv("/data/results.csv"))) {
+      sourced.push({ row, isSolvent: false });
+    }
+  }
 
   const result: Record<string, YearlyImpact[]> = {};
 
-  for (const row of parsed.data) {
+  for (const { row, isSolvent } of sourced) {
     if ((row.scoring_type ?? "") !== scoringType) continue;
-    if (
-      baselineScenario === "ssSolvent" &&
-      row.baseline_scenario !== "ss_solvent"
-    ) {
-      continue;
-    }
 
     const reformName = row.reform_name ?? "";
     if (!reformName) continue;
@@ -315,7 +352,7 @@ export async function loadDashboardData(
       hiNetImpact: asNumber(row.hi_net_impact),
     };
     const split =
-      baselineScenario === "ssSolvent"
+      isSolvent
         ? {
             revenueImpact: asNumber(row.revenue_impact),
             tobOasdiImpact: asNumber(row.solvent_oasdi_impact),

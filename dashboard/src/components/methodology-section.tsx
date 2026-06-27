@@ -270,12 +270,13 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Scoring baselines and present value"
-          summary="Reforms can be scored against current law or a Social Security solvency baseline; 75-year totals are reported in present value."
+          summary="Reforms can be scored against scheduled benefits or a Social Security solvency baseline; 75-year totals are reported in present value."
         >
           <BulletList>
             <li>
-              <strong>Current law:</strong> the reform is scored against the law
-              as it stands, including the Trustees long-run taxation-of-benefits
+              <strong>Scheduled benefits:</strong> the reform is scored against
+              the law as it stands, with Social Security paying full scheduled
+              benefits, including the Trustees long-run taxation-of-benefits
               thresholds.
             </li>
             <li>
@@ -284,7 +285,9 @@ export function MethodologySection() {
               through roughly equal benefit reductions and payroll-rate
               increases (a balanced &ldquo;traditional fix&rdquo;), so its
               effect is measured on top of an already-solvent system. Available
-              for repeal, 85%, 100%, and the Phased Roth, over 2035-2100.
+              for repeal, 85%, 100%, and the Phased Roth; the solvent baseline
+              applies from 2035, with 2026-2034 scored against scheduled
+              benefits.
             </li>
           </BulletList>
           <p className="mt-4">
