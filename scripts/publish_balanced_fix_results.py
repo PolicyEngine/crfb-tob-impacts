@@ -267,7 +267,6 @@ def build_balanced_fix_results(
     anchors: pd.DataFrame, current_law: pd.DataFrame
 ) -> pd.DataFrame:
     anchor_lookup = anchors.set_index(["reform_name", "year"])
-    ratios = anchor_ratio_map(anchors, current_law)
     rows: list[dict[str, Any]] = []
 
     for current in current_law.sort_values(["reform_name", "year"]).to_dict("records"):
@@ -284,28 +283,29 @@ def build_balanced_fix_results(
             row["interpolation_left_year"] = year
             row["interpolation_right_year"] = year
         else:
+            # Linearly interpolate the real solvent anchor rows directly. The
+            # earlier method scaled the current-law row by an interpolated
+            # solvent/current-law ratio; that ratio divides by the current-law
+            # value, so it exploded wherever current law crosses zero (option12's
+            # phased-out benefit tax produced a spurious crater at 2055/2060) and
+            # broke the revenue_impact = reform - baseline identity. Interpolating
+            # the anchors directly is artifact-free and internally consistent.
+            left_row = anchor_lookup.loc[(reform, left_year)]
+            right_row = anchor_lookup.loc[(reform, right_year)]
             row = dict(current)
             row["solvent_baseline"] = "ss_solvent"
-            for column in (
-                *INTERPOLATED_RATIO_COLUMNS,
-                "solvent_oasdi_impact",
-                "solvent_medicare_hi_impact",
-            ):
-                left_ratio = ratios[(reform, left_year, column)]
-                right_ratio = ratios[(reform, right_year, column)]
-                ratio = _interpolate(
-                    left_ratio, right_ratio, year, left_year, right_year
+            for column in VALUE_COLUMNS:
+                row[column] = _interpolate(
+                    _as_float(left_row.get(column)),
+                    _as_float(right_row.get(column)),
+                    year,
+                    left_year,
+                    right_year,
                 )
-                row[column] = _as_float(current.get(column)) * ratio
-            row["solvent_general_fund_impact"] = (
-                _as_float(row["revenue_impact"])
-                - _as_float(row["solvent_oasdi_impact"])
-                - _as_float(row["solvent_medicare_hi_impact"])
-            )
             row["anchor_source_path"] = ""
             row["anchor_source_sha256"] = ""
             row["balanced_fix_result_type"] = (
-                "linear_interpolation_between_solvent_baseline_anchor_ratios"
+                "linear_interpolation_between_solvent_baseline_anchors"
             )
             row["interpolation_left_year"] = left_year
             row["interpolation_right_year"] = right_year
