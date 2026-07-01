@@ -25,6 +25,7 @@ export interface YearlyImpact {
   hiTaxablePayroll: number;
   gdp: number;
   discountFactor: number;
+  hiDiscountFactor: number;
   pctOfOasdiPayroll: number;
   pctOfGdp: number;
   oasdiPctOfPayroll: number;
@@ -41,6 +42,7 @@ interface EconomicProjection {
   hiTaxablePayroll: number;
   gdp: number;
   discountFactor: number;
+  hiDiscountFactor: number;
 }
 
 interface AllocationInput {
@@ -132,30 +134,39 @@ async function loadHiTaxablePayroll(): Promise<Map<number, number>> {
   return payroll;
 }
 
-async function loadDiscountFactors(): Promise<Map<number, number>> {
-  // Present-value discount factors to the start of 2026 using the TR2026
-  // assumed nominal trust-fund interest rates (standard trust-fund accounting).
-  // Each year's flow is discounted by the cumulative product of (1 + rate).
-  const csvContent = await fetchCsv("/data/tr2026_interest_rates.csv");
+async function loadDiscountFactors(): Promise<{
+  oasdi: Map<number, number>;
+  hi: Map<number, number>;
+}> {
+  // Present-value discount factors to the start of 2026 using each trust
+  // fund's Trustees effective interest rates: OASDI from the TR2026 Table
+  // VI.G1 compound effective trust-fund interest factors, HI from Medicare
+  // Trustees Table IV.A4 (graded to the 4.7% ultimate nominal rate by 2040).
+  // Each year's flow is discounted by the cumulative product of (1 + rate)
+  // for its own fund.
+  const csvContent = await fetchCsv("/data/effective_interest_rates.csv");
   const parsed = Papa.parse<Record<string, string>>(csvContent, {
     header: true,
     skipEmptyLines: true,
   });
-  const rates = new Map<number, number>();
-  for (const row of parsed.data) {
-    rates.set(
-      asNumber(row.year),
-      asNumber(row.nominal_interest_rate_pct) / 100,
-    );
+  const rows = parsed.data
+    .map((row) => ({
+      year: asNumber(row.year),
+      oasdi: asNumber(row.oasdi_effective_rate_pct) / 100,
+      hi: asNumber(row.hi_effective_rate_pct) / 100,
+    }))
+    .sort((a, b) => a.year - b.year);
+  const oasdi = new Map<number, number>();
+  const hi = new Map<number, number>();
+  let oasdiCumulative = 1;
+  let hiCumulative = 1;
+  for (const row of rows) {
+    oasdiCumulative /= 1 + row.oasdi;
+    hiCumulative /= 1 + row.hi;
+    oasdi.set(row.year, oasdiCumulative);
+    hi.set(row.year, hiCumulative);
   }
-  const years = [...rates.keys()].sort((a, b) => a - b);
-  const factors = new Map<number, number>();
-  let cumulative = 1;
-  for (const year of years) {
-    cumulative /= 1 + (rates.get(year) ?? 0);
-    factors.set(year, cumulative);
-  }
-  return factors;
+  return { oasdi, hi };
 }
 
 async function loadEconomicProjections(): Promise<
@@ -181,7 +192,8 @@ async function loadEconomicProjections(): Promise<
           oasdiTaxablePayroll,
           hiTaxablePayroll: hiTaxablePayroll.get(year) ?? oasdiTaxablePayroll,
           gdp: asNumber(row.gdp),
-          discountFactor: discountFactors.get(year) ?? 1,
+          discountFactor: discountFactors.oasdi.get(year) ?? 1,
+          hiDiscountFactor: discountFactors.hi.get(year) ?? 1,
         });
       }
 
@@ -401,6 +413,7 @@ export async function loadDashboardData(
       hiTaxablePayroll: 0,
       gdp: 0,
       discountFactor: 1,
+      hiDiscountFactor: 1,
     };
 
     const yearlyImpact: YearlyImpact = {
@@ -420,6 +433,7 @@ export async function loadDashboardData(
       hiTaxablePayroll: economicProjection.hiTaxablePayroll,
       gdp: economicProjection.gdp,
       discountFactor: economicProjection.discountFactor,
+      hiDiscountFactor: economicProjection.hiDiscountFactor,
       pctOfOasdiPayroll:
         economicProjection.oasdiTaxablePayroll > 0
           ? (split.revenueImpact / economicProjection.oasdiTaxablePayroll) * 100
@@ -502,16 +516,26 @@ export function calculateTotals(data: YearlyImpact[]) {
   // interest rates (standard trust-fund accounting). Each row carries its
   // cumulative discount factor; % figures discount numerator and denominator
   // alike (the 75-year summarized-rate convention).
-  const pvBy = (rows: YearlyImpact[], key: keyof YearlyImpact) =>
+  const pvBy = (
+    rows: YearlyImpact[],
+    key: keyof YearlyImpact,
+    factorKey: "discountFactor" | "hiDiscountFactor" = "discountFactor",
+  ) =>
     rows.reduce(
-      (acc, row) => acc + (row[key] as number) * row.discountFactor,
+      (acc, row) => acc + (row[key] as number) * (row[factorKey] as number),
       0,
     );
-  const pvTotal = pvBy(data, "revenueImpact");
+  // Each fund's flows discount at its own effective rates (OASDI: TR2026
+  // VI.G1; HI: Medicare IV.A4 graded to the 4.7% ultimate). General-fund
+  // flows and the economy-wide denominators use the OASDI series. The
+  // 75-year total is the sum of the discounted components, so the summary
+  // figures stay additive.
   const pvOasdi = pvBy(data, "tobOasdiImpact");
-  const pvHi = pvBy(data, "tobMedicareHiImpact");
+  const pvHi = pvBy(data, "tobMedicareHiImpact", "hiDiscountFactor");
+  const pvGeneralFund = pvBy(data, "generalFundImpact");
+  const pvTotal = pvOasdi + pvHi + pvGeneralFund;
   const pvPayroll = pvBy(data, "oasdiTaxablePayroll");
-  const pvHiPayroll = pvBy(data, "hiTaxablePayroll");
+  const pvHiPayroll = pvBy(data, "hiTaxablePayroll", "hiDiscountFactor");
   const pvGdp = pvBy(data, "gdp");
 
   return {

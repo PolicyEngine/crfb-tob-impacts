@@ -1,0 +1,17 @@
+# Source: 2026 Medicare Trustees Report, Table IV.A4 ("Summary of HI Alternative
+# Projections"), intermediate estimates, "HI effective interest rate" column
+# (p. 129 of the report; PDF p. 135 of data/sources/tr2026/medicare_tr2026.pdf).
+# Footnote 4: the Trustees discount HI present values using these projected
+# effective rates for the first 10 years, then grade to the ultimate nominal
+# interest rate assumption (4.7 percent intermediate) by year 15 (2040).
+year,hi_effective_interest_rate_pct
+2026,3.983
+2027,4.007
+2028,4.083
+2029,4.255
+2030,4.452
+2031,4.530
+2032,4.562
+2033,4.125
+2034,4.125
+2035,4.125

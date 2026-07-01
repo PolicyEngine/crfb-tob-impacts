@@ -612,7 +612,8 @@ export function DashboardShell() {
     baselineScenario === "ssSolvent"
       ? "SS-solvent total"
       : "75-year total";
-  const pvFramingCaption = "2026-2100, present value (Trustees rates)";
+  const pvFramingCaption =
+    "2026-2100, present value (Trustees effective trust-fund rates)";
   // The four headline figures, each mapped to the active display unit. The
   // per-fund "% GDP" and "% payroll" figures use their own dollar sign for the
   // tone; the "% GDP" and "% payroll" totals use the total's sign.

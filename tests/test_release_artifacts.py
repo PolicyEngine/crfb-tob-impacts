@@ -49,7 +49,8 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/live_reform_status.csv",
     "dashboard/public/data/results.csv",
     "dashboard/public/data/ssa_economic_projections.csv",
-    "dashboard/public/data/tr2026_interest_rates.csv",
+    "dashboard/public/data/effective_interest_rates.csv",
+    "data/sources/tr2026/hi_effective_interest_rates_tr2026_iv_a4.csv",
     "dashboard/public/data/v2_baseline_diagnostics.csv",
     "data/SSPopJul_TR2024.csv",
     "data/SSPopJul_TR2026_interim.csv",
@@ -655,24 +656,20 @@ def test_dashboard_defaults_to_full_75_year_surface():
         REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
     ).read_text(encoding="utf-8")
 
-    assert 'useState<ScoringType>("static")' in shell
+    # Static-only scoring: hardcoded, with no scoring toggle exposed.
+    assert 'const scoringType: ScoringType = "static";' in shell
+    assert "Labor response" not in shell
+    assert 'value: "behavioral"' not in shell
+    # The full 75-year surface is always shown: view mode is fixed and the
+    # 10-year/75-year period toggle is gone.
+    assert 'const viewMode: ViewMode = "75year";' in shell
+    assert '{ label: "10-year", value: "10year" }' not in shell
     assert 'useState<DisplayUnit>("pctPayroll")' in shell
-    assert 'useState<ViewMode>("75year")' in shell
-    assert '{ label: "Static", value: "static" }' in shell
-    assert '{ label: "Labor response", value: "behavioral" }' in shell
-    assert '{ label: "Labor-supply response", value: "conventional" }' not in shell
-    assert '{ label: "75-year", value: "75year" }' in shell
-    assert shell.index('{ label: "10-year", value: "10year" }') < shell.index(
-        '{ label: "75-year", value: "75year" }'
-    )
-    assert (
-        'baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect"'
-        in shell
-    )
-    assert "const tenYearLabel = isPctPayroll" in shell
-    assert "? `${fundLabel} · 10-year effect`" in shell
-    assert 'label="OASDI / HI split"' not in shell
-    assert 'caption="2026 baseline share"' not in shell
+    # The summary card carries the four headline figures.
+    assert 'label: "10-year effect"' in shell
+    assert '"75-year total"' in shell
+    assert 'label: "75-year OASDI"' in shell
+    assert 'label: "75-year HI"' in shell
     assert "spotlightRows(selectedData, viewMode)" in shell
     assert "new Set([2026, 2035, 2050, 2075, 2100])" in data_loader
     assert "const xAxisDomain: [number, number]" in shell
@@ -685,18 +682,17 @@ def test_ss_solvent_dashboard_view_is_long_run_only():
         REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
     ).read_text(encoding="utf-8")
 
-    assert 'if (next === "ssSolvent")' in shell
-    assert 'setViewMode("75year")' in shell
-    assert 'baselineScenario === "ssSolvent" ? (' in shell
-    assert "2035-2100" in shell
-    assert (
-        'baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect"'
-        in shell
-    )
-    assert "label={longRunLabel}" in shell
-    assert "caption={longRunMetricCaption}" in shell
-    assert "label={tenYearLabel}" in shell
-    assert 'viewMode === "10year" ? (' in shell
+    # The solvency baseline is offered and framed as a long-run scenario that
+    # splices scheduled-benefits scoring before 2035.
+    assert '{ label: "SS solvent", value: "ssSolvent" }' in shell
+    assert "on top of the solvent system from 2035 (shown" in shell
+    assert '? "SS-solvent total"' in shell
+    assert ': "75-year total"' in shell
+    # The chart marks the 2035 baseline switch only under the solvency view.
+    assert "solventStartYear={" in shell
+    assert 'baselineScenario === "ssSolvent" ? 2035 : undefined' in shell
+    # External current-law estimates stay hidden under the solvency baseline.
+    assert 'baselineScenario !== "ssSolvent" && (' in shell
 
 
 def test_reproducibility_roadmap_points_to_full_reform_h5_artifacts():

@@ -381,9 +381,9 @@ question rather than certifying it.
 
 ## Supplemental labor-supply response scoring
 
-Static estimates are the primary scoring surface for the CRFB dashboard.
-Supplemental labor-supply response rows are included in the dashboard as a
-secondary scoring surface. They are generated from the same current-contract
+Static estimates are the scoring surface displayed on the CRFB dashboard.
+Supplemental labor-supply response rows are reported in the published results
+data as a secondary estimand. They are generated from the same current-contract
 full-H5 reform lineage as the static rows, then aggregated from those durable
 H5 artifacts. Labor-supply response reform dictionaries merge the statutory
 reform parameters with the project's age-based elasticity schedule:

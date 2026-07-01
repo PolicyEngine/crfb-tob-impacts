@@ -294,10 +294,16 @@ export function MethodologySection() {
           </BulletList>
           <p className="mt-4">
             <strong>Present value:</strong> 75-year totals discount each
-            year&apos;s flow to 2026 at the Trustees&apos; assumed nominal
-            trust-fund interest rates (table V.B2), following standard
-            trust-fund accounting. Ten-year budget-window totals are shown in
-            nominal dollars.
+            year&apos;s flow to 2026 at each trust fund&apos;s effective
+            interest rates under the Trustees&apos; intermediate assumptions:
+            OASDI flows at the rates implied by the compound effective
+            trust-fund interest factors in Table VI.G1 of the 2026 OASDI
+            Trustees Report, and Medicare HI flows at the effective rates in
+            Table IV.A4 of the 2026 Medicare Trustees Report, graded to the
+            4.7 percent ultimate nominal rate by 2040. General-fund flows and
+            economy-wide denominators use the OASDI series, and the 75-year
+            total is the sum of the discounted components. Ten-year
+            budget-window totals are shown in nominal dollars.
           </p>
         </AccordionItem>
       </div>
