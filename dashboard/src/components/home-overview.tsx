@@ -127,10 +127,11 @@ export function HomeOverview({
         </p>
         <p className="text-base leading-7">
           Choose a reform from the sidebar to see its revenue impact, trust-fund
-          split, and effect across the income distribution. Each reform can be
-          scored against scheduled benefits or against a Social Security
-          solvency baseline. Start with the explainer below for how benefit taxation
-          works today.
+          split, and effect across the income distribution. Every reform is
+          scored against scheduled benefits, and the repeal, 85%, 100%, and
+          Phased Roth options can also be scored against a Social Security
+          solvency baseline. Start with the explainer below for how benefit
+          taxation works today.
         </p>
       </section>
 

@@ -18,7 +18,7 @@ export interface ExternalEstimate {
   url: string;
 }
 
-export const REFORMS: ReformMeta[] = [
+const REFORM_DEFINITIONS: ReformMeta[] = [
   {
     id: "option1",
     name: "Full Repeal of Social Security Benefit Taxation",
@@ -243,6 +243,31 @@ export const REFORMS: ReformMeta[] = [
       "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
   },
 ];
+
+// Display order for the sidebar/selector: full repeal, then the 85% family
+// (base plus its senior-deduction and credit variants), then the higher
+// taxation shares in ascending order, then the Roth-structure options.
+const REFORM_DISPLAY_ORDER = [
+  "option1",
+  "option2",
+  "option3",
+  "option7",
+  "option4",
+  "option11",
+  "option9",
+  "tax93",
+  "option10",
+  "option8",
+  "option5",
+  "option6",
+  "option12",
+  "reverse_roth",
+];
+
+export const REFORMS: ReformMeta[] = [...REFORM_DEFINITIONS].sort(
+  (a, b) =>
+    REFORM_DISPLAY_ORDER.indexOf(a.id) - REFORM_DISPLAY_ORDER.indexOf(b.id),
+);
 
 export const EXTERNAL_ESTIMATES: Record<string, ExternalEstimate[]> = {
   option1: [
