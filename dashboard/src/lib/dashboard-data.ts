@@ -362,7 +362,14 @@ export async function loadDashboardData(
               asNumber(row.solvent_medicare_hi_impact),
             generalFundImpact: asNumber(row.solvent_general_fund_impact),
           }
-        : splitRevenueImpacts(allocationRow, allocationMode);
+        : splitRevenueImpacts(
+            allocationRow,
+            // The 2026-2034 rows spliced into the solvency view use a fixed
+            // baseline-share split — the trust-fund allocation toggle is hidden
+            // under solvency, so a stale allocationMode must not leak in. The
+            // live allocationMode applies only to the current-law scenario.
+            baselineScenario === "ssSolvent" ? "baselineShares" : allocationMode,
+          );
     const generalFundImpact =
       "generalFundImpact" in split
         ? split.generalFundImpact

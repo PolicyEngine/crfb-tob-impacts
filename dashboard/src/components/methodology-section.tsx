@@ -287,7 +287,9 @@ export function MethodologySection() {
               effect is measured on top of an already-solvent system. Available
               for repeal, 85%, 100%, and the Phased Roth; the solvent baseline
               applies from 2035, with 2026-2034 scored against scheduled
-              benefits.
+              benefits. A reform whose structure differs from current law can
+              step at 2035 where the baseline switches &mdash; clearest for the
+              Phased Roth &mdash; which the dashed marker on the chart flags.
             </li>
           </BulletList>
           <p className="mt-4">

@@ -1,9 +1,9 @@
 """Publish additive balanced-fix results for the dashboard.
 
 The canonical current-law panel remains ``results.csv``. This script consumes
-exact balanced-fix anchor rows recovered from Modal, interpolates the
-solvent/current-law ratio between anchors, and writes a separate public file
-for the "SS solvent" baseline scenario.
+exact balanced-fix anchor rows recovered from Modal, linearly interpolates the
+real solvent anchor rows between the five exact anchors, and writes a separate
+public file for the "SS solvent" baseline scenario.
 """
 
 from __future__ import annotations
@@ -42,7 +42,12 @@ DEFAULT_METADATA_OUTPUTS = (
     REPO / "dashboard" / "public" / "data" / "balanced_fix_results_metadata.json",
 )
 DEFAULT_RUN_PREFIX = "balanced_fix_v2pop_tr2026_endpoints_first_20260619_hi2100fix"
-NEAR_ZERO_BILLIONS = 0.001
+
+# Provenance tags written into balanced_fix_result_type / source. Defined once so
+# the build step and the metadata counter can never drift apart (they did once:
+# the metadata counted a stale interpolation tag and reported 0 interpolated rows).
+EXACT_RESULT_TYPE = "exact_solvent_baseline_full_h5"
+INTERPOLATED_RESULT_TYPE = "linear_interpolation_between_solvent_baseline_anchors"
 
 VALUE_COLUMNS = (
     "baseline_revenue",
@@ -68,29 +73,6 @@ VALUE_COLUMNS = (
     "solvent_oasdi_impact",
     "solvent_medicare_hi_impact",
     "solvent_general_fund_impact",
-)
-
-INTERPOLATED_RATIO_COLUMNS = (
-    "baseline_revenue",
-    "reform_revenue",
-    "revenue_impact",
-    "baseline_tob_medicare_hi",
-    "reform_tob_medicare_hi",
-    "tob_medicare_hi_impact",
-    "baseline_tob_oasdi",
-    "reform_tob_oasdi",
-    "tob_oasdi_impact",
-    "baseline_tob_total",
-    "reform_tob_total",
-    "tob_total_impact",
-    "employer_ss_tax_revenue",
-    "employer_medicare_tax_revenue",
-    "oasdi_gain",
-    "hi_gain",
-    "oasdi_loss",
-    "hi_loss",
-    "oasdi_net_impact",
-    "hi_net_impact",
 )
 
 
@@ -148,12 +130,6 @@ def _as_float(value: Any) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
-
-
-def _ratio(numerator: float, denominator: float) -> float:
-    if abs(denominator) < NEAR_ZERO_BILLIONS:
-        return 1.0 if abs(numerator) < NEAR_ZERO_BILLIONS else 0.0
-    return numerator / denominator
 
 
 def _interpolate(
@@ -233,26 +209,6 @@ def current_law_default_rows(results: pd.DataFrame) -> pd.DataFrame:
     return rows
 
 
-def anchor_ratio_map(
-    anchors: pd.DataFrame, current_law: pd.DataFrame
-) -> dict[tuple[str, int, str], float]:
-    current_indexed = current_law.set_index(["reform_name", "year"])
-    ratios: dict[tuple[str, int, str], float] = {}
-    for anchor in anchors.to_dict("records"):
-        key = (str(anchor["reform_name"]), int(anchor["year"]))
-        current = current_indexed.loc[key]
-        for column in (
-            *INTERPOLATED_RATIO_COLUMNS,
-            "solvent_oasdi_impact",
-            "solvent_medicare_hi_impact",
-        ):
-            ratios[(key[0], key[1], column)] = _ratio(
-                _as_float(anchor.get(column)),
-                _as_float(current.get(column)),
-            )
-    return ratios
-
-
 def surrounding_anchor_years(year: int) -> tuple[int, int]:
     anchors = tuple(BALANCED_FIX_PUBLISH_ANCHOR_YEARS)
     if year in anchors:
@@ -279,7 +235,7 @@ def build_balanced_fix_results(
             row = dict(anchor_lookup.loc[exact_key])
             row["reform_name"] = reform
             row["year"] = year
-            row["balanced_fix_result_type"] = "exact_solvent_baseline_full_h5"
+            row["balanced_fix_result_type"] = EXACT_RESULT_TYPE
             row["interpolation_left_year"] = year
             row["interpolation_right_year"] = year
         else:
@@ -304,9 +260,7 @@ def build_balanced_fix_results(
                 )
             row["anchor_source_path"] = ""
             row["anchor_source_sha256"] = ""
-            row["balanced_fix_result_type"] = (
-                "linear_interpolation_between_solvent_baseline_anchors"
-            )
+            row["balanced_fix_result_type"] = INTERPOLATED_RESULT_TYPE
             row["interpolation_left_year"] = left_year
             row["interpolation_right_year"] = right_year
 
@@ -353,23 +307,17 @@ def metadata_for(
         "year_end": int(result["year"].max()),
         "rows": int(len(result)),
         "exact_rows": int(
-            result["balanced_fix_result_type"]
-            .eq("exact_solvent_baseline_full_h5")
-            .sum()
+            result["balanced_fix_result_type"].eq(EXACT_RESULT_TYPE).sum()
         ),
         "interpolated_rows": int(
-            result["balanced_fix_result_type"]
-            .eq("linear_interpolation_between_solvent_baseline_anchor_ratios")
-            .sum()
+            result["balanced_fix_result_type"].eq(INTERPOLATED_RESULT_TYPE).sum()
         ),
         "interpolation_method": (
-            "For each reform and metric, compute the solvent/current-law ratio "
-            "at exact anchor years 2035, 2050, 2065, 2075, and 2100; "
-            "linearly interpolate that ratio by year; multiply the live "
-            "current-law static row by the interpolated ratio. 2065 was "
-            "promoted from validation spot-check to exact anchor because "
-            "the direct option12 split materially differed from the "
-            "2035/2050/2075/2100-only interpolation."
+            "For each reform and metric, linearly interpolate the real solvent "
+            "anchor rows by year between the exact anchor years 2035, 2050, "
+            "2065, 2075, and 2100. 2065 was promoted from validation spot-check "
+            "to exact anchor because the direct option12 split materially "
+            "differed from the 2035/2050/2075/2100-only interpolation."
         ),
         "split_contract": (
             "solvent_oasdi_impact + solvent_medicare_hi_impact + "
