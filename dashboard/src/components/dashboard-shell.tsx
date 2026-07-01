@@ -31,7 +31,6 @@ import { ComparisonTable } from "@/components/comparison-table";
 import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
 import {
-  ALLOCATION_ELIGIBLE_OPTIONS,
   BALANCED_FIX_ELIGIBLE_OPTIONS,
   calculateTotals,
   type AllocationMode,
@@ -533,17 +532,21 @@ function SidebarGroup({
 export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("home");
   const [selectedReform, setSelectedReform] = useState("option1");
-  const [scoringType, setScoringType] = useState<ScoringType>("static");
   const [allocationMode, setAllocationMode] =
     useState<AllocationMode>("baselineShares");
   const [baselineScenario, setBaselineScenario] =
     useState<BaselineScenario>("currentLaw");
   const [displayUnit, setDisplayUnit] = useState<DisplayUnit>("pctPayroll");
   const [trustFund, setTrustFund] = useState<"oasdi" | "hi">("oasdi");
-  const [viewMode, setViewMode] = useState<ViewMode>("75year");
   const [data, setData] = useState<Record<string, YearlyImpact[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // All figures are static (no-behavioral) scores; the behavioral rows stay on
+  // disk but are no longer surfaced. Charts and tables always show the full
+  // 2026-2100 window.
+  const scoringType: ScoringType = "static";
+  const viewMode: ViewMode = "75year";
 
   useEffect(() => {
     let active = true;
@@ -581,19 +584,6 @@ export function DashboardShell() {
     setLoading(true);
     setError(null);
     setBaselineScenario(next);
-    if (next === "ssSolvent") {
-      setScoringType("static");
-      setViewMode("75year");
-    }
-  }
-
-  function handleViewModeChange(next: ViewMode) {
-    if (baselineScenario === "ssSolvent") {
-      setViewMode("75year");
-      return;
-    }
-    setViewMode(next);
-    setDisplayUnit(next === "10year" ? "dollars" : "pctPayroll");
   }
 
   const effectiveReformId = selectedReform;
@@ -601,59 +591,84 @@ export function DashboardShell() {
     (candidate) => candidate.id === effectiveReformId,
   ) as ReformMeta;
   const selectedData = data[effectiveReformId] ?? [];
-  const visibleData =
-    viewMode === "10year"
-      ? selectedData.filter((row) => row.year >= 2026 && row.year <= 2035)
-      : selectedData;
+  const visibleData = selectedData;
   const totals = calculateTotals(selectedData);
   const spotlight = spotlightRows(selectedData, viewMode);
   const showGeneralFundResidual = selectedData.some(
     (row) => Math.abs(row.generalFundImpact) > 0.005,
   );
-  const showAllocationToggle =
-    baselineScenario === "currentLaw" &&
-    ALLOCATION_ELIGIBLE_OPTIONS.includes(effectiveReformId);
+  // The trust-fund allocation toggle is available for every reform under the
+  // current-law (scheduled-benefits) baseline; it stays hidden under the
+  // SS-solvent baseline, whose split is fixed.
+  const showAllocationToggle = baselineScenario === "currentLaw";
   const showBaselineScenarioToggle =
     BALANCED_FIX_ELIGIBLE_OPTIONS.includes(effectiveReformId);
-  const isStaticOnlyReform = baselineScenario === "ssSolvent";
-  const longRunMetricLabel =
-    baselineScenario === "ssSolvent" ? "SS-solvent effect" : "75-year effect";
-  const longRunMetricCaption =
-    baselineScenario === "ssSolvent"
-      ? "2026-2100, present value (Trustees rates)"
-      : "2026-2100, present value (Trustees rates)";
-  // In "% payroll" mode the chart, table, and metric focus on ONE trust fund,
-  // because OASDI and HI have different taxable-payroll denominators (capped vs
-  // uncapped) — overlaying them on one axis would be misleading.
+  // In "% payroll" mode figures use each trust fund's OWN taxable-payroll base,
+  // because OASDI (capped) and HI (uncapped) have different denominators — they
+  // are never mixed on a single axis. The "total" figures use the OASDI base.
   const isPctPayroll = displayUnit === "pctPayroll";
   const fundLabel = trustFund === "oasdi" ? "OASDI" : "HI";
-  const focusOasdi = trustFund === "oasdi";
-  const longRunDollar = focusOasdi ? totals.pvOasdi : totals.pvHi;
-  const tenYearDollar = focusOasdi ? totals.tenYearOasdi : totals.tenYearHi;
-  const longRunValue =
+  const longRunTotalLabel =
+    baselineScenario === "ssSolvent"
+      ? "SS-solvent total"
+      : "75-year total";
+  const pvFramingCaption = "2026-2100, present value (Trustees rates)";
+  // The four headline figures, each mapped to the active display unit. The
+  // per-fund "% GDP" and "% payroll" figures use their own dollar sign for the
+  // tone; the "% GDP" and "% payroll" totals use the total's sign.
+  const pickUnit = (
+    dollars: number,
+    pctPayroll: number,
+    pctGdp: number,
+  ) =>
     displayUnit === "dollars"
-      ? totals.pvTotal
+      ? dollars
       : isPctPayroll
-        ? focusOasdi
-          ? totals.pvOasdiPctPayroll
-          : totals.pvHiPctPayroll
-        : totals.pvTotalPctGdp;
-  const tenYearValue =
-    displayUnit === "dollars"
-      ? totals.tenYear
-      : isPctPayroll
-        ? focusOasdi
-          ? totals.tenYearOasdiPctPayroll
-          : totals.tenYearHiPctPayroll
-        : totals.tenYearPctGdp;
-  const longRunPositive = (isPctPayroll ? longRunDollar : totals.pvTotal) >= 0;
-  const tenYearPositive = (isPctPayroll ? tenYearDollar : totals.tenYear) >= 0;
-  const longRunLabel = isPctPayroll
-    ? `${fundLabel} · ${longRunMetricLabel}`
-    : longRunMetricLabel;
-  const tenYearLabel = isPctPayroll
-    ? `${fundLabel} · 10-year effect`
-    : "10-year effect";
+        ? pctPayroll
+        : pctGdp;
+  const summaryFigures: Array<{
+    label: string;
+    value: number;
+    sign: number;
+    caption: string;
+  }> = [
+    {
+      label: "10-year effect",
+      value: pickUnit(
+        totals.tenYear,
+        totals.tenYearPctPayroll,
+        totals.tenYearPctGdp,
+      ),
+      sign: totals.tenYear,
+      caption: "2026-2035 cumulative",
+    },
+    {
+      label: longRunTotalLabel,
+      value: pickUnit(
+        totals.pvTotal,
+        totals.pvTotalPctPayroll,
+        totals.pvTotalPctGdp,
+      ),
+      sign: totals.pvTotal,
+      caption: pvFramingCaption,
+    },
+    {
+      label: "75-year OASDI",
+      value: pickUnit(
+        totals.pvOasdi,
+        totals.pvOasdiPctPayroll,
+        totals.pvOasdiPctGdp,
+      ),
+      sign: totals.pvOasdi,
+      caption: "Social Security, present value",
+    },
+    {
+      label: "75-year HI",
+      value: pickUnit(totals.pvHi, totals.pvHiPctPayroll, totals.pvHiPctGdp),
+      sign: totals.pvHi,
+      caption: "Medicare HI, present value",
+    },
+  ];
   // External (CBO / Tax Foundation) estimates are current-law scores, so they
   // are not comparable to a reform measured against the SS-solvency baseline —
   // hide them there rather than show a misleading gap.
@@ -681,12 +696,6 @@ export function DashboardShell() {
       return;
     }
     handleReformSelect(nextValue);
-  }
-
-  function handleScoringTypeChange(next: ScoringType) {
-    setLoading(true);
-    setError(null);
-    setScoringType(next);
   }
 
   function exportCsv() {
@@ -952,24 +961,6 @@ export function DashboardShell() {
 
               {/* Controls — compact inline row */}
               <section className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                <div className="flex items-center">
-                  <ControlLabel>Scoring</ControlLabel>
-                  {isStaticOnlyReform ? (
-                    <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
-                      Static only
-                    </span>
-                  ) : (
-                    <Segment
-                      label="Scoring"
-                      value={scoringType}
-                      onChange={handleScoringTypeChange}
-                      options={[
-                        { label: "Static", value: "static" },
-                        { label: "Labor response", value: "behavioral" },
-                      ]}
-                    />
-                  )}
-                </div>
                 {showBaselineScenarioToggle && (
                   <div className="flex items-center">
                     <ControlLabel>Baseline scenario</ControlLabel>
@@ -1018,24 +1009,6 @@ export function DashboardShell() {
                     />
                   </div>
                 )}
-                <div className="flex items-center">
-                  <ControlLabel>Period</ControlLabel>
-                  {baselineScenario === "ssSolvent" ? (
-                    <span className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-sm font-medium text-[var(--pe-color-text-secondary)]">
-                      2026-2100
-                    </span>
-                  ) : (
-                    <Segment
-                      label="Period"
-                      value={viewMode}
-                      onChange={handleViewModeChange}
-                      options={[
-                        { label: "10-year", value: "10year" },
-                        { label: "75-year", value: "75year" },
-                      ]}
-                    />
-                  )}
-                </div>
                 {showAllocationToggle && (
                   <div className="flex items-center">
                     <ControlLabel>Trust fund split</ControlLabel>
@@ -1074,25 +1047,18 @@ export function DashboardShell() {
                 </section>
               ) : null}
 
-              {/* Metric — only the selected period's total */}
-              <section className="grid gap-4 md:grid-cols-2">
-                {viewMode === "10year" ? (
+              {/* Summary — four headline figures */}
+              <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {summaryFigures.map((figure) => (
                   <MetricTile
-                    label={tenYearLabel}
-                    value={formatValue(tenYearValue, displayUnit)}
-                    tone={tenYearPositive ? "positive" : "negative"}
-                    caption="2026–2035 cumulative"
+                    key={figure.label}
+                    label={figure.label}
+                    value={formatValue(figure.value, displayUnit)}
+                    tone={figure.sign >= 0 ? "positive" : "negative"}
+                    caption={figure.caption}
                     accent
                   />
-                ) : (
-                  <MetricTile
-                    label={longRunLabel}
-                    value={formatValue(longRunValue, displayUnit)}
-                    tone={longRunPositive ? "positive" : "negative"}
-                    caption={longRunMetricCaption}
-                    accent
-                  />
-                )}
+                ))}
               </section>
 
               {/* Chart + inline spotlight */}

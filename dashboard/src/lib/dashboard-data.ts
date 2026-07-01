@@ -84,7 +84,6 @@ const balancedFixEligibleOptions = new Set([
 ]);
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-export const ALLOCATION_ELIGIBLE_OPTIONS = [...allocationEligibleOptions];
 export const BALANCED_FIX_ELIGIBLE_OPTIONS = [...balancedFixEligibleOptions];
 
 let projectionCache: Promise<Map<number, EconomicProjection>> | null = null;
@@ -193,11 +192,52 @@ async function loadEconomicProjections(): Promise<
   return projectionCache;
 }
 
+// The single-trust-fund override modes ("all OASDI" / "all HI") assign a
+// reform's WHOLE revenue impact to one trust fund. They apply to every reform,
+// so they use each reform's native revenue total — which for the structural
+// swaps is the branched net-impact sum, not the raw revenue_impact column.
+function nativeRevenueImpact(row: AllocationInput): number {
+  if (
+    directBranchingOptions.has(row.reformName) ||
+    netImpactOptions.has(row.reformName)
+  ) {
+    return row.oasdiNetImpact + row.hiNetImpact;
+  }
+  return row.revenueImpact;
+}
+
 function splitRevenueImpacts(
   row: AllocationInput,
   allocationMode: AllocationMode,
 ): AllocationResult {
+  // "All OASDI" / "All HI" override every reform: the entire native revenue
+  // impact lands on one trust fund, with no general-fund residual. For the
+  // structural swaps (option12, reverse Roth) "the whole impact" is the
+  // reform's branched net revenue, not the small benefit-taxation column.
+  if (allocationMode === "allOasdi") {
+    const revenueImpact = nativeRevenueImpact(row);
+    return {
+      revenueImpact,
+      tobOasdiImpact: revenueImpact,
+      tobMedicareHiImpact: 0,
+      tobTotalImpact: revenueImpact,
+    };
+  }
+
+  if (allocationMode === "allHi") {
+    const revenueImpact = nativeRevenueImpact(row);
+    return {
+      revenueImpact,
+      tobOasdiImpact: 0,
+      tobMedicareHiImpact: revenueImpact,
+      tobTotalImpact: revenueImpact,
+    };
+  }
+
   if (directBranchingOptions.has(row.reformName)) {
+    // The direct-branching swap (option 12) is scored straight from its OASDI
+    // and HI net-impact columns. This IS its statutory split, so both the
+    // default ("baseline shares") and the "current law" statutory mode keep it.
     const revenueImpact = row.oasdiNetImpact + row.hiNetImpact;
     return {
       revenueImpact,
@@ -211,7 +251,9 @@ function splitRevenueImpacts(
     // Fold the general-revenue cost (the employee OASDI payroll-tax deduction)
     // into OASDI; leave the benefit-taxation HI share as scored. The whole
     // revenue impact is then split across the trust funds with no general-fund
-    // line.
+    // line. This is reverse Roth's mechanism split, so the default and the
+    // "current law" statutory mode both keep it (only the all-OASDI / all-HI
+    // overrides above reassign it).
     const generalFundDelta =
       row.revenueImpact - (row.tobOasdiImpact + row.tobMedicareHiImpact);
     return {
@@ -226,30 +268,6 @@ function splitRevenueImpacts(
     baselineShareOptions.has(row.reformName) ||
     (allocationMode === "baselineShares" &&
       allocationEligibleOptions.has(row.reformName));
-
-  if (
-    allocationMode === "allOasdi" &&
-    allocationEligibleOptions.has(row.reformName)
-  ) {
-    return {
-      revenueImpact: row.revenueImpact,
-      tobOasdiImpact: row.revenueImpact,
-      tobMedicareHiImpact: 0,
-      tobTotalImpact: row.revenueImpact,
-    };
-  }
-
-  if (
-    allocationMode === "allHi" &&
-    allocationEligibleOptions.has(row.reformName)
-  ) {
-    return {
-      revenueImpact: row.revenueImpact,
-      tobOasdiImpact: 0,
-      tobMedicareHiImpact: row.revenueImpact,
-      tobTotalImpact: row.revenueImpact,
-    };
-  }
 
   if (usesBaselineShares) {
     const baselineTotal = row.baselineTobOasdi + row.baselineTobMedicareHi;
@@ -282,6 +300,9 @@ function splitRevenueImpacts(
     };
   }
 
+  // "Current law" statutory mode (and any non-eligible reform under the default
+  // mode): split by the scored statutory OASDI/HI columns, leaving the rest as
+  // a general-fund residual.
   return {
     revenueImpact: row.revenueImpact,
     tobOasdiImpact: row.tobOasdiImpact,
@@ -520,6 +541,8 @@ export function calculateTotals(data: YearlyImpact[]) {
     pvTotalPctGdp: pvGdp > 0 ? (pvTotal / pvGdp) * 100 : 0,
     pvOasdiPctPayroll: pvPayroll > 0 ? (pvOasdi / pvPayroll) * 100 : 0,
     pvHiPctPayroll: pvHiPayroll > 0 ? (pvHi / pvHiPayroll) * 100 : 0,
+    pvOasdiPctGdp: pvGdp > 0 ? (pvOasdi / pvGdp) * 100 : 0,
+    pvHiPctGdp: pvGdp > 0 ? (pvHi / pvGdp) * 100 : 0,
   };
 }
 
