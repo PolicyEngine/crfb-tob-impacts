@@ -63,12 +63,17 @@ interface AllocationResult {
   tobTotalImpact: number;
 }
 
+// Benefit-taxation reforms that default to maintaining the baseline
+// trust-fund shares (CRFB's rule for every option except the Roth-structure
+// ones and option 7). tax93 joined the model after that rule was set and
+// must follow it like its 90%/95% siblings.
 const allocationEligibleOptions = new Set([
   "option1",
   "option2",
   "option8",
   "option9",
   "option10",
+  "tax93",
 ]);
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);

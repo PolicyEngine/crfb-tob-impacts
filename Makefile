@@ -1,4 +1,4 @@
-.PHONY: all install panel data dashboard dashboard-dev paper site test lint format clean help
+.PHONY: all install panel data dashboard dashboard-dev paper site test check lint format clean help
 
 all: install dashboard paper
 
@@ -38,6 +38,12 @@ test:
 	@echo "Running Python tests..."
 	pytest tests/ -v --cov=src --cov-report=term-missing
 
+check:
+	@echo "Running the full pre-release gate (Python tests + dashboard typecheck/lint)..."
+	pytest tests/ -q
+	cd dashboard && bunx tsc --noEmit
+	cd dashboard && bun run lint
+
 lint:
 	@echo "Linting Python and dashboard code..."
 	ruff format --check src/ tests/ scripts/
@@ -69,6 +75,7 @@ help:
 	@echo "  paper         - Render the Quarto paper HTML"
 	@echo "  site          - Build dashboard at / and paper at /paper/"
 	@echo "  test          - Run Python tests"
+	@echo "  check         - Full pre-release gate: pytest + dashboard tsc + lint"
 	@echo "  lint          - Check formatting/lint"
 	@echo "  format        - Auto-format code"
 	@echo "  clean         - Remove generated files"

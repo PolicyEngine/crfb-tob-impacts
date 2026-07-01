@@ -7,12 +7,17 @@ from typing import Any, Mapping
 @lru_cache(maxsize=1)
 def load_allocation_rules() -> dict[str, set[str]]:
     return {
+        # Benefit-taxation reforms that default to maintaining the baseline
+        # trust-fund shares (CRFB's rule for every option except the
+        # Roth-structure ones and option 7). tax93 follows its 90%/95%
+        # siblings. Keep in sync with dashboard/src/lib/dashboard-data.ts.
         "allocationEligibleOptions": {
             "option1",
             "option2",
             "option8",
             "option9",
             "option10",
+            "tax93",
         },
         "baselineShareOptions": {"option3", "option4", "option11"},
         "netImpactOptions": {"option5", "option6"},
