@@ -379,6 +379,59 @@ the `reverse_roth` payroll-deduction definition; the infill cells are therefore
 produced from the pinned worktree end to end, which removes that single open
 question rather than certifying it.
 
+## Solvency-baseline scoring
+
+Four options (full repeal, 85%, 100%, and the phased Roth-style swap) are also
+scored against a Social Security solvency baseline — a balanced "traditional
+fix" in which the program is brought into annual balance from `2035` onward
+before the reform applies. For each scored year, the solvent baseline is
+constructed on that year's calibrated dataset in two stages:
+
+1. **Benefit reduction.** Every benefit is reduced proportionally by half of
+   that year's OASDI shortfall (income minus scheduled benefits), applied as a
+   uniform benefit multiplier.
+2. **Payroll-rate increase.** The remaining OASDI gap is closed by equal
+   employee and employer OASDI rate increases, and the Medicare HI gap by
+   equal employee and employer HI rate adjustments (signed, so an HI surplus
+   lowers rates).
+
+The construction validates that both trust-fund gaps close within tolerance
+and that the current-law leg of the computation reproduces the published
+current-law row for the same year before any reform is scored. Reforms are
+then scored as deltas against the solvent system, with revenue split by
+baseline trust-fund shares and any residual assigned to the general fund; the
+split identity (components summing to the total) is asserted for every row.
+
+Solvent scoring is exact in `2035`, `2050`, `2065`, `2075`, and `2100`
+(`2065` was promoted from a validation spot-check because the phased
+Roth-style swap's split materially differed from a four-anchor
+interpolation). Intermediate years are direct linear interpolations of the
+anchor rows. An earlier scheme interpolated the solvent/current-law ratio and
+scaled the live current-law row; it was replaced because the ratio diverges
+where current-law totals cross zero, which produced artifacts for the phased
+Roth-style swap. Years before `2035` are scored against scheduled benefits —
+the solvency fix coincides with current law until then — so the displayed
+series runs `2026`-`2100`.
+
+## Present-value convention
+
+Seventy-five-year totals discount each year's flow to the start of `2026` at
+each trust fund's effective interest rates under the Trustees' intermediate
+assumptions. OASDI flows use the annual effective yields implied by the
+compound effective trust-fund interest factors in Table VI.G1 of the 2026
+OASDI Trustees Report [@ssa2026trustees], whose reciprocals are the
+discount factors SSA itself uses for summarized rates and balances. Medicare
+HI flows use the effective rates reported in Table IV.A4 of the 2026 Medicare
+Trustees Report [@medicare2026trustees] through `2035`, graded linearly to
+the `4.7` percent ultimate nominal rate by `2040` per that table's
+convention, and held constant thereafter. General-fund flows and economy-wide
+denominators (taxable payroll and GDP) use the OASDI series, and the 75-year
+total is the sum of the discounted components, so headline figures remain
+additive across trust funds. Ten-year budget-window totals are nominal sums
+over `2026`-`2035`. The headline figures the manuscript cites are generated
+server-side by `scripts/build_headline_summary.py` and regression-tested
+against the dashboard's rendered values.
+
 ## Supplemental labor-supply response scoring
 
 Static estimates are the scoring surface displayed on the CRFB dashboard.

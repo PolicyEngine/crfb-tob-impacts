@@ -16,6 +16,15 @@ The publication rule is:
 
 ## Core exhibit families
 
+### Headline summary
+
+{{< include exhibits/headline-summary.md >}}
+
+These figures are generated server-side by
+`scripts/build_headline_summary.py` from the published results panel and the
+effective-interest-rate series, reproduce the dashboard's default view, and
+are regression-tested against it.
+
 ### Overview results
 
 {{< include exhibits/results-overview.md >}}

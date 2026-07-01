@@ -50,6 +50,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/results.csv",
     "dashboard/public/data/ssa_economic_projections.csv",
     "dashboard/public/data/effective_interest_rates.csv",
+    "dashboard/public/data/headline_summary.csv",
     "data/sources/tr2026/hi_effective_interest_rates_tr2026_iv_a4.csv",
     "dashboard/public/data/v2_baseline_diagnostics.csv",
     "data/SSPopJul_TR2024.csv",
