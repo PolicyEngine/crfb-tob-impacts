@@ -1,6 +1,5 @@
 """Tests for reform definitions."""
 
-import pytest
 from src.reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -10,6 +9,8 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
+    get_reverse_roth_conventional_reform,
+    get_reverse_roth_reform,
     REFORMS,
 )
 
@@ -112,9 +113,29 @@ def test_option8_reform():
     assert any("threshold.adjusted_base.main" in str(k) for k in params.keys())
 
 
+def test_reverse_roth_reform():
+    """Test the reverse-Roth Social Security proposal."""
+    reform = get_reverse_roth_reform()
+    assert reform is not None
+    params = reform.parameter_values
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+    assert reform.name == "Reverse Roth Social Security proposal"
+
+
+def test_reverse_roth_conventional_reform_includes_elasticities():
+    """Test reverse-Roth behavioral scoring uses a custom Reform class."""
+    reform = get_reverse_roth_conventional_reform()
+    assert reform is not None
+    params = reform.parameter_values
+    assert any("simulation.labor_supply_responses" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+
+
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 12
+    assert len(REFORMS) == 13
+    assert "reverse_roth" in REFORMS
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():

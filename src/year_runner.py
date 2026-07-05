@@ -40,6 +40,8 @@ try:
         get_option8_reform,
         get_option9_conventional_dict,
         get_option9_reform,
+        get_reverse_roth_conventional_reform,
+        get_reverse_roth_reform,
     )
     from .tax_assumption_loader import (
         TaxAssumptionContract,
@@ -72,6 +74,8 @@ except ImportError:  # pragma: no cover - script execution fallback
         get_option8_reform,
         get_option9_conventional_dict,
         get_option9_reform,
+        get_reverse_roth_conventional_reform,
+        get_reverse_roth_reform,
     )
     from tax_assumption_loader import (
         TaxAssumptionContract,
@@ -93,6 +97,7 @@ STATIC_REFORM_FUNCTIONS = {
     "option10": get_option10_reform,
     "option11": get_option11_reform,
     "option12": get_option12_reform,
+    "reverse_roth": get_reverse_roth_reform,
 }
 
 CONVENTIONAL_REFORM_DICT_FUNCTIONS = {
@@ -108,6 +113,7 @@ CONVENTIONAL_REFORM_DICT_FUNCTIONS = {
     "option10": get_option10_conventional_dict,
     "option11": get_option11_conventional_dict,
     "option12": get_option12_conventional_dict,
+    "reverse_roth": get_reverse_roth_conventional_reform,
 }
 
 OPTION6_PHASE_IN_RATES = {
@@ -1492,7 +1498,7 @@ def build_reform(
     reform_id: str,
     scoring_type: str,
     reform_functions: dict[str, Callable[[], Any]],
-    conventional_functions: dict[str, Callable[[], dict[str, Any]]],
+    conventional_functions: dict[str, Callable[[], Any]],
 ) -> Any:
     if scoring_type == "static":
         reform_func = reform_functions.get(reform_id)
@@ -1504,8 +1510,10 @@ def build_reform(
         conventional_dict_func = conventional_functions.get(reform_id)
         if conventional_dict_func is None:
             raise KeyError(f"No conventional dict for: {reform_id}")
-        reform_params = conventional_dict_func()
-        return Reform.from_dict(reform_params, country_id="us")
+        reform_definition = conventional_dict_func()
+        if isinstance(reform_definition, dict):
+            return Reform.from_dict(reform_definition, country_id="us")
+        return reform_definition
 
     raise ValueError(f"Invalid scoring type: {scoring_type}")
 

@@ -6,7 +6,8 @@ Social Security taxation policy options.
 """
 
 from policyengine_core.reforms import Reform
-from policyengine_us.model_api import *
+from policyengine_us.model_api import *  # noqa: F403
+from policyengine_us.model_api import TaxUnit, USD, Variable, YEAR, add
 
 
 # Common reform components as modular functions
@@ -371,6 +372,47 @@ def enable_ss_credit_phase_out():
     }
 
 
+def deduct_employee_social_security_payroll_tax(
+    parameter_values: dict,
+    *,
+    name: str,
+):
+    """Apply parameters and deduct employee OASDI payroll tax from AGI."""
+
+    parameter_reform = Reform.from_dict(parameter_values, country_id="us")
+
+    class above_the_line_deductions(Variable):
+        value_type = float
+        entity = TaxUnit
+        label = "Above-the-line deductions including employee OASDI payroll tax"
+        unit = USD
+        definition_period = YEAR
+
+        def formula(tax_unit, period, parameters):
+            baseline_deductions = add(
+                tax_unit,
+                period,
+                parameters(period).gov.irs.ald.deductions,
+            )
+            employee_social_security_tax = add(
+                tax_unit,
+                period,
+                ["employee_social_security_tax"],
+            )
+            return baseline_deductions + employee_social_security_tax
+
+    class reform(Reform):
+        country_id = "us"
+
+        def apply(self):
+            parameter_reform.apply(self)
+            self.update_variable(above_the_line_deductions)
+
+    reform.parameter_values = parameter_values
+    reform.name = name
+    return reform
+
+
 # CBO labor supply elasticities (for conventional scoring)
 #
 # Use the labor-supply elasticity schema supported by current policyengine-us.
@@ -642,6 +684,16 @@ def get_option12_dict():
     return reform_dict
 
 
+def get_reverse_roth_dict():
+    """Return parameter dict for Marc Goldwein's reverse-Roth SS proposal.
+
+    The Social Security piece immediately taxes 100% of benefits. The employee
+    OASDI payroll-tax deduction is implemented by get_reverse_roth_reform()
+    because it requires a custom above-the-line deduction variable.
+    """
+    return tax_100_percent_ss()
+
+
 # Complete conventional scoring dictionaries with CBO elasticities pre-merged
 def get_option1_conventional_dict():
     """Return complete parameter dict for Option 1 with CBO elasticities."""
@@ -805,6 +857,16 @@ def get_option12_conventional_dict():
     return result
 
 
+def get_reverse_roth_conventional_reform():
+    """Return reverse-Roth reform with CBO labor-supply elasticities."""
+    result = get_reverse_roth_dict()
+    result.update(CBO_ELASTICITIES)
+    return deduct_employee_social_security_payroll_tax(
+        result,
+        name="Reverse Roth Social Security proposal with behavioral elasticities",
+    )
+
+
 # =============================================================================
 # OPTION 13 / BALANCED FIX - NOT IMPLEMENTED HERE
 # =============================================================================
@@ -954,6 +1016,18 @@ def get_option12_reform():
     return Reform.from_dict(get_option12_dict(), country_id="us")
 
 
+def get_reverse_roth_reform():
+    """Reverse Roth Social Security proposal.
+
+    Immediately taxes 100% of Social Security benefits while making employee
+    OASDI payroll taxes deductible from income tax. Medicare is left unchanged.
+    """
+    return deduct_employee_social_security_payroll_tax(
+        get_reverse_roth_dict(),
+        name="Reverse Roth Social Security proposal",
+    )
+
+
 # NOTE: get_option13_reform() and get_balanced_fix_reform() have been removed.
 # See comment block above for why Option 13 cannot be implemented here.
 # Use batch/run_option13_modal.py instead.
@@ -1008,6 +1082,10 @@ REFORMS = {
     "option12": {
         "name": "Extended Roth-Style Swap (2029-2062 Phase-Out)",
         "func": get_option12_reform,
+    },
+    "reverse_roth": {
+        "name": "Reverse Roth Social Security Proposal",
+        "func": get_reverse_roth_reform,
     },
     # NOTE: option13 and balanced_fix removed - use batch/run_option13_modal.py
 }
