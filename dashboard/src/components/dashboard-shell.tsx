@@ -32,6 +32,7 @@ import { DistributionalSection } from "@/components/distributional-section";
 import { MethodologySection } from "@/components/methodology-section";
 import {
   BALANCED_FIX_ELIGIBLE_OPTIONS,
+  DATA_VINTAGE,
   calculateTotals,
   type AllocationMode,
   type BaselineScenario,
@@ -710,6 +711,7 @@ export function DashboardShell() {
       "HI Impact ($B)",
       "General Fund Impact ($B)",
       "Total TOB Impact ($B)",
+      "Data Vintage",
     ];
     const rows = selectedData.map((row) => [
       reform.name,
@@ -719,6 +721,7 @@ export function DashboardShell() {
       row.tobMedicareHiImpact.toFixed(2),
       row.generalFundImpact.toFixed(2),
       row.tobTotalImpact.toFixed(2),
+      DATA_VINTAGE,
     ]);
     const content = [
       headers.join(","),
@@ -728,7 +731,7 @@ export function DashboardShell() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${effectiveReformId}_${scoringType}_impact_data.csv`;
+    link.download = `${effectiveReformId}_${scoringType}_impact_data_${DATA_VINTAGE}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

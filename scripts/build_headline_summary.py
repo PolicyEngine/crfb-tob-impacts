@@ -41,6 +41,7 @@ TEN_YEAR_END = 2035
 # (REFORM_DISPLAY_ORDER); tests assert the two stay in sync.
 REFORM_LABELS: dict[str, str] = {
     "option1": "Full repeal",
+    "magi100": "Full MAGI inclusion",
     "option2": "85% taxation",
     "option3": "85% + deduction",
     "option7": "No senior deduction",
@@ -50,7 +51,6 @@ REFORM_LABELS: dict[str, str] = {
     "tax93": "93% taxation",
     "option10": "95% taxation",
     "option8": "100% taxation",
-    "magi100": "Full MAGI inclusion",
     "option5": "Roth swap",
     "option6": "Short phase-in Roth",
     "option12": "Phased Roth",

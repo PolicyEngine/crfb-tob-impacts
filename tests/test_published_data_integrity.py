@@ -108,3 +108,18 @@ def test_allocation_rule_sets_mirror_python():
     assert ts_set("baselineShareOptions") == rules["baselineShareOptions"]
     assert ts_set("netImpactOptions") == rules["netImpactOptions"]
     assert ts_set("directBranchingOptions") == rules["directBranchingOptions"]
+
+
+def test_export_data_vintage_matches_contract():
+    """The dashboard's export vintage stamp must track the results contract's
+    generation date, so stale-tab downloads are identifiable."""
+    import json
+
+    contract = json.loads(
+        (REPO / "dashboard/public/data/results_contract.json").read_text()
+    )
+    contract_date = contract["generated_at"][:10]
+    ts = DASHBOARD_DATA_TS.read_text(encoding="utf-8")
+    assert f'export const DATA_VINTAGE = "{contract_date}";' in ts, (
+        f"DATA_VINTAGE out of date; contract generated {contract_date}"
+    )

@@ -265,6 +265,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
 // taxation shares in ascending order, then the Roth-structure options.
 const REFORM_DISPLAY_ORDER = [
   "option1",
+  "magi100",
   "option2",
   "option3",
   "option7",
@@ -274,7 +275,6 @@ const REFORM_DISPLAY_ORDER = [
   "tax93",
   "option10",
   "option8",
-  "magi100",
   "option5",
   "option6",
   "option12",

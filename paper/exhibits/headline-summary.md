@@ -13,6 +13,7 @@ option except the no-senior-deduction option.
 | Reform | 10-year (nominal $B) | 75-year PV ($B) | OASDI PV ($B) | Medicare HI PV ($B) |
 | --- | --- | --- | --- | --- |
 | Full repeal | -1,659 | -10,879 | -6,206 | -4,673 |
+| Full MAGI inclusion | +201 | +812 | +467 | +345 |
 | 85% taxation | +419 | +1,313 | +757 | +556 |
 | 85% + deduction | +182 | +801 | +457 | +344 |
 | No senior deduction | +52 | +50 | +10 | -1 |
@@ -22,7 +23,6 @@ option except the no-senior-deduction option.
 | 93% taxation | +671 | +2,785 | +1,598 | +1,188 |
 | 95% taxation | +735 | +3,159 | +1,811 | +1,348 |
 | 100% taxation | +896 | +4,100 | +2,349 | +1,752 |
-| Full MAGI inclusion | +201 | +812 | +467 | +345 |
 | Roth swap | +426 | -110 | +2,115 | -2,226 |
 | Short phase-in Roth | +1,173 | +857 | +3,009 | -2,152 |
 | Phased Roth | +1,945 | +2,600 | +3,179 | -579 |
