@@ -29,6 +29,7 @@ import { BaselineDiagnosticsSection } from "@/components/baseline-diagnostics-se
 import { HomeOverview } from "@/components/home-overview";
 import { ComparisonTable } from "@/components/comparison-table";
 import { DistributionalSection } from "@/components/distributional-section";
+import { toCsvLine } from "@/lib/csv";
 import { MethodologySection } from "@/components/methodology-section";
 import {
   BALANCED_FIX_ELIGIBLE_OPTIONS,
@@ -724,8 +725,8 @@ export function DashboardShell() {
       DATA_VINTAGE,
     ]);
     const content = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
+      toCsvLine(headers),
+      ...rows.map((row) => toCsvLine(row)),
     ].join("\n");
     const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
