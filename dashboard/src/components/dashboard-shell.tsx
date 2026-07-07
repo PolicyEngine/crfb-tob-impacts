@@ -50,7 +50,7 @@ type ViewMode = "10year" | "75year";
 type SeriesKey = "total" | "oasdi" | "hi" | "generalFund";
 
 const STANDARD_REFORMS = REFORMS.filter((reform) =>
-  /^(?:option(?:[1-9]|1[0-2])|reverse_roth|tax93)$/.test(reform.id),
+  /^(?:option(?:[1-9]|1[0-2])|reverse_roth|tax93|magi100)$/.test(reform.id),
 );
 
 const PAPER_HREF = sitePath("/paper/");
@@ -66,6 +66,7 @@ const BENEFIT_RULE_IDS = [
   "option10",
   "option11",
   "tax93",
+  "magi100",
 ];
 const STRUCTURAL_IDS = ["option5", "option12", "reverse_roth"];
 

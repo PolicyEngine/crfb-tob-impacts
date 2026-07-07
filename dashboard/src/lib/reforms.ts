@@ -242,6 +242,22 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     scoringNote:
       "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
   },
+  {
+    id: "magi100",
+    name: "Full MAGI Inclusion of Benefits",
+    shortName: "Full MAGI inclusion",
+    description:
+      "Count 100% of Social Security benefits, rather than 50%, in the combined income that determines the taxable share of benefits.",
+    category: "Expanded taxation",
+    mechanism:
+      "Raises the IRC section 86(b)(1) combined-income fraction from 50% to 100% of benefits. Benefit-taxation rates, thresholds, and the 85% inclusion cap are unchanged, so benefits become taxable at lower non-benefit incomes and more filers reach the upper tier.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "A threshold-side expansion: it broadens who pays and how quickly the taxable share phases in, without changing the maximum taxable share.",
+    scoringNote:
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
+  },
 ];
 
 // Display order for the sidebar/selector: full repeal, then the 85% family
@@ -258,6 +274,7 @@ const REFORM_DISPLAY_ORDER = [
   "tax93",
   "option10",
   "option8",
+  "magi100",
   "option5",
   "option6",
   "option12",

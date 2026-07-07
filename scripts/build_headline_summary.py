@@ -50,6 +50,7 @@ REFORM_LABELS: dict[str, str] = {
     "tax93": "93% taxation",
     "option10": "95% taxation",
     "option8": "100% taxation",
+    "magi100": "Full MAGI inclusion",
     "option5": "Roth swap",
     "option6": "Short phase-in Roth",
     "option12": "Phased Roth",

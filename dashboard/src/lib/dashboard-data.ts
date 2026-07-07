@@ -74,6 +74,7 @@ const allocationEligibleOptions = new Set([
   "option9",
   "option10",
   "tax93",
+  "magi100",
 ]);
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);

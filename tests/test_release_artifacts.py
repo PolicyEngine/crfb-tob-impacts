@@ -912,7 +912,8 @@ def test_public_dashboard_data_cover_full_2026_2100_horizon():
     behavioral = load_dashboard_results("behavioral")
 
     for df, expected_reforms in [
-        (static, 14),
+        # magi100 (full MAGI inclusion) is scored static-only.
+        (static, 15),
         (behavioral, 14),
     ]:
         by_reform = df.groupby("reform_name")["year"].agg(["min", "max", "count"])

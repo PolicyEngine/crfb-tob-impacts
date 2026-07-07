@@ -1063,6 +1063,27 @@ def get_tax93_reform():
     return Reform.from_dict(get_tax93_dict(), country_id="us")
 
 
+def get_magi100_dict():
+    """Return parameter dict for the full-MAGI-inclusion option (static scoring).
+
+    Counts 100% of Social Security benefits, rather than 50%, in the combined
+    income used to determine the taxable share of benefits (the IRC section
+    86(b)(1) fraction). Benefit-taxation rates and thresholds are unchanged, so
+    benefits become taxable at lower non-benefit incomes and a larger share is
+    taxable at a given income, but the 85% inclusion cap still applies.
+    """
+    return {
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        }
+    }
+
+
+def get_magi100_reform():
+    """Full MAGI inclusion: count 100% of benefits toward combined income."""
+    return Reform.from_dict(get_magi100_dict(), country_id="us")
+
+
 def get_reverse_roth_reform():
     """Reverse Roth Social Security proposal.
 
