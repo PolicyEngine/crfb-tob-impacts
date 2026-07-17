@@ -1083,6 +1083,54 @@ def get_magi100_reform():
     """Full MAGI inclusion: count 100% of benefits toward combined income."""
     return Reform.from_dict(get_magi100_dict(), country_id="us")
 
+def get_tax_panel_2005_dict():
+    """Return parameter dict for the 2005 Tax Panel option (static scoring).
+
+    Implements the President's Advisory Panel on Federal Tax Reform (2005)
+    Social Security recommendation (report pp. 87-89, Figure 5.11 worksheet),
+    modified per CRFB's request to leave the thresholds unindexed:
+
+        taxable SS = clamp(50% x (income - threshold), 0, 85% x benefits)
+
+    where income counts 85% of benefits (worksheet line 9 includes line 7)
+    and the threshold is $22,000 single / $44,000 joint, fixed in nominal
+    terms 2026-2100. Expressed entirely through existing section 86
+    parameters: the phase-in uses the tier-1 slope (rate.base.excess, already
+    50%) with the tier-1 benefit cap raised to 85%, and the second tier is
+    disabled by moving the adjusted base threshold out of reach. Married
+    filing separately while cohabitating keeps its current-law $0 threshold
+    (the Panel is silent on it).
+    """
+    period = "2026-01-01.2100-12-31"
+    unreachable = 10_000_000_000  # de facto infinity: nobody enters tier 2
+    reform = {
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            period: 0.85
+        },
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {period: 0.85},
+    }
+    thresholds = {
+        "SINGLE": 22_000,
+        "JOINT": 44_000,
+        "SEPARATE": 22_000,
+        "HEAD_OF_HOUSEHOLD": 22_000,
+        "SURVIVING_SPOUSE": 22_000,
+    }
+    for status, amount in thresholds.items():
+        reform[
+            f"gov.irs.social_security.taxability.threshold.base.main.{status}"
+        ] = {period: amount}
+        reform[
+            f"gov.irs.social_security.taxability.threshold.adjusted_base.main.{status}"
+        ] = {period: unreachable}
+    return reform
+
+
+def get_tax_panel_2005_reform():
+    """2005 Tax Panel simple deduction, unindexed thresholds (CRFB variant)."""
+    return Reform.from_dict(get_tax_panel_2005_dict(), country_id="us")
+
+
 
 def get_reverse_roth_reform():
     """Reverse Roth Social Security proposal.

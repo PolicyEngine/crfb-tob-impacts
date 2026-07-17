@@ -19,6 +19,7 @@ def load_allocation_rules() -> dict[str, set[str]]:
             "option10",
             "tax93",
             "magi100",
+            "tax_panel_2005",
         },
         "baselineShareOptions": {"option3", "option4", "option11"},
         "netImpactOptions": {"option5", "option6"},

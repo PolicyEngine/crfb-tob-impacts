@@ -42,6 +42,7 @@ TEN_YEAR_END = 2035
 REFORM_LABELS: dict[str, str] = {
     "option1": "Full repeal",
     "magi100": "Full MAGI inclusion",
+    "tax_panel_2005": "2005 Tax Panel deduction",
     "option2": "85% taxation",
     "option3": "85% + deduction",
     "option7": "No senior deduction",

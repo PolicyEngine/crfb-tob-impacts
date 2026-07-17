@@ -258,6 +258,22 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     scoringNote:
       "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
   },
+  {
+    id: "tax_panel_2005",
+    name: "2005 Tax Panel Simple Deduction",
+    shortName: "2005 Tax Panel deduction",
+    description:
+      "Replace the current income thresholds with the 2005 President's Advisory Panel's simple deduction: 85% of benefits count as taxable income, offset by a deduction that phases out at 50 cents per dollar of income above $22,000 (single) or $44,000 (married), without the Panel's inflation indexing.",
+    category: "Simplification",
+    mechanism:
+      "Implements the report's Figure 5.11 worksheet: taxable benefits equal 50% of income above $22,000/$44,000, capped at 85% of benefits, with 85% of benefits counted in the income test. Thresholds are fixed in nominal terms; the Panel proposed CPI indexing, and CRFB requested this unindexed variant.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "Taxation starts at lower non-benefit income than current law and the marriage penalty disappears ($44,000 is exactly twice $22,000), while the taxable share phases in at 50% rather than the 85% second-tier rate — expansion at the bottom, relief in the middle, unchanged 85% cap at the top.",
+    scoringNote:
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
+  },
 ];
 
 // Display order for the sidebar/selector: full repeal, then the 85% family
@@ -266,6 +282,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
 const REFORM_DISPLAY_ORDER = [
   "option1",
   "magi100",
+  "tax_panel_2005",
   "option2",
   "option3",
   "option7",

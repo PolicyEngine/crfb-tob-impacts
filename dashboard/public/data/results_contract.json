@@ -1,6 +1,6 @@
 {
  "schema": "crfb_results_contract/v1",
- "generated_at": "2026-07-07T12:37:33.708130+00:00",
+ "generated_at": "2026-07-17T17:56:31.543888+00:00",
  "lineage": {
   "base_dataset": {
    "name": "populace-us-2024-9f1260b-20260611",
@@ -766,6 +766,11 @@
    },
    {
     "run_prefix": "magi100_certrepro_20260706",
+    "scoring_type": "static",
+    "cell_count": 18
+   },
+   {
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
     "scoring_type": "static",
     "cell_count": 18
    },
@@ -21338,6 +21343,1377 @@
     "baseline_year_h5_sha256": "b5b5182f8ce75de6bc23b5591e3d61bad6e6d68ffadcc5985c26b4a07d2f926e",
     "run_prefix": "magi100_certrepro_20260706",
     "scenario_h5_sha256": "71c1ba80fb3ef70d0f448a60e9027d08e38e8a2963c710eddfd01b7e0725c07e",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2026,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -1.8954580486,
+   "tob_oasdi_impact_billions": 1.246896275,
+   "tob_medicare_hi_impact_billions": -3.1423542889,
+   "baseline_revenue_billions": 2531.9073715394,
+   "lineage": {
+    "baseline_year_h5_sha256": "cec09e5f96e7af39df48c2eeb97b0bf179551867b985fd7a36c82db596193785",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "4257a4bfe7d83119ad9e6f334f8dd871e5fd0dca4f86fe3f029ea8a4751738f7",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2027,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -2.1982158155,
+   "tob_oasdi_impact_billions": 1.1982886766,
+   "tob_medicare_hi_impact_billions": -3.3965044676,
+   "baseline_revenue_billions": 2658.3913527278,
+   "lineage": {
+    "baseline_year_h5_sha256": "cec09e5f96e7af39df48c2eeb97b0bf179551867b985fd7a36c82db596193785",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2026,
+     2028
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2028,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -2.5009735824,
+   "tob_oasdi_impact_billions": 1.1496810783,
+   "tob_medicare_hi_impact_billions": -3.6506546463,
+   "baseline_revenue_billions": 2784.8753339163,
+   "lineage": {
+    "baseline_year_h5_sha256": "d38966cf8d649c5c9f1cc224f1ce233cbd5dccfafaa4ab0eb28840405b124e42",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "30e97f3aec1ba0197a8c2da6419f7edc381aad8ecf80fda10655b13aaebd4f90",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2029,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -1.7471415547,
+   "tob_oasdi_impact_billions": 2.209709103,
+   "tob_medicare_hi_impact_billions": -3.9568506603,
+   "baseline_revenue_billions": 2996.8708485781,
+   "lineage": {
+    "baseline_year_h5_sha256": "518ead722f74b157c95233a44c2a209a31dbf3e7320c801d98e32ef8decf95d7",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "bad51cad080b004ff0c52be202c80adeb87d39019ff888f895598a864b895f50",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2030,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -2.7112068765,
+   "tob_oasdi_impact_billions": 2.2147030626,
+   "tob_medicare_hi_impact_billions": -4.925909946,
+   "baseline_revenue_billions": 3231.868814239,
+   "lineage": {
+    "baseline_year_h5_sha256": "30d92a713cd1ca0aaca870245a1f6d9a8f2904f58a692ea2ecbcfb68c22a7eb0",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "12b3e8d9bdede3a92b00ba488a28f65f905a0171087aacad08c48cf1a894d61c",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2031,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -3.5064607444,
+   "tob_oasdi_impact_billions": 2.2144766424,
+   "tob_medicare_hi_impact_billions": -5.7209373906,
+   "baseline_revenue_billions": 3448.0184410393,
+   "lineage": {
+    "baseline_year_h5_sha256": "30d92a713cd1ca0aaca870245a1f6d9a8f2904f58a692ea2ecbcfb68c22a7eb0",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2030,
+     2032
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2032,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -4.3017146123,
+   "tob_oasdi_impact_billions": 2.2142502222,
+   "tob_medicare_hi_impact_billions": -6.5159648353,
+   "baseline_revenue_billions": 3664.1680678396,
+   "lineage": {
+    "baseline_year_h5_sha256": "fd518c8311ab6eee04e7e156dd9fcc5ad018459a10bb37a794037e626bba5545",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2030,
+     2033
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2033,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -5.0969684802,
+   "tob_oasdi_impact_billions": 2.214023802,
+   "tob_medicare_hi_impact_billions": -7.3109922799,
+   "baseline_revenue_billions": 3880.31769464,
+   "lineage": {
+    "baseline_year_h5_sha256": "95f940e4abd5920e39447abb0657ebc21af36d4a2b08db2d9dd8789e3d4523cc",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2032,
+     2035
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2034,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -5.8922223481,
+   "tob_oasdi_impact_billions": 2.2137973818,
+   "tob_medicare_hi_impact_billions": -8.1060197245,
+   "baseline_revenue_billions": 4096.4673214403,
+   "lineage": {
+    "baseline_year_h5_sha256": "f4d5549dadbbc92ad096823ee67b4b7218f972dbff591545a83bdcc1b7f71b05",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2033,
+     2035
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2035,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -6.687476216,
+   "tob_oasdi_impact_billions": 2.2135709617,
+   "tob_medicare_hi_impact_billions": -8.9010471692,
+   "baseline_revenue_billions": 4312.6169482407,
+   "lineage": {
+    "baseline_year_h5_sha256": "f4d5549dadbbc92ad096823ee67b4b7218f972dbff591545a83bdcc1b7f71b05",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "9fffd6ef1340c93cdefecb9e26479c4fe0bd5ab833ae1a529fbe8b9c6c7d8436",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2036,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -7.5437206896,
+   "tob_oasdi_impact_billions": 2.2041950645,
+   "tob_medicare_hi_impact_billions": -9.7479157497,
+   "baseline_revenue_billions": 4512.727637506,
+   "lineage": {
+    "baseline_year_h5_sha256": "f4d5549dadbbc92ad096823ee67b4b7218f972dbff591545a83bdcc1b7f71b05",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2035,
+     2040
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2037,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -8.3999651631,
+   "tob_oasdi_impact_billions": 2.1948191674,
+   "tob_medicare_hi_impact_billions": -10.5947843303,
+   "baseline_revenue_billions": 4712.8383267714,
+   "lineage": {
+    "baseline_year_h5_sha256": "f4d5549dadbbc92ad096823ee67b4b7218f972dbff591545a83bdcc1b7f71b05",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2035,
+     2040
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2038,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -9.2562096367,
+   "tob_oasdi_impact_billions": 2.1854432703,
+   "tob_medicare_hi_impact_billions": -11.4416529109,
+   "baseline_revenue_billions": 4912.9490160367,
+   "lineage": {
+    "baseline_year_h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2035,
+     2040
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2039,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -10.1124541102,
+   "tob_oasdi_impact_billions": 2.1760673732,
+   "tob_medicare_hi_impact_billions": -12.2885214915,
+   "baseline_revenue_billions": 5113.0597053021,
+   "lineage": {
+    "baseline_year_h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2035,
+     2040
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2040,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -10.9686985837,
+   "tob_oasdi_impact_billions": 2.1666914761,
+   "tob_medicare_hi_impact_billions": -13.1353900721,
+   "baseline_revenue_billions": 5313.1703945674,
+   "lineage": {
+    "baseline_year_h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "aea58662e5a0b75789a63cfab6ae9655ec8e1b7e5658b6de8a40975d9a8e6170",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2041,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -12.381778508,
+   "tob_oasdi_impact_billions": 2.1449396547,
+   "tob_medicare_hi_impact_billions": -14.5267181753,
+   "baseline_revenue_billions": 5548.8107910595,
+   "lineage": {
+    "baseline_year_h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2040,
+     2045
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2042,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -13.7948584323,
+   "tob_oasdi_impact_billions": 2.1231878333,
+   "tob_medicare_hi_impact_billions": -15.9180462784,
+   "baseline_revenue_billions": 5784.4511875516,
+   "lineage": {
+    "baseline_year_h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2040,
+     2045
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2043,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -15.2079383565,
+   "tob_oasdi_impact_billions": 2.1014360119,
+   "tob_medicare_hi_impact_billions": -17.3093743816,
+   "baseline_revenue_billions": 6020.0915840437,
+   "lineage": {
+    "baseline_year_h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2040,
+     2045
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2044,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -16.6210182808,
+   "tob_oasdi_impact_billions": 2.0796841906,
+   "tob_medicare_hi_impact_billions": -18.7007024848,
+   "baseline_revenue_billions": 6255.7319805358,
+   "lineage": {
+    "baseline_year_h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2040,
+     2045
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2045,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -18.0340982051,
+   "tob_oasdi_impact_billions": 2.0579323692,
+   "tob_medicare_hi_impact_billions": -20.092030588,
+   "baseline_revenue_billions": 6491.3723770279,
+   "lineage": {
+    "baseline_year_h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "5dbe3146aebcf4281920cf360b8639ff3997740b1890c39129254f552ec170f0",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2046,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -19.3690804498,
+   "tob_oasdi_impact_billions": 2.0104973735,
+   "tob_medicare_hi_impact_billions": -21.3795778312,
+   "baseline_revenue_billions": 6784.6191287831,
+   "lineage": {
+    "baseline_year_h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2045,
+     2050
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2047,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -20.7040626945,
+   "tob_oasdi_impact_billions": 1.9630623779,
+   "tob_medicare_hi_impact_billions": -22.6671250744,
+   "baseline_revenue_billions": 7077.8658805384,
+   "lineage": {
+    "baseline_year_h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2045,
+     2050
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2048,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -22.0390449392,
+   "tob_oasdi_impact_billions": 1.9156273822,
+   "tob_medicare_hi_impact_billions": -23.9546723177,
+   "baseline_revenue_billions": 7371.1126322937,
+   "lineage": {
+    "baseline_year_h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2045,
+     2050
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2049,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -23.3740271839,
+   "tob_oasdi_impact_billions": 1.8681923865,
+   "tob_medicare_hi_impact_billions": -25.2422195609,
+   "baseline_revenue_billions": 7664.359384049,
+   "lineage": {
+    "baseline_year_h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2045,
+     2050
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2050,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -24.7090094286,
+   "tob_oasdi_impact_billions": 1.8207573909,
+   "tob_medicare_hi_impact_billions": -26.5297668042,
+   "baseline_revenue_billions": 7957.6061358043,
+   "lineage": {
+    "baseline_year_h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "dff91d3c988492ff7d6c9837dfa4307e2e958a3aaaed8fdceaf2b5c0d82b9e56",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2051,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -26.6309436625,
+   "tob_oasdi_impact_billions": 1.743023251,
+   "tob_medicare_hi_impact_billions": -28.3739668751,
+   "baseline_revenue_billions": 8294.8125468865,
+   "lineage": {
+    "baseline_year_h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2050,
+     2055
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2052,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -28.5528778965,
+   "tob_oasdi_impact_billions": 1.6652891111,
+   "tob_medicare_hi_impact_billions": -30.2181669461,
+   "baseline_revenue_billions": 8632.0189579687,
+   "lineage": {
+    "baseline_year_h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2050,
+     2055
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2053,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -30.4748121304,
+   "tob_oasdi_impact_billions": 1.5875549712,
+   "tob_medicare_hi_impact_billions": -32.0623670171,
+   "baseline_revenue_billions": 8969.2253690509,
+   "lineage": {
+    "baseline_year_h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2050,
+     2055
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2054,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -32.3967463644,
+   "tob_oasdi_impact_billions": 1.5098208314,
+   "tob_medicare_hi_impact_billions": -33.9065670881,
+   "baseline_revenue_billions": 9306.4317801331,
+   "lineage": {
+    "baseline_year_h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2050,
+     2055
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2055,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -34.3186805983,
+   "tob_oasdi_impact_billions": 1.4320866915,
+   "tob_medicare_hi_impact_billions": -35.7507671591,
+   "baseline_revenue_billions": 9643.6381912153,
+   "lineage": {
+    "baseline_year_h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "3dfd5c15fc2570afccf80ea09296e579ade277db74ece89cdc8983fe76c71827",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2056,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -35.7113128368,
+   "tob_oasdi_impact_billions": 1.4469924256,
+   "tob_medicare_hi_impact_billions": -37.1583051469,
+   "baseline_revenue_billions": 10025.3843033468,
+   "lineage": {
+    "baseline_year_h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2055,
+     2060
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2057,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -37.1039450754,
+   "tob_oasdi_impact_billions": 1.4618981597,
+   "tob_medicare_hi_impact_billions": -38.5658431346,
+   "baseline_revenue_billions": 10407.1304154784,
+   "lineage": {
+    "baseline_year_h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2055,
+     2060
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2058,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -38.4965773139,
+   "tob_oasdi_impact_billions": 1.4768038938,
+   "tob_medicare_hi_impact_billions": -39.9733811223,
+   "baseline_revenue_billions": 10788.8765276099,
+   "lineage": {
+    "baseline_year_h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2055,
+     2060
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2059,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -39.8892095525,
+   "tob_oasdi_impact_billions": 1.4917096279,
+   "tob_medicare_hi_impact_billions": -41.3809191101,
+   "baseline_revenue_billions": 11170.6226397414,
+   "lineage": {
+    "baseline_year_h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2055,
+     2060
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2060,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -41.281841791,
+   "tob_oasdi_impact_billions": 1.506615362,
+   "tob_medicare_hi_impact_billions": -42.7884570978,
+   "baseline_revenue_billions": 11552.3687518729,
+   "lineage": {
+    "baseline_year_h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "d7692a066cbd32de1c39a310a18ebb81e0988f350b245678b1d0c00b6323c645",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2061,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -43.1012951435,
+   "tob_oasdi_impact_billions": 1.4755987404,
+   "tob_medicare_hi_impact_billions": -44.5768938444,
+   "baseline_revenue_billions": 12029.7510802359,
+   "lineage": {
+    "baseline_year_h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2060,
+     2065
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2062,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -44.9207484959,
+   "tob_oasdi_impact_billions": 1.4445821188,
+   "tob_medicare_hi_impact_billions": -46.365330591,
+   "baseline_revenue_billions": 12507.133408599,
+   "lineage": {
+    "baseline_year_h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2060,
+     2065
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2063,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -46.7402018484,
+   "tob_oasdi_impact_billions": 1.4135654973,
+   "tob_medicare_hi_impact_billions": -48.1537673375,
+   "baseline_revenue_billions": 12984.515736962,
+   "lineage": {
+    "baseline_year_h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2060,
+     2065
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2064,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -48.5596552008,
+   "tob_oasdi_impact_billions": 1.3825488757,
+   "tob_medicare_hi_impact_billions": -49.9422040841,
+   "baseline_revenue_billions": 13461.898065325,
+   "lineage": {
+    "baseline_year_h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2060,
+     2065
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2065,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -50.3791085533,
+   "tob_oasdi_impact_billions": 1.3515322541,
+   "tob_medicare_hi_impact_billions": -51.7306408307,
+   "baseline_revenue_billions": 13939.2803936881,
+   "lineage": {
+    "baseline_year_h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "dc8ff8ad5716e8eb3d8527c61cd073df1d4f3b34b99ea5cc4538993817a7e76e",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2066,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -52.0533189308,
+   "tob_oasdi_impact_billions": 1.2526180112,
+   "tob_medicare_hi_impact_billions": -53.3059369746,
+   "baseline_revenue_billions": 14533.9995412286,
+   "lineage": {
+    "baseline_year_h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2065,
+     2070
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2067,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -53.7275293083,
+   "tob_oasdi_impact_billions": 1.1537037682,
+   "tob_medicare_hi_impact_billions": -54.8812331185,
+   "baseline_revenue_billions": 15128.7186887691,
+   "lineage": {
+    "baseline_year_h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2065,
+     2070
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2068,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -55.4017396858,
+   "tob_oasdi_impact_billions": 1.0547895253,
+   "tob_medicare_hi_impact_billions": -56.4565292624,
+   "baseline_revenue_billions": 15723.4378363096,
+   "lineage": {
+    "baseline_year_h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2065,
+     2070
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2069,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -57.0759500633,
+   "tob_oasdi_impact_billions": 0.9558752823,
+   "tob_medicare_hi_impact_billions": -58.0318254063,
+   "baseline_revenue_billions": 16318.1569838502,
+   "lineage": {
+    "baseline_year_h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2065,
+     2070
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2070,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -58.7501604407,
+   "tob_oasdi_impact_billions": 0.8569610393,
+   "tob_medicare_hi_impact_billions": -59.6071215502,
+   "baseline_revenue_billions": 16912.8761313907,
+   "lineage": {
+    "baseline_year_h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "1631c665d8fbcaf1ee7b94364bc98f4bea9c7297ea8cac62d7f45738f978a094",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2071,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -55.2321323775,
+   "tob_oasdi_impact_billions": 0.7026947375,
+   "tob_medicare_hi_impact_billions": -55.9348271705,
+   "baseline_revenue_billions": 17728.2306496158,
+   "lineage": {
+    "baseline_year_h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2070,
+     2075
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2072,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -51.7141043143,
+   "tob_oasdi_impact_billions": 0.5484284357,
+   "tob_medicare_hi_impact_billions": -52.2625327907,
+   "baseline_revenue_billions": 18543.5851678408,
+   "lineage": {
+    "baseline_year_h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2070,
+     2075
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2073,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -48.196076251,
+   "tob_oasdi_impact_billions": 0.3941621339,
+   "tob_medicare_hi_impact_billions": -48.5902384109,
+   "baseline_revenue_billions": 19358.9396860659,
+   "lineage": {
+    "baseline_year_h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2070,
+     2075
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2074,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -44.6780481878,
+   "tob_oasdi_impact_billions": 0.2398958321,
+   "tob_medicare_hi_impact_billions": -44.9179440311,
+   "baseline_revenue_billions": 20174.2942042909,
+   "lineage": {
+    "baseline_year_h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2070,
+     2075
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2075,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -41.1600201246,
+   "tob_oasdi_impact_billions": 0.0856295302,
+   "tob_medicare_hi_impact_billions": -41.2456496514,
+   "baseline_revenue_billions": 20989.648722516,
+   "lineage": {
+    "baseline_year_h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "9ac2e9beb9b31e51e17c3c69ef36f4492e1f1001ac89481717509c95c538b357",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2076,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -41.7769988694,
+   "tob_oasdi_impact_billions": 0.0719978503,
+   "tob_medicare_hi_impact_billions": -41.8489967248,
+   "baseline_revenue_billions": 21887.2260252015,
+   "lineage": {
+    "baseline_year_h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2075,
+     2080
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2077,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -42.3939776143,
+   "tob_oasdi_impact_billions": 0.0583661705,
+   "tob_medicare_hi_impact_billions": -42.4523437982,
+   "baseline_revenue_billions": 22784.8033278869,
+   "lineage": {
+    "baseline_year_h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2075,
+     2080
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2078,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -43.0109563591,
+   "tob_oasdi_impact_billions": 0.0447344906,
+   "tob_medicare_hi_impact_billions": -43.0556908717,
+   "baseline_revenue_billions": 23682.3806305724,
+   "lineage": {
+    "baseline_year_h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2075,
+     2080
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2079,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -43.627935104,
+   "tob_oasdi_impact_billions": 0.0311028107,
+   "tob_medicare_hi_impact_billions": -43.6590379451,
+   "baseline_revenue_billions": 24579.9579332579,
+   "lineage": {
+    "baseline_year_h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2075,
+     2080
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2080,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -44.2449138489,
+   "tob_oasdi_impact_billions": 0.0174711308,
+   "tob_medicare_hi_impact_billions": -44.2623850185,
+   "baseline_revenue_billions": 25477.5352359434,
+   "lineage": {
+    "baseline_year_h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "7702fdfc9b4e2b163500ec39ab4d126d2377bc439b11d0bceb32df6c7df82481",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2081,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -46.5979728714,
+   "tob_oasdi_impact_billions": 0.0692085668,
+   "tob_medicare_hi_impact_billions": -46.6671814787,
+   "baseline_revenue_billions": 26510.2237328917,
+   "lineage": {
+    "baseline_year_h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2080,
+     2085
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2082,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -48.9510318939,
+   "tob_oasdi_impact_billions": 0.1209460029,
+   "tob_medicare_hi_impact_billions": -49.0719779389,
+   "baseline_revenue_billions": 27542.91222984,
+   "lineage": {
+    "baseline_year_h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2080,
+     2085
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2083,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -51.3040909165,
+   "tob_oasdi_impact_billions": 0.1726834389,
+   "tob_medicare_hi_impact_billions": -51.4767743992,
+   "baseline_revenue_billions": 28575.6007267883,
+   "lineage": {
+    "baseline_year_h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2080,
+     2085
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2084,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -53.657149939,
+   "tob_oasdi_impact_billions": 0.224420875,
+   "tob_medicare_hi_impact_billions": -53.8815708594,
+   "baseline_revenue_billions": 29608.2892237365,
+   "lineage": {
+    "baseline_year_h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2080,
+     2085
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2085,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -56.0102089616,
+   "tob_oasdi_impact_billions": 0.276158311,
+   "tob_medicare_hi_impact_billions": -56.2863673196,
+   "baseline_revenue_billions": 30640.9777206848,
+   "lineage": {
+    "baseline_year_h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "c7bf1295060ec19ab22e2031217553d47d64ca8d8c69d8e81981fa42552221d9",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2086,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -58.485957291,
+   "tob_oasdi_impact_billions": 0.2947999063,
+   "tob_medicare_hi_impact_billions": -58.7807572371,
+   "baseline_revenue_billions": 31826.4398784324,
+   "lineage": {
+    "baseline_year_h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2085,
+     2090
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2087,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -60.9617056205,
+   "tob_oasdi_impact_billions": 0.3134415016,
+   "tob_medicare_hi_impact_billions": -61.2751471547,
+   "baseline_revenue_billions": 33011.9020361799,
+   "lineage": {
+    "baseline_year_h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2085,
+     2090
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2088,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -63.4374539499,
+   "tob_oasdi_impact_billions": 0.3320830969,
+   "tob_medicare_hi_impact_billions": -63.7695370722,
+   "baseline_revenue_billions": 34197.3641939274,
+   "lineage": {
+    "baseline_year_h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2085,
+     2090
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2089,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -65.9132022794,
+   "tob_oasdi_impact_billions": 0.3507246922,
+   "tob_medicare_hi_impact_billions": -66.2639269898,
+   "baseline_revenue_billions": 35382.826351675,
+   "lineage": {
+    "baseline_year_h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2085,
+     2090
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2090,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -68.3889506088,
+   "tob_oasdi_impact_billions": 0.3693662875,
+   "tob_medicare_hi_impact_billions": -68.7583169073,
+   "baseline_revenue_billions": 36568.2885094225,
+   "lineage": {
+    "baseline_year_h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "569677ecd845c3cd10fd297c24847ef1b60dda49e00aa24e17225312c7dc6b8a",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2091,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -69.6923123333,
+   "tob_oasdi_impact_billions": 0.3198182822,
+   "tob_medicare_hi_impact_billions": -70.0121305786,
+   "baseline_revenue_billions": 38118.6946285731,
+   "lineage": {
+    "baseline_year_h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2090,
+     2095
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2092,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -70.9956740578,
+   "tob_oasdi_impact_billions": 0.270270277,
+   "tob_medicare_hi_impact_billions": -71.2659442499,
+   "baseline_revenue_billions": 39669.1007477236,
+   "lineage": {
+    "baseline_year_h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2090,
+     2095
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2093,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -72.2990357823,
+   "tob_oasdi_impact_billions": 0.2207222718,
+   "tob_medicare_hi_impact_billions": -72.5197579212,
+   "baseline_revenue_billions": 41219.5068668742,
+   "lineage": {
+    "baseline_year_h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2090,
+     2095
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2094,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -73.6023975068,
+   "tob_oasdi_impact_billions": 0.1711742665,
+   "tob_medicare_hi_impact_billions": -73.7735715925,
+   "baseline_revenue_billions": 42769.9129860248,
+   "lineage": {
+    "baseline_year_h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2090,
+     2095
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2095,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -74.9057592313,
+   "tob_oasdi_impact_billions": 0.1216262613,
+   "tob_medicare_hi_impact_billions": -75.0273852638,
+   "baseline_revenue_billions": 44320.3191051753,
+   "lineage": {
+    "baseline_year_h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "3801cec7ef837b1acd3e70dd1b978f4d232cc04fee940b2543c8f4be1ffa22c4",
+    "interpolated_between": null
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2096,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -77.6779463865,
+   "tob_oasdi_impact_billions": 0.0594715705,
+   "tob_medicare_hi_impact_billions": -77.7374177742,
+   "baseline_revenue_billions": 46262.7875829821,
+   "lineage": {
+    "baseline_year_h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2095,
+     2100
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2097,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -80.4501335417,
+   "tob_oasdi_impact_billions": -0.0026831202,
+   "tob_medicare_hi_impact_billions": -80.4474502846,
+   "baseline_revenue_billions": 48205.2560607888,
+   "lineage": {
+    "baseline_year_h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2095,
+     2100
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2098,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -83.2223206969,
+   "tob_oasdi_impact_billions": -0.064837811,
+   "tob_medicare_hi_impact_billions": -83.1574827949,
+   "baseline_revenue_billions": 50147.7245385955,
+   "lineage": {
+    "baseline_year_h5_sha256": "b5b5182f8ce75de6bc23b5591e3d61bad6e6d68ffadcc5985c26b4a07d2f926e",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2095,
+     2100
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2099,
+   "scoring_type": "static",
+   "result_type": "linear_interpolation_between_full_h5_years",
+   "revenue_impact_billions": -85.9945078521,
+   "tob_oasdi_impact_billions": -0.1269925017,
+   "tob_medicare_hi_impact_billions": -85.8675153053,
+   "baseline_revenue_billions": 52090.1930164023,
+   "lineage": {
+    "baseline_year_h5_sha256": "b5b5182f8ce75de6bc23b5591e3d61bad6e6d68ffadcc5985c26b4a07d2f926e",
+    "run_prefix": null,
+    "scenario_h5_sha256": null,
+    "interpolated_between": [
+     2095,
+     2100
+    ]
+   }
+  },
+  {
+   "reform": "tax_panel_2005",
+   "year": 2100,
+   "scoring_type": "static",
+   "result_type": "exact_full_h5",
+   "revenue_impact_billions": -88.7666950073,
+   "tob_oasdi_impact_billions": -0.1891471925,
+   "tob_medicare_hi_impact_billions": -88.5775478156,
+   "baseline_revenue_billions": 54032.661494209,
+   "lineage": {
+    "baseline_year_h5_sha256": "b5b5182f8ce75de6bc23b5591e3d61bad6e6d68ffadcc5985c26b4a07d2f926e",
+    "run_prefix": "tax_panel_2005_certrepro_20260717",
+    "scenario_h5_sha256": "11a31043e481965301f2f7f1135cc7fba0f2f9940437c945030a2a186f4d9b3a",
     "interpolated_between": null
    }
   }

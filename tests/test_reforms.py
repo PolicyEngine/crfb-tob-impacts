@@ -179,3 +179,91 @@ def test_tax93_reform_builds():
     from src.reforms import get_tax93_reform
 
     assert get_tax93_reform() is not None
+
+
+def test_tax_panel_2005_dict_structure():
+    from src.reforms import get_tax_panel_2005_dict
+
+    d = get_tax_panel_2005_dict()
+    period = "2026-01-01.2100-12-31"
+    # Worksheet income (line 9) counts 85% of benefits.
+    assert d[
+        "gov.irs.social_security.taxability.combined_income_ss_fraction"
+    ] == {period: 0.85}
+    # 50% phase-in slope is current law's tier-1 rate; only the cap moves.
+    assert d["gov.irs.social_security.taxability.rate.base.benefit_cap"] == {
+        period: 0.85
+    }
+    assert not any(".rate.base.excess" in key for key in d)
+    assert not any(".rate.additional." in key for key in d)
+    # $22,000/$44,000 unindexed thresholds; married = exactly twice single.
+    base = "gov.irs.social_security.taxability.threshold.base.main"
+    assert d[f"{base}.SINGLE"] == {period: 22_000}
+    assert d[f"{base}.JOINT"] == {period: 44_000}
+    # Second tier disabled for every main filing status.
+    adjusted = "gov.irs.social_security.taxability.threshold.adjusted_base.main"
+    for status in [
+        "SINGLE",
+        "JOINT",
+        "SEPARATE",
+        "HEAD_OF_HOUSEHOLD",
+        "SURVIVING_SPOUSE",
+    ]:
+        assert list(d[f"{adjusted}.{status}"].values())[0] >= 10_000_000_000
+    # Separate-cohabitating thresholds keep current law ($0): not in the dict.
+    assert not any("separate_cohabitating" in key for key in d)
+
+
+def test_tax_panel_2005_matches_worksheet():
+    """Reform must reproduce the 2005 report's Figure 5.11 worksheet:
+
+    taxable SS = clamp(50% x (income - threshold), 0, 85% x benefits),
+    income counting 85% of benefits, thresholds $22k single / $44k joint.
+    """
+    from policyengine_us import Simulation
+
+    from src.reforms import get_tax_panel_2005_reform
+
+    reform = get_tax_panel_2005_reform()
+
+    def worksheet(ss, other_income, threshold):
+        income = other_income + 0.85 * ss
+        return min(max(0.5 * (income - threshold), 0.0), 0.85 * ss)
+
+    cases = [
+        # (gross SS, taxable interest, joint?, threshold)
+        (20_000, 30_000, False, 22_000),  # phase-in binds
+        (20_000, 60_000, False, 22_000),  # 85% cap binds
+        (20_000, 5_000, False, 22_000),  # below threshold
+        (30_000, 40_000, True, 44_000),  # joint, phase-in binds
+    ]
+    for ss, other, joint, threshold in cases:
+        people = {
+            "adult": {
+                "age": {2026: 70},
+                "social_security_retirement": {2026: ss},
+                "taxable_interest_income": {2026: other},
+            }
+        }
+        members = ["adult"]
+        if joint:
+            people["spouse"] = {"age": {2026: 68}}
+            members.append("spouse")
+        simulation = Simulation(
+            situation={
+                "people": people,
+                "tax_units": {"tax_unit": {"members": members}},
+                "households": {
+                    "household": {
+                        "members": members,
+                        "state_code": {2026: "TX"},
+                    }
+                },
+            },
+            reform=reform,
+        )
+        actual = float(
+            simulation.calculate("tax_unit_taxable_social_security", 2026)[0]
+        )
+        expected = worksheet(ss, other, threshold)
+        assert abs(actual - expected) < 1, (ss, other, joint, actual, expected)

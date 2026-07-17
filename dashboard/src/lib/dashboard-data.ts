@@ -75,6 +75,7 @@ const allocationEligibleOptions = new Set([
   "option10",
   "tax93",
   "magi100",
+  "tax_panel_2005",
 ]);
 const baselineShareOptions = new Set(["option3", "option4", "option11"]);
 const netImpactOptions = new Set(["option5", "option6"]);
@@ -95,7 +96,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // Stamped into the CSV export so consumers can see at a glance whether a
 // download came from a stale browser tab. Bump when the published data
 // changes; a test pins it to the results contract's generation date.
-export const DATA_VINTAGE = "2026-07-07";
+export const DATA_VINTAGE = "2026-07-17";
 
 export const BALANCED_FIX_ELIGIBLE_OPTIONS = [...balancedFixEligibleOptions];
 
