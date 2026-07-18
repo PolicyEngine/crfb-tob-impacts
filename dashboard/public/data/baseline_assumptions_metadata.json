@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-22T13:23:18.452443+00:00",
+  "generated_at": "2026-06-13T10:16:55.977788+00:00",
   "source_dashboard_results": "dashboard/public/data/results.csv",
   "source_post_obbba_tob_baseline": "data/ssa_tob_baseline_75year.csv",
   "source_post_obbba_tob_baseline_manifest": "data/ssa_tob_baseline_75year.manifest.json",
   "public_post_obbba_tob_baseline_manifest": "dashboard/public/data/post_obbba_tob_baseline_manifest.json",
-  "post_obbba_tob_baseline_sha256": "944ff71bcd472eea8971bd911088c4e2b078cd6e067004bcf14916c1e3ade8d9",
-  "scenario_id": "crfb_post_obbba_tob_75y",
+  "post_obbba_tob_baseline_sha256": "e85e06cf794a849b23adc42ca44a4b7c9ecefa5935e7f53194db7f6b28c48483",
+  "scenario_id": "crfb_tr2026_current_law_tob_75y",
   "baseline_kind": "calibration_target",
-  "not_law": true,
-  "law_mode": "trustees-2025-core-thresholds-v1",
-  "hi_bridge_method": "match_oasdi_pct_change",
+  "not_law": false,
+  "law_mode": "trustees-2026-intermediate-v1",
+  "hi_bridge_method": "current_law",
   "source_economic_projections": "dashboard/public/data/ssa_economic_projections.csv",
   "source_hi_taxable_payroll": "dashboard/public/data/hi_taxable_payroll.csv",
   "tax_assumption_module": "/Users/maxghenis/PolicyEngine/crfb-tob-impacts/.venv/lib/python3.11/site-packages/policyengine_us/reforms/ssa/trustees_core_thresholds.py",
@@ -63,11 +63,13 @@
     "Ordinary income tax brackets",
     "Standard deduction"
   ],
-  "calibration_target_count": 225,
-  "calibration_diagnostic_count": 1102,
+  "calibration_target_count": 273,
+  "calibration_diagnostic_count": 1235,
   "policy_parameter_count": 40,
   "reform_parameter_count": 816,
-  "calibration_metadata_roots": [],
+  "calibration_metadata_roots": [
+    "projected_datasets_v2pop"
+  ],
   "baseline_years": [
     2026,
     2100

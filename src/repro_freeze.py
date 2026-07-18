@@ -7,7 +7,7 @@ import tarfile
 
 try:
     from repro_bundle import file_sha256
-except ModuleNotFoundError:  # pragma: no cover - package-style test import
+except ImportError:  # pragma: no cover - package-style test import
     from src.repro_bundle import file_sha256
 
 

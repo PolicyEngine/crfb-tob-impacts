@@ -114,7 +114,7 @@ def test_save_complete_microsimulation_h5_writes_entity_tables(tmp_path: Path):
     assert manifest["entities"]["household"]["required_weight_column_present"] is True
 
 
-def test_behavioral_scoring_uses_behavioral_reform_alias(monkeypatch):
+def test_behavioral_scoring_uses_behavioral_reform(monkeypatch):
     marker = object()
 
     monkeypatch.setattr(
@@ -123,18 +123,45 @@ def test_behavioral_scoring_uses_behavioral_reform_alias(monkeypatch):
     )
 
     assert build_policy_reform("option1", "behavioral") == ("option1", marker)
-    assert build_policy_reform("option1", "conventional") == ("option1", marker)
+
+
+def test_conventional_scoring_label_is_not_accepted():
+    with pytest.raises(ValueError, match="Unsupported scoring_type"):
+        build_policy_reform("option1", "conventional")
+
+
+def test_behavioral_scoring_accepts_custom_reform(monkeypatch):
+    marker = object()
+
+    monkeypatch.setattr(
+        "src.reforms.get_reverse_roth_behavioral_reform",
+        lambda: marker,
+    )
+
+    assert build_policy_reform("reverse_roth", "behavioral") is marker
 
 
 def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     baseline_reform = object()
     baseline_system = SimpleNamespace(simulation=None)
-    sim = SimpleNamespace(baseline=SimpleNamespace())
+    fallback_system = SimpleNamespace(simulation=None)
 
     monkeypatch.setattr(
         "policyengine_us.Microsimulation.default_tax_benefit_system",
-        staticmethod(lambda reform: baseline_system if reform is baseline_reform else None),
+        staticmethod(
+            lambda reform: fallback_system if reform is baseline_reform else None
+        ),
     )
+
+    class _ManagedSimulation:
+        def __init__(self):
+            self.baseline = SimpleNamespace()
+
+        @staticmethod
+        def default_tax_benefit_system(*, reform):
+            return baseline_system if reform is baseline_reform else None
+
+    sim = _ManagedSimulation()
 
     result = install_behavioral_baseline_tax_system(
         sim,
@@ -143,6 +170,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
 
     assert result["installed"] is True
     assert sim.baseline.tax_benefit_system is baseline_system
+    assert sim.baseline.tax_benefit_system is not fallback_system
     assert baseline_system.simulation is sim.baseline
     assert sim.baseline.reform is baseline_reform
 
@@ -174,11 +202,7 @@ def test_full_h5_paths_use_required_production_shape():
     )
 
     assert path == (
-        Path("/results")
-        / "run"
-        / FULL_H5_DIRNAME
-        / "year=2100"
-        / "reform=option12"
+        Path("/results") / "run" / FULL_H5_DIRNAME / "year=2100" / "reform=option12"
     )
 
 

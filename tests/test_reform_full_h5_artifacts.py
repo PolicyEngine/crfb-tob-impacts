@@ -278,7 +278,9 @@ def test_object_store_upload_is_idempotent_for_same_content(tmp_path: Path):
     assert upload_artifact_pair_to_object_store(**kwargs)["validated"] is True
 
 
-def test_object_store_upload_rejects_existing_key_with_different_content(tmp_path: Path):
+def test_object_store_upload_rejects_existing_key_with_different_content(
+    tmp_path: Path,
+):
     h5_path = tmp_path / "scenario.h5"
     metadata_path = tmp_path / "metadata.json"
     _write_full_h5(h5_path)

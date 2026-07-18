@@ -15,17 +15,19 @@ The intended current delivery surface is:
 
 The public/release result paths are:
 
-- `results/results_full_h5_selected_panel_display_20260522.csv`
-- `results/results_full_h5_selected_panel_display_20260522_metadata.json`
 - `results.csv`
+- `results.csv.metadata.json`
 - `dashboard/public/data/results.csv`
+- `dashboard/public/data/results_contract.json`
+- `dashboard/public/data/distributional.json`
 - `results/release_packages/crfb_tob_release_<timestamp>/`
 
 Behind the scenes, the builder combines static and labor-supply response source
-artifacts into the unified `results.csv`. Public-facing code and docs should
-not ask readers to choose between separate static and response artifact
-families. Labor-supply response rows are included only when regenerated from the
-current full-H5 production contract.
+artifacts into the unified `results.csv`. The raw Modal source CSVs live under
+`results/modal_runs_production/` as provenance inputs, not public result
+surfaces. Public-facing code and docs should not ask readers to choose between
+separate static and response artifact families. Labor-supply response rows are
+included only when regenerated from the current full-H5 production contract.
 
 ## Delivery Rules
 
@@ -90,9 +92,10 @@ Use this simple rule:
   carried forward
 - the live audit note reflects the final release state:
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md)
-- independent review should start from the controlling
-  [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md) and
-  [reform-modeling-progress.json](reform-modeling-progress.json)
+- independent review should start from
+  [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md),
+  [v2-baseline-method.md](v2-baseline-method.md), and
+  `dashboard/public/data/results_contract.json`
 
 ## Archive Boundary
 

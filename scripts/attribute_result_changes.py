@@ -36,13 +36,17 @@ def parse_args() -> argparse.Namespace:
 
 def load_results(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
-    missing = [column for column in [*KEY_COLUMNS, *VALUE_COLUMNS] if column not in df.columns]
+    missing = [
+        column for column in [*KEY_COLUMNS, *VALUE_COLUMNS] if column not in df.columns
+    ]
     if missing:
         raise ValueError(f"{path} is missing required columns: {missing}")
     return df[KEY_COLUMNS + VALUE_COLUMNS].copy()
 
 
-def filter_results(df: pd.DataFrame, reforms: list[str], years: list[int]) -> pd.DataFrame:
+def filter_results(
+    df: pd.DataFrame, reforms: list[str], years: list[int]
+) -> pd.DataFrame:
     filtered = df[df["reform_name"].isin(reforms) & df["year"].isin(years)].copy()
     return filtered.sort_values(KEY_COLUMNS).reset_index(drop=True)
 
@@ -63,10 +67,7 @@ def build_attribution(
         validate="one_to_one",
     )
 
-    renamed = {
-        column: f"{column}_refresh_oact"
-        for column in VALUE_COLUMNS
-    }
+    renamed = {column: f"{column}_refresh_oact" for column in VALUE_COLUMNS}
     merged = merged.rename(columns=renamed)
 
     ordered_columns = KEY_COLUMNS.copy()

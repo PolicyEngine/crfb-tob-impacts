@@ -47,8 +47,7 @@ def _base_release_manifest(
     if base_release_manifest is not None:
         return _load_json(base_release_manifest)
     manifest_path = (
-        base_release_manifest_path
-        or f"releases/{data_version}/release_manifest.json"
+        base_release_manifest_path or f"releases/{data_version}/release_manifest.json"
     )
     revision = base_release_manifest_revision or data_version
     return _fetch_hf_json(repo_id=repo_id, revision=revision, path=manifest_path)
@@ -83,7 +82,9 @@ def _long_term_files(long_term_dir: Path) -> list[Path]:
             f"Expected 75 long-run metadata sidecars, found {len(sidecars)}."
         )
     missing_sidecars = [
-        h5.name for h5 in h5s if not (long_term_dir / f"{h5.name}.metadata.json").exists()
+        h5.name
+        for h5 in h5s
+        if not (long_term_dir / f"{h5.name}.metadata.json").exists()
     ]
     if missing_sidecars:
         raise RuntimeError(f"Missing metadata sidecars for: {missing_sidecars[:5]}")
@@ -209,7 +210,9 @@ def parse_args() -> argparse.Namespace:
         "--version",
         default=os.environ.get("CRFB_LONGRUN_HF_VERSION", "crfb-longrun-20260518"),
     )
-    parser.add_argument("--data-version", default=os.environ.get("CRFB_LONGRUN_DATA_VERSION"))
+    parser.add_argument(
+        "--data-version", default=os.environ.get("CRFB_LONGRUN_DATA_VERSION")
+    )
     parser.add_argument("--model-version")
     parser.add_argument("--core-version")
     parser.add_argument("--hf-repo", default=DEFAULT_HF_REPO)

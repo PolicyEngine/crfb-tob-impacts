@@ -27,7 +27,7 @@ This Quarto paper is the stable narrative layer intended for:
 
 The manuscript should preserve the source trail and substantive chapter
 coverage of the first report while updating scope to the current CRFB-facing
-twelve-option menu.
+fourteen-reform menu.
 
 ## 3. Operational documentation
 
@@ -62,11 +62,11 @@ That separation only works if each surface is honest about result status.
   and recovery details needed to reconcile those two publication surfaces.
 
 For the current rebuild, that release discipline means the dashboard-facing
-standard panel uses the hardened exact-only path, the `2075+` donor-backed
-support supplement, and saved full reform H5 artifacts before appearing in the
-public result surface.
+panel uses the hardened exact-only path on real (no-synthetic) populace
+records and saved full reform H5 artifacts before appearing in the public
+result surface.
 
-For the supplemental labor-supply response package, the standard `option1`
-through `option12` panel is public only where generated from durable full reform
+For the supplemental labor-supply response package, the fourteen-reform panel
+is public only where generated from durable full reform
 H5 artifacts under the current contract. Multiplier-derived sample panels and
 other non-contract response artifacts are excluded from the release surface.

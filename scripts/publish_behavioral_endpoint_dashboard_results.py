@@ -25,23 +25,16 @@ from scripts.publish_full_h5_static_dashboard_results import (
 
 RESULTS = REPO / "results"
 DEFAULT_BEHAVIORAL_ENDPOINT_AGGREGATE = (
-    RESULTS
-    / "modal_runs_production"
-    / "full_h5_5a35713_behavioral_endpoints_20260522.csv"
+    RESULTS / "modal_runs_production" / "behavioral_endpoint_cells.csv"
 )
-DEFAULT_STATIC_DISPLAY = (
-    RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
-)
+DEFAULT_STATIC_DISPLAY = REPO / "results.csv"
 DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
-DEFAULT_BEHAVIORAL_EXACT_OUTPUT = (
-    RESULTS / "behavioral_endpoint_full_h5_exact_20260522.csv"
-)
-DEFAULT_BEHAVIORAL_DISPLAY_OUTPUT = (
-    RESULTS / "behavioral_endpoint_ratio_display_20260522.csv"
-)
-DEFAULT_METADATA_OUTPUT = (
-    RESULTS / "behavioral_endpoint_ratio_display_20260522_metadata.json"
-)
+DEFAULT_BEHAVIORAL_EXACT_OUTPUT = REPO / "tmp" / "behavioral_endpoint_exact_preview.csv"
+DEFAULT_BEHAVIORAL_DISPLAY_OUTPUT = REPO / "tmp" / "behavioral_display_preview.csv"
+DEFAULT_METADATA_OUTPUT = REPO / "tmp" / "behavioral_display_preview.metadata.json"
+INTERPOLATED_RUN_PREFIX = "behavioral_endpoint_ratio_interpolation_20260612"
+INTERPOLATED_BASELINE_SOURCE = "v2pop_tr2026_static_full_h5_display"
+EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 
 ENDPOINT_YEARS = (2026, 2100)
 IMPACT_RATIO_COLUMNS = (
@@ -95,9 +88,7 @@ def _validate_endpoint_panel(frame: pd.DataFrame) -> None:
 
     missing: list[tuple[str, int]] = []
     for reform in STANDARD_REFORMS:
-        years = set(
-            standard.loc[standard["reform_name"] == reform, "year"].astype(int)
-        )
+        years = set(standard.loc[standard["reform_name"] == reform, "year"].astype(int))
         for year in ENDPOINT_YEARS:
             if year not in years:
                 missing.append((reform, year))
@@ -124,6 +115,7 @@ def _published_behavioral_endpoints(
     exact["scoring_type"] = "behavioral"
     exact["source"] = "exact_behavioral_endpoint_full_h5"
     exact["full_h5_result_type"] = "exact_behavioral_endpoint_full_h5"
+    exact["baseline_source"] = EXACT_BASELINE_SOURCE
     return exact.sort_values(["reform_name", "year"]).reset_index(drop=True)
 
 
@@ -182,7 +174,10 @@ def _behavioral_annual_for_reform(
                 row[column] = float(static_row[column])
 
         for column in IMPACT_RATIO_COLUMNS:
-            if column not in static_group.columns or column not in endpoint_group.columns:
+            if (
+                column not in static_group.columns
+                or column not in endpoint_group.columns
+            ):
                 continue
             endpoint_ratios: dict[int, float] = {}
             endpoint_values: dict[int, float] = {}
@@ -215,7 +210,10 @@ def _behavioral_annual_for_reform(
                 )
                 row[column] = float(static_row[column]) * ratio
 
-        for reform_column, (baseline_column, impact_column) in REFORM_LEVEL_COLUMNS.items():
+        for reform_column, (
+            baseline_column,
+            impact_column,
+        ) in REFORM_LEVEL_COLUMNS.items():
             if baseline_column in row and impact_column in row:
                 row[reform_column] = float(row[baseline_column]) + float(
                     row[impact_column]
@@ -242,8 +240,8 @@ def _behavioral_annual_for_reform(
                 "output_h5_sha256",
             ):
                 row[column] = ""
-            row["run_prefix"] = "behavioral_endpoint_ratio_interpolation_20260522"
-            row["baseline_source"] = "static_display_baseline"
+            row["run_prefix"] = INTERPOLATED_RUN_PREFIX
+            row["baseline_source"] = INTERPOLATED_BASELINE_SOURCE
             row["source"] = "linear_interpolation_between_behavioral_endpoint_ratios"
             row["full_h5_result_type"] = (
                 "linear_interpolation_between_behavioral_endpoint_ratios"
@@ -279,9 +277,7 @@ def build_behavioral_display(
             if year not in years:
                 missing_static.append((reform, year))
     if missing_static:
-        preview = ", ".join(
-            f"{reform}:{year}" for reform, year in missing_static[:20]
-        )
+        preview = ", ".join(f"{reform}:{year}" for reform, year in missing_static[:20])
         raise ValueError(f"Missing static display rows; first missing: {preview}")
 
     fallback_records: list[dict[str, Any]] = []
@@ -297,7 +293,9 @@ def build_behavioral_display(
         )
 
     display = pd.concat(annual_rows, ignore_index=True)
-    columns = list(dict.fromkeys([*DASHBOARD_COLUMNS, *static.columns, *display.columns]))
+    columns = list(
+        dict.fromkeys([*DASHBOARD_COLUMNS, *static.columns, *display.columns])
+    )
     exact = exact.reindex(columns=columns)
     display = display.reindex(columns=columns)
     exact_output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -319,7 +317,9 @@ def build_behavioral_display(
         "exact_endpoint_rows": int(len(exact)),
         "dashboard_row_count": int(len(display)),
         "dashboard_exact_endpoint_rows": int(
-            (display["full_h5_result_type"] == "exact_behavioral_endpoint_full_h5").sum()
+            (
+                display["full_h5_result_type"] == "exact_behavioral_endpoint_full_h5"
+            ).sum()
         ),
         "dashboard_interpolated_rows": int(
             (

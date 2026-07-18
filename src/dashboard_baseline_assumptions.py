@@ -39,9 +39,7 @@ OUTPUT_INDEXED_PARAMETER_SUMMARY = (
 )
 OUTPUT_INDEXING_GROWTH = DASHBOARD_DATA / "baseline_indexing_growth.csv"
 OUTPUT_CALIBRATION_TARGETS = DASHBOARD_DATA / "baseline_calibration_targets.csv"
-OUTPUT_CALIBRATION_DIAGNOSTICS = (
-    DASHBOARD_DATA / "baseline_calibration_diagnostics.csv"
-)
+OUTPUT_CALIBRATION_DIAGNOSTICS = DASHBOARD_DATA / "baseline_calibration_diagnostics.csv"
 OUTPUT_POLICY_PARAMETERS = DASHBOARD_DATA / "baseline_policy_parameters.csv"
 OUTPUT_REFORM_PARAMETERS = DASHBOARD_DATA / "baseline_reform_parameters.csv"
 OUTPUT_METADATA = DASHBOARD_DATA / "baseline_assumptions_metadata.json"
@@ -166,7 +164,9 @@ def _ensure_import_paths(policyengine_us_path: Path | None = None) -> None:
 
     policyengine_us_path = policyengine_us_path.expanduser().resolve()
     if not policyengine_us_path.exists():
-        raise FileNotFoundError(f"policyengine-us path does not exist: {policyengine_us_path}")
+        raise FileNotFoundError(
+            f"policyengine-us path does not exist: {policyengine_us_path}"
+        )
     path_str = str(policyengine_us_path)
     if path_str not in sys.path:
         sys.path.insert(0, path_str)
@@ -184,7 +184,9 @@ def _load_tax_assumption_module():
         module = _canonical_tax_assumption_module(
             TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION
         )
-        return Path(getattr(module, "__file__", TRUSTEES_CORE_THRESHOLDS_MODULE)), module
+        return Path(
+            getattr(module, "__file__", TRUSTEES_CORE_THRESHOLDS_MODULE)
+        ), module
     except ModuleNotFoundError as error:
         import os
 
@@ -193,7 +195,9 @@ def _load_tax_assumption_module():
         module_path = resolve_tax_assumption_module()
         spec = importlib.util.spec_from_file_location("tax_assumptions", module_path)
         if spec is None or spec.loader is None:
-            raise ImportError(f"Unable to load tax assumption module from {module_path}")
+            raise ImportError(
+                f"Unable to load tax assumption module from {module_path}"
+            )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module_path, module
@@ -408,7 +412,9 @@ def _load_post_obbba_tob_baseline() -> pd.DataFrame:
     output["scenario_id"] = str(manifest["scenario_id"])
     output["baseline_kind"] = str(manifest["baseline_kind"])
     output["baseline_sha256"] = str(manifest["baseline_sha256"])
-    output["baseline_manifest"] = str(POST_OBBBA_TOB_BASELINE_MANIFEST.relative_to(REPO))
+    output["baseline_manifest"] = str(
+        POST_OBBBA_TOB_BASELINE_MANIFEST.relative_to(REPO)
+    )
     return output
 
 
@@ -446,7 +452,9 @@ def build_baseline_aggregates(tax_assumption_name: str) -> pd.DataFrame:
     standard = static[static["reform_name"].isin(EXPECTED_STANDARD_REFORMS)].copy()
     missing_reforms = EXPECTED_STANDARD_REFORMS - set(standard["reform_name"])
     if missing_reforms:
-        raise ValueError(f"Missing standard static reforms in {DASHBOARD_RESULTS}: {missing_reforms}")
+        raise ValueError(
+            f"Missing standard static reforms in {DASHBOARD_RESULTS}: {missing_reforms}"
+        )
 
     baseline_cols = [
         "baseline_revenue",
@@ -460,8 +468,7 @@ def build_baseline_aggregates(tax_assumption_name: str) -> pd.DataFrame:
 
     baseline = (
         standard.sort_values(["year", "reform_name"])
-        .drop_duplicates("year")
-        [["year", *baseline_cols]]
+        .drop_duplicates("year")[["year", *baseline_cols]]
         .rename(
             columns={
                 # baseline_revenue and federal_income_tax are the same quantity
@@ -477,7 +484,9 @@ def build_baseline_aggregates(tax_assumption_name: str) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     tob_baseline = _load_post_obbba_tob_baseline()
-    baseline = baseline.merge(tob_baseline, on="year", how="left", validate="one_to_one")
+    baseline = baseline.merge(
+        tob_baseline, on="year", how="left", validate="one_to_one"
+    )
     missing_target_years = baseline.loc[baseline["tob_oasdi"].isna(), "year"].tolist()
     if missing_target_years:
         raise ValueError(
@@ -526,7 +535,7 @@ def build_baseline_aggregates(tax_assumption_name: str) -> pd.DataFrame:
 def _build_trustees_parameters(policyengine_us_path: Path | None = None):
     _ensure_import_paths(policyengine_us_path)
 
-    from policyengine_us import Microsimulation
+    from engine import base_microsimulation
     from tax_assumption_loader import (
         TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
         load_tax_assumption_reform_by_name,
@@ -537,7 +546,7 @@ def _build_trustees_parameters(policyengine_us_path: Path | None = None):
         start_year=2035,
         end_year=2100,
     )
-    return Microsimulation(
+    return base_microsimulation(
         reform=reform,
         start_instant="2035-01-01",
     ).tax_benefit_system.parameters
@@ -662,7 +671,9 @@ def _metadata_quality_score(metadata: dict[str, Any]) -> tuple[int, float]:
     return quality_rank, -error
 
 
-def _best_metadata_by_year(metadata_roots: Iterable[Path] | None) -> dict[int, dict[str, Any]]:
+def _best_metadata_by_year(
+    metadata_roots: Iterable[Path] | None,
+) -> dict[int, dict[str, Any]]:
     by_year: dict[int, dict[str, Any]] = {}
     for path in _metadata_paths(metadata_roots):
         metadata = _load_metadata(path)
@@ -670,9 +681,9 @@ def _best_metadata_by_year(metadata_roots: Iterable[Path] | None) -> dict[int, d
             continue
         year = int(metadata["year"])
         current = by_year.get(year)
-        if current is None or _metadata_quality_score(metadata) > _metadata_quality_score(
-            current
-        ):
+        if current is None or _metadata_quality_score(
+            metadata
+        ) > _metadata_quality_score(current):
             by_year[year] = metadata
     return by_year
 
@@ -752,9 +763,7 @@ def build_calibration_targets(
                 pct_error=values.get("pct_error"),
                 source=str(constraint_provenance.get("source", "")),
                 classification=str(constraint_provenance.get("classification", "")),
-                scoring_contract=str(
-                    constraint_provenance.get("scoring_contract", "")
-                ),
+                scoring_contract=str(constraint_provenance.get("scoring_contract", "")),
                 dataset_path=str(metadata.get("_metadata_path", "")),
                 target_source_name=str(target_source.get("name", "")),
                 target_source_sha256=str(target_source.get("sha256", "")),
@@ -789,7 +798,9 @@ def build_calibration_targets(
                 )
             )
 
-    return pd.DataFrame(rows).sort_values(["year", "constraint_group", "constraint_name"])
+    return pd.DataFrame(rows).sort_values(
+        ["year", "constraint_group", "constraint_name"]
+    )
 
 
 def _diagnostic_row(
@@ -838,9 +849,7 @@ def build_calibration_diagnostics(
             "tob_oasdi_gap_to_post_obbba_target": (
                 row.tob_oasdi_gap_to_post_obbba_target
             ),
-            "tob_hi_gap_to_post_obbba_target": (
-                row.tob_hi_gap_to_post_obbba_target
-            ),
+            "tob_hi_gap_to_post_obbba_target": (row.tob_hi_gap_to_post_obbba_target),
             "tob_total_gap_to_post_obbba_target": (
                 row.tob_total_gap_to_post_obbba_target
             ),
@@ -885,7 +894,7 @@ def build_calibration_diagnostics(
                         )
                     )
 
-    hi_expenditures = REPO / "data" / "hi_expenditures_tr2025.csv"
+    hi_expenditures = REPO / "data" / "hi_expenditures_tr2026.csv"
     if hi_expenditures.exists():
         hi = pd.read_csv(hi_expenditures)
         for row in hi.itertuples(index=False):
@@ -900,7 +909,7 @@ def build_calibration_diagnostics(
                             value=float(getattr(row, diagnostic_id)) / 1e9,
                             group="HI Trustees diagnostic",
                             unit="billions of nominal dollars",
-                            source="data/hi_expenditures_tr2025.csv",
+                            source="data/hi_expenditures_tr2026.csv",
                         )
                     )
 
@@ -1032,11 +1041,11 @@ def _static_reform_dict_functions():
     }
 
 
-def _conventional_reform_dict_functions():
+def _behavioral_reform_dict_functions():
     from src import reforms
 
     return {
-        f"option{index}": getattr(reforms, f"get_option{index}_conventional_dict")
+        f"option{index}": getattr(reforms, f"get_option{index}_behavioral_dict")
         for index in range(1, 13)
     }
 
@@ -1046,7 +1055,7 @@ def build_reform_parameter_tables(parameters) -> tuple[pd.DataFrame, pd.DataFram
     touched: dict[str, dict[str, set[str]]] = {}
     for scoring_type, functions in [
         ("static", _static_reform_dict_functions()),
-        ("behavioral", _conventional_reform_dict_functions()),
+        ("behavioral", _behavioral_reform_dict_functions()),
     ]:
         for reform_name, function in functions.items():
             reform_dict = function()
@@ -1196,7 +1205,9 @@ def write_outputs(
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_dashboard_results": str(DASHBOARD_RESULTS.relative_to(REPO)),
-        "source_post_obbba_tob_baseline": str(POST_OBBBA_TOB_BASELINE.relative_to(REPO)),
+        "source_post_obbba_tob_baseline": str(
+            POST_OBBBA_TOB_BASELINE.relative_to(REPO)
+        ),
         "source_post_obbba_tob_baseline_manifest": str(
             POST_OBBBA_TOB_BASELINE_MANIFEST.relative_to(REPO)
         ),
@@ -1225,9 +1236,7 @@ def write_outputs(
         ),
         "calibration_target_count": int(calibration_targets.shape[0]),
         "calibration_diagnostic_count": int(calibration_diagnostics.shape[0]),
-        "policy_parameter_count": int(
-            policy_parameters["parameter_name"].nunique()
-        ),
+        "policy_parameter_count": int(policy_parameters["parameter_name"].nunique()),
         "reform_parameter_count": int(reform_parameters.shape[0]),
         "calibration_metadata_roots": [
             str(Path(path).expanduser()) for path in metadata_roots or []

@@ -32,6 +32,7 @@ DEFAULT_DEPENDENCY_MANIFESTS = (
     "pyproject.toml",
     "uv.lock",
 )
+ALLOWED_MODAL_TARGETS = {"reform_full_h5"}
 
 
 def file_sha256(path: Path) -> str:
@@ -343,7 +344,7 @@ def resolved_environment_contract(
         or snapshot_path is None
     ):
         raise ValueError(
-            "Raw-H5 Modal runs require policyengine_us_path, "
+            "Full-H5 Modal runs require policyengine_us_path, "
             "projected_datasets_path, and snapshot_path."
         )
 
@@ -443,6 +444,12 @@ def create_repro_bundle(
     bundle_root: Path | None = None,
     cells_file: Path | None = None,
 ) -> BundlePaths:
+    modal_target = modal_target.strip()
+    if modal_target not in ALLOWED_MODAL_TARGETS:
+        raise ValueError(
+            f"Unsupported modal_target {modal_target!r}; expected reform_full_h5."
+        )
+
     launched_at = datetime.now(timezone.utc)
     if bundle_root is None:
         bundle_root = repo_root / "results" / "repro_bundles"
@@ -475,7 +482,7 @@ def create_repro_bundle(
     else:
         if policyengine_us_path is None or projected_datasets_path is None:
             raise ValueError(
-                "Raw-H5 reproducibility bundles require policyengine_us_path "
+                "Full-H5 reproducibility bundles require policyengine_us_path "
                 "and projected_datasets_path."
             )
         using_packaged_policyengine_us = _is_packaged_policyengine_us_path(

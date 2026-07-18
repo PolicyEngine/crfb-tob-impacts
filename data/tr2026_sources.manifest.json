@@ -1,0 +1,53 @@
+{
+ "description": "2026 Trustees Report calibration target sources",
+ "retrieved": "2026-06-10",
+ "files": [
+  {
+   "file": "data/sources/tr2026/SingleYearTRTables_TR2026.xlsx",
+   "sha256": "38d8c5fee2f8b46dc15dd689c82a080163d190f260066f7e34bbc51f2d6ba361",
+   "source": "https://www.ssa.gov/oact/TR/2026/SingleYearTRTables_TR2026.xlsx (retrieved via web.archive.org, 2026-06-10)"
+  },
+  {
+   "file": "data/sources/tr2026/Medicare Sources of Non-Interest Income as a Percentage of Total Income and as a Percentage of Gross Domestic Product.csv",
+   "sha256": "62ade09847a389a74fb91c1c549d4fc2709568aba11c31547c2e2173d10c2ff1",
+   "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
+  },
+  {
+   "file": "data/sources/tr2026/HI Cost and Income Rates.csv",
+   "sha256": "99d53da9667e20b79db78b3aef236e7c07c54fdfa157b146b7f5ff7dec64c556",
+   "source": "https://www.cms.gov/files/zip/2026-expanded-supplementary-tables-figures.zip (retrieved direct, 2026-06-10)"
+  },
+  {
+   "file": "data/social_security_aux_tr2026.csv",
+   "sha256": "bf0ab77fc035378ca1270522d54c4d7bfca8e7e92f941a8d49a77ffc992540c6",
+   "source": ""
+  },
+  {
+   "file": "data/SSPopJul_TR2026_interim.csv",
+   "sha256": "fa1b088ad7ac9f8f621f861bdb9fef33e81e74ac5862e75654e10977c5e40c12",
+   "source": ""
+  },
+  {
+   "file": "data/hi_expenditures_tr2026.csv",
+   "sha256": "90aa1640fa425e826c55b8097db9a561b1b9bd5ec7d9632c659053c8477bb809",
+   "source": "Derived from data/sources/tr2026/HI Cost and Income Rates.csv cost rates times dashboard/public/data/hi_taxable_payroll.csv TR2026-scaled HI taxable payroll."
+  },
+  {
+   "file": "data/sources/tr2026/medicare_tr2026.pdf",
+   "sha256": "ffa56b9137006872300b0346149eae1613d09a172b6ba118aad48e66dfc48fa8",
+   "source": "https://www.cms.gov/oact/tr/2026 (full 2026 Medicare Trustees Report PDF; retrieved 2026-07-01)"
+  },
+  {
+   "file": "data/sources/tr2026/hi_effective_interest_rates_tr2026_iv_a4.csv",
+   "sha256": "e96daf0eb5e2cd96f0d20616e68ce9179aed4820792d4e48113d425ac3378dad",
+   "source": "Transcribed from Table IV.A4 (intermediate estimates, HI effective interest rate), 2026 Medicare Trustees Report p. 129 (PDF p. 135)"
+  }
+ ],
+ "notes": [
+  "OASDI TOB dollars = IV.B2 percent of taxable payroll times VI.G1 taxable payroll.",
+  "HI TOB from the CMS 2026 Medicare Trustees expanded tables, annual through 2100 (no carry-forward bridge needed).",
+  "Single-year-age population is interim: TR2024 single-year shape rescaled to TR2026 V.A3 group totals until SSA posts the TR2026 single-year file.",
+  "TR2026 incorporates OBBBA in current law, so these TOB targets replace the TR2025 post-OBBBA bridge entirely.",
+  "HI expenditures for balanced-fix scoring use TR2026 HI cost rates times the TR2026-adjusted HI taxable payroll denominator series."
+ ]
+}

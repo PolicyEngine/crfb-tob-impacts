@@ -1,0 +1,62 @@
+{
+  "anchor_sources": [
+    {
+      "path": "tmp/balanced_fix_r2fix_2035/2035.csv",
+      "sha256": "34e0de5bda32c6936e1862de1da70e57febf2c6a0262bd37bc6b154f82b4071d"
+    },
+    {
+      "path": "tmp/balanced_fix_r2fix_anchors/2035.csv",
+      "sha256": "34e0de5bda32c6936e1862de1da70e57febf2c6a0262bd37bc6b154f82b4071d"
+    },
+    {
+      "path": "tmp/balanced_fix_r2fix_anchors/2050.csv",
+      "sha256": "847c6742c03fcacb04c70c643fdeebd2b4e309419b8e868f2e34e58342b1cf17"
+    },
+    {
+      "path": "tmp/balanced_fix_r2fix_anchors/2075.csv",
+      "sha256": "8fe1e9bdae68c2f724370df3e53b8084274e676f6d8988b1d1b644629b8cd649"
+    },
+    {
+      "path": "tmp/balanced_fix_r2fix_anchors/2100.csv",
+      "sha256": "fa1cc3ff6829a79abf183a76e3c098fd6e75d640c2954b9e4ce097a125a36e8c"
+    },
+    {
+      "path": "tmp/balanced_fix_r2fix_spotcheck/2065.csv",
+      "sha256": "327fc25285ba22762e4ada98b5b79264c98f1185b0cca975ef3eb1062a25f7cf"
+    }
+  ],
+  "anchor_years": [
+    2035,
+    2050,
+    2065,
+    2075,
+    2100
+  ],
+  "baseline_scenario": "ss_solvent",
+  "current_law_results": "results.csv",
+  "exact_rows": 20,
+  "generated_at": "2026-07-01T04:47:17.138733+00:00",
+  "interpolated_rows": 244,
+  "interpolation_method": "For each reform and metric, linearly interpolate the real solvent anchor rows by year between the exact anchor years 2035, 2050, 2065, 2075, and 2100. 2065 was promoted from validation spot-check to exact anchor because the direct option12 split materially differed from the 2035/2050/2075/2100-only interpolation.",
+  "planned_anchor_years": [
+    2035,
+    2050,
+    2075,
+    2100
+  ],
+  "promoted_spot_check_years": [
+    2065
+  ],
+  "reforms": [
+    "option1",
+    "option2",
+    "option8",
+    "option12"
+  ],
+  "rows": 264,
+  "run_prefix": "balanced_fix_v2pop_tr2026_endpoints_first_20260619_hi2100fix",
+  "schema": "crfb_balanced_fix_public_results/v1",
+  "split_contract": "solvent_oasdi_impact + solvent_medicare_hi_impact + solvent_general_fund_impact equals revenue_impact for every row.",
+  "year_end": 2100,
+  "year_start": 2035
+}

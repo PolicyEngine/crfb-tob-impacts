@@ -7,6 +7,7 @@ export interface LiveModelingMetadata {
   generated_at?: string;
   selected_year_count?: number;
   selected_cell_count?: number;
+  standard_reform_count?: number;
   baseline_ready_year_count?: number;
   reform_h5_complete_or_sentinel_count?: number;
   reform_h5_pending_count?: number;

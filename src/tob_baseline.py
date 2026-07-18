@@ -17,9 +17,19 @@ SSA_ECONOMIC_PROJECTIONS_PATH = REPO_ROOT / "data" / "ssa_economic_projections.c
 GENERATED_BASELINE_PATH = REPO_ROOT / "data" / "ssa_tob_baseline_75year.csv"
 GENERATED_BASELINE_MANIFEST_PATH = GENERATED_BASELINE_PATH.with_suffix(".manifest.json")
 
-POST_OBBBA_SCENARIO_ID = "crfb_post_obbba_tob_75y"
-POST_OBBBA_TARGET_ID = "post_obbba_calibrated_tob_75y"
-TRUSTEES_CORE_THRESHOLD_LAW_MODE = "trustees-2025-core-thresholds-v1"
+TR2026_AUX_PATH = REPO_ROOT / "data" / "social_security_aux_tr2026.csv"
+TR2026_SOURCES_MANIFEST_PATH = REPO_ROOT / "data" / "tr2026_sources.manifest.json"
+
+TOB_BASELINE_SCENARIO_ID = "crfb_tr2026_current_law_tob_75y"
+TOB_BASELINE_TARGET_ID = "tr2026_current_law_tob_75y"
+TOB_BASELINE_LAW_MODE = "trustees-2026-intermediate-v1"
+
+# Backwards-compatible aliases: the bridge-era names now point at the
+# TR2026 identifiers (TR2026 carries OBBBA natively, so the post-OBBBA
+# bridge no longer exists).
+POST_OBBBA_SCENARIO_ID = TOB_BASELINE_SCENARIO_ID
+POST_OBBBA_TARGET_ID = TOB_BASELINE_TARGET_ID
+TRUSTEES_CORE_THRESHOLD_LAW_MODE = TOB_BASELINE_LAW_MODE
 
 REQUIRED_CURRENT_LAW_COLUMNS = {
     "year",
@@ -36,12 +46,14 @@ HI_METHODS = {
 }
 
 SOURCE_OASDI = (
-    "SSA OACT Aug. 5, 2025 letter Table 1b.n nominal OASDI cash flow change"
+    "2026 Trustees Report intermediate assumptions: income-rate share of "
+    "taxable payroll attributable to taxation of benefits"
 )
-SOURCE_CURRENT_LAW = "2025 Trustees current-law TOB baseline"
+SOURCE_CURRENT_LAW = "2026 Trustees current-law TOB baseline (OBBBA native)"
 SOURCE_HI_CMS_DIRECTION = (
-    "CMS FY2025 Financial Report direction only; annual HI path bridged in code"
+    "CMS 2026 Medicare Trustees expanded tables, annual through 2100"
 )
+DELTA_METHOD_TR2026 = "tr2026_native_current_law"
 
 
 def _relative_to_repo(path: Path) -> str:
@@ -84,14 +96,20 @@ def load_current_law_series() -> pd.DataFrame:
             f"Missing current-law TOB columns in {CURRENT_LAW_PATH.name}: {sorted(missing_columns)}"
         )
 
-    payroll = pd.read_csv(SSA_ECONOMIC_PROJECTIONS_PATH, usecols=["year", "taxable_payroll"])
+    payroll = pd.read_csv(
+        SSA_ECONOMIC_PROJECTIONS_PATH, usecols=["year", "taxable_payroll"]
+    )
     payroll_2025 = pd.DataFrame([{"year": 2025, "taxable_payroll": 10621.0}])
     payroll = pd.concat([payroll_2025, payroll], ignore_index=True)
 
     merged = current_law.merge(payroll, on="year", how="left", validate="one_to_one")
-    missing_payroll_years = merged.loc[merged["taxable_payroll"].isna(), "year"].tolist()
+    missing_payroll_years = merged.loc[
+        merged["taxable_payroll"].isna(), "year"
+    ].tolist()
     if missing_payroll_years:
-        raise ValueError(f"Missing taxable payroll values for years: {missing_payroll_years}")
+        raise ValueError(
+            f"Missing taxable payroll values for years: {missing_payroll_years}"
+        )
 
     merged = merged.rename(
         columns={
@@ -153,6 +171,64 @@ def _apply_hi_method(df: pd.DataFrame, hi_method: str) -> tuple[pd.Series, str]:
     raise ValueError(f"Unsupported HI method: {hi_method}")
 
 
+def build_tob_baseline_tr2026() -> pd.DataFrame:
+    """Current-law TOB baseline read directly from the 2026 Trustees targets.
+
+    TR2026 incorporates OBBBA in current law, so the published baseline IS
+    the raw Trustees series — no OACT delta bridge, no HI scaling method.
+    """
+    aux = pd.read_csv(TR2026_AUX_PATH)
+    df = pd.DataFrame(
+        {
+            "year": aux["year"].astype(int),
+            "tob_oasdi_billions": aux["oasdi_tob_billions_nominal_usd"],
+            "tob_hi_billions": aux["hi_tob_billions_nominal_usd"],
+            "taxable_payroll": aux["taxable_payroll_in_billion_nominal_usd"],
+        }
+    ).dropna(subset=["tob_oasdi_billions", "tob_hi_billions"])
+    df["tob_total_billions"] = df["tob_oasdi_billions"] + df["tob_hi_billions"]
+    df["oasdi_share"] = df["tob_oasdi_billions"] / df["tob_total_billions"]
+    df["hi_share"] = df["tob_hi_billions"] / df["tob_total_billions"]
+    df["current_law_oasdi_billions"] = df["tob_oasdi_billions"]
+    df["current_law_hi_billions"] = df["tob_hi_billions"]
+    df["current_law_total_billions"] = df["tob_total_billions"]
+    df["oasdi_nominal_delta_billions"] = 0.0
+    df["oasdi_delta_method"] = DELTA_METHOD_TR2026
+    df["hi_method"] = HI_METHOD_CURRENT_LAW
+    df["oasdi_source"] = SOURCE_OASDI
+    df["hi_source"] = SOURCE_HI_CMS_DIRECTION
+    df["current_law_source"] = SOURCE_CURRENT_LAW
+    df["notes"] = (
+        "TR2026 intermediate assumptions carry OBBBA in current law; "
+        "values are the raw Trustees/CMS series with no bridge."
+    )
+    return (
+        df[
+            [
+                "year",
+                "tob_oasdi_billions",
+                "tob_hi_billions",
+                "tob_total_billions",
+                "oasdi_share",
+                "hi_share",
+                "current_law_oasdi_billions",
+                "current_law_hi_billions",
+                "current_law_total_billions",
+                "taxable_payroll",
+                "oasdi_nominal_delta_billions",
+                "oasdi_delta_method",
+                "hi_method",
+                "oasdi_source",
+                "hi_source",
+                "current_law_source",
+                "notes",
+            ]
+        ]
+        .sort_values("year")
+        .reset_index(drop=True)
+    )
+
+
 def build_tob_baseline(hi_method: str) -> pd.DataFrame:
     if hi_method not in HI_METHODS:
         raise ValueError(f"HI method must be one of {sorted(HI_METHODS)}")
@@ -161,7 +237,9 @@ def build_tob_baseline(hi_method: str) -> pd.DataFrame:
     oact_deltas = load_oact_oasdi_deltas()
 
     df = current_law.merge(oact_deltas, on="year", how="left", validate="one_to_one")
-    missing_delta_years = df.loc[df["oasdi_nominal_delta_billions"].isna(), "year"].tolist()
+    missing_delta_years = df.loc[
+        df["oasdi_nominal_delta_billions"].isna(), "year"
+    ].tolist()
     if missing_delta_years:
         raise ValueError(f"Missing OACT OASDI deltas for years: {missing_delta_years}")
 
@@ -178,39 +256,47 @@ def build_tob_baseline(hi_method: str) -> pd.DataFrame:
     df["current_law_source"] = SOURCE_CURRENT_LAW
     df["notes"] = hi_method_note
 
-    return df[
-        [
-            "year",
-            "tob_oasdi_billions",
-            "tob_hi_billions",
-            "tob_total_billions",
-            "oasdi_share",
-            "hi_share",
-            "current_law_oasdi_billions",
-            "current_law_hi_billions",
-            "current_law_total_billions",
-            "taxable_payroll",
-            "oasdi_nominal_delta_billions",
-            "oasdi_delta_method",
-            "hi_method",
-            "oasdi_source",
-            "hi_source",
-            "current_law_source",
-            "notes",
+    return (
+        df[
+            [
+                "year",
+                "tob_oasdi_billions",
+                "tob_hi_billions",
+                "tob_total_billions",
+                "oasdi_share",
+                "hi_share",
+                "current_law_oasdi_billions",
+                "current_law_hi_billions",
+                "current_law_total_billions",
+                "taxable_payroll",
+                "oasdi_nominal_delta_billions",
+                "oasdi_delta_method",
+                "hi_method",
+                "oasdi_source",
+                "hi_source",
+                "current_law_source",
+                "notes",
+            ]
         ]
-    ].sort_values("year").reset_index(drop=True)
+        .sort_values("year")
+        .reset_index(drop=True)
+    )
 
 
 def validate_generated_baseline(df: pd.DataFrame) -> None:
     expected_years = list(range(2025, 2101))
     years = df["year"].tolist()
     if years != expected_years:
-        raise ValueError("Generated baseline must contain one row for each year 2025-2100.")
+        raise ValueError(
+            "Generated baseline must contain one row for each year 2025-2100."
+        )
 
     totals = df["tob_total_billions"]
     if (totals <= 0).any():
         bad_years = df.loc[totals <= 0, "year"].tolist()
-        raise ValueError(f"Generated baseline has non-positive totals for years: {bad_years}")
+        raise ValueError(
+            f"Generated baseline has non-positive totals for years: {bad_years}"
+        )
 
     if not np.allclose(
         df["tob_oasdi_billions"] + df["tob_hi_billions"],
@@ -222,22 +308,34 @@ def validate_generated_baseline(df: pd.DataFrame) -> None:
     if not np.allclose(df["oasdi_share"] + df["hi_share"], 1.0, atol=1e-9):
         raise ValueError("OASDI share + HI share must equal 1 in every year.")
 
-    expected_oasdi = {
-        2025: 57.0397,
-        2026: 60.5901,
-        2029: 80.9200,
-        2099: 2010.4384,
-        2100: 2089.4768,
-    }
-    for year, expected_value in expected_oasdi.items():
-        actual_value = float(df.loc[df["year"] == year, "tob_oasdi_billions"].iloc[0])
-        if not np.isclose(actual_value, expected_value, atol=1e-4):
+    # Cross-check against the TR2026 target extract: the published baseline
+    # must equal the raw Trustees/CMS series in every overlapping year.
+    aux = pd.read_csv(TR2026_AUX_PATH).set_index("year")
+    merged = df.set_index("year")
+    overlap = merged.index.intersection(aux.index)
+    if len(overlap) < 70:
+        raise ValueError(
+            f"Generated baseline overlaps the TR2026 extract in only "
+            f"{len(overlap)} years."
+        )
+    for column, aux_column in [
+        ("tob_oasdi_billions", "oasdi_tob_billions_nominal_usd"),
+        ("tob_hi_billions", "hi_tob_billions_nominal_usd"),
+    ]:
+        if not np.allclose(
+            merged.loc[overlap, column],
+            aux.loc[overlap, aux_column],
+            atol=1e-6,
+            equal_nan=False,
+        ):
             raise ValueError(
-                f"Unexpected OASDI value for {year}: got {actual_value:.4f}, expected {expected_value:.4f}"
+                f"Generated baseline {column} diverges from the TR2026 extract."
             )
 
 
-def write_tob_baseline(df: pd.DataFrame, output_path: Path = GENERATED_BASELINE_PATH) -> None:
+def write_tob_baseline(
+    df: pd.DataFrame, output_path: Path = GENERATED_BASELINE_PATH
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False, float_format="%.10f")
 
@@ -258,7 +356,17 @@ def build_tob_baseline_manifest(
     output_sha256 = file_sha256(baseline_path)
     source_files = [
         {
-            "role": "raw_trustees_current_law_tob_comparator",
+            "role": "tr2026_target_extract",
+            "path": _relative_to_repo(TR2026_AUX_PATH),
+            "sha256": file_sha256(TR2026_AUX_PATH),
+        },
+        {
+            "role": "tr2026_source_manifest",
+            "path": _relative_to_repo(TR2026_SOURCES_MANIFEST_PATH),
+            "sha256": file_sha256(TR2026_SOURCES_MANIFEST_PATH),
+        },
+        {
+            "role": "legacy_tr2025_current_law_comparator",
             "path": _relative_to_repo(CURRENT_LAW_PATH),
             "sha256": file_sha256(CURRENT_LAW_PATH),
         },
@@ -277,11 +385,11 @@ def build_tob_baseline_manifest(
     return {
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "scenario_id": POST_OBBBA_SCENARIO_ID,
-        "calibration_target_id": POST_OBBBA_TARGET_ID,
+        "scenario_id": TOB_BASELINE_SCENARIO_ID,
+        "calibration_target_id": TOB_BASELINE_TARGET_ID,
         "baseline_kind": "calibration_target",
-        "not_law": True,
-        "law_mode": TRUSTEES_CORE_THRESHOLD_LAW_MODE,
+        "not_law": False,
+        "law_mode": TOB_BASELINE_LAW_MODE,
         "baseline_path": _relative_to_repo(baseline_path),
         "baseline_sha256": output_sha256,
         "output": {
@@ -314,8 +422,12 @@ def build_tob_baseline_manifest(
         "builder": {
             "module": _relative_to_repo(Path(__file__)),
             "module_sha256": file_sha256(Path(__file__)),
-            "script": _relative_to_repo(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
-            "script_sha256": file_sha256(REPO_ROOT / "scripts" / "build_tob_baseline.py"),
+            "script": _relative_to_repo(
+                REPO_ROOT / "scripts" / "build_tob_baseline.py"
+            ),
+            "script_sha256": file_sha256(
+                REPO_ROOT / "scripts" / "build_tob_baseline.py"
+            ),
             "git_head": _git_value("rev-parse", "HEAD"),
             "git_dirty": bool(_git_value("status", "--short")),
         },
@@ -336,7 +448,9 @@ def load_tob_baseline_manifest(
     manifest_path: Path = GENERATED_BASELINE_MANIFEST_PATH,
 ) -> dict[str, object]:
     if not manifest_path.exists():
-        raise FileNotFoundError(f"Generated TOB baseline manifest not found: {manifest_path}")
+        raise FileNotFoundError(
+            f"Generated TOB baseline manifest not found: {manifest_path}"
+        )
     return json.loads(manifest_path.read_text(encoding="utf-8"))
 
 
@@ -348,10 +462,10 @@ def validate_tob_baseline_manifest(
         manifest_path = baseline_path.with_suffix(".manifest.json")
     manifest = load_tob_baseline_manifest(manifest_path)
     expected = {
-        "scenario_id": POST_OBBBA_SCENARIO_ID,
+        "scenario_id": TOB_BASELINE_SCENARIO_ID,
         "baseline_kind": "calibration_target",
-        "not_law": True,
-        "law_mode": TRUSTEES_CORE_THRESHOLD_LAW_MODE,
+        "not_law": False,
+        "law_mode": TOB_BASELINE_LAW_MODE,
     }
     for key, expected_value in expected.items():
         actual = manifest.get(key)

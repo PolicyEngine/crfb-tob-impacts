@@ -7,7 +7,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from typing import Any
+from typing import Any, Callable
 import hashlib
 import json
 import os
@@ -90,13 +90,21 @@ def _option_static_reform(reform_id: str) -> Any:
     return function()
 
 
+def _coerce_policy_reform(reform_definition: Any) -> Any:
+    if isinstance(reform_definition, dict):
+        return Reform.from_dict(reform_definition, country_id="us")
+    return reform_definition
+
+
 def _option_behavioral_reform(reform_id: str) -> Any:
     from . import reforms as crfb_reforms
 
-    function = getattr(crfb_reforms, f"get_{reform_id}_conventional_dict", None)
+    function = getattr(crfb_reforms, f"get_{reform_id}_behavioral_reform", None)
+    if function is None:
+        function = getattr(crfb_reforms, f"get_{reform_id}_behavioral_dict", None)
     if function is None:
         raise KeyError(f"Unknown behavioral reform: {reform_id}")
-    return Reform.from_dict(function(), country_id="us")
+    return _coerce_policy_reform(function())
 
 
 def build_policy_reform(reform_id: str, scoring_type: str) -> Any:
@@ -130,11 +138,19 @@ def install_behavioral_baseline_tax_system(
             "reason": "simulation has no baseline branch",
         }
 
-    from policyengine_us import Microsimulation
-
-    baseline_system = Microsimulation.default_tax_benefit_system(
-        reform=baseline_reform
+    # Prefer the running simulation class so managed simulations preserve their
+    # certified model<->data pairing. Fall back to policyengine_us.Microsimulation
+    # for lightweight tests and simulation wrappers that proxy the baseline branch.
+    default_tax_benefit_system = getattr(
+        type(sim),
+        "default_tax_benefit_system",
+        None,
     )
+    if default_tax_benefit_system is None:
+        from policyengine_us import Microsimulation
+
+        default_tax_benefit_system = Microsimulation.default_tax_benefit_system
+    baseline_system = default_tax_benefit_system(reform=baseline_reform)
     baseline_system.simulation = sim.baseline
     sim.baseline.tax_benefit_system = baseline_system
     sim.baseline.reform = baseline_reform
@@ -204,7 +220,12 @@ def _calculate_unweighted(
     return _as_1d_array(values)
 
 
-def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
+def materialize_tob_revenue_pair(
+    sim: Any,
+    *,
+    year: int,
+    progress: Callable[[str], None] | None = None,
+) -> dict[str, Any]:
     """Materialize TOB revenue variables without duplicate branch formulas.
 
     This computes raw tax-unit arrays only. It performs no weighted aggregation.
@@ -212,17 +233,24 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
 
     from policyengine_core.periods import period as get_period
 
+    def emit(message: str) -> None:
+        if progress is not None:
+            progress(message)
+
     period = get_period(year)
+    emit("materialize TOB: tax_unit_social_security")
     gross_ss = _calculate_unweighted(
         sim,
         "tax_unit_social_security",
         year=year,
     )
+    emit("materialize TOB: tax_unit_taxable_social_security")
     taxable_ss = _calculate_unweighted(
         sim,
         "tax_unit_taxable_social_security",
         year=year,
     )
+    emit("materialize TOB: full income_tax")
     tax_full_ss = _calculate_unweighted(sim, "income_tax", year=year)
     parameters = sim.tax_benefit_system.parameters(period).gov.ssa.revenue
     capped_taxable_ss = np.minimum(
@@ -231,6 +259,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
     )
 
     no_ss_branch_name = "crfb_tob_no_taxable_ss"
+    emit("materialize TOB: no-taxable-SS branch")
     branch_no_ss = sim.get_branch(no_ss_branch_name, clone_system=True)
     try:
         branch_no_ss.tax_benefit_system.neutralize_variable(
@@ -242,6 +271,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
         sim.branches.pop(no_ss_branch_name, None)
 
     capped_branch_name = "crfb_tob_capped_taxable_ss"
+    emit("materialize TOB: capped-taxable-SS branch")
     branch_capped = sim.get_branch(capped_branch_name, clone_system=True)
     try:
         capped_deleted = _delete_non_input_cached_arrays(branch_capped)
@@ -252,6 +282,7 @@ def materialize_tob_revenue_pair(sim: Any, *, year: int) -> dict[str, Any]:
     finally:
         sim.branches.pop(capped_branch_name, None)
 
+    emit("materialize TOB: cache OASDI/HI arrays")
     oasdi = np.maximum(tax_capped_ss - tax_no_ss, 0)
     medicare_hi = np.maximum(tax_full_ss - tax_capped_ss, 0)
     sim.populations["tax_unit"].get_holder("tob_revenue_oasdi").put_in_cache(
@@ -548,7 +579,9 @@ def _boto3_client(config: ObjectStoreConfig) -> Any:
     try:
         import boto3
     except ImportError as error:  # pragma: no cover - Modal image supplies boto3
-        raise RuntimeError("Full reform H5 object-store persistence requires boto3.") from error
+        raise RuntimeError(
+            "Full reform H5 object-store persistence requires boto3."
+        ) from error
 
     return boto3.client(
         "s3",
@@ -842,9 +875,13 @@ def run_reform_full_h5_cell(
             )
         load_expected_schema_manifest(expected_schema_manifest_path)
     elif guard_ledger:
-        raise RuntimeError("expected_schema_manifest_path is required for approved runs.")
+        raise RuntimeError(
+            "expected_schema_manifest_path is required for approved runs."
+        )
     if guard_ledger and baseline_dataset_manifest_path is None:
-        raise RuntimeError("baseline_dataset_manifest_path is required for approved runs.")
+        raise RuntimeError(
+            "baseline_dataset_manifest_path is required for approved runs."
+        )
     baseline_dataset_validation = None
     if baseline_dataset_manifest_path is not None:
         baseline_dataset_validation = validate_baseline_dataset_against_manifest(
@@ -863,7 +900,9 @@ def run_reform_full_h5_cell(
     )
     if launch_mode == "full":
         if not ledger_pip_freeze_sha:
-            raise RuntimeError("approved_pip_freeze_sha256 is required for full launch workers.")
+            raise RuntimeError(
+                "approved_pip_freeze_sha256 is required for full launch workers."
+            )
         expected_pip_freeze_sha256 = str(ledger_pip_freeze_sha)
     if (
         expected_pip_freeze_sha256
@@ -929,9 +968,9 @@ def run_reform_full_h5_cell(
         tax_contract = tax_assumption_contract_for_dataset(dataset_path, year)
     combined_reform = _compose_reforms(current_law_reform, policy_reform)
 
-    from policyengine_us import Microsimulation
+    from .engine import dataset_microsimulation
 
-    sim = Microsimulation(dataset=str(dataset_path), reform=combined_reform)
+    sim = dataset_microsimulation(dataset_path, reform=combined_reform)
     behavioral_baseline_installation = None
     if scoring_type == "behavioral":
         behavioral_baseline_installation = install_behavioral_baseline_tax_system(

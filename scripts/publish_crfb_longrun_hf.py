@@ -260,11 +260,7 @@ def publish(batch_size: int = 10, tag: bool = True) -> dict:
     for path in [
         f"releases/{VERSION}/release_manifest.json",
         f"releases/{VERSION}/trace.tro.jsonld",
-    ] + [
-        path
-        for path in artifacts_by_path
-        if not path.startswith("long_term/")
-    ]:
+    ] + [path for path in artifacts_by_path if not path.startswith("long_term/")]:
         if not api.file_exists(
             repo_id=REPO_ID,
             repo_type=REPO_TYPE,

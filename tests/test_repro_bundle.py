@@ -196,11 +196,11 @@ def test_create_repro_bundle_copies_lockfiles_and_dirty_repo_overrides(tmp_path)
 
     bundle = create_repro_bundle(
         repo_root=repo_root,
-        output_path=repo_root / "results" / "demo_conventional.csv",
-        scoring="conventional",
+        output_path=repo_root / "results" / "demo_behavioral.csv",
+        scoring="behavioral",
         reforms="option1,option2",
         years="2026-2027",
-        modal_target="submit_cells",
+        modal_target="reform_full_h5",
         policyengine_us_path=pe_us,
         projected_datasets_path=projected,
         snapshot_path=snapshot_path,
@@ -257,7 +257,7 @@ def test_create_repro_bundle_managed_mode_records_policyengine_py_only(tmp_path)
         scoring="static",
         reforms="option1",
         years="2026",
-        modal_target="submit_cells",
+        modal_target="reform_full_h5",
         policyengine_us_path=None,
         projected_datasets_path=None,
         snapshot_path=None,
@@ -272,3 +272,45 @@ def test_create_repro_bundle_managed_mode_records_policyengine_py_only(tmp_path)
     assert set(manifest["repos"]) == {"crfb_tob_impacts", "policyengine_py"}
     assert "policyengine_us" not in manifest["dependency_manifests"]
     assert manifest["environment_contract"]["CRFB_PROJECTED_DATASETS_PATH"] is None
+
+
+def test_repro_bundle_cli_defaults_to_current_full_h5_target():
+    from src.repro_bundle_cli import parse_args
+
+    args = parse_args(
+        [
+            "--output",
+            "results/demo.csv",
+            "--reforms",
+            "option1",
+            "--years",
+            "2026",
+        ]
+    )
+
+    assert args.modal_target == "reform_full_h5"
+
+
+def test_create_repro_bundle_rejects_legacy_modal_targets(tmp_path):
+    repo_root = tmp_path / "crfb-tob-impacts"
+    repo_root.mkdir()
+
+    try:
+        create_repro_bundle(
+            repo_root=repo_root,
+            output_path=repo_root / "results" / "demo.csv",
+            scoring="static",
+            reforms="option1",
+            years="2026",
+            modal_target="submit_cells",
+            policyengine_us_path=None,
+            projected_datasets_path=None,
+            snapshot_path=None,
+            use_policyengine_py_managed_datasets=True,
+            policyengine_py_path=None,
+            bundle_root=repo_root / "results" / "repro_bundles",
+        )
+    except ValueError as error:
+        assert "reform_full_h5" in str(error)
+    else:
+        raise AssertionError("Legacy modal_target was accepted.")

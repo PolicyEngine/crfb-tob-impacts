@@ -23,10 +23,18 @@ from src.runtime_config import (
 )
 
 
+def _installed_policyengine_us_version() -> str:
+    from importlib.metadata import version
+
+    return version("policyengine-us")
+
+
 def _write_dataset(
     base_dir: Path,
     year: int,
     *,
+    policyengine_us_version: str | None = None,
+    policyengine_us_git_sha: str | None = None,
     profile_name: str = "ss-payroll-tob",
     tax_assumption_name: str = "trustees-2025-core-thresholds-v1",
     fell_back_to_ipf: bool = False,
@@ -38,29 +46,19 @@ def _write_dataset(
     top_10_weight_share_pct: float | None = 1.5,
     top_100_weight_share_pct: float | None = 10.0,
     support_augmentation: dict | None = None,
-    donor_family_effective_sample_size: float | None = None,
-    top_10_donor_family_weight_share_pct: float | None = None,
-    max_donor_family_weight_share_pct: float | None = None,
-    positive_clone_donor_family_count: int | None = None,
-    clone_donor_family_effective_sample_size: float | None = None,
-    top_10_clone_donor_family_weight_share_pct: float | None = None,
-    top_100_clone_donor_family_weight_share_pct: float | None = None,
-    max_clone_donor_family_weight_share_pct: float | None = None,
-    positive_clone_older_donor_count: int | None = None,
-    clone_older_donor_effective_sample_size: float | None = None,
-    top_10_clone_older_donor_weight_share_pct: float | None = None,
-    top_100_clone_older_donor_weight_share_pct: float | None = None,
-    max_clone_older_donor_weight_share_pct: float | None = None,
-    positive_clone_worker_donor_count: int | None = None,
-    clone_worker_donor_effective_sample_size: float | None = None,
-    top_10_clone_worker_donor_weight_share_pct: float | None = None,
-    top_100_clone_worker_donor_weight_share_pct: float | None = None,
-    max_clone_worker_donor_weight_share_pct: float | None = None,
 ) -> Path:
     dataset_file = base_dir / f"{year}.h5"
     dataset_file.write_text("", encoding="utf-8")
     metadata = {
         "year": year,
+        # The dataset contract requires the builder's policyengine-us
+        # version; these fixtures stand in for datasets built with the
+        # installed package.
+        "policyengine_us": {
+            "version": policyengine_us_version or _installed_policyengine_us_version(),
+            "git_commit_id": policyengine_us_git_sha or "0" * 40,
+            "git_dirty": False,
+        },
         "target_source": {
             "name": "trustees_2025_current_law",
         },
@@ -137,50 +135,6 @@ def _write_dataset(
             "effective_sample_size": effective_sample_size,
             "top_10_weight_share_pct": top_10_weight_share_pct,
             "top_100_weight_share_pct": top_100_weight_share_pct,
-            "donor_family_effective_sample_size": donor_family_effective_sample_size,
-            "top_10_donor_family_weight_share_pct": (
-                top_10_donor_family_weight_share_pct
-            ),
-            "max_donor_family_weight_share_pct": max_donor_family_weight_share_pct,
-            "positive_clone_donor_family_count": positive_clone_donor_family_count,
-            "clone_donor_family_effective_sample_size": (
-                clone_donor_family_effective_sample_size
-            ),
-            "top_10_clone_donor_family_weight_share_pct": (
-                top_10_clone_donor_family_weight_share_pct
-            ),
-            "top_100_clone_donor_family_weight_share_pct": (
-                top_100_clone_donor_family_weight_share_pct
-            ),
-            "max_clone_donor_family_weight_share_pct": (
-                max_clone_donor_family_weight_share_pct
-            ),
-            "positive_clone_older_donor_count": positive_clone_older_donor_count,
-            "clone_older_donor_effective_sample_size": (
-                clone_older_donor_effective_sample_size
-            ),
-            "top_10_clone_older_donor_weight_share_pct": (
-                top_10_clone_older_donor_weight_share_pct
-            ),
-            "top_100_clone_older_donor_weight_share_pct": (
-                top_100_clone_older_donor_weight_share_pct
-            ),
-            "max_clone_older_donor_weight_share_pct": (
-                max_clone_older_donor_weight_share_pct
-            ),
-            "positive_clone_worker_donor_count": positive_clone_worker_donor_count,
-            "clone_worker_donor_effective_sample_size": (
-                clone_worker_donor_effective_sample_size
-            ),
-            "top_10_clone_worker_donor_weight_share_pct": (
-                top_10_clone_worker_donor_weight_share_pct
-            ),
-            "top_100_clone_worker_donor_weight_share_pct": (
-                top_100_clone_worker_donor_weight_share_pct
-            ),
-            "max_clone_worker_donor_weight_share_pct": (
-                max_clone_worker_donor_weight_share_pct
-            ),
             "constraints": {
                 "ss_total": {"pct_error": 0.0},
                 "payroll_total": {"pct_error": max_constraint_pct_error},
@@ -629,11 +583,18 @@ def test_dataset_path_rejects_wrong_profile(monkeypatch, tmp_path):
 
 
 def test_dataset_path_accepts_validated_dataset(monkeypatch, tmp_path):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     dataset_dir = tmp_path / "datasets"
     snapshot_dir = tmp_path / "snapshot"
     dataset_dir.mkdir()
     snapshot_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
 
     monkeypatch.setenv("CRFB_PROJECTED_DATASETS_PATH", str(dataset_dir))
     monkeypatch.setenv("CRFB_PROJECTED_DATASETS_SNAPSHOT_PATH", str(snapshot_dir))
@@ -868,9 +829,16 @@ def test_dataset_path_can_resolve_through_policyengine_py_manifest(
     monkeypatch,
     tmp_path,
 ):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     managed_dir = tmp_path / "managed"
     managed_dir.mkdir()
-    expected = _write_dataset(managed_dir, 2026)
+    expected = _write_dataset(
+        managed_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _install_fake_policyengine_py_manifest(
         monkeypatch,
         dataset_file=expected,
@@ -899,7 +867,9 @@ def test_dataset_path_template_enforces_policyengine_us_runtime_contract(
     runtime_git_sha = _write_policyengine_us_runtime(runtime, "1.691.10")
     dataset_dir = tmp_path / "datasets"
     dataset_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _add_policyengine_us_metadata(
         expected,
         version="1.691.10",
@@ -1090,7 +1060,9 @@ def test_dataset_path_template_accepts_matching_policyengine_us_runtime(
     runtime_git_sha = _write_policyengine_us_runtime(runtime, "1.691.10")
     dataset_dir = tmp_path / "datasets"
     dataset_dir.mkdir()
-    expected = _write_dataset(dataset_dir, 2026)
+    expected = _write_dataset(
+        dataset_dir, 2026, policyengine_us_git_sha=runtime_git_sha
+    )
     _add_policyengine_us_metadata(
         expected,
         version="1.691.10",
@@ -1175,6 +1147,11 @@ def test_dataset_path_rejects_wrong_tax_assumption(monkeypatch, tmp_path):
 
 
 def test_dataset_path_accepts_year_bounded_approximate_dataset(monkeypatch, tmp_path):
+    runtime_dir = tmp_path / "pe-us-runtime"
+    runtime_git_sha = _write_policyengine_us_runtime(
+        runtime_dir, _installed_policyengine_us_version()
+    )
+    monkeypatch.setenv("CRFB_POLICYENGINE_US_PATH", str(runtime_dir))
     dataset_dir = tmp_path / "datasets"
     snapshot_dir = tmp_path / "snapshot"
     dataset_dir.mkdir()
@@ -1182,6 +1159,7 @@ def test_dataset_path_accepts_year_bounded_approximate_dataset(monkeypatch, tmp_
     expected = _write_dataset(
         dataset_dir,
         2080,
+        policyengine_us_git_sha=runtime_git_sha,
         calibration_quality="approximate",
         max_constraint_pct_error=3.0,
     )
@@ -1436,360 +1414,6 @@ def test_validate_dataset_contract_rejects_missing_late_year_support_metadata(
         )
 
 
-def test_validate_dataset_contract_rejects_composite_donor_family_concentration(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        calibration_quality="approximate",
-        support_augmentation={"name": "donor-backed-composite-v1"},
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=20.0,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(ValueError, match="max_donor_family_weight_share_pct"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="aggregate",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-            reject_aggregate=False,
-        )
-
-
-def test_validate_dataset_contract_rejects_clone_donor_family_concentration(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        calibration_quality="approximate",
-        support_augmentation={"name": "donor-backed-composite-v1"},
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=25.0,
-    )
-
-    with pytest.raises(ValueError, match="max_clone_donor_family_weight_share_pct"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="aggregate",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-            reject_aggregate=False,
-        )
-
-
-def test_validate_dataset_contract_rejects_missing_clone_donor_family_metadata(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        calibration_quality="approximate",
-        support_augmentation={"name": "donor-backed-composite-v1"},
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(
-        ValueError,
-        match="missing calibration_audit.positive_clone_donor_family_count",
-    ):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="aggregate",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-            reject_aggregate=False,
-        )
-
-
-def test_validate_dataset_contract_rejects_marginal_donor_concentration(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        calibration_quality="approximate",
-        support_augmentation={"name": "donor-backed-composite-v1"},
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=10.0,
-        max_clone_older_donor_weight_share_pct=35.0,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=10.0,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(ValueError, match="max_clone_older_donor_weight_share_pct"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="aggregate",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-            reject_aggregate=False,
-        )
-
-
-def test_validate_dataset_contract_rejects_fixed_tob_donor_weighting(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2100,
-        support_augmentation={
-            "name": "donor-backed-composite-v1",
-            "target_year": 2100,
-            "target_year_strategy": "run_year",
-            "tob_donor_weighting_mode": "fixed",
-        },
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=10.0,
-        max_clone_older_donor_weight_share_pct=0.5,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=10.0,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(ValueError, match="tob_donor_weighting_mode='fixed'"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="exact",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-        )
-
-
-def test_validate_dataset_contract_rejects_missing_tob_donor_prior_regularization(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2100,
-        support_augmentation={
-            "name": "donor-backed-composite-v1",
-            "target_year": 2100,
-            "target_year_strategy": "run_year",
-            "tob_donor_weighting_mode": "equal_contribution",
-        },
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=10.0,
-        max_clone_older_donor_weight_share_pct=0.5,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=10.0,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(ValueError, match="tob_donor_family_prior_regularization"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="exact",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-        )
-
-
-def test_validate_dataset_contract_rejects_reused_tob_support_target_year(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        support_augmentation={
-            "name": "donor-backed-composite-v1",
-            "target_year": 2100,
-            "target_year_strategy": "fixed",
-            "tob_donor_weighting_mode": "equal_contribution",
-        },
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=10.0,
-        max_clone_older_donor_weight_share_pct=0.5,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=10.0,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-
-    with pytest.raises(ValueError, match="target_year_strategy='fixed'"):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="exact",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-        )
-
-
-def test_validate_dataset_contract_accepts_equal_contribution_tob_support(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2100,
-        support_augmentation={
-            "name": "donor-backed-composite-v1",
-            "target_year": 2100,
-            "target_year_strategy": "run_year",
-            "tob_donor_weighting_mode": "equal_contribution",
-        },
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=10.0,
-        max_clone_older_donor_weight_share_pct=0.5,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=10.0,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-    metadata_path = tmp_path / "2100.h5.metadata.json"
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    metadata["calibration_audit"]["support_blueprint"] = {
-        "tob_donor_family_prior_regularization": {
-            "mode": "equal_contribution",
-            "family_count": 500,
-        }
-    }
-    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
-
-    metadata = validate_dataset_contract(
-        dataset_file,
-        required_profile="ss-payroll-tob",
-        minimum_calibration_quality="exact",
-        required_target_source="trustees_2025_current_law",
-        required_tax_assumption="trustees-2025-core-thresholds-v1",
-    )
-
-    assert metadata["year"] == 2100
-
-
-def test_validate_dataset_contract_tolerates_float_roundoff_at_share_ceiling(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2085,
-        support_augmentation={
-            "name": "donor-backed-composite-v1",
-            "target_year": 2085,
-            "target_year_strategy": "run_year",
-            "tob_donor_weighting_mode": "equal_contribution",
-        },
-        donor_family_effective_sample_size=2_000.0,
-        top_10_donor_family_weight_share_pct=2.0,
-        max_donor_family_weight_share_pct=0.5,
-        positive_clone_donor_family_count=2_000,
-        clone_donor_family_effective_sample_size=2_000.0,
-        top_10_clone_donor_family_weight_share_pct=2.0,
-        top_100_clone_donor_family_weight_share_pct=10.0,
-        max_clone_donor_family_weight_share_pct=0.5,
-        positive_clone_older_donor_count=2_000,
-        clone_older_donor_effective_sample_size=2_000.0,
-        top_10_clone_older_donor_weight_share_pct=2.0,
-        top_100_clone_older_donor_weight_share_pct=100.00000000000003,
-        max_clone_older_donor_weight_share_pct=0.5,
-        positive_clone_worker_donor_count=2_000,
-        clone_worker_donor_effective_sample_size=2_000.0,
-        top_10_clone_worker_donor_weight_share_pct=2.0,
-        top_100_clone_worker_donor_weight_share_pct=100.00000000000003,
-        max_clone_worker_donor_weight_share_pct=0.5,
-    )
-    metadata_path = tmp_path / "2085.h5.metadata.json"
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    metadata["calibration_audit"]["support_blueprint"] = {
-        "tob_donor_family_prior_regularization": {
-            "mode": "equal_contribution",
-            "family_count": 500,
-        }
-    }
-    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
-
-    metadata = validate_dataset_contract(
-        dataset_file,
-        required_profile="ss-payroll-tob",
-        minimum_calibration_quality="exact",
-        required_target_source="trustees_2025_current_law",
-        required_tax_assumption="trustees-2025-core-thresholds-v1",
-    )
-
-    assert metadata["year"] == 2085
-
-
 def test_validate_dataset_contract_rejects_weakened_env_gate(
     monkeypatch,
     tmp_path,
@@ -1836,30 +1460,6 @@ def test_validate_dataset_contract_allows_unsafe_weakened_env_gate(
     )
 
     assert metadata["year"] == 2075
-
-
-def test_validate_dataset_contract_rejects_missing_composite_donor_family_metadata(
-    tmp_path,
-):
-    dataset_file = _write_dataset(
-        tmp_path,
-        2075,
-        calibration_quality="approximate",
-        support_augmentation={"name": "donor-backed-composite-v1"},
-    )
-
-    with pytest.raises(
-        ValueError,
-        match="missing calibration_audit.donor_family_effective_sample_size",
-    ):
-        validate_dataset_contract(
-            dataset_file,
-            required_profile="ss-payroll-tob",
-            minimum_calibration_quality="aggregate",
-            required_target_source="trustees_2025_current_law",
-            required_tax_assumption="trustees-2025-core-thresholds-v1",
-            reject_aggregate=False,
-        )
 
 
 def test_validate_dataset_contract_can_force_metadata_even_with_env_override(

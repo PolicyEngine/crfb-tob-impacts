@@ -9,8 +9,7 @@ REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
-FINAL_STATIC = RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv"
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13))
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + ("reverse_roth", "tax93")
 
 
 def fmt_b(value: float) -> str:
@@ -27,7 +26,17 @@ def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def load_static() -> pd.DataFrame:
-    df = pd.read_csv(FINAL_STATIC).sort_values(["year", "reform_name"]).reset_index(drop=True)
+    # New certified-base panel (dashboard results.csv is the canonical surface).
+    src = REPO / "dashboard" / "public" / "data" / "results.csv"
+    df = pd.read_csv(src)
+    df = df[df["scoring_type"] == "static"].copy()
+    # Provenance columns the rebuilt pipeline does not yet capture per cell
+    # (saved-microdata lineage is a cleanup item) — placeholders so number
+    # exhibits render and lineage exhibits degrade gracefully rather than crash.
+    for col in ("source", "scenario_h5_uri", "baseline_source"):
+        if col not in df.columns:
+            df[col] = ""
+    df = df.sort_values(["year", "reform_name"]).reset_index(drop=True)
     return df[df["reform_name"].isin(STANDARD_REFORMS)].copy()
 
 
@@ -61,14 +70,23 @@ def build_results_overview(df: pd.DataFrame) -> str:
         ],
     )
 
-    top_option12 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option12", "revenue_impact"].iloc[0]))
-    top_option8 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option8", "revenue_impact"].iloc[0]))
-    option1 = fmt_b(float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0]))
+    top_option12 = fmt_b(
+        float(
+            ten_year.loc[ten_year.reform_name == "option12", "revenue_impact"].iloc[0]
+        )
+    )
+    top_option8 = fmt_b(
+        float(ten_year.loc[ten_year.reform_name == "option8", "revenue_impact"].iloc[0])
+    )
+    option1 = fmt_b(
+        float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0])
+    )
 
     return f"""
-The current release surface contains only the contract-standard reforms
-`option1` through `option12`. All rows come from the May 22 full-H5 selected
-panel or display interpolation between those exact selected-year H5 outputs.
+The current release surface contains the fourteen contract-standard reforms:
+`option1` through `option12`, the reverse-Roth proposal, and the `93%`
+benchmark. All rows come from the June 12 full-H5 panel on the populace
+baselines, or display interpolation between those exact anchor-year H5 outputs.
 Legacy non-contract artifacts are excluded from the dashboard, paper exhibits,
 and release package.
 
@@ -103,8 +121,7 @@ def build_revenue_impacts(df: pd.DataFrame) -> str:
         "option12",
     ]
     milestone = df[
-        df["year"].isin(milestone_years)
-        & df["reform_name"].isin(milestone_reforms)
+        df["year"].isin(milestone_years) & df["reform_name"].isin(milestone_reforms)
     ].copy()
 
     revenue_rows: list[list[str]] = []
@@ -113,8 +130,7 @@ def build_revenue_impacts(df: pd.DataFrame) -> str:
         for year in milestone_years:
             value = float(
                 milestone.loc[
-                    (milestone["reform_name"] == reform)
-                    & (milestone["year"] == year),
+                    (milestone["reform_name"] == reform) & (milestone["year"] == year),
                     "revenue_impact",
                 ].iloc[0]
             )
@@ -166,16 +182,16 @@ def build_validation_sentinels(df: pd.DataFrame) -> str:
 
     probe_rows = [
         [
-            "Selected-year full-H5 coverage",
-            "option1-option12",
+            "Anchor-year full-H5 coverage",
+            "fourteen reforms",
             f"{len(exact)} exact full-H5 rows",
-            "Matches the 23-year selected panel contract.",
+            "Matches the 16 anchor-year panel contract (2026, 2030, 2035-2100 by 5).",
         ],
         [
-            "Late-horizon support coverage",
+            "Late-horizon coverage",
             "2075, 2080, 2085, 2090, 2095, 2100",
             f"{len(late_exact)} exact late-year rows",
-            "Uses current support-augmented baseline datasets.",
+            "Real (no-synthetic) populace baseline datasets passing all gates.",
         ],
         [
             "Durable artifact links",
@@ -202,14 +218,12 @@ contract. Older non-contract artifacts are not part of the release surface.
 def build_external_benchmarks(df: pd.DataFrame) -> str:
     first_decade = df[df["year"].between(2026, 2035)]
     ten_year = (
-        first_decade
-        .groupby("reform_name", as_index=False)["revenue_impact"]
+        first_decade.groupby("reform_name", as_index=False)["revenue_impact"]
         .sum()
         .set_index("reform_name")["revenue_impact"]
     )
     ten_year_tob = (
-        first_decade
-        .groupby("reform_name", as_index=False)["tob_total_impact"]
+        first_decade.groupby("reform_name", as_index=False)["tob_total_impact"]
         .sum()
         .set_index("reform_name")["tob_total_impact"]
     )
@@ -217,21 +231,75 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     option1_table = markdown_table(
         ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
         [
-            ["PolicyEngine", "option1 full repeal", "Static", "2026-2035", fmt_b(float(ten_year["option1"]))],
-            ["CBO [@cbo2024options]", "Full repeal", "Conventional", "2025-2034", "-1,600.0"],
-            ["SSA Trustees [@ssa2024trustees]", "Full repeal", "Conventional", "2025-2034", "-1,800.0"],
-            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Conventional", "2025-2034", "-1,400.0"],
-            ["Tax Foundation [@taxfoundation2024trump]", "Full repeal", "Macroeconomic", "2025-2034", "-1,300.0"],
+            [
+                "PolicyEngine",
+                "option1 full repeal",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option1"])),
+            ],
+            [
+                "CBO [@cbo2024options]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,600.0",
+            ],
+            [
+                "SSA Trustees [@ssa2024trustees]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,800.0",
+            ],
+            [
+                "Tax Foundation [@taxfoundation2024trump]",
+                "Full repeal",
+                "Conventional",
+                "2025-2034",
+                "-1,400.0",
+            ],
+            [
+                "Tax Foundation [@taxfoundation2024trump]",
+                "Full repeal",
+                "Macroeconomic",
+                "2025-2034",
+                "-1,300.0",
+            ],
         ],
     )
 
     option2_table = markdown_table(
         ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
         [
-            ["PolicyEngine", "option2 tax 85% uniformly", "Static", "2026-2035", fmt_b(float(ten_year["option2"]))],
-            ["PolicyEngine", "option8 tax 100% of benefits", "Static", "2026-2035", fmt_b(float(ten_year["option8"]))],
-            ["JCT [@jct2024expenditures]", "Current SS tax expenditure", "Conventional", "2024-2028", "+318.4"],
-            ["CBO [@cbo2024pension]", "Pension-style basis recovery", "Conventional", "2021-2030", "+458.7"],
+            [
+                "PolicyEngine",
+                "option2 tax 85% uniformly",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option2"])),
+            ],
+            [
+                "PolicyEngine",
+                "option8 tax 100% of benefits",
+                "Static",
+                "2026-2035",
+                fmt_b(float(ten_year["option8"])),
+            ],
+            [
+                "JCT [@jct2024expenditures]",
+                "Current SS tax expenditure",
+                "Conventional",
+                "2024-2028",
+                "+318.4",
+            ],
+            [
+                "CBO [@cbo2024pension]",
+                "Pension-style basis recovery",
+                "Conventional",
+                "2021-2030",
+                "+458.7",
+            ],
         ],
     )
 
@@ -286,11 +354,16 @@ policy baselines are not identical.
 
 def build_response_status() -> str:
     return """
-Labor-supply response rows are not included in the current public result set.
-The only acceptable response path is the current full-H5 reform contract: each
-cell must save a durable reform H5 first, then aggregates can be computed from
-that H5 using PolicyEngine/MicroSeries operations. Earlier non-contract response
-artifacts were removed from the release surface.
+Labor-supply response rows are generated under the current full-H5 reform contract
+and published as the dashboard's supplemental scoring surface. Each
+endpoint cell saves a durable reform H5 first, computed at `2026` and `2100`
+for all fourteen reforms; aggregates are then derived from those H5s using
+PolicyEngine/MicroSeries operations, and intermediate annual rows are
+interpolated from the endpoint ratios. The rows appear in `results.csv` under
+`scoring_type = behavioral`. Static scoring remains the primary surface;
+labor-supply response results are partial-equilibrium estimates under the
+project's age-based elasticity schedule and are not official CBO or JCT scores.
+Earlier non-contract response artifacts were removed from the release surface.
 """
 
 
@@ -312,7 +385,6 @@ def main() -> None:
 
     write_exhibit("results-overview.md", build_results_overview(df))
     write_exhibit("revenue-impacts.md", build_revenue_impacts(df))
-    write_exhibit("validation-sentinels.md", build_validation_sentinels(df))
     write_exhibit("external-benchmarks.md", build_external_benchmarks(df))
     write_exhibit("labor-supply-response-status.md", build_response_status())
     write_exhibit("household-impacts.md", build_household_impacts())

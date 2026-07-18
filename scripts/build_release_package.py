@@ -25,6 +25,7 @@ RESULTS = REPO / "results"
 PACKAGE_ROOT = RESULTS / "release_packages"
 POST_OBBBA_TOB_BASELINE = GENERATED_BASELINE_PATH
 POST_OBBBA_TOB_BASELINE_MANIFEST = POST_OBBBA_TOB_BASELINE.with_suffix(".manifest.json")
+RESULTS_CONTRACT_PATH = REPO / "dashboard" / "public" / "data" / "results_contract.json"
 
 
 @dataclass(frozen=True)
@@ -35,46 +36,47 @@ class ReleasePackage:
 
 
 REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
+    ("results", REPO / "results.csv"),
+    ("results", REPO / "results.csv.metadata.json"),
+    ("results", RESULTS / "modal_runs_production" / "static_cells.csv"),
+    ("results", RESULTS / "modal_runs_production" / "behavioral_endpoint_cells.csv"),
+    ("results", RESULTS / "modal_runs_production" / "balanced_fix_results.csv"),
     (
         "results",
-        RESULTS / "all_static_results_full_h5_selected_panel_20260522.csv",
-    ),
-    (
-        "results",
-        RESULTS / "all_static_results_full_h5_selected_panel_display_20260522.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_full_h5_exact_20260522.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260522.csv",
-    ),
-    (
-        "results",
-        RESULTS / "behavioral_endpoint_ratio_display_20260522_metadata.json",
-    ),
-    ("results", RESULTS / "all_static_results_full_h5_selected_panel_20260522_metadata.json"),
-    (
-        "results",
-        RESULTS / "results_full_h5_selected_panel_display_20260522.csv",
-    ),
-    (
-        "results",
-        RESULTS / "results_full_h5_selected_panel_display_20260522_metadata.json",
+        RESULTS / "modal_runs_production" / "balanced_fix_results_metadata.json",
     ),
     ("dashboard_data", REPO / "dashboard" / "public" / "data" / "results.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "ssa_economic_projections.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv"),
-    ("dashboard_data", REPO / "dashboard" / "public" / "data" / "baseline_aggregates.csv"),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_results.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "balanced_fix_results_metadata.json",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "ssa_economic_projections.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "hi_taxable_payroll.csv",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "baseline_aggregates.csv",
+    ),
     (
         "dashboard_data",
         REPO / "dashboard" / "public" / "data" / "baseline_indexed_parameters.csv",
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "baseline_indexed_parameter_summary.csv",
+        REPO
+        / "dashboard"
+        / "public"
+        / "data"
+        / "baseline_indexed_parameter_summary.csv",
     ),
     (
         "dashboard_data",
@@ -102,40 +104,70 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "post_obbba_tob_baseline_manifest.json",
+        REPO
+        / "dashboard"
+        / "public"
+        / "data"
+        / "post_obbba_tob_baseline_manifest.json",
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "balanced_fix_baseline.csv",
+        REPO / "dashboard" / "public" / "data" / "distributional.json",
     ),
     (
         "dashboard_data",
-        REPO / "dashboard" / "public" / "data" / "balanced_fix_baseline_metadata.json",
+        REPO / "dashboard" / "public" / "data" / "results_contract.json",
+    ),
+    (
+        "dashboard_data",
+        REPO / "dashboard" / "public" / "data" / "tob_explainer.json",
     ),
     ("root_compat", REPO / "results.csv"),
     ("docs", REPO / "docs" / "current" / "README.md"),
     ("docs", REPO / "docs" / "current" / "deliverables.md"),
     ("docs", REPO / "docs" / "current" / "methodology.md"),
     ("docs", REPO / "docs" / "current" / "pipeline.md"),
-    ("docs", REPO / "docs" / "current" / "full-h5-results-summary-20260522.md"),
-    ("docs", REPO / "docs" / "current" / "github-ai-thread-audit-20260522.md"),
     ("docs", REPO / "docs" / "current" / "REFORM_MODELING_BIBLE.md"),
-    ("docs", REPO / "docs" / "current" / "reform-modeling-progress.json"),
+    ("docs", REPO / "docs" / "current" / "budget-window-infill.md"),
+    (
+        "docs",
+        REPO
+        / "docs"
+        / "current"
+        / "manifests"
+        / "baseline-dataset-manifest-v2pop-noclone.json",
+    ),
+    (
+        "docs",
+        REPO
+        / "docs"
+        / "current"
+        / "manifests"
+        / "baseline-dataset-manifest-9f1260b-certinfill.json",
+    ),
+    ("docs", REPO / "docs" / "current" / "v2-baseline-method.md"),
+    ("docs", REPO / "docs" / "current" / "v2-launch-runbook.md"),
     ("paper", REPO / "paper" / "sections" / "03-methods.qmd"),
     ("paper", REPO / "paper" / "sections" / "04-results-and-validation.qmd"),
     ("paper", REPO / "paper" / "sections" / "05-results-framework.qmd"),
     ("paper", REPO / "paper" / "sections" / "06-publication-boundary.qmd"),
     ("scripts", REPO / "scripts" / "build_dashboard_baseline_assumptions.py"),
-    ("scripts", REPO / "scripts" / "build_behavioral_endpoint_status.py"),
     ("scripts", REPO / "scripts" / "build_dashboard_payroll_denominators.py"),
+    ("scripts", REPO / "scripts" / "build_hi_expenditures_tr2026.py"),
+    ("scripts", REPO / "scripts" / "build_distributional_data.py"),
+    ("scripts", REPO / "scripts" / "build_results_contract.py"),
+    ("scripts", REPO / "scripts" / "build_tob_explainer_data.py"),
+    ("scripts", REPO / "scripts" / "publish_balanced_fix_results.py"),
     ("scripts", REPO / "scripts" / "publish_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_behavioral_endpoint_dashboard_results.py"),
     ("scripts", REPO / "scripts" / "publish_full_h5_static_dashboard_results.py"),
-    ("scripts", REPO / "scripts" / "publish_balanced_fix_dashboard_data.py"),
+    ("modal", REPO / "modal_batch" / "balanced_fix.py"),
     ("package", REPO / "pyproject.toml"),
+    ("package", REPO / "src" / "balanced_fix.py"),
     ("package", REPO / "src" / "cli.py"),
     ("package", REPO / "src" / "dashboard_baseline_assumptions.py"),
     ("package", REPO / "src" / "runtime_config.py"),
+    ("package", REPO / "src" / "hi_expenditures.py"),
     ("package", REPO / "src" / "tax_assumption_loader.py"),
     ("package", REPO / "src" / "tob_baseline.py"),
     ("tests", REPO / "tests" / "test_release_artifacts.py"),
@@ -143,11 +175,11 @@ REQUIRED_FILES: tuple[tuple[str, Path], ...] = (
     ("source_data", POST_OBBBA_TOB_BASELINE_MANIFEST),
 )
 
-OPTIONAL_FILES: tuple[tuple[str, Path], ...] = (
-)
+OPTIONAL_FILES: tuple[tuple[str, Path], ...] = ()
 
 DATA_SOURCE_GLOBS: tuple[str, ...] = (
     "data/*.csv",
+    "data/tr2026_sources.manifest.json",
     "reproducibility.lock.toml",
 )
 
@@ -187,7 +219,9 @@ def git_value(*args: str) -> str | None:
     return result.stdout.strip()
 
 
-def copy_file(source: Path, package_dir: Path, records: list[dict[str, object]], category: str) -> None:
+def copy_file(
+    source: Path, package_dir: Path, records: list[dict[str, object]], category: str
+) -> None:
     relative = source.relative_to(REPO)
     if any(record["path"] == str(relative) for record in records):
         return
@@ -204,21 +238,57 @@ def copy_file(source: Path, package_dir: Path, records: list[dict[str, object]],
     )
 
 
-def copy_tree(source_root: Path, package_dir: Path, records: list[dict[str, object]], category: str) -> None:
+def copy_tree(
+    source_root: Path,
+    package_dir: Path,
+    records: list[dict[str, object]],
+    category: str,
+) -> None:
     for source in sorted(source_root.rglob("*")):
         if source.is_file():
             copy_file(source, package_dir, records, category)
+
+
+def _contract_local_json_path(raw_path: object) -> Path:
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(
+            f"Contract manifest path must be a non-empty string: {raw_path!r}"
+        )
+    relative = Path(raw_path)
+    if relative.is_absolute() or ".." in relative.parts or relative.suffix != ".json":
+        raise ValueError(
+            f"Contract manifest path must be package-local JSON: {raw_path}"
+        )
+    source = (REPO / relative).resolve()
+    try:
+        source.relative_to(REPO)
+    except ValueError as exc:
+        raise ValueError(
+            f"Contract manifest path escapes the repository: {raw_path}"
+        ) from exc
+    return source
+
+
+def contract_manifest_paths(
+    contract_path: Path = RESULTS_CONTRACT_PATH,
+) -> list[Path]:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    baseline_build = contract["lineage"]["baseline_build"]
+    paths = [
+        _contract_local_json_path(baseline_build["manifest_path"]),
+        *(
+            _contract_local_json_path(path)
+            for path in baseline_build.get("supplemental_manifest_paths", [])
+        ),
+    ]
+    return sorted(set(paths))
 
 
 def baseline_metadata_paths() -> list[Path]:
     paths: set[Path] = set()
     for csv_path in [
         REPO / "dashboard" / "public" / "data" / "baseline_calibration_targets.csv",
-        REPO
-        / "dashboard"
-        / "public"
-        / "data"
-        / "baseline_calibration_diagnostics.csv",
+        REPO / "dashboard" / "public" / "data" / "baseline_calibration_diagnostics.csv",
     ]:
         if not csv_path.exists():
             continue
@@ -247,7 +317,9 @@ def archive_package(package_dir: Path) -> Path:
     archive_path = package_dir.with_suffix(".zip")
     if archive_path.exists():
         archive_path.unlink()
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(
+        archive_path, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
         for path in sorted(package_dir.rglob("*")):
             if path.is_file():
                 archive.write(path, path.relative_to(package_dir.parent))
@@ -282,6 +354,18 @@ def build_release_package(
     if missing_required:
         raise FileNotFoundError(
             "Missing required release package files: " + ", ".join(missing_required)
+        )
+
+    missing_contract_manifests: list[str] = []
+    for source in contract_manifest_paths():
+        if source.exists():
+            copy_file(source, package_dir, records, "contract_lineage")
+        else:
+            missing_contract_manifests.append(str(source.relative_to(REPO)))
+    if missing_contract_manifests:
+        raise FileNotFoundError(
+            "Missing results-contract baseline manifests: "
+            + ", ".join(missing_contract_manifests)
         )
 
     copied_optional: list[str] = []

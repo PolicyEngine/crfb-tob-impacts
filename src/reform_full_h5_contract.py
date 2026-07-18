@@ -182,8 +182,10 @@ def normalize_cells(cells: list[Any] | tuple[Any, ...]) -> tuple[ReformCell, ...
 
 def normalize_scoring_type(scoring_type: str) -> str:
     normalized = scoring_type.strip().lower()
-    if normalized == "conventional":
-        return "behavioral"
+    if normalized not in {"static", "behavioral"}:
+        raise ValueError(
+            f"Unsupported scoring_type {scoring_type!r}; expected static or behavioral"
+        )
     return normalized
 
 
@@ -273,7 +275,9 @@ def _validate_common_approval(
             ledger.get("paid_modal_launch_allowed") is True,
             "paid_modal_launch_allowed is not true.",
         )
-        _require(bool(ledger.get("approval_text_or_id")), "approval_text_or_id is missing.")
+        _require(
+            bool(ledger.get("approval_text_or_id")), "approval_text_or_id is missing."
+        )
         _require(bool(ledger.get("approved_by")), "approved_by is missing.")
         _require(bool(ledger.get("approved_at")), "approved_at is missing.")
     if launch_mode == "sentinel":
@@ -586,7 +590,9 @@ class R2ConditionalApprovalStore:
         reservation_payload = self._read_json(f"reservations/{token_hash}.json")
         expected = payload.get("expected_reservation")
         if not isinstance(expected, dict):
-            raise ApprovalGuardError("Reservation consumption payload is missing expected_reservation.")
+            raise ApprovalGuardError(
+                "Reservation consumption payload is missing expected_reservation."
+            )
         _validate_payload_subset(
             actual=reservation_payload,
             expected=expected,
@@ -667,7 +673,9 @@ def record_spawned_call(
     write_ledger(ledger_path, ledger)
 
 
-def cell_list_for_ledger(cells: list[ReformCell] | tuple[ReformCell, ...]) -> list[dict]:
+def cell_list_for_ledger(
+    cells: list[ReformCell] | tuple[ReformCell, ...],
+) -> list[dict]:
     return [asdict(cell) for cell in cells]
 
 

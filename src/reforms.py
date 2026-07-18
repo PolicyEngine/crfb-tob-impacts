@@ -6,7 +6,8 @@ Social Security taxation policy options.
 """
 
 from policyengine_core.reforms import Reform
-from policyengine_us.model_api import *
+from policyengine_us.model_api import *  # noqa: F403
+from policyengine_us.model_api import TaxUnit, USD, Variable, YEAR, add
 
 
 # Common reform components as modular functions
@@ -170,6 +171,21 @@ def tax_90_percent_ss():
             "2026-01-01.2100-12-31": 0.90
         },
     }
+
+
+def tax_93_percent_ss():
+    """Tax 93% of Social Security benefits for all recipients.
+
+    Steve Goss's SSA analysis found that about 93% of benefits would be
+    taxable under full income-tax treatment of the employer-funded and
+    earnings portions of benefits. Same structure as the 90% option with
+    every rate parameter set to 0.93.
+    """
+    reform_dict = tax_90_percent_ss()
+    for parameter, values in reform_dict.items():
+        if ".taxability.rate." in parameter:
+            reform_dict[parameter] = {period: 0.93 for period in values}
+    return reform_dict
 
 
 def tax_95_percent_ss():
@@ -371,7 +387,56 @@ def enable_ss_credit_phase_out():
     }
 
 
-# CBO labor supply elasticities (for conventional scoring)
+def deduct_employee_social_security_payroll_tax(
+    parameter_values: dict,
+    *,
+    name: str,
+):
+    """Apply parameters and deduct employee OASDI payroll tax from AGI."""
+
+    parameter_reform = Reform.from_dict(parameter_values, country_id="us")
+
+    class above_the_line_deductions(Variable):
+        value_type = float
+        entity = TaxUnit
+        label = "Above-the-line deductions including employee OASDI payroll tax"
+        unit = USD
+        definition_period = YEAR
+
+        def formula(tax_unit, period, parameters):
+            baseline_deductions = add(
+                tax_unit,
+                period,
+                parameters(period).gov.irs.ald.deductions,
+            )
+            employee_social_security_tax = add(
+                tax_unit,
+                period,
+                ["employee_social_security_tax"],
+            )
+            return baseline_deductions + employee_social_security_tax
+
+    class deduction_reform(Reform):
+        country_id = "us"
+
+        def apply(self):
+            self.update_variable(above_the_line_deductions)
+
+    parameter_reform.parameter_values = parameter_values
+    parameter_reform.name = name
+    deduction_reform.name = name
+
+    # Return a two-reform set (parameters, then the OASDI-deduction variable)
+    # rather than nesting parameter_reform.apply() inside a single custom
+    # reform. policyengine-us's labor-supply path re-applies reforms, and a
+    # from_dict reform nested inside another reform's apply() gets its parameter
+    # dict rebound to the class object, raising "type object 'reform' has no
+    # attribute 'items'". Applied as a flat set, each reform is simple and
+    # behavioral scoring works.
+    return (parameter_reform, deduction_reform)
+
+
+# CBO labor supply elasticities (for behavioral scoring)
 #
 # Use the labor-supply elasticity schema supported by current policyengine-us.
 # Earlier local branches split income elasticities into a base value and age
@@ -417,7 +482,7 @@ CBO_ELASTICITIES = {
 }
 
 
-# Dict-returning functions for each option (used for conventional scoring)
+# Dict-returning functions for each option (used for behavioral scoring)
 # These return complete parameter dictionaries with CBO elasticities pre-merged
 
 
@@ -536,6 +601,11 @@ def get_option10_dict():
     return tax_95_percent_ss()
 
 
+def get_tax93_dict():
+    """Return parameter dict for the 93% taxation option (static scoring)."""
+    return tax_93_percent_ss()
+
+
 def get_option11_dict():
     """Return parameter dict for Option 11 (static scoring only - no elasticities).
 
@@ -642,8 +712,18 @@ def get_option12_dict():
     return reform_dict
 
 
-# Complete conventional scoring dictionaries with CBO elasticities pre-merged
-def get_option1_conventional_dict():
+def get_reverse_roth_dict():
+    """Return parameter dict for Marc Goldwein's reverse-Roth SS proposal.
+
+    The Social Security piece immediately taxes 100% of benefits. The employee
+    OASDI payroll-tax deduction is implemented by get_reverse_roth_reform()
+    because it requires a custom above-the-line deduction variable.
+    """
+    return tax_100_percent_ss()
+
+
+# Complete behavioral scoring dictionaries with CBO elasticities pre-merged
+def get_option1_behavioral_dict():
     """Return complete parameter dict for Option 1 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -651,7 +731,7 @@ def get_option1_conventional_dict():
     return result
 
 
-def get_option2_conventional_dict():
+def get_option2_behavioral_dict():
     """Return complete parameter dict for Option 2 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -659,7 +739,7 @@ def get_option2_conventional_dict():
     return result
 
 
-def get_option3_conventional_dict():
+def get_option3_behavioral_dict():
     """Return complete parameter dict for Option 3 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -668,7 +748,7 @@ def get_option3_conventional_dict():
     return result
 
 
-def get_option4_conventional_dict(credit_amount=500):
+def get_option4_behavioral_dict(credit_amount=500):
     """Return complete parameter dict for Option 4 with CBO elasticities."""
     result = {}
     result.update(tax_85_percent_ss())
@@ -678,7 +758,7 @@ def get_option4_conventional_dict(credit_amount=500):
     return result
 
 
-def get_option5_conventional_dict():
+def get_option5_behavioral_dict():
     """Return complete parameter dict for Option 5 with CBO elasticities."""
     result = {}
     result.update(eliminate_ss_taxation())
@@ -687,7 +767,7 @@ def get_option5_conventional_dict():
     return result
 
 
-def get_option6_conventional_dict():
+def get_option6_behavioral_dict():
     """Return complete parameter dict for Option 6 with CBO elasticities."""
     reform_dict = {
         "gov.contrib.crfb.tax_employer_payroll_tax.in_effect": {
@@ -749,7 +829,7 @@ def get_option6_conventional_dict():
     return reform_dict
 
 
-def get_option7_conventional_dict():
+def get_option7_behavioral_dict():
     """Return complete parameter dict for Option 7 with CBO elasticities."""
     result = {}
     result.update(eliminate_senior_deduction())
@@ -757,7 +837,7 @@ def get_option7_conventional_dict():
     return result
 
 
-def get_option8_conventional_dict():
+def get_option8_behavioral_dict():
     """Return complete parameter dict for Option 8 with CBO elasticities."""
     result = {}
     result.update(tax_100_percent_ss())
@@ -765,7 +845,7 @@ def get_option8_conventional_dict():
     return result
 
 
-def get_option9_conventional_dict():
+def get_option9_behavioral_dict():
     """Return complete parameter dict for Option 9 with CBO elasticities."""
     result = {}
     result.update(tax_90_percent_ss())
@@ -773,7 +853,7 @@ def get_option9_conventional_dict():
     return result
 
 
-def get_option10_conventional_dict():
+def get_option10_behavioral_dict():
     """Return complete parameter dict for Option 10 with CBO elasticities."""
     result = {}
     result.update(tax_95_percent_ss())
@@ -781,7 +861,14 @@ def get_option10_conventional_dict():
     return result
 
 
-def get_option11_conventional_dict():
+def get_tax93_behavioral_dict():
+    """Return complete parameter dict for the 93% option with CBO elasticities."""
+    result = get_tax93_dict()
+    result.update(CBO_ELASTICITIES)
+    return result
+
+
+def get_option11_behavioral_dict():
     """Return complete parameter dict for Option 11 with CBO elasticities.
 
     $700 credit with 6% phase-out above $150k (joint) / $75k (other).
@@ -795,7 +882,7 @@ def get_option11_conventional_dict():
     return result
 
 
-def get_option12_conventional_dict():
+def get_option12_behavioral_dict():
     """Return complete parameter dict for Option 12 with CBO elasticities.
 
     Extended Roth-Style Swap with specific phase-out schedule.
@@ -805,24 +892,41 @@ def get_option12_conventional_dict():
     return result
 
 
+def get_reverse_roth_behavioral_reform():
+    """Return reverse-Roth reform with CBO labor-supply elasticities."""
+    result = get_reverse_roth_dict()
+    result.update(CBO_ELASTICITIES)
+    return deduct_employee_social_security_payroll_tax(
+        result,
+        name="Reverse Roth Social Security proposal with behavioral elasticities",
+    )
+
+
 # =============================================================================
 # OPTION 13 / BALANCED FIX - NOT IMPLEMENTED HERE
 # =============================================================================
 #
-# Option 13 (Balanced Fix Baseline) requires conventional year-by-year gap closing
+# Option 13 (Balanced Fix Baseline) requires behavioral year-by-year gap closing
 # that CANNOT be implemented via Reform.from_dict(). The implementation requires:
 #
 #   1. Running a baseline simulation to calculate actual SS/HI gaps each year
 #   2. Computing tax rate increases from real gaps
-#   3. Applying benefit cuts via set_input() with TOB feedback adjustment
+#   3. Applying benefit cuts via set_input(), then measuring remaining gaps
+#      after TOB feedback in a separate Stage-1 sim
 #
-# The correct implementation is in: batch/run_option13_modal.py
+# The current self-contained implementation spec is:
+# analysis/balanced_fix_recompute_spec.md. The old Option 13/14 runner is
+# archived fail-closed and must not be used for current results.
 #
 # Gap Closing Formula (per year):
-#   - SS Gap = (employee_ss_tax + employer_ss_tax + tob_oasdi) - ss_benefits
-#   - HI Gap = (employee_hi_tax + employer_hi_tax + tob_hi) - medicare_expenditures
-#   - 50% closed via payroll tax increases (split employee/employer)
-#   - 50% closed via SS benefit cuts (with TOB feedback: cut / (1 - 0.175))
+#   - SS income = employee_social_security_tax + employer_social_security_tax
+#       + self_employment_social_security_tax + tob_revenue_oasdi
+#   - HI income = employee_medicare_tax + employer_medicare_tax
+#       + self_employment_medicare_tax + additional_medicare_tax
+#       + tob_revenue_medicare_hi
+#   - 50% of the initial SS shortfall is closed via benefit cuts.
+#   - Remaining Stage-1 SS/HI gaps are closed via employee/employer payroll
+#     rate changes.
 #
 # To run publishable Modal jobs, use the package CLI so runtime contracts are checked.
 # =============================================================================
@@ -954,9 +1058,95 @@ def get_option12_reform():
     return Reform.from_dict(get_option12_dict(), country_id="us")
 
 
+def get_tax93_reform():
+    """Taxation of 93% of Social Security benefits (Goss share)."""
+    return Reform.from_dict(get_tax93_dict(), country_id="us")
+
+
+def get_magi100_dict():
+    """Return parameter dict for the full-MAGI-inclusion option (static scoring).
+
+    Counts 100% of Social Security benefits, rather than 50%, in the combined
+    income used to determine the taxable share of benefits (the IRC section
+    86(b)(1) fraction). Benefit-taxation rates and thresholds are unchanged, so
+    benefits become taxable at lower non-benefit incomes and a larger share is
+    taxable at a given income, but the 85% inclusion cap still applies.
+    """
+    return {
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            "2026-01-01.2100-12-31": 1.0
+        }
+    }
+
+
+def get_magi100_reform():
+    """Full MAGI inclusion: count 100% of benefits toward combined income."""
+    return Reform.from_dict(get_magi100_dict(), country_id="us")
+
+def get_tax_panel_2005_dict():
+    """Return parameter dict for the 2005 Tax Panel option (static scoring).
+
+    Implements the President's Advisory Panel on Federal Tax Reform (2005)
+    Social Security recommendation (report pp. 87-89, Figure 5.11 worksheet),
+    modified per CRFB's request to leave the thresholds unindexed:
+
+        taxable SS = clamp(50% x (income - threshold), 0, 85% x benefits)
+
+    where income counts 85% of benefits (worksheet line 9 includes line 7)
+    and the threshold is $22,000 single / $44,000 joint, fixed in nominal
+    terms 2026-2100. Expressed entirely through existing section 86
+    parameters: the phase-in uses the tier-1 slope (rate.base.excess, already
+    50%) with the tier-1 benefit cap raised to 85%, and the second tier is
+    disabled by moving the adjusted base threshold out of reach. Married
+    filing separately while cohabitating keeps its current-law $0 threshold
+    (the Panel is silent on it).
+    """
+    period = "2026-01-01.2100-12-31"
+    unreachable = 10_000_000_000  # de facto infinity: nobody enters tier 2
+    reform = {
+        "gov.irs.social_security.taxability.combined_income_ss_fraction": {
+            period: 0.85
+        },
+        "gov.irs.social_security.taxability.rate.base.benefit_cap": {period: 0.85},
+    }
+    thresholds = {
+        "SINGLE": 22_000,
+        "JOINT": 44_000,
+        "SEPARATE": 22_000,
+        "HEAD_OF_HOUSEHOLD": 22_000,
+        "SURVIVING_SPOUSE": 22_000,
+    }
+    for status, amount in thresholds.items():
+        reform[
+            f"gov.irs.social_security.taxability.threshold.base.main.{status}"
+        ] = {period: amount}
+        reform[
+            f"gov.irs.social_security.taxability.threshold.adjusted_base.main.{status}"
+        ] = {period: unreachable}
+    return reform
+
+
+def get_tax_panel_2005_reform():
+    """2005 Tax Panel simple deduction, unindexed thresholds (CRFB variant)."""
+    return Reform.from_dict(get_tax_panel_2005_dict(), country_id="us")
+
+
+
+def get_reverse_roth_reform():
+    """Reverse Roth Social Security proposal.
+
+    Immediately taxes 100% of Social Security benefits while making employee
+    OASDI payroll taxes deductible from income tax. Medicare is left unchanged.
+    """
+    return deduct_employee_social_security_payroll_tax(
+        get_reverse_roth_dict(),
+        name="Reverse Roth Social Security proposal",
+    )
+
+
 # NOTE: get_option13_reform() and get_balanced_fix_reform() have been removed.
 # See comment block above for why Option 13 cannot be implemented here.
-# Use batch/run_option13_modal.py instead.
+# Use analysis/balanced_fix_recompute_spec.md for the current implementation spec.
 
 
 # Dictionary mapping reform IDs to configurations
@@ -1009,5 +1199,14 @@ REFORMS = {
         "name": "Extended Roth-Style Swap (2029-2062 Phase-Out)",
         "func": get_option12_reform,
     },
-    # NOTE: option13 and balanced_fix removed - use batch/run_option13_modal.py
+    "reverse_roth": {
+        "name": "Reverse Roth Social Security Proposal",
+        "func": get_reverse_roth_reform,
+    },
+    "tax93": {
+        "name": "Taxation of 93% of Social Security Benefits",
+        "func": get_tax93_reform,
+    },
+    # NOTE: option13 and balanced_fix removed; see
+    # analysis/balanced_fix_recompute_spec.md.
 }

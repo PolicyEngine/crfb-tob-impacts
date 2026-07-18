@@ -1,16 +1,12 @@
 # Current CRFB Handbook
 
-## Start Here For Reform Modeling
+## Start Here
 
-**Before any reform Modal launch, read
-[`REFORM_MODELING_BIBLE.md`](REFORM_MODELING_BIBLE.md).** It is the controlling
-source of truth for the reform-modeling relaunch and the full reform H5/R2
-artifact contract. Gate progress is tracked in
-[`reform-modeling-progress.json`](reform-modeling-progress.json).
-
-This is the current documentation spine for the active CRFB trust-fund-taxation
-work. For any reform-modeling relaunch, the Bible and progress ledger above
-control over the rest of this handbook.
+This is the current documentation spine for the CRFB trust-fund-taxation work.
+The controlling modeling contract is
+[`REFORM_MODELING_BIBLE.md`](REFORM_MODELING_BIBLE.md); the baseline method and
+Trustees 2026 target lineage are in
+[`v2-baseline-method.md`](v2-baseline-method.md).
 
 It is designed to answer four questions quickly:
 
@@ -22,21 +18,18 @@ It is designed to answer four questions quickly:
 ## What This Covers
 
 - the standard `option1` through `option12` long-run analysis
-- legacy/background documentation for the hardened exact-only static rebuild
-  path; do not use it as the production full-H5 reform relaunch path
+- the v2 populace/TR2026 baseline construction and full reform-H5 scoring path
 - the delivery boundary between current dashboard outputs and legacy
   spreadsheet-reference values
 
 ## Current Workflow At A Glance
 
-The diagram below documents the current release workflow. It is not approval to
-launch reform modeling. The active reform relaunch path is controlled by
-[`REFORM_MODELING_BIBLE.md`](REFORM_MODELING_BIBLE.md).
+The diagram below documents the current release workflow.
 
 ```mermaid
 flowchart LR
   A["Trustees current-law targets"] --> B["Exact H5 generation in policyengine-us-data"]
-  B --> C["Current full-H5 standard rescoring for options 1-12"]
+  B --> C["Current full-H5 rescoring for 14 reforms"]
   C --> D["Unified results.csv"]
   D --> E["Dashboard current results"]
   D --> F["Release package and paper exhibits"]
@@ -46,8 +39,9 @@ flowchart LR
 ## Read In This Order
 
 - [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md)
-  - controlling plan for reform modeling, full reform H5 retention, R2
-    durability, forbidden paths, and launch gates
+  - current full-H5 retention, R2 durability, aggregation, and release rules
+- [v2-baseline-method.md](v2-baseline-method.md)
+  - current v2 populace/TR2026 baseline construction and validation limits
 - [methodology.md](methodology.md)
   - scope, scenario families, modeling assumptions, and interpretation rules
 - [pipeline.md](pipeline.md)
@@ -67,11 +61,9 @@ flowchart LR
   surfaces are the dashboard, Quarto paper, and operational docs.
 - Keep prior or legacy values in comparison spreadsheets only, not in the
   dashboard current-results path.
-- For reform modeling, trust the Bible and progress ledger above any run
-  artifact or prose note. A run artifact can be evidence only if the ledger
-  points to it and marks the related gate complete.
-- Outside the reform relaunch, if a run artifact conflicts with a prose note,
-  trust the artifact and update the prose.
+- If a current run artifact conflicts with a prose note, trust the artifact and
+  update the prose. Legacy run ledgers are historical evidence only, not current
+  release controls.
 
 ## Where To Go Next
 

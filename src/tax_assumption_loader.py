@@ -15,9 +15,7 @@ DEFAULT_TAX_ASSUMPTION_FACTORY = "create_wage_indexed_core_thresholds_reform"
 TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION = "trustees-2025-core-thresholds-v1"
 LEGACY_TRUSTEES_CORE_THRESHOLDS_ASSUMPTION = "trustees-core-thresholds-v1"
 CURRENT_LAW_LITERAL_ASSUMPTION = "current-law-literal"
-TRUSTEES_CORE_THRESHOLDS_MODULE = (
-    "policyengine_us.reforms.ssa.trustees_core_thresholds"
-)
+TRUSTEES_CORE_THRESHOLDS_MODULE = "policyengine_us.reforms.ssa.trustees_core_thresholds"
 TRUSTEES_CORE_THRESHOLDS_FACTORY = "create_trustees_core_thresholds_reform"
 SUPPORTED_TAX_ASSUMPTION_NAMES = frozenset(
     {
@@ -160,8 +158,7 @@ def load_tax_assumption_reform(
             factory_name = alias
         else:
             raise AttributeError(
-                f"Tax assumption module {module_path} has no factory "
-                f"{factory_name!r}."
+                f"Tax assumption module {module_path} has no factory {factory_name!r}."
             )
     factory = getattr(module, factory_name)
     return factory(start_year=start_year, end_year=end_year)
@@ -193,12 +190,9 @@ def load_tax_assumption_reform_by_name(
         )
 
     module = resolve_tax_assumption_module(module_path)
-    factory = (
-        factory_name
-        or TAX_ASSUMPTION_FACTORY_BY_NAME.get(
-            contract_name,
-            DEFAULT_TAX_ASSUMPTION_FACTORY,
-        )
+    factory = factory_name or TAX_ASSUMPTION_FACTORY_BY_NAME.get(
+        contract_name,
+        DEFAULT_TAX_ASSUMPTION_FACTORY,
     )
     return load_tax_assumption_reform(
         module,

@@ -42,7 +42,9 @@ def build_hi_payroll(
     raw = raw.sort_values("year").reset_index(drop=True)
 
     if len(raw) < 2:
-        raise ValueError("Need at least two raw HI payroll rows to extrapolate endpoints.")
+        raise ValueError(
+            "Need at least two raw HI payroll rows to extrapolate endpoints."
+        )
 
     raw_start = int(raw["year"].min())
     raw_end = int(raw["year"].max())
@@ -82,7 +84,9 @@ def build_hi_payroll(
     expected_years = set(range(start_year, end_year + 1))
     missing = sorted(expected_years - set(output["year"]))
     if missing:
-        raise ValueError("Missing HI taxable payroll years: " + ", ".join(map(str, missing)))
+        raise ValueError(
+            "Missing HI taxable payroll years: " + ", ".join(map(str, missing))
+        )
     return output
 
 

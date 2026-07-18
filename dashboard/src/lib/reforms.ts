@@ -18,7 +18,7 @@ export interface ExternalEstimate {
   url: string;
 }
 
-export const REFORMS: ReformMeta[] = [
+const REFORM_DEFINITIONS: ReformMeta[] = [
   {
     id: "option1",
     name: "Full Repeal of Social Security Benefit Taxation",
@@ -210,7 +210,98 @@ export const REFORMS: ReformMeta[] = [
     scoringNote:
       "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },
+  {
+    id: "reverse_roth",
+    name: "Reverse Roth Social Security Proposal",
+    shortName: "Reverse Roth",
+    description:
+      "Tax 100% of Social Security benefits and deduct employee Social Security payroll taxes from income tax.",
+    category: "Traditional tax treatment",
+    mechanism:
+      "Applies full benefit taxation immediately while treating employee OASDI payroll-tax contributions as above-the-line deductions.",
+    baseline:
+      "Designed to be scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "This is the mirror image of a Roth-style Social Security swap: contributions become deductible and benefits become fully taxable.",
+    scoringNote:
+      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+  },
+  {
+    id: "tax93",
+    name: "Taxation of 93% of Social Security Benefits",
+    shortName: "93% taxation",
+    description:
+      "Tax 93% of Social Security benefits for all recipients, the share Steve Goss's SSA analysis attributed to employer contributions and earnings.",
+    category: "Expanded taxation",
+    mechanism:
+      "Sets every benefit-taxability rate parameter to 93% with thresholds at zero, mirroring the structure of the 90% and 95% options.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "Sits between the 90% and 95% options; useful as the Goss-consistent estimate of the taxable share of benefits.",
+    scoringNote:
+      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+  },
+  {
+    id: "magi100",
+    name: "Full MAGI Inclusion of Benefits",
+    shortName: "Full MAGI inclusion",
+    description:
+      "Count 100% of Social Security benefits, rather than 50%, in the combined income that determines the taxable share of benefits.",
+    category: "Expanded taxation",
+    mechanism:
+      "Raises the IRC section 86(b)(1) combined-income fraction from 50% to 100% of benefits. Benefit-taxation rates, thresholds, and the 85% inclusion cap are unchanged, so benefits become taxable at lower non-benefit incomes and more filers reach the upper tier.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "A threshold-side expansion: it broadens who pays and how quickly the taxable share phases in, without changing the maximum taxable share.",
+    scoringNote:
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
+  },
+  {
+    id: "tax_panel_2005",
+    name: "2005 Tax Panel Simple Deduction",
+    shortName: "2005 Tax Panel deduction",
+    description:
+      "Replace the current income thresholds with the 2005 President's Advisory Panel's simple deduction: 85% of benefits count as taxable income, offset by a deduction that phases out at 50 cents per dollar of income above $22,000 (single) or $44,000 (married), without the Panel's inflation indexing.",
+    category: "Simplification",
+    mechanism:
+      "Implements the report's Figure 5.11 worksheet: taxable benefits equal 50% of income above $22,000/$44,000, capped at 85% of benefits, with 85% of benefits counted in the income test. Thresholds are fixed in nominal terms; the Panel proposed CPI indexing, and CRFB requested this unindexed variant.",
+    baseline:
+      "Scored against the same current-law baseline as the standard Social Security benefit-taxation reforms.",
+    interpretation:
+      "Taxation starts at lower non-benefit income than current law and the marriage penalty disappears ($44,000 is exactly twice $22,000), while the taxable share phases in at 50% rather than the 85% second-tier rate — expansion at the bottom, relief in the middle, unchanged 85% cap at the top.",
+    scoringNote:
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
+  },
 ];
+
+// Display order for the sidebar/selector: full repeal, then the 85% family
+// (base plus its senior-deduction and credit variants), then the higher
+// taxation shares in ascending order, then the Roth-structure options.
+const REFORM_DISPLAY_ORDER = [
+  "option1",
+  "magi100",
+  "tax_panel_2005",
+  "option2",
+  "option3",
+  "option7",
+  "option4",
+  "option11",
+  "option9",
+  "tax93",
+  "option10",
+  "option8",
+  "option5",
+  "option6",
+  "option12",
+  "reverse_roth",
+];
+
+export const REFORMS: ReformMeta[] = [...REFORM_DEFINITIONS].sort(
+  (a, b) =>
+    REFORM_DISPLAY_ORDER.indexOf(a.id) - REFORM_DISPLAY_ORDER.indexOf(b.id),
+);
 
 export const EXTERNAL_ESTIMATES: Record<string, ExternalEstimate[]> = {
   option1: [

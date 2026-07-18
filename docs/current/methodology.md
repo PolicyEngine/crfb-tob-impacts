@@ -8,24 +8,35 @@ The active package contains the standard reforms `option1` through `option12`.
 Legacy non-contract variants are not part of the current dashboard, release, or
 reform-modeling contract.
 
+The package also defines `reverse_roth` as a new proposal scenario: immediately
+tax 100% of Social Security benefits and make employee OASDI payroll taxes
+deductible from income tax. It is runnable as an explicit reform ID, but it is
+not part of the current published `option1` through `option12` result set until
+full reform H5 cells are produced, stored, and aggregated under the production
+contract.
+
 The main delivery window is `2026-2100`.
 
 ## Standard Series Contract
 
-For the current clean static rerun, the intended contract is:
+For the current v2/populace rerun, the release contract is:
 
-- target source: `trustees_2025_current_law`
-- calibration profile: `ss-payroll-tob`
-- tax assumption: `trustees-2025-core-thresholds-v1`
-- exact-calibration-only acceptance for delivered years
-- donor-backed composite support augmentation from `2075` onward, with exact
-  final calibration and late-year support gates
-- pinned local worktrees for both `policyengine-us` and `policyengine-us-data`
-- a run-level reproducibility bundle that records the exact code/data lineage,
-  including dirty sibling-repo overrides when present
+- target source: 2026 Trustees Reports, intermediate assumptions, with OBBBA in
+  current law
+- baseline run ID: `crfb-longrun-v2pop-tr2026-noclone-9f1260b-20260612`
+- populace base: `populace-us-2024-9f1260b-20260611`
+- exact H5 anchors: `2026`, `2030`, and every fifth year from `2035` through
+  `2100`
+- reforms: `option1` through `option12`, `reverse_roth`, and `tax93`
+- static exact rows: saved full reform H5 artifacts in R2 under
+  `v2pop_tr2026_20260611` and `v2pop_tr2026_noclone_20260612`
+- behavioral rows: exact full-H5 endpoints in `2026` and `2100`, with annual
+  non-endpoint rows produced by the documented endpoint-ratio interpolation
 
-That contract replaces the older mixed lineage that produced the legacy stitched
-standard file.
+The named threshold assumption remains
+`trustees-2025-core-thresholds-v1` because that is the actual PolicyEngine
+tax-threshold reform used by the H5s. It is a tax-indexing assumption name, not
+the data-target vintage. The data targets and release lineage are TR2026.
 
 ## Trustees Tax-Threshold Assumption
 
@@ -52,34 +63,13 @@ for the CRFB long-run TOB work, not default statutory current law.
 
 ## Late-Year Support
 
-Starting in `2075`, the clean long-run path uses
-`donor-backed-composite-v1` support augmentation before the final entropy
-calibration. This addresses a far-horizon support problem: the original CPS
-records alone can force too much taxation-of-benefits weight onto a small set
-of households, even when aggregate calibration targets are technically
-feasible.
-
-The current sentinel recipe is:
-
-- fixed `2100` support supplement
-- top `120` synthetic target types
-- `20` real donor tax units per target
-- base-household prior scale `0.15`
-- support-solve tolerance `5%`
-- activation from `2075` onward
-
-The support supplement is donor-backed rather than free synthetic data. It maps
-synthetic late-year household targets to nearby real `2024` donor tax units,
-preserves entity structure, and retargets unstable tail components such as
-pension and dividend-like income. The support solve only determines feasible
-support and priors; the final delivered H5 still must exactly match the
-Trustees Social Security, taxable-payroll, OASDI TOB, and HI TOB targets.
-
-Publication gating therefore rejects approximate donor-augmented outputs but
-allows donor-backed support when the final calibration is exact, metadata is
-stamped, and late-year support gates pass. Those gates include separate
-taxation-of-benefits contributor checks documented in
-[late-year-support-gates.md](late-year-support-gates.md).
+The v2/populace construction does not use synthetic household support in
+the published years. Demographics are carried through household weights; broad
+economic growth is carried through input values before a final light calibration
+to TR2026 benefits, taxable payroll, and TOB targets. Late-year support gates
+still apply and are documented in
+[late-year-support-gates.md](late-year-support-gates.md), but the current
+published H5s pass those gates without synthetic household support.
 
 ## Scenario Families
 
@@ -106,14 +96,14 @@ For the labor-supply response release, the intended differences from plain upstr
 
 Labor-supply response scoring should therefore be interpreted as a
 partial-equilibrium estimate under PolicyEngine's elasticity assumptions, not
-as a separate legacy workflow or as an exact replica of JCT/CBO conventional
+as a separate legacy workflow or as an exact replica of JCT/CBO scorekeeping
 practice.
 
 Operationally:
 
 - the publication-facing dashboard defaults to static scoring and includes
-  supplemental behavioral rows only where generated from the current full
-  reform H5 contract
+  supplemental behavioral rows generated from the current full reform-H5
+  endpoint contract
 - any labor-supply response release must start from durable
   `reform_full_h5/year=YYYY/reform=optionX/scenario.h5` artifacts; aggregate
   CSVs and non-contract sample panels are not production inputs
@@ -122,27 +112,14 @@ Operationally:
 
 The repo-level standard now is:
 
-- `uv sync --frozen` for the Python environment
-- pinned local worktrees for `policyengine-us` and `policyengine-us-data`
-- calibrated H5 snapshots with machine-readable metadata
-- a launch-time reproducibility bundle under `results/repro_bundles/`
-
-That bundle records:
-
-- the exact git SHAs and dirty status for the three repos involved
-- the sibling `pyproject.toml` and `uv.lock` files that define the local model
-  and data worktree environments
-- the exact calibrated snapshot manifest
-- a complete per-file SHA256 inventory for the calibrated snapshot
-- the resolved enhanced CPS blob hash and path used by the recalibrated H5s
-- any tracked or untracked local overrides that were present in dirty sibling
-  repos
-
-So the reproducibility contract is no longer just “remember which worktree we
-used”; it is an artifact that travels with the run.
-
-For release-grade runs, that bundle can also be frozen into local snapshot and
-repo tar archives with `scripts/freeze_repro_bundle.py`.
+- calibrated H5 snapshots with machine-readable metadata under
+  `projected_datasets_v2pop/`
+- baseline manifests under `docs/current/manifests/`
+- the public `dashboard/public/data/results_contract.json`, which maps each
+  published result row to baseline H5 hashes, reform run prefixes, scenario H5
+  hashes where exact, and TR2026 targets
+- source and output SHA-256 checksums in release packages built by
+  `scripts/build_release_package.py`
 
 ## Interpretation Rules
 
@@ -150,12 +127,11 @@ repo tar archives with `scripts/freeze_repro_bundle.py`.
 - Prior or legacy values belong only in comparison spreadsheets.
 - The deleted legacy Jupyter Book is historical context, not the live
   methodology spec.
-- The live anomaly and validation record is
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md).
 
 ## What Still Lives Elsewhere
 
 - pinned dependency and environment notes:
   [REPRODUCIBILITY.md](../../REPRODUCIBILITY.md)
-- live audit trail and sentinel evidence:
+- audit trail and validation evidence:
   [analysis/long_run_rescoring_findings.md](../../analysis/long_run_rescoring_findings.md)

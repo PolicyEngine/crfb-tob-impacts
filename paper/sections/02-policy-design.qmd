@@ -1,8 +1,8 @@
 # Policy design
 
-The current reform menu spans three broad families: direct benefit-taxation
-changes, senior-relief redesigns, and employer-payroll-tax swaps. The release
-series shares one common current-law baseline.
+The current reform menu spans four broad families: direct benefit-taxation
+changes, senior-relief redesigns, employer-payroll-tax swaps, and a reverse-Roth
+restructuring. The release series shares one common current-law baseline.
 
 ## Standard options `1-12`
 
@@ -16,6 +16,10 @@ series shares one common current-law baseline.
 - **`option8`**: tax 100 percent of benefits.
 - **`option9`**: tax 90 percent of benefits.
 - **`option10`**: tax 95 percent of benefits.
+- **`tax93`**: tax 93 percent of benefits. This benchmark applies a uniform
+  93 percent inclusion rate across the taxability tiers; it sits between the
+  90 and 95 percent options and corresponds to the share the Social Security
+  actuaries have used in illustrative full-taxation analyses.
 
 These options primarily change the size of the taxable-benefit base while
 preserving the current-law trust-fund accounting framework.
@@ -61,3 +65,20 @@ The raw artifact still retains `option6`, a shorter phase-in variant, for
 lineage and sensitivity checks. It is not shown as a separate CRFB-facing
 Roth option because the publication menu uses the longer `option12` design as
 the phased Roth option.
+
+## Reverse-Roth proposal
+
+- **`reverse_roth`**: tax 100 percent of Social Security benefits while
+  allowing an above-the-line deduction for the employee share of Social
+  Security payroll taxes paid during working years.
+
+The reverse-Roth reform inverts the timing of Social Security's tax treatment.
+Current law is effectively a partial Roth structure: payroll contributions are
+made from after-tax wages (the employee share is not deductible), and benefits
+are then only partially taxable. The reverse-Roth design moves toward a
+traditional-account structure: it makes the employee payroll contribution
+deductible when paid, and in exchange taxes the full benefit when received.
+Medicare's Hospital Insurance treatment is unchanged. Because the deduction
+accrues to workers and the full-inclusion change falls on beneficiaries, the
+net revenue effect depends on the relative size of the working-age and
+retired populations in each projection year.

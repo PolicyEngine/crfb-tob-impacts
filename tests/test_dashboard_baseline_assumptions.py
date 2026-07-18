@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.metadata as metadata
 import ast
 import json
+from pathlib import Path
+import re
 
 from packaging.version import Version
 import pandas as pd
@@ -17,7 +19,13 @@ def _direct_url(package_name: str) -> dict | None:
 
 
 def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
-    assert metadata.version("policyengine") == "4.5.1"
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+    pinned_policyengine = re.search(
+        r'"policyengine\[us\]==(?P<version>[^"]+)"',
+        pyproject,
+    )
+    assert pinned_policyengine is not None
+    assert metadata.version("policyengine") == pinned_policyengine.group("version")
     assert Version(metadata.version("policyengine-us")) >= Version("1.691.10")
     assert Version(metadata.version("policyengine-core")) >= Version("3.26.1")
     policyengine_direct_url = _direct_url("policyengine")
@@ -65,9 +73,7 @@ def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
         ),
         None,
     )
-    assert assumption_name == (
-        "trustees-2025-core-thresholds-v1"
-    )
+    assert assumption_name == ("trustees-2025-core-thresholds-v1")
 
 
 def test_cli_help_exposes_dashboard_baseline_metadata_root(capsys):
@@ -179,7 +185,9 @@ def test_calibration_targets_prefer_h5_metadata_and_fill_public_fallbacks(tmp_pa
     assert bool(indexed.loc["ss_total", "used_in_year_runner_reconciliation"])
 
     assert indexed.loc["oasdi_tob", "source"] == "metadata"
-    assert indexed.loc["payroll_total", "source"] == "dashboard_public_baseline_artifact"
+    assert (
+        indexed.loc["payroll_total", "source"] == "dashboard_public_baseline_artifact"
+    )
     assert indexed.loc["payroll_total", "target"] == 11_129.0
     assert indexed.loc["hi_tob", "target"] == 41.19
     assert targets["constraint_name"].value_counts()["oasdi_tob"] == 1

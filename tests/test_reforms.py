@@ -1,6 +1,5 @@
 """Tests for reform definitions."""
 
-import pytest
 from src.reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -10,6 +9,8 @@ from src.reforms import (
     get_option6_reform,
     get_option7_reform,
     get_option8_reform,
+    get_reverse_roth_behavioral_reform,
+    get_reverse_roth_reform,
     REFORMS,
 )
 
@@ -112,9 +113,31 @@ def test_option8_reform():
     assert any("threshold.adjusted_base.main" in str(k) for k in params.keys())
 
 
+def test_reverse_roth_reform():
+    """Test the reverse-Roth Social Security proposal."""
+    # A two-reform set: parameter reform + the OASDI-deduction variable reform.
+    param_reform, deduction_reform = get_reverse_roth_reform()
+    assert param_reform is not None and deduction_reform is not None
+    params = param_reform.parameter_values
+    assert any("combined_income_ss_fraction" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+    assert param_reform.name == "Reverse Roth Social Security proposal"
+
+
+def test_reverse_roth_behavioral_reform_includes_elasticities():
+    """Reverse-Roth behavioral scoring: params + elasticities, then the
+    deduction variable, as a flat reform set (no nested from_dict)."""
+    param_reform, deduction_reform = get_reverse_roth_behavioral_reform()
+    assert param_reform is not None and deduction_reform is not None
+    params = param_reform.parameter_values
+    assert any("simulation.labor_supply_responses" in str(k) for k in params.keys())
+    assert any("taxability.rate.additional" in str(k) for k in params.keys())
+
+
 def test_reforms_registry():
     """Test that all reforms are properly registered."""
-    assert len(REFORMS) == 12
+    assert len(REFORMS) == 14
+    assert "reverse_roth" in REFORMS
 
     # Check each reform has required fields
     for reform_id, config in REFORMS.items():
@@ -133,3 +156,114 @@ def test_reform_variants():
     for amount in [250, 500, 750, 900, 1000]:
         reform = option4["func"](amount)
         assert reform is not None
+
+
+def test_tax93_rates_sit_between_neighbors():
+    from src.reforms import (
+        get_option9_dict,
+        get_option10_dict,
+        get_tax93_dict,
+    )
+
+    rate_keys = [key for key in get_tax93_dict() if ".taxability.rate." in key]
+    assert rate_keys
+    for key in rate_keys:
+        low = list(get_option9_dict()[key].values())[0]
+        mid = list(get_tax93_dict()[key].values())[0]
+        high = list(get_option10_dict()[key].values())[0]
+        assert low < mid < high
+        assert mid == 0.93
+
+
+def test_tax93_reform_builds():
+    from src.reforms import get_tax93_reform
+
+    assert get_tax93_reform() is not None
+
+
+def test_tax_panel_2005_dict_structure():
+    from src.reforms import get_tax_panel_2005_dict
+
+    d = get_tax_panel_2005_dict()
+    period = "2026-01-01.2100-12-31"
+    # Worksheet income (line 9) counts 85% of benefits.
+    assert d[
+        "gov.irs.social_security.taxability.combined_income_ss_fraction"
+    ] == {period: 0.85}
+    # 50% phase-in slope is current law's tier-1 rate; only the cap moves.
+    assert d["gov.irs.social_security.taxability.rate.base.benefit_cap"] == {
+        period: 0.85
+    }
+    assert not any(".rate.base.excess" in key for key in d)
+    assert not any(".rate.additional." in key for key in d)
+    # $22,000/$44,000 unindexed thresholds; married = exactly twice single.
+    base = "gov.irs.social_security.taxability.threshold.base.main"
+    assert d[f"{base}.SINGLE"] == {period: 22_000}
+    assert d[f"{base}.JOINT"] == {period: 44_000}
+    # Second tier disabled for every main filing status.
+    adjusted = "gov.irs.social_security.taxability.threshold.adjusted_base.main"
+    for status in [
+        "SINGLE",
+        "JOINT",
+        "SEPARATE",
+        "HEAD_OF_HOUSEHOLD",
+        "SURVIVING_SPOUSE",
+    ]:
+        assert list(d[f"{adjusted}.{status}"].values())[0] >= 10_000_000_000
+    # Separate-cohabitating thresholds keep current law ($0): not in the dict.
+    assert not any("separate_cohabitating" in key for key in d)
+
+
+def test_tax_panel_2005_matches_worksheet():
+    """Reform must reproduce the 2005 report's Figure 5.11 worksheet:
+
+    taxable SS = clamp(50% x (income - threshold), 0, 85% x benefits),
+    income counting 85% of benefits, thresholds $22k single / $44k joint.
+    """
+    from policyengine_us import Simulation
+
+    from src.reforms import get_tax_panel_2005_reform
+
+    reform = get_tax_panel_2005_reform()
+
+    def worksheet(ss, other_income, threshold):
+        income = other_income + 0.85 * ss
+        return min(max(0.5 * (income - threshold), 0.0), 0.85 * ss)
+
+    cases = [
+        # (gross SS, taxable interest, joint?, threshold)
+        (20_000, 30_000, False, 22_000),  # phase-in binds
+        (20_000, 60_000, False, 22_000),  # 85% cap binds
+        (20_000, 5_000, False, 22_000),  # below threshold
+        (30_000, 40_000, True, 44_000),  # joint, phase-in binds
+    ]
+    for ss, other, joint, threshold in cases:
+        people = {
+            "adult": {
+                "age": {2026: 70},
+                "social_security_retirement": {2026: ss},
+                "taxable_interest_income": {2026: other},
+            }
+        }
+        members = ["adult"]
+        if joint:
+            people["spouse"] = {"age": {2026: 68}}
+            members.append("spouse")
+        simulation = Simulation(
+            situation={
+                "people": people,
+                "tax_units": {"tax_unit": {"members": members}},
+                "households": {
+                    "household": {
+                        "members": members,
+                        "state_code": {2026: "TX"},
+                    }
+                },
+            },
+            reform=reform,
+        )
+        actual = float(
+            simulation.calculate("tax_unit_taxable_social_security", 2026)[0]
+        )
+        expected = worksheet(ss, other, threshold)
+        assert abs(actual - expected) < 1, (ss, other, joint, actual, expected)

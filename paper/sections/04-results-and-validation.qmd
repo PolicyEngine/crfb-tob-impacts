@@ -16,31 +16,66 @@ The internal validation framework therefore tests:
 - representative sentinel years across the horizon
 - absence of known legacy anomalies in rebuilt standard outputs
 
-### Sentinel evidence
+### Far-horizon calibration evidence
 
-{{< include exhibits/validation-sentinels.md >}}
+The projected datasets are checked against the calibration contract before
+reform results are treated as publishable. On the populace base with no
+synthetic support, all six far-horizon years (`2075`–`2100`) clear the
+exact-calibration and contributor support-gate contract: OASDI
+taxation-of-benefits contributor effective sample sizes run `131`–`161` and HI
+contributor effective sample sizes run `47`–`121` against the contributor-gate
+floor, which is applied uniformly across every projection year rather than only
+the late horizon. In a local static reform smoke test, full repeal of benefit
+taxation reduced revenue by the baseline taxation-of-benefits amount in every
+anchor year, and taxing all benefits raised that revenue with the expected sign.
 
-The current late-year support validation separately checks the projected H5
-datasets before reform results are treated as publishable. Under the
-donor-backed-composite recipe, the `2075` and `2100` sentinel H5s both clear
-the exact-calibration and support-gate contract. The `2075` H5 has OASDI
-taxation-of-benefits contributor effective sample size `83.0`, HI
-taxation-of-benefits contributor effective sample size `59.0`, and max
-single-contributor shares of `8.7%` and `11.3%`. The `2100` H5 has OASDI and
-HI contributor effective sample sizes of `126.2` and `105.3`, with max
-single-contributor shares of `4.7%` and `5.4%`. In a local static reform smoke
-test, full repeal of benefit taxation reduced revenue by the baseline TOB
-amount in both years, and taxing all benefits increased TOB revenue with the
-expected sign in both years.
+The production run delivers the full fourteen-reform static panel (`option1`
+through `option12`, the reverse-Roth proposal, and the `93%` benchmark) across
+the annual budget window, five-year long-run sentinels, and the reform-transition
+junctures, with labor-supply-response multipliers derived from `2026` and `2100`
+endpoints and interpolated across years. Dashboard annual rows between computed
+years are display interpolations flagged as such; the computed anchor-year rows
+remain the cited microsimulation outputs. Legacy special-case series are
+excluded from the current dashboard, spreadsheet, and paper release surface.
 
-As of the May 22 full-H5 production run, the standard static selected panel
-(`option1` through `option12`) has complete durable reform H5s for `2026-2035`
-and every fifth year from `2040` through `2100`. Dashboard annual rows between
-long-run anchor years are display interpolations; the exact selected-year H5
-rows remain the cited microsimulation outputs. The standard labor-supply
-response series is excluded until it is generated from durable full reform H5s.
-Legacy special-case series are excluded from the current dashboard,
-spreadsheet, and paper release surface.
+The budget-window infill adds exact full-H5 anchors where federal tax schedules
+have discontinuities that would otherwise be smeared by interpolation. The
+largest validation case is `option7`, which only repeals the temporary senior
+deduction: the annual panel previously interpolated its static revenue impact
+from `$8.35` billion in `2028` to `$4.18` billion in `2029`, while the exact
+full-H5 cells show `$18.22` billion in `2028` and approximately zero in `2029`,
+as expected once the deduction has already expired under current law. The same
+check moves `option4` from `$24.23` to `$34.35` billion in `2028` and from
+`$20.96` to `$17.78` billion in `2029`; `option11` from `$25.39` to `$35.86`
+billion and from `$22.67` to `$19.50` billion; and the `option6` payroll-ramp
+corner from `$133.45` to `$160.63` billion in `2032` and from `$143.82` to
+`$177.51` billion in `2033`. Each new row is marked `exact_full_h5` and carries
+its own R2 `scenario.h5`, metadata, completion marker, and SHA-256 lineage.
+
+### Independent estimation cross-check
+
+As an additional guard against systematic error, we cross-checked a sample of
+headline cells against independent back-of-the-envelope estimates derived only
+from public aggregates and statutory parameters, with no access to the model's
+output. The 2026 current-law taxation-of-benefits total reproduces the
+published 2026 Trustees and CMS figures directly (the Hospital Insurance
+component is the CMS expanded-table value to the dollar); the reverse-Roth net
+effect and the rising share of beneficiaries who owe tax on benefits both
+landed inside the independently derived ranges, and the share trajectory
+reproduced the same near-universal-but-capped asymptote from first principles.
+
+The one cell that diverged from a simplified hand calculation — full
+(100 percent) benefit inclusion — did so for an instructive reason. The hand
+calculation assumed low-income beneficiaries are shielded from tax by the
+senior standard deduction and the temporary OBBBA bonus deduction. The
+microsimulation instead finds the revenue is broad-based across the lower and
+middle of the income distribution: benefit-reliant retirees with little other
+income have low adjusted gross income under current partial inclusion, but
+once the full benefit enters income it exceeds even the enlarged senior
+deductions, so they cross their deduction floor and owe tax. The
+household-level calculation captures this composition effect that an aggregate
+shortcut misses. The cross-check is a sanity bound on order of magnitude rather
+than an alternative scoring method, but it is a standing pre-publication step.
 
 ## External benchmark framework
 

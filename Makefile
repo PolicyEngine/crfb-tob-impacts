@@ -1,6 +1,11 @@
-.PHONY: all install data dashboard dashboard-dev paper site test lint format clean help
+.PHONY: all install panel data dashboard dashboard-dev paper site test check lint format clean help
 
 all: install dashboard paper
+
+panel:
+	@echo "The old aggregate-only panel launcher is archived and fail-closed."
+	@echo "Use modal_batch/reform_full_h5.py::submit_reform_full_h5 after ledger approval."
+	@exit 1
 
 install:
 	@echo "Installing Python package and dashboard dependencies..."
@@ -10,8 +15,8 @@ install:
 	cd dashboard && bun install
 
 data:
-	@echo "Generating policy impact data..."
-	. .venv/bin/activate && python scripts/generate_policy_impacts.py
+	@echo "Reform data is produced from durable reform_full_h5 artifacts."
+	@echo "Use scripts/aggregate_reform_full_h5_results.py only after full-H5 cells exist."
 
 dashboard:
 	@echo "Building Next dashboard..."
@@ -32,6 +37,12 @@ site:
 test:
 	@echo "Running Python tests..."
 	pytest tests/ -v --cov=src --cov-report=term-missing
+
+check:
+	@echo "Running the full pre-release gate (Python tests + dashboard typecheck/lint)..."
+	pytest tests/ -q
+	cd dashboard && bunx tsc --noEmit
+	cd dashboard && bun run lint
 
 lint:
 	@echo "Linting Python and dashboard code..."
@@ -57,12 +68,14 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  install       - Install Python package and dashboard dependencies"
-	@echo "  data          - Generate policy impact data"
+	@echo "  panel         - Archived fail-closed legacy aggregate launcher"
+	@echo "  data          - Explain current full-H5 data assembly"
 	@echo "  dashboard     - Build the Next dashboard"
 	@echo "  dashboard-dev - Run the Next dashboard locally"
 	@echo "  paper         - Render the Quarto paper HTML"
 	@echo "  site          - Build dashboard at / and paper at /paper/"
 	@echo "  test          - Run Python tests"
+	@echo "  check         - Full pre-release gate: pytest + dashboard tsc + lint"
 	@echo "  lint          - Check formatting/lint"
 	@echo "  format        - Auto-format code"
 	@echo "  clean         - Remove generated files"

@@ -11,7 +11,6 @@ Why this exists:
 
 Expected files:
 
-- `validation-sentinels.md`
 - `external-benchmarks.md`
 - `results-overview.md`
 - `household-impacts.md`

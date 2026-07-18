@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
 
@@ -24,6 +23,7 @@ from src.tob_baseline import (
 )
 
 BASELINE_PATH = GENERATED_BASELINE_PATH
+DEFAULT_PREVIEW_DIR = REPO_ROOT / "tmp" / "post_obbba_tob_baseline_preview"
 BASELINE_COLUMNS = [
     "baseline_tob_oasdi",
     "baseline_tob_medicare_hi",
@@ -39,8 +39,6 @@ SPECIAL_START_YEAR = 2035
 CURRENT_LAW_TOB_REFORMS = {f"option{i}" for i in range(1, 14)}
 EMPLOYER_SWAP_REFORMS = {"option5", "option6", "option12"}
 RESULT_PATHS = [
-    REPO_ROOT / "results" / "all_static_results_full_h5_selected_panel_display_20260522.csv",
-    REPO_ROOT / "results" / "results_full_h5_selected_panel_display_20260522.csv",
     REPO_ROOT / "dashboard" / "public" / "data" / "results.csv",
     REPO_ROOT / "results.csv",
 ]
@@ -48,13 +46,23 @@ RESULT_PATHS = [
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate and apply a post-OBBBA TOB baseline to result CSVs."
+        description=(
+            "Generate the diagnostic post-OBBBA TOB baseline and write "
+            "preview-adjusted result CSVs under tmp. Canonical results.csv is "
+            "never modified by this script."
+        )
     )
     parser.add_argument(
         "--hi-method",
         choices=sorted(HI_METHODS),
         default=HI_METHOD_MATCH_OASDI_PCT_CHANGE,
         help="How to bridge the annual HI path while the public CMS post-OBBBA series is unresolved.",
+    )
+    parser.add_argument(
+        "--preview-dir",
+        type=Path,
+        default=DEFAULT_PREVIEW_DIR,
+        help="Directory for preview-adjusted CSVs. Canonical result files are not overwritten.",
     )
     return parser.parse_args()
 
@@ -100,7 +108,9 @@ def generate_baseline(hi_method: str) -> None:
     )
 
 
-def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
+def apply_override(
+    result_path: Path, baseline: pd.DataFrame, preview_dir: Path
+) -> None:
     df = pd.read_csv(result_path)
     merged = df.merge(
         baseline,
@@ -110,9 +120,13 @@ def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
         validate="many_to_one",
     )
 
-    missing_years = sorted(merged.loc[merged["target_tob_oasdi"].isna(), "year"].unique())
+    missing_years = sorted(
+        merged.loc[merged["target_tob_oasdi"].isna(), "year"].unique()
+    )
     if missing_years:
-        raise ValueError(f"{result_path} is missing baseline rows for years: {missing_years}")
+        raise ValueError(
+            f"{result_path} is missing baseline rows for years: {missing_years}"
+        )
 
     mask = current_law_tob_mask(merged)
     calibrated = merged.copy()
@@ -145,8 +159,7 @@ def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
             ]
             raise ValueError(
                 f"Cannot apply post-OBBBA TOB baseline to {result_path} "
-                "with non-positive baseline rows:\n"
-                + bad.to_string(index=False)
+                "with non-positive baseline rows:\n" + bad.to_string(index=False)
             )
 
         target = calibrated.loc[mask, target_col].astype(float)
@@ -161,9 +174,9 @@ def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
         calibrated.loc[mask, reform_col] = new_reform
         calibrated.loc[mask, impact_col] = new_reform - target
         if loss_col in calibrated.columns:
-            calibrated.loc[mask, loss_col] = calibrated.loc[mask, loss_col].astype(
-                float
-            ) * factor
+            calibrated.loc[mask, loss_col] = (
+                calibrated.loc[mask, loss_col].astype(float) * factor
+            )
 
     calibrated.loc[mask, "baseline_tob_total"] = (
         calibrated.loc[mask, "baseline_tob_oasdi"]
@@ -194,16 +207,17 @@ def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
     reform = calibrated["reform_name"].astype(str)
     swap_mask = mask & (
         reform.isin(EMPLOYER_SWAP_REFORMS)
-        | (reform.eq("option14_stacked") & calibrated["year"].astype(int).lt(SPECIAL_START_YEAR))
+        | (
+            reform.eq("option14_stacked")
+            & calibrated["year"].astype(int).lt(SPECIAL_START_YEAR)
+        )
     )
-    calibrated.loc[swap_mask, "oasdi_net_impact"] = (
-        calibrated.loc[swap_mask, "oasdi_gain"].astype(float)
-        - calibrated.loc[swap_mask, "oasdi_loss"].astype(float)
-    )
-    calibrated.loc[swap_mask, "hi_net_impact"] = (
-        calibrated.loc[swap_mask, "hi_gain"].astype(float)
-        - calibrated.loc[swap_mask, "hi_loss"].astype(float)
-    )
+    calibrated.loc[swap_mask, "oasdi_net_impact"] = calibrated.loc[
+        swap_mask, "oasdi_gain"
+    ].astype(float) - calibrated.loc[swap_mask, "oasdi_loss"].astype(float)
+    calibrated.loc[swap_mask, "hi_net_impact"] = calibrated.loc[
+        swap_mask, "hi_gain"
+    ].astype(float) - calibrated.loc[swap_mask, "hi_loss"].astype(float)
 
     direct_tob_mask = mask & ~swap_mask & ~reform.eq("option13")
     calibrated.loc[direct_tob_mask, "oasdi_net_impact"] = calibrated.loc[
@@ -215,22 +229,16 @@ def apply_override(result_path: Path, baseline: pd.DataFrame) -> None:
 
     calibrated = calibrated.drop(columns=TARGET_COLUMNS)
 
-    calibrated.to_csv(result_path, index=False, float_format="%.10f")
+    output_path = preview_dir / result_path.relative_to(REPO_ROOT)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    calibrated.to_csv(output_path, index=False, float_format="%.10f")
 
     sample = calibrated.loc[calibrated["year"] == SAMPLE_YEAR, BASELINE_COLUMNS].iloc[0]
     print(
-        f"{result_path.relative_to(REPO_ROOT)}: "
+        f"{output_path.relative_to(REPO_ROOT)}: "
         f"{SAMPLE_YEAR} OASDI={sample['baseline_tob_oasdi']:.4f} "
         f"HI={sample['baseline_tob_medicare_hi']:.4f} "
         f"Total={sample['baseline_tob_total']:.4f}"
-    )
-
-
-def regenerate_dashboard_results() -> None:
-    subprocess.run(
-        [sys.executable, "scripts/publish_dashboard_results.py"],
-        cwd=REPO_ROOT,
-        check=True,
     )
 
 
@@ -240,8 +248,7 @@ def main() -> None:
     baseline = load_baseline()
     for result_path in RESULT_PATHS:
         if result_path.exists():
-            apply_override(result_path, baseline)
-    regenerate_dashboard_results()
+            apply_override(result_path, baseline, args.preview_dir)
 
 
 if __name__ == "__main__":

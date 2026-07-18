@@ -5,10 +5,11 @@ single-repo workflow. The model and data dependencies lived in sibling repos and
 the batch scripts assumed unpublished Hugging Face dataset paths.
 
 This file records the exact PRs and SHAs that matter and the environment variables
-needed to rerun the analysis from local checkouts. The repo now also writes a
-machine-readable reproducibility bundle for launches that go through
-`scripts/run_modal_refresh.py`, and the same bundle can be created manually with
-`scripts/write_repro_bundle.py`.
+needed to rerun the analysis from local checkouts. The repo writes a
+machine-readable reproducibility bundle via `scripts/write_repro_bundle.py`
+(or `crfb-tob write-repro-bundle`) alongside `reform_full_h5` Bible-contract
+launches, and freezes it into self-contained archives with
+`scripts/freeze_repro_bundle.py`.
 
 ## Current reproducibility standard
 
@@ -118,10 +119,10 @@ export CRFB_POLICYENGINE_US_PATH=/Users/maxghenis/PolicyEngine/policyengine-us
 export CRFB_DATASET_TEMPLATE=/Users/maxghenis/PolicyEngine/policyengine-us-data/projected_datasets/{year}.h5
 ```
 
-### Automatic run bundles
+### Run bundles
 
-`scripts/run_modal_refresh.py` now writes a reproducibility bundle before it
-submits Modal work. The bundle lives under:
+`scripts/write_repro_bundle.py` writes a reproducibility bundle for a run. The
+bundle lives under:
 
 - `results/repro_bundles/<output-stem>_<timestamp>/`
 
@@ -140,13 +141,12 @@ and contains:
   `policyengine-us-data`
 - patch artifacts for tracked and untracked local overrides in any dirty repo
 
-The launch path also now stamps the required target source, tax assumption,
-calibration profile, and minimum calibration quality into the Modal runtime
-environment from the snapshot contract itself, so detached reruns fail closed
-instead of relying on implicit defaults.
+The `reform_full_h5` Bible-contract launch path also stamps the required target
+source, tax assumption, calibration profile, and minimum calibration quality
+into the Modal runtime environment from the snapshot contract itself, so
+detached reruns fail closed instead of relying on implicit defaults.
 
-If you need the same bundle for a local run or special-case flow that does not
-go through `run_modal_refresh.py`, use:
+To write the bundle for a run, use:
 
 ```bash
 cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
@@ -155,7 +155,7 @@ uv run python scripts/write_repro_bundle.py \
   --scoring static \
   --reforms option1,option2 \
   --years 2026-2100 \
-  --modal-target run_cells \
+  --modal-target reform_full_h5 \
   --policyengine-us-path /absolute/path/to/policyengine-us \
   --projected-datasets-path /absolute/path/to/projected_datasets \
   --snapshot-path /absolute/path/to/projected_datasets_snapshot
@@ -240,21 +240,17 @@ repo now vendors an explicit TOB baseline table at:
 
 - `data/ssa_tob_baseline_75year.csv`
 
-That file carries the annual OASDI and HI TOB baseline totals used for the
-baseline-share allocation logic. To stamp those values into the shipped CSVs and
-regenerate the combined export, run:
+That file carries the annual OASDI and HI TOB baseline totals used as a
+diagnostic target. The shipped `results.csv` is direct microsimulation output,
+not a post-hoc calibrated result. To regenerate the diagnostic baseline table
+and write preview-adjusted CSVs under `tmp/` without touching the canonical
+results, run:
 
 ```bash
 cd /Users/maxghenis/PolicyEngine/crfb-tob-impacts
 python3 scripts/apply_post_obbba_tob_baseline.py
 ```
 
-This updates both:
-
-- the repo-level `all_static_results.csv` / `all_dynamic_results.csv`
-- the published dashboard copies under `dashboard/public/data/`
-
-and then rebuilds `dashboard_data_combined.csv`.
-
-It does not update `results/oact_static_current.csv`; that file remains the
-legacy published-output comparison point for the saved-H5 rescoring checks.
+The canonical dashboard export remains `results.csv` plus
+`dashboard/public/data/results.csv`; do not stamp the diagnostic target into
+those files.

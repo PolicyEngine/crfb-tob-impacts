@@ -37,13 +37,21 @@ def test_download_run_uses_force_for_modal_volume_get(tmp_path: Path, monkeypatc
             return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
         raise AssertionError(f"Unexpected modal_volume args: {args}")
 
-    monkeypatch.setattr(module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir())
+    monkeypatch.setattr(
+        module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir()
+    )
     monkeypatch.setattr(module, "modal_volume", fake_modal_volume)
 
     manifest_path = module.download_run(run_id, output_dir)
 
     assert manifest_path == output_dir / "manifest.json"
-    assert ("get", "--force", "crfb-results", f"{module.run_root(run_id)}/", f"{temp_root}/") in calls
+    assert (
+        "get",
+        "--force",
+        "crfb-results",
+        f"{module.run_root(run_id)}/",
+        f"{temp_root}/",
+    ) in calls
 
 
 def test_download_volume_prefix_returns_output_dir_when_manifest_missing(
@@ -73,7 +81,9 @@ def test_download_volume_prefix_returns_output_dir_when_manifest_missing(
             return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
         raise AssertionError(f"Unexpected modal_volume args: {args}")
 
-    monkeypatch.setattr(module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir())
+    monkeypatch.setattr(
+        module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir()
+    )
     monkeypatch.setattr(module, "modal_volume", fake_modal_volume)
 
     recovered = module.download_volume_prefix(prefix, output_dir)
@@ -109,7 +119,9 @@ def test_download_volume_prefix_handles_flattened_modal_get_layout(
             return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
         raise AssertionError(f"Unexpected modal_volume args: {args}")
 
-    monkeypatch.setattr(module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir())
+    monkeypatch.setattr(
+        module.tempfile, "TemporaryDirectory", lambda prefix="": DummyTempDir()
+    )
     monkeypatch.setattr(module, "modal_volume", fake_modal_volume)
 
     recovered = module.download_volume_prefix(prefix, output_dir)

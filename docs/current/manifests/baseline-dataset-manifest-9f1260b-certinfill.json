@@ -1,0 +1,103 @@
+{
+  "schema": "crfb_baseline_dataset_manifest/v1",
+  "created_at": "2026-06-25T00:00:00Z",
+  "run_id": "crfb-9f1260b-certinfill",
+  "source_sha": "3de8abb681f438b23f6912179a34339a084ee88d",
+  "dataset_template": "/baselines/crfb-9f1260b-certinfill/{year}.h5",
+  "volume": "policyengine-us-data-long-term",
+  "prefix": "/crfb-9f1260b-certinfill",
+  "selected_years": [
+    2028,
+    2029,
+    2030,
+    2032,
+    2033
+  ],
+  "datasets": [
+    {
+      "year": 2028,
+      "h5_path": "/baselines/crfb-9f1260b-certinfill/2028.h5",
+      "h5_sha256": "d38966cf8d649c5c9f1cc224f1ce233cbd5dccfafaa4ab0eb28840405b124e42",
+      "h5_size_bytes": 82178544,
+      "metadata_path": "2028.h5.metadata.json",
+      "metadata_sha256": "b03f1cec020d8896619a11dd47fa40da907f10edb357cfac81893eb025ca7935",
+      "metadata_size_bytes": 10279,
+      "expected_entity_rows": {
+        "person": 160858,
+        "household": 75112,
+        "spm_unit": 76665,
+        "family": 79365,
+        "tax_unit": 87519,
+        "marital_unit": 124087
+      }
+    },
+    {
+      "year": 2029,
+      "h5_path": "/baselines/crfb-9f1260b-certinfill/2029.h5",
+      "h5_sha256": "518ead722f74b157c95233a44c2a209a31dbf3e7320c801d98e32ef8decf95d7",
+      "h5_size_bytes": 82178544,
+      "metadata_path": "2029.h5.metadata.json",
+      "metadata_sha256": "a514c4de710800e0bb5056bbe2597cb65789fe0898dadc52c2957d60b80b05ff",
+      "metadata_size_bytes": 10411,
+      "expected_entity_rows": {
+        "person": 160858,
+        "household": 75112,
+        "spm_unit": 76665,
+        "family": 79365,
+        "tax_unit": 87519,
+        "marital_unit": 124087
+      }
+    },
+    {
+      "year": 2030,
+      "h5_path": "/baselines/crfb-9f1260b-certinfill/2030.h5",
+      "h5_sha256": "30d92a713cd1ca0aaca870245a1f6d9a8f2904f58a692ea2ecbcfb68c22a7eb0",
+      "h5_size_bytes": 82178544,
+      "metadata_path": "2030.h5.metadata.json",
+      "metadata_sha256": "be2e4685eb878542541983a4f27c681c851c8dcf21590504fe086e5ae23899e6",
+      "metadata_size_bytes": 10419,
+      "expected_entity_rows": {
+        "person": 160858,
+        "household": 75112,
+        "spm_unit": 76665,
+        "family": 79365,
+        "tax_unit": 87519,
+        "marital_unit": 124087
+      }
+    },
+    {
+      "year": 2032,
+      "h5_path": "/baselines/crfb-9f1260b-certinfill/2032.h5",
+      "h5_sha256": "fd518c8311ab6eee04e7e156dd9fcc5ad018459a10bb37a794037e626bba5545",
+      "h5_size_bytes": 82178544,
+      "metadata_path": "2032.h5.metadata.json",
+      "metadata_sha256": "553d4543856c7efa0fe8f40b929692c4f336ff85137cc3f384d666ecc335fabe",
+      "metadata_size_bytes": 10411,
+      "expected_entity_rows": {
+        "person": 160858,
+        "household": 75112,
+        "spm_unit": 76665,
+        "family": 79365,
+        "tax_unit": 87519,
+        "marital_unit": 124087
+      }
+    },
+    {
+      "year": 2033,
+      "h5_path": "/baselines/crfb-9f1260b-certinfill/2033.h5",
+      "h5_sha256": "95f940e4abd5920e39447abb0657ebc21af36d4a2b08db2d9dd8789e3d4523cc",
+      "h5_size_bytes": 82178544,
+      "metadata_path": "2033.h5.metadata.json",
+      "metadata_sha256": "e2d484b10909fd4695412ba6022278b933ae56383ea5ccca91ab256b4a8ef2c3",
+      "metadata_size_bytes": 10399,
+      "expected_entity_rows": {
+        "person": 160858,
+        "household": 75112,
+        "spm_unit": 76665,
+        "family": 79365,
+        "tax_unit": 87519,
+        "marital_unit": 124087
+      }
+    }
+  ]
+}
