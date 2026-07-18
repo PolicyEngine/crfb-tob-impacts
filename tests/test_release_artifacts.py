@@ -802,13 +802,10 @@ def test_legacy_special_case_modal_runners_are_fail_closed():
         assert "run_cells" not in text
 
 
-def test_legacy_gcloud_monitor_scripts_are_fail_closed():
+def test_legacy_gcloud_monitor_scripts_are_removed():
+    # Once fail-closed stubs; deleted outright with main's #129 cleanup.
     for script in ["monitor_all.sh", "monitor_option4.sh"]:
-        text = (REPO_ROOT / script).read_text(encoding="utf-8")
-        assert "archived and fail-closed" in text
-        assert "gcloud" not in text
-        assert "gsutil" not in text
-        assert "option4_dynamic" not in text
+        assert not (REPO_ROOT / script).exists()
 
 
 def test_legacy_dynamic_notebook_path_is_removed():
