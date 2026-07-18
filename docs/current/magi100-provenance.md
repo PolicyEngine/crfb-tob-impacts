@@ -53,5 +53,10 @@ the 2026-06 budget-window infill used for its published cells
   interpolates non-anchor years (panel convention), and refuses partial
   assembly; rows carry `run_prefix=magi100_certrepro_20260706`.
 
-Distributional deciles are not yet published for magi100 (the dashboard
-hides the section); the saved scenario H5s support adding them later.
+Distributional deciles published 2026-07-18 (with tax_panel_2005's) via the
+same-family pairing: certrepro reform-leg H5s against per-household
+baselines exported from the certified worktree
+(`scripts/export_certrepro_baseline_households.py` +
+`scripts/build_distributional_data.py`). All-decile losses concentrated in
+the middle (deciles 4-7), matching the threshold-crossing mechanism; decile
+sums mirror the certified revenue impacts within ~1-6%.

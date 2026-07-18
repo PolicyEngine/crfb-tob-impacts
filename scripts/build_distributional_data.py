@@ -31,7 +31,28 @@ sys.path.insert(0, str(REPO))
 
 BASELINE_DIR = REPO / "projected_datasets_v2pop"
 ANCHOR_YEARS = [2026, 2030] + list(range(2035, 2101, 5))
-REFORMS = [f"option{i}" for i in range(1, 13)] + ["reverse_roth", "tax93"]
+
+# Reforms scored on the certified-reproduction environment pair with
+# baselines from the SAME rebuilt datasets (exported per-household by
+# crfb-cert/tmp/export_baseline_households.py), per the same-family rule in
+# docs/current/magi100-provenance.md. Everything else pairs with the
+# published v2pop/no-clone family below.
+CERTREPRO_PREFIXES = {
+    "magi100": "magi100_certrepro_20260706",
+    "tax_panel_2005": "tax_panel_2005_certrepro_20260717",
+}
+CERTREPRO_CELL_ROOTS = {
+    "magi100": REPO / "tmp" / "full_h5_magi100",
+    "tax_panel_2005": REPO / "tmp" / "full_h5_tax_panel_2005",
+}
+CERTREPRO_BASELINE_DIR = (
+    REPO.parent / "crfb-cert" / "tmp" / "baseline_households_certrepro"
+)
+REFORMS = (
+    [f"option{i}" for i in range(1, 13)]
+    + ["reverse_roth", "tax93"]
+    + sorted(CERTREPRO_PREFIXES)
+)
 
 # The reform-output H5s were cached locally by the aggregation runs. Static
 # 2026-2070 live under the original prefix cache; 2075-2100 under the no-clone
@@ -41,6 +62,16 @@ NOCLONE_CACHE = REPO / "tmp" / "r2_cache_noclone"
 
 
 def scenario_path(year: int, reform: str) -> Path:
+    if reform in CERTREPRO_PREFIXES:
+        prefix = CERTREPRO_PREFIXES[reform]
+        return (
+            CERTREPRO_CELL_ROOTS[reform]
+            / prefix
+            / "reform_full_h5"
+            / f"year={year}"
+            / f"reform={reform}"
+            / "scenario.h5"
+        )
     if year <= 2070:
         return (
             STATIC_CACHE
@@ -85,6 +116,26 @@ def baseline_households(year: int) -> pd.DataFrame:
     frame["decile"] = frame["baseline_net_income"].decile_rank().astype(int)
     del sim
     gc.collect()
+    return frame
+
+
+def certrepro_baseline_households(year: int) -> pd.DataFrame:
+    """Same-family baseline for certrepro-scored reforms, from the exported
+    per-household CSVs (certified worktree, policyengine-us 1.700.2)."""
+    path = CERTREPRO_BASELINE_DIR / f"{year}.csv"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} — run crfb-cert/tmp/export_baseline_households.py {year}"
+        )
+    raw = pd.read_csv(path)
+    frame = mdf.MicroDataFrame(
+        {
+            "household_id": raw["household_id"].reset_index(drop=True),
+            "baseline_net_income": raw["baseline_net_income"].reset_index(drop=True),
+        },
+        weights=raw["weight"].reset_index(drop=True),
+    )
+    frame["decile"] = frame["baseline_net_income"].decile_rank().astype(int)
     return frame
 
 
@@ -145,25 +196,54 @@ def main() -> int:
         default=REPO / "dashboard" / "public" / "data" / "distributional.json",
     )
     parser.add_argument("--years", default=None, help="Comma list; default all anchors")
+    parser.add_argument(
+        "--reforms",
+        default=None,
+        help=(
+            "Comma list; default all. Other reforms' entries in an existing "
+            "output file are preserved (per-reform merge)."
+        ),
+    )
     args = parser.parse_args()
 
     years = [int(y) for y in args.years.split(",")] if args.years else ANCHOR_YEARS
+    reforms = args.reforms.split(",") if args.reforms else list(REFORMS)
+    unknown = sorted(set(reforms) - set(REFORMS))
+    if unknown:
+        raise SystemExit(f"unknown reforms: {unknown}")
+
     data: dict[str, dict] = {reform: {} for reform in REFORMS}
+    if args.output.exists():
+        existing = json.loads(args.output.read_text())
+        for reform, by_year in existing.get("data", {}).items():
+            data.setdefault(reform, {}).update(by_year)
+
     for year in years:
-        print(f"baseline {year}…", flush=True)
-        baseline = baseline_households(year)
-        for reform in REFORMS:
+        baselines: dict[str, pd.DataFrame] = {}
+
+        def baseline_for(reform: str) -> pd.DataFrame:
+            family = "certrepro" if reform in CERTREPRO_PREFIXES else "published"
+            if family not in baselines:
+                print(f"baseline {year} ({family})…", flush=True)
+                baselines[family] = (
+                    certrepro_baseline_households(year)
+                    if family == "certrepro"
+                    else baseline_households(year)
+                )
+            return baselines[family]
+
+        for reform in reforms:
             try:
                 reform_frame = reform_net_income(year, reform)
             except FileNotFoundError:
                 print(f"  {reform} {year}: scenario missing, skipping", file=sys.stderr)
                 continue
-            data[reform][str(year)] = decile_impacts(baseline, reform_frame)
+            data[reform][str(year)] = decile_impacts(baseline_for(reform), reform_frame)
         print(
-            f"  {year}: {sum(str(year) in data[r] for r in REFORMS)} reforms",
+            f"  {year}: {sum(str(year) in data[r] for r in reforms)} reforms",
             flush=True,
         )
-        del baseline
+        baselines.clear()
         gc.collect()
 
     payload = {

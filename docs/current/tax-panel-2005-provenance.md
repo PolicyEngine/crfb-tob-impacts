@@ -90,9 +90,16 @@ directly (`scripts/tax_panel_2005_aggregate.py`).
   `r2://axiom-corpus/crfb/reform_full_h5/tax_panel_2005_certrepro_20260717/...`
   and records URIs + output H5 sha256 in `tmp/tax_panel_2005_lineage.json`.
 
-Distributional deciles are not yet published for tax_panel_2005 (the
-dashboard hides the section, matching magi100); the saved scenario H5s
-support adding them later.
+Distributional deciles published 2026-07-18 (with magi100's): the certrepro
+reform-leg H5s are diffed against per-household baselines exported from the
+certified worktree on the same rebuilt datasets
+(`scripts/export_certrepro_baseline_households.py` →
+`scripts/build_distributional_data.py --reforms magi100,tax_panel_2005`,
+per-reform merge). Decile net-income sums mirror the certified revenue
+impacts within ~1-6% (state-tax and benefit knock-ons inside household net
+income). 2026 shape: losses in deciles 1-5 (taxation starts at lower
+non-benefit income), gains in 6-10 (the 50% phase-in undercuts the 85%
+second tier).
 
 ## Headline results
 

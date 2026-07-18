@@ -107,3 +107,36 @@ def test_full_repeal_is_a_gain_rising_with_income(dist: dict) -> None:
     changes = [r["avg_change"] for r in sorted(rows, key=lambda r: r["decile"])]
     assert all(c >= 0 for c in changes)
     assert changes[-1] > changes[0]
+
+
+CERTREPRO_REFORMS = ["magi100", "tax_panel_2005"]
+
+
+def test_certrepro_reforms_have_full_anchor_coverage(dist: dict) -> None:
+    # magi100 and tax_panel_2005 pair certrepro reform legs with same-family
+    # exported baselines; both must carry every anchor year with ten deciles.
+    for reform in CERTREPRO_REFORMS:
+        by_year = dist["data"][reform]
+        assert len(by_year) >= 16
+        for year, rows in by_year.items():
+            assert len(rows) == 10, (reform, year)
+            assert [r["decile"] for r in rows] == list(range(1, 11))
+
+
+def test_magi100_is_a_middle_decile_loss_in_2026(dist: dict) -> None:
+    # Counting 100% of benefits in the income test only ever raises tax, and
+    # the burden lands on middle-income beneficiary households below the 85%
+    # cap; the bottom is below the thresholds and the top is already capped.
+    rows = {r["decile"]: r["avg_change"] for r in dist["data"]["magi100"]["2026"]}
+    assert all(change <= 0 for change in rows.values())
+    assert min(rows[4], rows[5], rows[6], rows[7]) < rows[1]
+    assert min(rows[4], rows[5], rows[6], rows[7]) < rows[10]
+
+
+def test_tax_panel_2005_crosses_from_loss_to_gain_in_2026(dist: dict) -> None:
+    # The Panel deduction taxes benefits at lower non-benefit income than
+    # current law (losses in the lower-middle deciles) but phases in at 50
+    # cents per dollar instead of the 85-cent second tier (gains above).
+    rows = {r["decile"]: r["avg_change"] for r in dist["data"]["tax_panel_2005"]["2026"]}
+    assert rows[3] < 0 and rows[4] < 0
+    assert all(rows[d] > 0 for d in (7, 8, 9, 10))
