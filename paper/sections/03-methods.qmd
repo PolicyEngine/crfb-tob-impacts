@@ -448,12 +448,47 @@ reform parameters with the project's age-based elasticity schedule:
 - secondary-earner substitution elasticity: `0.27`
 - substitution elasticity multiplier above the older-worker threshold: `2.0`
 
-The doubled older-worker elasticity reflects the literature review judgment
-used for this project: near-retirement and retirement-age workers are more
-responsive on the labor-supply margin than prime-age workers. Labor-supply
+The doubled older-worker elasticity reflects the empirical literature on
+elderly labor supply, reviewed below: near-retirement and retirement-age
+workers are more responsive on the labor-supply margin than prime-age
+workers. Labor-supply
 response results therefore should be interpreted as partial-equilibrium revenue
 estimates under that specific elasticity schedule, not as macroeconomic
 forecasts. They are not official CBO or JCT scores.
+
+### Empirical basis for the older-worker multiplier
+
+The model applies the age adjustment as a single multiplier on both
+elasticities at age 65 and over, rather than a full age-by-decile schedule.
+The literature supports higher responsiveness at older ages but offers no
+age-by-income-decile breakdown, and a single multiplier keeps the adjustment
+transparent and easy to vary in sensitivity analysis. CBO's working-paper
+reviews anchor the under-65 values: substitution (Frisch) elasticities of
+0.27--0.53 with a 0.40 central value [@reichlingwhalen2012] and income
+elasticities of $-0.02$ to $-0.05$ [@mcclellandmok2012]; @keane2011 surveys
+the wider range.
+
+For older workers, structural and reduced-form estimates imply substitution
+elasticities two to three times the prime-age values. @french2005 estimates
+elasticities rising from 0.2--0.4 at age 40 to 1.0--1.3 by age 60 in a
+life-cycle model (roughly $3\times$); @blaushvydko2011 find extensive-margin
+elasticities of 0.5--0.8 at ages 62--69 against intensive-margin values of
+0.05--0.2 (roughly $2$--$3\times$); @coilegruber2007 estimate 0.4--0.7 at
+ages 62--64 from Social Security entitlement variation (roughly $2\times$);
+and @gustmansteinmeier2009 estimate 0.45--0.8 at ages 65--69 from
+pension--Social Security interactions ($2$--$2.5\times$). On the income side,
+@french2005 and @gustmansteinmeier2009 imply elasticities of $-0.06$ to
+$-0.10$ for workers 60 and over against the $-0.04$ prime-age central value
+($1.5$--$2\times$), with life-cycle calibration in @rogersonwallenius2009
+supporting a similar ratio. The model's default multiplier of 2.0 for both
+elasticities sits at the conservative end of these ranges; a 1.5--3.0
+sensitivity range spans the estimates. Most of the elderly evidence
+identifies the extensive margin, while the model applies aggregate earnings
+elasticities; the multiplier carries that participation responsiveness into
+total-earnings terms. Older cohorts in far-horizon years may also differ
+from the estimation samples --- in assets, defined-benefit pension coverage,
+and health --- so the multiplier is a present-calibrated judgment rather
+than a cohort forecast.
 
 **Correction (2026-07-20).** The labor-supply response rows published between
 2026-06-13 and 2026-07-19 carried the income channel only. A cache-purge defect
