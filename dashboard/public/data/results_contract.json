@@ -1,6 +1,6 @@
 {
  "schema": "crfb_results_contract/v1",
- "generated_at": "2026-07-17T17:56:31.543888+00:00",
+ "generated_at": "2026-07-20T07:00:31.636011+00:00",
  "lineage": {
   "base_dataset": {
    "name": "populace-us-2024-9f1260b-20260611",

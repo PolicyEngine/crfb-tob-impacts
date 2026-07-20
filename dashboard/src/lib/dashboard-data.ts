@@ -96,7 +96,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // Stamped into the CSV export so consumers can see at a glance whether a
 // download came from a stale browser tab. Bump when the published data
 // changes; a test pins it to the results contract's generation date.
-export const DATA_VINTAGE = "2026-07-17";
+export const DATA_VINTAGE = "2026-07-20";
 
 export const BALANCED_FIX_ELIGIBLE_OPTIONS = [...balancedFixEligibleOptions];
 

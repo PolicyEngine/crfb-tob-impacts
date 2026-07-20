@@ -32,7 +32,7 @@ DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
 DEFAULT_BEHAVIORAL_EXACT_OUTPUT = REPO / "tmp" / "behavioral_endpoint_exact_preview.csv"
 DEFAULT_BEHAVIORAL_DISPLAY_OUTPUT = REPO / "tmp" / "behavioral_display_preview.csv"
 DEFAULT_METADATA_OUTPUT = REPO / "tmp" / "behavioral_display_preview.metadata.json"
-INTERPOLATED_RUN_PREFIX = "behavioral_endpoint_ratio_interpolation_20260612"
+INTERPOLATED_RUN_PREFIX = "behavioral_endpoint_ratio_interpolation_20260719"
 INTERPOLATED_BASELINE_SOURCE = "v2pop_tr2026_static_full_h5_display"
 EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 
