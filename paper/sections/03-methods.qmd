@@ -490,29 +490,6 @@ from the estimation samples --- in assets, defined-benefit pension coverage,
 and health --- so the multiplier is a present-calibrated judgment rather
 than a cohort forecast.
 
-**Correction (2026-07-20).** The labor-supply response rows published between
-2026-06-13 and 2026-07-19 carried the income channel only. A cache-purge defect
-in `policyengine-core` 3.24.4 through 3.30.0 (released 2026-04-18 onward) made
-the internal measurement branches record identical baseline and reform marginal
-tax rates — exactly 1.0 for each simulated adult — so the relative wage change
-was identically zero and the substitution elasticities listed above, while
-configured, contributed nothing
-([policyengine-us #9086](https://github.com/PolicyEngine/policyengine-us/issues/9086)).
-Static rows were never affected: the defect fired only inside named measurement
-branches, and the same purge is effective on root simulations. The upstream fix
-([policyengine-core #521](https://github.com/PolicyEngine/policyengine-core/pull/521),
-released as 3.30.1) was backported to this project's certified
-policyengine-us 1.700.2 environment as a documented patch, and all
-twenty-eight endpoint cells were rescored on the same certified baseline H5s.
-Static invariance of the patch was verified before rescoring: full-population
-marginal-tax-rate arrays are bitwise identical with and without the patch, and
-a full static sentinel cell reproduces the published option5 2026 revenue
-impact to all ten published decimals. The current rows carry both channels;
-the substitution channel moves the payroll-swap family most (option5 at 2026:
-+\$51.1B income-only, +\$36.4B corrected, against +\$48.7B static). The
-operational record, including the regression window and per-gate outputs, is in
-`docs/current/lsr-substitution-fix-provenance.md`.
-
 The public dashboard labels these rows as behavioral; its charts and tables
 display static scores only. Earlier response files
 were removed because they were not generated from the current full-H5 production
