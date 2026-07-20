@@ -89,9 +89,23 @@ artifact if the environment is ever re-synced.
   behavioral exact + ratio-interpolated display rows (new interpolation
   prefix `behavioral_endpoint_ratio_interpolation_20260719`); the published
   static block (1,200 rows including magi100 and tax_panel_2005) was spliced
-  through byte-identically — exactly the 1,050 behavioral lines changed in
-  `results.csv`. `results_contract.json` regenerated (static-only by design;
+  through record-identically — all 1,200 static records match the prior
+  release field-for-field in the same order (equal EOL-normalized SHA-256),
+  with one whole-file normalization: the prior release used CRLF line
+  endings and the splice wrote LF, the terminator the publish script itself
+  emits. Exactly the 1,050 behavioral records changed.
+  `results_contract.json` regenerated (static-only by design;
   timestamp-only diff).
+- Independent audit (cross-model, 2026-07-20, report
+  `sol_report3.md` in the session records): four exact cells re-derived
+  directly from the scenario H5 entity tables match the published rows with
+  a largest difference of $74.73 out of trillions; all four spot-checked
+  `output_h5_sha256` values match the local artifacts; three interpolated
+  rows reproduce the ratio math to ≤$12.83; the option7 zero tail holds for
+  all 71 years 2030–2100; the 2100 option5/6/12 equality is literal, and
+  the option2/option3 pair differs by ≤$2,243 — the same spread the static
+  panel has carried since June (dataset-level noise, not introduced by the
+  rescore).
 
 ## Headline effect of the correction
 
