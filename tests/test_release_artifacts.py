@@ -49,6 +49,7 @@ ALLOWED_CSV_ARTIFACTS = {
     "dashboard/public/data/live_reform_status.csv",
     "dashboard/public/data/results.csv",
     "dashboard/public/data/ssa_economic_projections.csv",
+    "dashboard/public/data/earnings_response.csv",
     "dashboard/public/data/effective_interest_rates.csv",
     "dashboard/public/data/headline_summary.csv",
     "data/sources/tr2026/hi_effective_interest_rates_tr2026_iv_a4.csv",

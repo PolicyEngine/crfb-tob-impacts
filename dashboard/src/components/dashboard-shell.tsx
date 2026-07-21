@@ -572,9 +572,11 @@ export function DashboardShell() {
   const viewMode: ViewMode = "75year";
 
   useEffect(() => {
-    if (window.localStorage.getItem("crfb-scoring") === "behavioral") {
-      setScoringType("behavioral");
-    }
+    if (window.localStorage.getItem("crfb-scoring") !== "behavioral") return;
+    // Deferred so the first client render matches the prerendered static
+    // markup (and the compiler's no-sync-setState-in-effect rule).
+    const timer = window.setTimeout(() => setScoringType("behavioral"), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
