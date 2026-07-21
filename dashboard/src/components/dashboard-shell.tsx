@@ -43,6 +43,10 @@ import {
   type ScoringType,
   type YearlyImpact,
 } from "@/lib/dashboard-data";
+import {
+  loadEarningsResponses,
+  type EarningsResponse,
+} from "@/lib/earnings-response";
 import { EXTERNAL_ESTIMATES, REFORMS, type ReformMeta } from "@/lib/reforms";
 import { sitePath } from "@/lib/site-path";
 import { useElementSize } from "@/lib/use-element-size";
@@ -56,6 +60,10 @@ const STANDARD_REFORMS = REFORMS.filter((reform) =>
     reform.id,
   ),
 );
+
+// Scored static-only: the certified-reproduction additions have no
+// behavioral endpoint cells (a release test pins this to results.csv).
+const STATIC_ONLY_REFORM_IDS = new Set(["magi100", "tax_panel_2005"]);
 
 const PAPER_HREF = sitePath("/paper/");
 
@@ -102,6 +110,12 @@ function formatAxisDollars(value: number) {
 
 function formatPercent(value: number) {
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function formatEarningsPct(fraction: number) {
+  // Earnings responses are small (hundredths of a percent), so keep an
+  // extra decimal versus the revenue percent format.
+  return `${fraction >= 0 ? "+" : ""}${(fraction * 100).toFixed(3)}%`;
 }
 
 function formatValue(value: number, displayUnit: DisplayUnit) {
@@ -548,15 +562,43 @@ export function DashboardShell() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // All figures are static (no-behavioral) scores; the behavioral rows stay on
-  // disk but are no longer surfaced. Charts and tables always show the full
-  // 2026-2100 window.
-  const scoringType: ScoringType = "static";
+  // Sitewide scoring preference. Static is the default; the labor-response
+  // rows are the corrected behavioral endpoints (substitution channel live).
+  const [scoringType, setScoringType] = useState<ScoringType>("static");
+  const [earningsResponses, setEarningsResponses] = useState<Record<
+    string,
+    EarningsResponse
+  > | null>(null);
   const viewMode: ViewMode = "75year";
 
   useEffect(() => {
+    if (window.localStorage.getItem("crfb-scoring") === "behavioral") {
+      setScoringType("behavioral");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (scoringType !== "behavioral" || earningsResponses !== null) return;
+    loadEarningsResponses().then(setEarningsResponses, () =>
+      setEarningsResponses({}),
+    );
+  }, [scoringType, earningsResponses]);
+
+  useEffect(() => {
     let active = true;
-    loadDashboardData(scoringType, allocationMode, baselineScenario)
+    // Under labor-response scoring, static rows fill in for the options that
+    // are scored static-only (and the solvency baseline, which is static).
+    const request =
+      scoringType === "behavioral" && baselineScenario === "currentLaw"
+        ? Promise.all([
+            loadDashboardData("static", allocationMode, baselineScenario),
+            loadDashboardData("behavioral", allocationMode, baselineScenario),
+          ]).then(([staticData, behavioral]) => ({
+            ...staticData,
+            ...behavioral,
+          }))
+        : loadDashboardData("static", allocationMode, baselineScenario);
+    request
       .then((result) => {
         if (!active) return;
         setData(result);
@@ -592,10 +634,30 @@ export function DashboardShell() {
     setBaselineScenario(next);
   }
 
+  function handleScoringTypeChange(next: ScoringType) {
+    if (next === scoringType) return; // no-op click: don't strand the spinner
+    setLoading(true);
+    setError(null);
+    setScoringType(next);
+    window.localStorage.setItem("crfb-scoring", next);
+  }
+
   const effectiveReformId = selectedReform;
   const reform = STANDARD_REFORMS.find(
     (candidate) => candidate.id === effectiveReformId,
   ) as ReformMeta;
+  // The solvency baseline and the static-only options fall back to static
+  // figures while the sitewide preference stays put.
+  const scoringLockedStatic =
+    baselineScenario === "ssSolvent" ||
+    STATIC_ONLY_REFORM_IDS.has(effectiveReformId);
+  const effectiveScoringType: ScoringType = scoringLockedStatic
+    ? "static"
+    : scoringType;
+  const earningsResponse =
+    effectiveScoringType === "behavioral"
+      ? (earningsResponses?.[effectiveReformId] ?? null)
+      : null;
   const selectedData = data[effectiveReformId] ?? [];
   const visibleData = selectedData;
   const totals = calculateTotals(selectedData);
@@ -735,7 +797,7 @@ export function DashboardShell() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${effectiveReformId}_${scoringType}_impact_data_${DATA_VINTAGE}.csv`;
+    link.download = `${effectiveReformId}_${effectiveScoringType}_impact_data_${DATA_VINTAGE}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -944,7 +1006,7 @@ export function DashboardShell() {
             </section>
           ) : selectedData.length === 0 ? (
             <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-5 py-6 text-[var(--pe-color-text-secondary)]">
-              No {scoringType} results are available for {reform.shortName}.
+              No {effectiveScoringType} results are available for {reform.shortName}.
             </section>
           ) : (
             <>
@@ -970,6 +1032,32 @@ export function DashboardShell() {
 
               {/* Controls — compact inline row */}
               <section className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <div className="flex items-center">
+                  <ControlLabel>Scoring</ControlLabel>
+                  <span
+                    title="Static holds earnings fixed. Labor response applies the project's labor-supply elasticities (income and substitution, doubled for older workers), so earnings and revenue respond to the reform. Responses are modeled at 2026 and 2100 with intermediate years interpolated."
+                    aria-label="Scoring explanation"
+                    className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pe-color-border-light)] text-[var(--pe-color-text-tertiary)]"
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </span>
+                  <Segment
+                    label="Scoring"
+                    value={scoringType}
+                    onChange={handleScoringTypeChange}
+                    options={[
+                      { label: "Static", value: "static" },
+                      { label: "Labor response", value: "behavioral" },
+                    ]}
+                  />
+                  {scoringType === "behavioral" && scoringLockedStatic && (
+                    <span className="ml-2 text-xs text-[var(--pe-color-text-tertiary)]">
+                      {baselineScenario === "ssSolvent"
+                        ? "solvency baseline is static-scored"
+                        : "this option is static-scored"}
+                    </span>
+                  )}
+                </div>
                 {showBaselineScenarioToggle && (
                   <div className="flex items-center">
                     <ControlLabel>Baseline scenario</ControlLabel>
@@ -1056,8 +1144,13 @@ export function DashboardShell() {
                 </section>
               ) : null}
 
-              {/* Summary — four headline figures */}
-              <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {/* Summary — headline figures (+ earnings response when labor
+                  scoring is active) */}
+              <section
+                className={`grid gap-4 sm:grid-cols-2 ${
+                  earningsResponse ? "xl:grid-cols-5" : "xl:grid-cols-4"
+                }`}
+              >
                 {summaryFigures.map((figure) => (
                   <MetricTile
                     key={figure.label}
@@ -1068,6 +1161,19 @@ export function DashboardShell() {
                     accent
                   />
                 ))}
+                {earningsResponse && (
+                  <MetricTile
+                    label="Earnings response"
+                    value={formatEarningsPct(earningsResponse.pct2100)}
+                    tone={
+                      earningsResponse.pct2100 >= 0 ? "positive" : "negative"
+                    }
+                    caption={`total earnings vs baseline, 2100; 2026 ${formatEarningsPct(
+                      earningsResponse.pct2026,
+                    )}`}
+                    accent
+                  />
+                )}
               </section>
 
               {/* Chart + inline spotlight */}
@@ -1207,6 +1313,7 @@ export function DashboardShell() {
               <DistributionalSection
                 reformId={effectiveReformId}
                 reformName={reform.shortName}
+                staticScoringNote={effectiveScoringType === "behavioral"}
               />
 
               {/* Detailed external comparison table — current-law only, since
@@ -1216,7 +1323,7 @@ export function DashboardShell() {
                 <ComparisonTable
                   reformId={effectiveReformId}
                   policyEngineEstimate={Math.round(totals.tenYear * 10) / 10}
-                  scoringType={scoringType}
+                  scoringType={effectiveScoringType}
                 />
               )}
             </>

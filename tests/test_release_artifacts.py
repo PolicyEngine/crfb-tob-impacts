@@ -657,10 +657,10 @@ def test_dashboard_defaults_to_full_75_year_surface():
         REPO_ROOT / "dashboard" / "src" / "lib" / "dashboard-data.ts"
     ).read_text(encoding="utf-8")
 
-    # Static-only scoring: hardcoded, with no scoring toggle exposed.
-    assert 'const scoringType: ScoringType = "static";' in shell
-    assert "Labor response" not in shell
-    assert 'value: "behavioral"' not in shell
+    # Scoring defaults to static; the sitewide labor-response toggle is
+    # exposed (restored 2026-07-21 with the corrected behavioral rows).
+    assert 'useState<ScoringType>("static")' in shell
+    assert '{ label: "Labor response", value: "behavioral" }' in shell
     # The full 75-year surface is always shown: view mode is fixed and the
     # 10-year/75-year period toggle is gone.
     assert 'const viewMode: ViewMode = "75year";' in shell
@@ -981,3 +981,42 @@ def test_hi_payroll_denominator_follows_tr2026_ratio_path():
         merged["hi_taxable_payroll_x"]
         > merged["taxable_payroll_in_billion_nominal_usd_tr2026"]
     ).all()
+
+
+def test_earnings_response_covers_behavioral_reforms():
+    """The earnings-response file must carry both endpoint years for exactly
+    the reforms that have behavioral rows, with percents mirroring the
+    published earnings levels."""
+    earnings = pd.read_csv(DASHBOARD_DATA / "earnings_response.csv")
+    behavioral = load_dashboard_results("behavioral")
+    behavioral_reforms = set(behavioral["reform_name"].unique())
+    assert set(earnings["reform_name"].unique()) == behavioral_reforms
+    by_reform = earnings.groupby("reform_name")["year"].agg(set)
+    assert by_reform.map(lambda years: years == {2026, 2100}).all()
+    recomputed = (
+        earnings["behavioral_earnings_billions"]
+        / earnings["baseline_earnings_billions"]
+        - 1
+    )
+    assert (recomputed - earnings["pct_change"]).abs().max() < 1e-6
+
+
+def test_static_only_reform_ids_match_results():
+    """The dashboard's static-only set must equal the reforms that lack
+    behavioral rows in results.csv."""
+    import re
+
+    shell = (
+        REPO_ROOT / "dashboard" / "src" / "components" / "dashboard-shell.tsx"
+    ).read_text(encoding="utf-8")
+    match = re.search(
+        r"const STATIC_ONLY_REFORM_IDS = new Set\(\[(.*?)\]\)", shell, re.S
+    )
+    assert match, "STATIC_ONLY_REFORM_IDS missing from dashboard-shell.tsx"
+    declared = set(re.findall(r'"([a-z0-9_]+)"', match.group(1)))
+    static = load_dashboard_results("static")
+    behavioral = load_dashboard_results("behavioral")
+    expected = set(static["reform_name"].unique()) - set(
+        behavioral["reform_name"].unique()
+    )
+    assert declared == expected
