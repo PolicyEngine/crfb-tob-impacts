@@ -129,27 +129,18 @@ figure changed; the correction affects the downloadable behavioral rows and
 the paper's methods description (see the correction note in
 `paper/sections/03-methods.qmd`).
 
-## Dashboard re-exposure (2026-07-21)
+## Dashboard exposure (2026-07-21 → 2026-07-22)
 
-With the corrected endpoints published, the dashboard's scoring toggle
-returned (Max's call): a sitewide "Static | Labor response" control in the
-reform controls row, persisted per visitor (localStorage), defaulting to
-static. Labor-response mode drives the summary card, chart, spotlight
-years, and CSV export from the behavioral rows; the solvency baseline and
-the static-only options (magi100, tax_panel_2005) fall back to static
-figures with an inline note, and the decile section is captioned as
-static-scored.
-
-When labor-response scoring is active the summary card adds an "Earnings
-response" figure: the net effect of the reform on total earnings
-(employment plus self-employment, person-weighted) versus the same year's
-baseline, at the modeled endpoints (2026 and 2100).
-`scripts/build_earnings_response.py` computes it from the corrected
-`lsrfix_behavioral_20260719` cells against static-cell earnings (static
-scoring applies no response, so its earnings equal the dataset inputs and
-are asserted reform-invariant) →
-`dashboard/public/data/earnings_response.csv`. Release tests pin the
-file's coverage to the behavioral reform set and the dashboard's
-static-only list to results.csv. Signature values: option5 2026 −0.403%
-and 2100 −0.207% (the substitution channel outweighing the income channel
-post-fix), reverse_roth +0.289% at 2100.
+With the corrected endpoints published, a sitewide static/labor-response
+toggle (plus a net earnings-response figure) went live on 2026-07-21 and
+was removed on 2026-07-22 at CRFB's request — Marc Goldwein reaffirmed the
+static-only display decision from the 6/30 round (the static and
+labor-response scores are close enough that the toggle mainly adds
+confusion). The dashboard remains static-only; the corrected behavioral
+rows stay in results.csv and the CSV export. The earnings-response
+tooling from the brief exposure lives in git history
+(scripts/build_earnings_response.py at 36174ed) and the per-reform
+earnings responses are recorded in the repo record for reference:
+option5 −0.403% (2026) / −0.207% (2100), option12 −0.549% (2026),
+reverse_roth +0.405% (2026) / +0.289% (2100), benefit-share reforms
+within ±0.04%.

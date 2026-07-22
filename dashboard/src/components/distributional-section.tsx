@@ -133,13 +133,9 @@ function interpolateDeciles(
 export function DistributionalSection({
   reformId,
   reformName,
-  staticScoringNote = false,
 }: {
   reformId: string;
   reformName: string;
-  // Set when the dashboard is showing labor-response figures: the decile
-  // data is computed from static scoring, and the caption says so.
-  staticScoringNote?: boolean;
 }) {
   const [data, setData] = useState<DistributionalData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -186,7 +182,6 @@ export function DistributionalSection({
           <p className="mt-1 text-sm text-[var(--pe-color-text-secondary)]">
             Average change in household net income under {reformName}, by
             baseline income decile, in {year}.
-            {staticScoringNote ? " Deciles use static scoring." : null}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
