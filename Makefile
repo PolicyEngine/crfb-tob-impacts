@@ -59,7 +59,6 @@ clean:
 	rm -rf .vercel-site/
 	rm -rf dashboard/out dashboard/.next
 	rm -rf paper/_build paper/index_files paper/index.pdf
-	rm -rf data/*.csv
 	rm -rf __pycache__/ src/__pycache__/ tests/__pycache__/
 	rm -rf .pytest_cache/ .coverage htmlcov/
 	find . -type f -name "*.pyc" -delete
