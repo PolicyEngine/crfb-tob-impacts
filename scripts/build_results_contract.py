@@ -50,10 +50,29 @@ DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS = (
     / "docs"
     / "current"
     / "manifests"
-    / "baseline-dataset-manifest-anchor2062.json",
+    / "baseline-dataset-manifest-anchor2032-2033.json",
 )
 DEFAULT_DISPLAY = REPO / "results.csv"
 DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_status.csv"
+
+# Exact cells scored on the certified-reproduction dataset family carry that
+# family's baseline H5, not the published-family dataset the primary manifest
+# records for the same year (audit M-05: magi100/tax_panel_2005@2035). Resolve
+# each exact row's baseline sha from the manifest matching its run prefix;
+# rows without a mapped prefix fall back to the merged primary-first map.
+MANIFEST_NAME_BY_RUN_PREFIX = (
+    ("certinfill_9f1260b_", "baseline-dataset-manifest-9f1260b-certinfill.json"),
+    ("magi100_certrepro_", "baseline-dataset-manifest-anchor2032-2033.json"),
+    ("tax_panel_2005_certrepro_", "baseline-dataset-manifest-anchor2032-2033.json"),
+    ("anchor2062_", "baseline-dataset-manifest-anchor2032-2033.json"),
+    ("option6_bracketfix_", "baseline-dataset-manifest-anchor2032-2033.json"),
+    ("anchor_behavioral_", "baseline-dataset-manifest-anchor2032-2033.json"),
+)
+
+EXACT_RESULT_TYPES = {
+    "static": "exact_full_h5",
+    "behavioral": "exact_behavioral_endpoint_full_h5",
+}
 DEFAULT_OUTPUT = REPO / "dashboard" / "public" / "data" / "results_contract.json"
 TR2026_AUX = REPO / "data" / "social_security_aux_tr2026.csv"
 
@@ -164,8 +183,8 @@ def build_contract(
     baseline_manifest_path = _resolve_repo_path(baseline_manifest_path)
     live_status_path = _resolve_repo_path(live_status_path)
     display = pd.read_csv(display_path)
-    if "scoring_type" in display.columns:
-        display = display[display["scoring_type"].eq("static")].copy()
+    if "scoring_type" not in display.columns:
+        display = display.assign(scoring_type="static")
     manifest = json.loads(baseline_manifest_path.read_text())
     year_sha = _year_sha_from_manifest(baseline_manifest_path)
     strict_supplemental_manifests = supplemental_baseline_manifest_paths is not None
@@ -174,6 +193,9 @@ def build_contract(
         supplemental_baseline_manifest_paths,
     )
     supplemental_manifest_paths: list[str] = []
+    year_sha_by_manifest_name: dict[str, dict[int, str]] = {
+        baseline_manifest_path.name: dict(year_sha)
+    }
     for supplemental_path in supplemental_baseline_manifest_paths:
         if not supplemental_path.exists():
             if strict_supplemental_manifests:
@@ -183,7 +205,9 @@ def build_contract(
                 )
             continue
         supplemental_manifest_paths.append(str(supplemental_path.relative_to(REPO)))
-        for year, h5_sha in _year_sha_from_manifest(supplemental_path).items():
+        supplemental_year_sha = _year_sha_from_manifest(supplemental_path)
+        year_sha_by_manifest_name[supplemental_path.name] = supplemental_year_sha
+        for year, h5_sha in supplemental_year_sha.items():
             year_sha.setdefault(year, h5_sha)
 
     status = pd.read_csv(live_status_path)
@@ -195,38 +219,72 @@ def build_contract(
             "scenario_h5_sha256": row.get("output_h5_sha256") or None,
         }
 
-    anchor_years = sorted(
-        int(y)
-        for y in display.loc[display["full_h5_result_type"] == "exact_full_h5", "year"]
-        .astype(int)
-        .unique()
-    )
+    # Interpolation parents are per reform and scoring type: pooling exact
+    # years globally credited option6-only anchors (2032/2033) and the
+    # option12/option5 completion anchor (2062) to reforms that are
+    # interpolated at those years (audit M-04).
+    exact_mask = display["full_h5_result_type"].isin(EXACT_RESULT_TYPES.values())
+    anchor_years_by_group: dict[tuple[str, str], list[int]] = {
+        (str(reform), str(scoring)): sorted(
+            int(y) for y in group["year"].astype(int).unique()
+        )
+        for (reform, scoring), group in display[exact_mask].groupby(
+            ["reform_name", "scoring_type"]
+        )
+    }
 
-    results = []
-    for _, row in display.iterrows():
-        year = int(row["year"])
-        reform = str(row["reform_name"])
-        exact = row["full_h5_result_type"] == "exact_full_h5"
-        if exact and year not in year_sha:
+    def _baseline_sha_for_exact_row(
+        reform: str, year: int, run_prefix: str | None
+    ) -> str:
+        if isinstance(run_prefix, str):
+            for prefix, manifest_name in MANIFEST_NAME_BY_RUN_PREFIX:
+                if run_prefix.startswith(prefix):
+                    if manifest_name not in year_sha_by_manifest_name:
+                        # Caller supplied a different manifest set; fall back
+                        # to the merged map (and its canonical error).
+                        break
+                    by_year = year_sha_by_manifest_name[manifest_name]
+                    if year in by_year:
+                        return by_year[year]
+                    raise ValueError(
+                        f"Exact row {reform} {year} (prefix {run_prefix}) maps "
+                        f"to manifest {manifest_name}, which lacks year {year}."
+                    )
+        if year not in year_sha:
             raise ValueError(
                 "Exact full-H5 row lacks same-year baseline lineage: "
                 f"{reform} {year}. Add a supplemental baseline manifest covering "
                 "that exact year."
             )
-        nearest_sha_year = (
-            year if year in year_sha else min(year_sha, key=lambda y: abs(y - year))
+        return year_sha[year]
+
+    results = []
+    for _, row in display.iterrows():
+        year = int(row["year"])
+        reform = str(row["reform_name"])
+        scoring = str(row["scoring_type"])
+        exact = row["full_h5_result_type"] == EXACT_RESULT_TYPES.get(scoring)
+        row_run_prefix = row.get("run_prefix")
+        row_run_prefix = (
+            str(row_run_prefix)
+            if isinstance(row_run_prefix, str) and row_run_prefix
+            else None
         )
+        if exact:
+            baseline_sha = _baseline_sha_for_exact_row(reform, year, row_run_prefix)
+        else:
+            nearest_sha_year = (
+                year
+                if year in year_sha
+                else min(year_sha, key=lambda y: abs(y - year))
+            )
+            baseline_sha = year_sha[nearest_sha_year]
         lineage: dict = {
-            "baseline_year_h5_sha256": year_sha[nearest_sha_year],
+            "baseline_year_h5_sha256": baseline_sha,
         }
         if exact:
-            cell = cell_sha.get((reform, year), {})
-            row_run_prefix = row.get("run_prefix")
-            lineage["run_prefix"] = (
-                str(row_run_prefix)
-                if isinstance(row_run_prefix, str) and row_run_prefix
-                else cell.get("run_prefix")
-            )
+            cell = cell_sha.get((reform, year), {}) if scoring == "static" else {}
+            lineage["run_prefix"] = row_run_prefix or cell.get("run_prefix")
             row_sha = row.get("output_h5_sha256")
             sha = (
                 str(row_sha)
@@ -238,9 +296,12 @@ def build_contract(
             )
             lineage["interpolated_between"] = None
         else:
+            anchor_years = anchor_years_by_group.get((reform, scoring), [])
             below = max((y for y in anchor_years if y < year), default=None)
             above = min((y for y in anchor_years if y > year), default=None)
-            lineage["run_prefix"] = None
+            # Behavioral interpolated rows carry the ratio-interpolation
+            # vintage as their prefix; static interpolated rows have none.
+            lineage["run_prefix"] = row_run_prefix
             lineage["scenario_h5_sha256"] = None
             lineage["interpolated_between"] = [
                 y for y in (below, above) if y is not None
@@ -261,8 +322,19 @@ def build_contract(
             }
         )
 
-    run_prefixes = sorted(
-        {r["lineage"]["run_prefix"] for r in results if r["lineage"].get("run_prefix")}
+    scoring_by_prefix: dict[str, str] = {}
+    for r in results:
+        prefix = r["lineage"].get("run_prefix")
+        if prefix:
+            scoring_by_prefix.setdefault(prefix, r["scoring_type"])
+    run_prefixes = sorted(scoring_by_prefix)
+    static_anchor_years = sorted(
+        {
+            y
+            for (_, scoring), years in anchor_years_by_group.items()
+            if scoring == "static"
+            for y in years
+        }
     )
     return {
         "schema": "crfb_results_contract/v1",
@@ -276,11 +348,11 @@ def build_contract(
                 "year_h5_sha256": {str(y): s for y, s in sorted(year_sha.items())},
                 "supplemental_manifest_paths": supplemental_manifest_paths,
             },
-            "targets": targets_in_populace_grammar(anchor_years),
+            "targets": targets_in_populace_grammar(static_anchor_years),
             "reform_runs": [
                 {
                     "run_prefix": prefix,
-                    "scoring_type": "static",
+                    "scoring_type": scoring_by_prefix[prefix],
                     "cell_count": int(
                         sum(
                             1
@@ -340,7 +412,11 @@ def main() -> int:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(contract, indent=1) + "\n")
-    exact = sum(1 for r in contract["results"] if r["result_type"] == "exact_full_h5")
+    exact = sum(
+        1
+        for r in contract["results"]
+        if r["result_type"] in EXACT_RESULT_TYPES.values()
+    )
     print(
         f"wrote {args.output}: {len(contract['results'])} rows "
         f"({exact} exact, {len(contract['results']) - exact} interpolated), "

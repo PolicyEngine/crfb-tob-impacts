@@ -142,7 +142,7 @@ def exact_row(agg, baseline, reform: str) -> dict:
             ),
             "complete_uri": "",
             "output_h5_sha256": metadata["output_h5_sha256"],
-            "baseline_source": "certrepro_2062_same_dataset_baseline",
+            "baseline_source": "certrepro_same_dataset_baseline",
             "baseline_tax_assumption_name": metadata["tax_assumption"]["name"],
             "baseline_tax_assumption_active": str(metadata["tax_assumption"]["active"]),
         }

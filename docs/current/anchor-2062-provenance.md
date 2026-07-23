@@ -44,7 +44,7 @@ dataset (`aggregate_reform_full_h5_results.load_baseline`), cached in
 `scripts/fix_option12_2062_anchor.py splice` replaced the option12 and
 option5 static rows for 2061–2064 in both results.csv copies in place
 (all other rows byte-identical): 2062 becomes the exact anchor
-(baseline_source `certrepro_2062_same_dataset_baseline`), 2061
+(baseline_source `certrepro_same_dataset_baseline`), 2061
 re-interpolates 2060→2062, 2063–2064 re-interpolate 2062→2065.
 Headline moves: option12 2062 −$40.42B → −$58.28B; option5 2062
 −$59.96B → −$58.28B. From 2062 the two reforms' rows are identical, as
