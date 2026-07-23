@@ -119,12 +119,11 @@ def test_contract_builder_keeps_default_supplement_when_explicit_paths_are_added
     )
     baseline_build = regenerated["lineage"]["baseline_build"]
     expected_supplements = {
-        str(DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS[0].relative_to(REPO)),
-        str(ALT_BASELINE_MANIFEST.relative_to(REPO)),
-    }
+        str(path.relative_to(REPO)) for path in DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS
+    } | {str(ALT_BASELINE_MANIFEST.relative_to(REPO))}
 
     assert set(baseline_build["supplemental_manifest_paths"]) == expected_supplements
-    for infill_year in ["2028", "2029", "2032", "2033"]:
+    for infill_year in ["2028", "2029", "2032", "2033", "2062"]:
         assert infill_year in baseline_build["year_h5_sha256"]
 
 
@@ -133,7 +132,7 @@ def test_contract_builder_requires_custom_supplement_for_custom_manifest() -> No
         Path("dashboard/public/data/results.csv"),
         Path("docs/current/manifests/baseline-dataset-manifest-v2pop.json"),
         Path("dashboard/public/data/live_reform_status.csv"),
-        [DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS[0]],
+        list(DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS),
     )
     baseline_build = regenerated["lineage"]["baseline_build"]
 
@@ -141,7 +140,7 @@ def test_contract_builder_requires_custom_supplement_for_custom_manifest() -> No
         ALT_BASELINE_MANIFEST.relative_to(REPO)
     )
     assert baseline_build["supplemental_manifest_paths"] == [
-        str(DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS[0].relative_to(REPO))
+        str(path.relative_to(REPO)) for path in DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS
     ]
 
 

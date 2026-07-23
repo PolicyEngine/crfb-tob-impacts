@@ -46,6 +46,11 @@ DEFAULT_SUPPLEMENTAL_BASELINE_MANIFESTS = (
     / "current"
     / "manifests"
     / "baseline-dataset-manifest-9f1260b-certinfill.json",
+    REPO
+    / "docs"
+    / "current"
+    / "manifests"
+    / "baseline-dataset-manifest-anchor2062.json",
 )
 DEFAULT_DISPLAY = REPO / "results.csv"
 DEFAULT_LIVE_STATUS = REPO / "dashboard" / "public" / "data" / "live_reform_status.csv"

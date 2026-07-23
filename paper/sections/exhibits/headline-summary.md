@@ -24,9 +24,9 @@ option except the no-senior-deduction option.
 | 93% taxation | +671 | +2,785 | +1,598 | +1,188 |
 | 95% taxation | +735 | +3,159 | +1,811 | +1,348 |
 | 100% taxation | +896 | +4,100 | +2,349 | +1,752 |
-| Roth swap | +426 | -110 | +2,115 | -2,226 |
+| Roth swap | +426 | -110 | +2,116 | -2,225 |
 | Short phase-in Roth | +1,173 | +857 | +3,009 | -2,152 |
-| Phased Roth | +1,945 | +2,600 | +3,179 | -579 |
+| Phased Roth | +1,945 | +2,591 | +3,179 | -588 |
 | Reverse Roth | -643 | -4,164 | -7,836 | +3,672 |
 
 **Scored against the Social Security solvency baseline (2026-2034

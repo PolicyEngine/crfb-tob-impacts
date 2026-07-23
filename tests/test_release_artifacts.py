@@ -312,6 +312,7 @@ def test_current_public_results_have_current_release_provenance():
     assert set(results["baseline_source"].dropna()) == {
         "v2pop_tr2026_baseline_h5",
         "v2pop_tr2026_static_full_h5_display",
+        "certrepro_2062_same_dataset_baseline",
     }
     behavioral = results[results["scoring_type"].eq("behavioral")]
     interpolated = behavioral[
