@@ -9,7 +9,12 @@ REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
-STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + ("reverse_roth", "tax93")
+STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
+    "reverse_roth",
+    "tax93",
+    "magi100",
+    "tax_panel_2005",
+)
 
 
 def fmt_b(value: float) -> str:
@@ -83,12 +88,14 @@ def build_results_overview(df: pd.DataFrame) -> str:
     )
 
     return f"""
-The current release surface contains the fourteen contract-standard reforms:
-`option1` through `option12`, the reverse-Roth proposal, and the `93%`
-benchmark. All rows come from the June 12 full-H5 panel on the populace
-baselines, or display interpolation between those exact anchor-year H5 outputs.
-Legacy non-contract artifacts are excluded from the dashboard, paper exhibits,
-and release package.
+The current release surface contains sixteen reforms: `option1` through
+`option12`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
+inclusion (`magi100`), and the 2005 Tax Panel simple deduction
+(`tax_panel_2005`). Every static row is either an exact full-H5
+microsimulation output on the populace baselines or display interpolation
+between those exact anchor-year outputs, as labeled per row in the public
+CSV. Legacy non-contract artifacts are excluded from the dashboard, paper
+exhibits, and release package.
 
 ## Ten-year static revenue impacts
 
@@ -357,10 +364,11 @@ def build_response_status() -> str:
 Labor-supply response rows are generated under the current full-H5 reform contract
 and published as the dashboard's supplemental scoring surface. Each
 endpoint cell saves a durable reform H5 first, computed at `2026` and `2100`
-for all fourteen reforms; aggregates are then derived from those H5s using
+for the fourteen contract-standard reforms; aggregates are then derived from those H5s using
 PolicyEngine/MicroSeries operations, and intermediate annual rows are
 interpolated from the endpoint ratios. The rows appear in `results.csv` under
-`scoring_type = behavioral`. Static scoring remains the primary surface;
+`scoring_type = behavioral` and carry both the income and substitution
+channels. Static scoring remains the primary surface;
 labor-supply response results are partial-equilibrium estimates under the
 project's age-based elasticity schedule and are not official CBO or JCT scores.
 Earlier non-contract response artifacts were removed from the release surface.
@@ -378,12 +386,80 @@ household aggregation pass is complete.
 """
 
 
+def build_full_h5_summary(static_df: pd.DataFrame) -> str:
+    """Current-release replacement for the retired May run-status exhibit."""
+    src = REPO / "dashboard" / "public" / "data" / "results.csv"
+    full = pd.read_csv(src)
+    behavioral = full[full["scoring_type"] == "behavioral"].copy()
+
+    exact = static_df[static_df["full_h5_result_type"] == "exact_full_h5"]
+    n_exact = len(exact)
+    n_reforms = static_df["reform_name"].nunique()
+
+    milestone_years = [2035, 2050, 2075, 2100]
+    milestone_rows = []
+    for reform in sorted(static_df["reform_name"].unique()):
+        sub = static_df[static_df["reform_name"] == reform].set_index("year")
+        milestone_rows.append(
+            [reform]
+            + [
+                fmt_b(float(sub.loc[year, "revenue_impact"]))
+                for year in milestone_years
+            ]
+        )
+    milestone_table = markdown_table(
+        ["Reform"] + [str(year) for year in milestone_years], milestone_rows
+    )
+
+    endpoint_rows = []
+    for reform in sorted(behavioral["reform_name"].unique()):
+        b = behavioral[behavioral["reform_name"] == reform].set_index("year")
+        st = static_df[static_df["reform_name"] == reform].set_index("year")
+        cells = [reform]
+        for year in (2026, 2100):
+            b_val = float(b.loc[year, "revenue_impact"])
+            s_val = float(st.loc[year, "revenue_impact"])
+            cells.append(f"{fmt_b(b_val)} ({fmt_b(b_val - s_val)})")
+        endpoint_rows.append(cells)
+    endpoint_table = markdown_table(
+        [
+            "Reform",
+            "2026 behavioral, (minus static) ($B)",
+            "2100 behavioral, (minus static) ($B)",
+        ],
+        endpoint_rows,
+    )
+
+    return f"""
+The static panel covers `{n_reforms}` reforms with `{n_exact}` exact full-H5
+anchor cells; every non-anchor annual row is display interpolation between
+those exact outputs, labeled per row in the public CSV. Labor-supply response
+scoring is supplemental: exact endpoint cells at `2026` and `2100` for the
+fourteen contract-standard reforms, with intermediate years interpolated from
+endpoint ratios. All exact cells carry durable artifact lineage
+(`run_prefix`, output-H5 SHA-256) recorded per row.
+
+### Milestone static revenue impacts
+
+{milestone_table}
+
+### Behavioral endpoints versus static
+
+{endpoint_table}
+
+Labor-supply response results carry both the income and substitution
+channels and are partial-equilibrium estimates under the project's age-based
+elasticity schedule, not official CBO or JCT scores.
+"""
+
+
 def main() -> None:
     EXHIBITS.mkdir(parents=True, exist_ok=True)
     SECTION_EXHIBITS.mkdir(parents=True, exist_ok=True)
     df = load_static()
 
     write_exhibit("results-overview.md", build_results_overview(df))
+    write_exhibit("full-h5-results-summary.md", build_full_h5_summary(df))
     write_exhibit("revenue-impacts.md", build_revenue_impacts(df))
     write_exhibit("external-benchmarks.md", build_external_benchmarks(df))
     write_exhibit("labor-supply-response-status.md", build_response_status())

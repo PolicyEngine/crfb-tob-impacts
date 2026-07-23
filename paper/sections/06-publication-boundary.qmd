@@ -27,7 +27,7 @@ This Quarto paper is the stable narrative layer intended for:
 
 The manuscript should preserve the source trail and substantive chapter
 coverage of the first report while updating scope to the current CRFB-facing
-fourteen-reform menu.
+sixteen-reform menu.
 
 ## 3. Operational documentation
 

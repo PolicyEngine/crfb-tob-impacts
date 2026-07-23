@@ -374,7 +374,7 @@ test, since a difference in base, build code, model version, or scoring code wou
 all surface as a published cell that no longer reproduces. Only after both gates
 match are the four budget-window anchors scored and merged. The scoring code at the
 production commit differs from the current head only in cosmetic relabeling and
-guard logic for thirteen of the fourteen reforms, with one substantive change to
+guard logic for all but one of the then-current fourteen reforms, with one substantive change to
 the `reverse_roth` payroll-deduction definition; the infill cells are therefore
 produced from the pinned worktree end to end, which removes that single open
 question rather than certifying it.

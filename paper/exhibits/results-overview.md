@@ -1,9 +1,11 @@
-The current release surface contains the fourteen contract-standard reforms:
-`option1` through `option12`, the reverse-Roth proposal, and the `93%`
-benchmark. All rows come from the June 12 full-H5 panel on the populace
-baselines, or display interpolation between those exact anchor-year H5 outputs.
-Legacy non-contract artifacts are excluded from the dashboard, paper exhibits,
-and release package.
+The current release surface contains sixteen reforms: `option1` through
+`option12`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
+inclusion (`magi100`), and the 2005 Tax Panel simple deduction
+(`tax_panel_2005`). Every static row is either an exact full-H5
+microsimulation output on the populace baselines or display interpolation
+between those exact anchor-year outputs, as labeled per row in the public
+CSV. Legacy non-contract artifacts are excluded from the dashboard, paper
+exhibits, and release package.
 
 ## Ten-year static revenue impacts
 
@@ -11,8 +13,10 @@ and release package.
 | --- | --- |
 | option1 | -1,658.8 |
 | reverse_roth | -643.5 |
+| tax_panel_2005 | -36.5 |
 | option7 | +52.4 |
 | option3 | +182.4 |
+| magi100 | +200.6 |
 | option4 | +221.0 |
 | option11 | +248.1 |
 | option5 | +413.5 |
@@ -37,8 +41,10 @@ reduction is `option1` (-1,658.8 $B).
 | option12 | -547.8 | -3,319.1 |
 | option5 | -547.8 | -3,319.1 |
 | option6 | -547.8 | -3,319.1 |
+| tax_panel_2005 | -141.1 | -141.1 |
 | option7 | +0.0 | +0.0 |
 | option4 | +187.1 | +187.1 |
+| magi100 | +217.4 | +217.4 |
 | option3 | +231.3 | +231.3 |
 | option11 | +231.3 | +231.3 |
 | option2 | +231.3 | +231.3 |

@@ -22,15 +22,16 @@ The projected datasets are checked against the calibration contract before
 reform results are treated as publishable. On the populace base with no
 synthetic support, all six far-horizon years (`2075`–`2100`) clear the
 exact-calibration and contributor support-gate contract: OASDI
-taxation-of-benefits contributor effective sample sizes run `131`–`161` and HI
-contributor effective sample sizes run `47`–`121` against the contributor-gate
-floor, which is applied uniformly across every projection year rather than only
-the late horizon. In a local static reform smoke test, full repeal of benefit
+taxation-of-benefits contributor effective sample sizes run `132`–`156` and HI
+contributor effective sample sizes run `107`–`127`, clearing the uniform
+contributor-gate floor of `50`, which is applied across every projection year
+rather than only the late horizon. In a local static reform smoke test, full repeal of benefit
 taxation reduced revenue by the baseline taxation-of-benefits amount in every
 anchor year, and taxing all benefits raised that revenue with the expected sign.
 
-The production run delivers the full fourteen-reform static panel (`option1`
-through `option12`, the reverse-Roth proposal, and the `93%` benchmark) across
+The production surface delivers the full sixteen-reform static panel
+(`option1` through `option12`, the reverse-Roth proposal, the `93%` benchmark,
+full MAGI inclusion, and the 2005 Tax Panel simple deduction) across
 the annual budget window, five-year long-run sentinels, and the reform-transition
 junctures, with labor-supply-response multipliers derived from `2026` and `2100`
 endpoints and interpolated across years. Dashboard annual rows between computed

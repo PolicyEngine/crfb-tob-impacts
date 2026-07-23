@@ -8,10 +8,11 @@ separate from, two other project surfaces:
 - the **operational docs**, which track rerun status, reproducibility, and audit decisions
 
 The current analysis extends the original eight-option report to a broader
-fourteen-reform package over a `2026-2100` modeling window. The live release
-surface is the standard reform set, `option1` through `option12`, plus two
-additional reforms — a reverse-Roth proposal and a `93%` benefit-taxation
-benchmark — all generated from the current full-H5 contract on the populace
+sixteen-reform package over a `2026-2100` modeling window. The live release
+surface is the standard reform set, `option1` through `option12`, plus four
+additional reforms — a reverse-Roth proposal, a `93%` benefit-taxation
+benchmark, full MAGI inclusion of benefits, and the 2005 Tax Panel simple
+deduction — all generated from the current full-H5 contract on the populace
 microdata base.
 
 ## Current-law baseline
