@@ -104,8 +104,8 @@ Roughly revenue-neutral in the budget window, a growing loss thereafter
 (figures post far-anchor fix): −$1.9B (2026), −$36.5B over 2026–2035
 nominal, −$141.1B by 2100; 75-year total −$4,271.5B undiscounted.
 Present value at the Trustees effective rates (per-fund discounting,
-panel convention): −$546.0B under the dashboard's default
-baseline-shares split; summing the statutory-split tiers instead gives
+panel convention): −$529B as displayed on the dashboard (default baseline-shares split
+plus the general-fund line, each discounted at its fund's rates); summing the statutory-split tiers instead gives
 −$524.5B (OASDI +$40.1B, HI −$564.6B) — the gap is the two splits
 discounting different fund shares at different rates.
 
