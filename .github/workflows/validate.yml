@@ -48,7 +48,12 @@ jobs:
           .venv/bin/pytest -q \
             tests/test_release_artifacts.py \
             tests/test_dashboard_baseline_assumptions.py \
-            tests/test_release_package.py
+            tests/test_release_package.py \
+            tests/test_results_contract.py \
+            tests/test_published_data_integrity.py \
+            tests/test_headline_summary.py \
+            tests/test_behavioral_anchor_interpolation.py \
+            tests/test_reforms.py
 
   dashboard:
     name: Dashboard Build

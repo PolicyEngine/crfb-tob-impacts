@@ -158,8 +158,10 @@ def run_gate(agg=None, verbose: bool = True) -> dict[str, dict]:
         got = getattr(baseline, key) / 1e9
         ok = abs(got - want) <= 1e-3
         if verbose:
-            print(f"[G1] baseline {key}: {got:,.6f}B vs OACT {want:,.4f}B "
-                  f"({'OK' if ok else 'FAIL'})")
+            print(
+                f"[G1] baseline {key}: {got:,.6f}B vs OACT {want:,.4f}B "
+                f"({'OK' if ok else 'FAIL'})"
+            )
         if not ok:
             failures.append(f"G1 {key}")
     rows = {r: exact_row(agg, baseline, r) for r in ("option1", "option12", "option5")}
@@ -167,17 +169,21 @@ def run_gate(agg=None, verbose: bool = True) -> dict[str, dict]:
     tob = baseline.tob_total / 1e9
     g2 = abs(o1 + tob) <= 0.1
     if verbose:
-        print(f"[G2] option1@2062 {o1:+.6f}B vs -baseline TOB {-tob:,.6f}B "
-              f"(diff {abs(o1 + tob) * 1000:.3f}M, {'OK' if g2 else 'FAIL'})")
+        print(
+            f"[G2] option1@2062 {o1:+.6f}B vs -baseline TOB {-tob:,.6f}B "
+            f"(diff {abs(o1 + tob) * 1000:.3f}M, {'OK' if g2 else 'FAIL'})"
+        )
     if not g2:
         failures.append("G2")
     gap = rows["option12"]["revenue_impact"] - rows["option5"]["revenue_impact"]
     g3 = abs(gap) <= 0.5
     if verbose:
-        print(f"[G3] option12@2062 {rows['option12']['revenue_impact']:+.6f}B vs "
-              f"option5@2062 {rows['option5']['revenue_impact']:+.6f}B "
-              f"(gap {gap * 1000:+.3f}M, {'OK' if g3 else 'FAIL'}; "
-              f"displayed artifact was +19,543.450M)")
+        print(
+            f"[G3] option12@2062 {rows['option12']['revenue_impact']:+.6f}B vs "
+            f"option5@2062 {rows['option5']['revenue_impact']:+.6f}B "
+            f"(gap {gap * 1000:+.3f}M, {'OK' if g3 else 'FAIL'}; "
+            f"displayed artifact was +19,543.450M)"
+        )
     if not g3:
         failures.append("G3")
     if failures:

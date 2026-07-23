@@ -75,8 +75,7 @@ def _raw_baseline_series() -> dict[str, dict[int, float]]:
                 continue
             if values.max() - values.min() > MAX_ANCHOR_SPREAD_BILLIONS:
                 raise SystemExit(
-                    f"raw {column} spread at {year}: "
-                    f"{values.max() - values.min():.6f}B"
+                    f"raw {column} spread at {year}: {values.max() - values.min():.6f}B"
                 )
             series[column][int(year)] = float(values.iloc[0])
     return series
@@ -86,8 +85,7 @@ def pooled_series(rows: list[dict]) -> dict[str, dict[int, float]]:
     exact = [
         r
         for r in rows
-        if r["scoring_type"] == "static"
-        and r["full_h5_result_type"] == "exact_full_h5"
+        if r["scoring_type"] == "static" and r["full_h5_result_type"] == "exact_full_h5"
     ]
     raw_series = _raw_baseline_series()
     series: dict[str, dict[int, float]] = {c: {} for c in BASELINE_COLUMNS}
@@ -96,7 +94,9 @@ def pooled_series(rows: list[dict]) -> dict[str, dict[int, float]]:
         by_year.setdefault(int(r["year"]), []).append(r)
     for year, group in sorted(by_year.items()):
         for column in BASELINE_COLUMNS:
-            values = [float(g[column]) for g in group if g.get(column) not in ("", None)]
+            values = [
+                float(g[column]) for g in group if g.get(column) not in ("", None)
+            ]
             if not values:
                 continue
             raw_value = raw_series[column].get(year)
@@ -155,9 +155,10 @@ def main() -> int:
                         worst = (delta, f"{row['reform_name']} {year}", column)
                     row[column] = f"{new:.10f}"
                     row_changed = True
-            for reform_column, (baseline_column, impact_column) in (
-                REFORM_LEVEL_COLUMNS.items()
-            ):
+            for reform_column, (
+                baseline_column,
+                impact_column,
+            ) in REFORM_LEVEL_COLUMNS.items():
                 if (
                     row.get(reform_column) in ("", None)
                     or row.get(baseline_column) in ("", None)

@@ -1,4 +1,4 @@
-The static panel covers `16` reforms with `290` exact full-H5
+The static panel covers `16` reforms with `292` exact full-H5
 anchor cells; every non-anchor annual row is display interpolation between
 those exact outputs, labeled per row in the public CSV. Labor-supply response
 scoring is supplemental: exact endpoint cells at `2026` and `2100` for the

@@ -28,8 +28,8 @@ The diagram below documents the current release workflow.
 
 ```mermaid
 flowchart LR
-  A["Trustees current-law targets"] --> B["Exact H5 generation in policyengine-us-data"]
-  B --> C["Current full-H5 rescoring for 14 reforms"]
+  A["Trustees current-law targets"] --> B["Calibrated year-dataset builds (populace base, certified worktree)"]
+  B --> C["Current full-H5 rescoring for 16 reforms"]
   C --> D["Unified results.csv"]
   D --> E["Dashboard current results"]
   D --> F["Release package and paper exhibits"]

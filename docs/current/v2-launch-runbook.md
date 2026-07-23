@@ -1,5 +1,13 @@
 # V2 every-fifth-year reform panel: launch runbook
 
+> **Historical record (2026-06).** This runbook documents the June 2026
+> production launch and its one-time authorization. It is not standing
+> permission for new paid runs, and later work has extended the panel it
+> describes (budget-window and completion anchors, magi100 and
+> tax_panel_2005, the far-anchor no-clone rescore, the option6
+> bracket-cap rescore). The current release flow is described by
+> `pipeline.md` and the per-change provenance docs in this directory.
+
 Authorization: Max, by chat on 2026-06-09 — "if you're really confident and
 can do it stepwise with sentinels to see the data you can also rerun the
 modal reform analysis (just every 5y)". Stepwise-with-sentinels is binding:

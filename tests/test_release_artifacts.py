@@ -321,7 +321,7 @@ def test_current_public_results_have_current_release_provenance():
         )
     ]
     assert set(interpolated["run_prefix"]) == {
-        "behavioral_endpoint_ratio_interpolation_20260719"
+        "behavioral_anchor_ratio_interpolation_20260723"
     }
 
 

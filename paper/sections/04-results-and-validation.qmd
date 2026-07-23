@@ -33,10 +33,18 @@ The production surface delivers the full sixteen-reform static panel
 (`option1` through `option12`, the reverse-Roth proposal, the `93%` benchmark,
 full MAGI inclusion, and the 2005 Tax Panel simple deduction) across
 the annual budget window, five-year long-run sentinels, and the reform-transition
-junctures, with labor-supply-response multipliers derived from `2026` and `2100`
-endpoints and interpolated across years. Dashboard annual rows between computed
-years are display interpolations flagged as such; the computed anchor-year rows
-remain the cited microsimulation outputs. Legacy special-case series are
+junctures. Labor-supply-response rows derive from behavioral/static ratios at
+exact full-H5 behavioral anchors — the `2026` and `2100` endpoints plus interior
+completion anchors where a reform's schedule bends (`option12` and `option5` at
+`2062`, `option6` at `2033`) — interpolated within each consecutive anchor
+segment. Segments whose static anchor values have opposite signs interpolate the
+behavioral values directly: a behavioral/static ratio has no meaning across a
+static zero-crossing, and the structural swap reforms cross mid-century.
+(The exact `2062` behavioral anchors, scored independently for `option12` and
+`option5`, agree to the dollar, and a single `2026`-`2100` ratio segment had
+understated that mid-century behavioral impact by half.) Dashboard annual rows
+between computed years are display interpolations flagged as such; the computed
+anchor-year rows remain the cited microsimulation outputs. Legacy special-case series are
 excluded from the current dashboard, spreadsheet, and paper release surface.
 
 The budget-window infill adds exact full-H5 anchors where federal tax schedules

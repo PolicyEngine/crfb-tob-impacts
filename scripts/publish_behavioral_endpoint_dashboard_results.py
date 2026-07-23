@@ -203,9 +203,11 @@ def _behavioral_annual_for_reform(
                 continue
             anchor_ratios: dict[int, float] = {}
             anchor_values: dict[int, float] = {}
+            anchor_statics: dict[int, float] = {}
             for anchor_year in segment:
                 static_value = float(static_group.loc[anchor_year, column])
                 behavioral_value = float(endpoint_group.loc[anchor_year, column])
+                anchor_statics[anchor_year] = static_value
                 anchor_values[anchor_year] = behavioral_value
                 anchor_ratios[anchor_year] = _endpoint_ratio(
                     behavioral_value=behavioral_value,
@@ -217,7 +219,25 @@ def _behavioral_annual_for_reform(
                 )
 
             left, right = segment
-            if any(pd.isna(value) for value in anchor_ratios.values()):
+            # Ratio interpolation is meaningless across a static sign flip:
+            # the swap reforms' static revenue crosses zero mid-century, and
+            # a behavioral/static ratio interpolated through that crossing
+            # understated the exact option12@2062 behavioral anchor by 2x.
+            # Interpolate the behavioral values directly on such segments.
+            sign_flip = anchor_statics[left] * anchor_statics[right] < 0
+            if sign_flip or any(
+                pd.isna(value) for value in anchor_ratios.values()
+            ):
+                if sign_flip and year == left + 1:
+                    # One record per (reform, column, segment).
+                    fallback_records.append(
+                        {
+                            "reform_name": reform_name,
+                            "segment": [int(left), int(right)],
+                            "column": column,
+                            "method": "sign_flip_segment_value_interpolation",
+                        }
+                    )
                 row[column] = _interpolate_ratio(
                     anchor_values[left], anchor_values[right], year, left, right
                 )
@@ -391,8 +411,11 @@ def build_behavioral_display(
             "at every exact full-H5 behavioral anchor (the 2026/2100 endpoints "
             "plus any interior completion anchors), linearly interpolate the "
             "ratio within each consecutive anchor segment, and multiply the "
-            "static annual row by that ratio. Baseline levels are copied from "
-            "the static current-law baseline."
+            "static annual row by that ratio. Segments whose static anchor "
+            "values have opposite signs interpolate the behavioral values "
+            "directly instead - a ratio has no meaning across a static "
+            "zero-crossing (the swap reforms cross mid-century). Baseline "
+            "levels are copied from the static current-law baseline."
         ),
         "zero_static_denominator_fallbacks": fallback_records,
         "manual_weight_aggregation_used": False,

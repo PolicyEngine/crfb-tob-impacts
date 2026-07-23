@@ -31,9 +31,7 @@ def _static_frame() -> pd.DataFrame:
             "year": list(ANNUAL_YEARS),
             "revenue_impact": [100.0 + 5.0 * (y - 2026) for y in ANNUAL_YEARS],
             "tob_oasdi_impact": [60.0 + 3.0 * (y - 2026) for y in ANNUAL_YEARS],
-            "tob_medicare_hi_impact": [
-                40.0 + 2.0 * (y - 2026) for y in ANNUAL_YEARS
-            ],
+            "tob_medicare_hi_impact": [40.0 + 2.0 * (y - 2026) for y in ANNUAL_YEARS],
             "tob_total_impact": [100.0 + 5.0 * (y - 2026) for y in ANNUAL_YEARS],
             "baseline_revenue": [1000.0] * len(ANNUAL_YEARS),
         }
@@ -83,9 +81,7 @@ def test_interior_anchor_bends_the_ratio_path():
 
     # The anchor year itself is exact.
     assert out.loc[2062, "revenue_impact"] == pytest.approx(280.0)
-    assert (
-        out.loc[2062, "full_h5_result_type"] == "exact_behavioral_endpoint_full_h5"
-    )
+    assert out.loc[2062, "full_h5_result_type"] == "exact_behavioral_endpoint_full_h5"
 
     # A year inside the first segment uses the 2026->2062 ratio line...
     year = 2044  # halfway 2026->2062
@@ -102,6 +98,31 @@ def test_interior_anchor_bends_the_ratio_path():
     seg_ratio = 1.0 + (0.5 - 1.0) * ((year - 2062) / (2100 - 2062))
     static = 100.0 + 5.0 * (year - 2026)
     assert out.loc[year, "revenue_impact"] == pytest.approx(static * seg_ratio)
+
+
+def test_sign_flip_segment_interpolates_values_not_ratios():
+    """A segment whose static anchors have opposite signs must interpolate
+    behavioral values directly: ratios blow up near the static
+    zero-crossing (the exact option12@2062 anchor exposed a 2x error)."""
+    static = _static_frame()
+    # Static revenue_impact crossing zero: -100 at 2026 rising to +270 at 2100.
+    static["revenue_impact"] = [-100.0 + 5.0 * (y - 2026) for y in ANNUAL_YEARS]
+    fallbacks: list[dict] = []
+    out = _behavioral_annual_for_reform(
+        reform_name="synthetic",
+        static_group=static,
+        endpoint_group=_anchors({2026: -90.0, 2100: 235.0}),
+        fallback_records=fallbacks,
+    ).set_index("year")
+
+    year = 2063  # halfway
+    expected = -90.0 + (235.0 - (-90.0)) * ((year - 2026) / (2100 - 2026))
+    assert out.loc[year, "revenue_impact"] == pytest.approx(expected)
+    assert any(
+        f.get("method") == "sign_flip_segment_value_interpolation"
+        and f.get("column") == "revenue_impact"
+        for f in fallbacks
+    )
 
 
 def test_interior_rows_keep_tob_additivity():

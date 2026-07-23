@@ -25,7 +25,7 @@ exhibits, and release package.
 | tax93 | +670.8 |
 | option10 | +734.6 |
 | option8 | +896.2 |
-| option6 | +1,148.3 |
+| option6 | +1,139.8 |
 | option12 | +1,908.5 |
 
 In the ten-year window, the largest revenue raisers are `option12`
