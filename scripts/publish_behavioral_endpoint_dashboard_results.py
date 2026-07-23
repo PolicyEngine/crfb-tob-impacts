@@ -210,6 +210,37 @@ def _behavioral_annual_for_reform(
                 )
                 row[column] = float(static_row[column]) * ratio
 
+        # Interior rows: interpolate only the primitive series, then derive
+        # the algebraically dependent columns so every published row satisfies
+        # the same identities the exact endpoints do (independently
+        # interpolating dependents broke TOB additivity by up to $47B and the
+        # structural gain/loss decomposition in every interior swap row).
+        # The gain/loss decomposition only exists for the structural swaps;
+        # other reforms carry their TOB impacts in the net columns and keep
+        # gains/losses at zero, so deriving net from them would zero real
+        # values.
+        if year not in ENDPOINT_YEARS:
+            if all(
+                column in row
+                for column in ("tob_oasdi_impact", "tob_medicare_hi_impact")
+            ):
+                row["tob_total_impact"] = float(row["tob_oasdi_impact"]) + float(
+                    row["tob_medicare_hi_impact"]
+                )
+            structural = any(
+                abs(float(endpoint_group.loc[endpoint_year, column])) > 1e-6
+                for endpoint_year in ENDPOINT_YEARS
+                for column in ("oasdi_gain", "oasdi_loss", "hi_gain", "hi_loss")
+                if column in endpoint_group.columns
+            )
+            if structural:
+                if all(column in row for column in ("oasdi_gain", "oasdi_loss")):
+                    row["oasdi_net_impact"] = float(row["oasdi_gain"]) - float(
+                        row["oasdi_loss"]
+                    )
+                if all(column in row for column in ("hi_gain", "hi_loss")):
+                    row["hi_net_impact"] = float(row["hi_gain"]) - float(row["hi_loss"])
+
         for reform_column, (
             baseline_column,
             impact_column,
@@ -267,6 +298,8 @@ def build_behavioral_display(
         tob_baseline_path=tob_baseline_path,
     )
     static = pd.read_csv(static_display_path)
+    if "scoring_type" in static.columns:
+        static = static[static["scoring_type"] == "static"]
     static = static[static["reform_name"].isin(STANDARD_REFORMS)].copy()
     static["year"] = static["year"].astype(int)
 

@@ -575,7 +575,11 @@ def get_option6_dict():
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
         reform_dict[param_path] = {}
         for year, value in zip(add_years, add_values):
-            reform_dict[param_path][str(year)] = value
+            # The bracket coefficient is 0.50 under current law (IRC section
+            # 86(a)(2)(A)(ii)), not part of the 85% family — a phase-down
+            # must never raise it above its current-law level.
+            capped = min(value, 0.50) if param_name == "bracket" else value
+            reform_dict[param_path][str(year)] = capped
         reform_dict[param_path]["2045-01-01.2100-12-31"] = 0
 
     return reform_dict
@@ -821,7 +825,11 @@ def get_option6_behavioral_dict():
         param_path = f"gov.irs.social_security.taxability.rate.additional.{param_name}"
         reform_dict[param_path] = {}
         for year, value in zip(add_years, add_values):
-            reform_dict[param_path][str(year)] = value
+            # The bracket coefficient is 0.50 under current law (IRC section
+            # 86(a)(2)(A)(ii)), not part of the 85% family — a phase-down
+            # must never raise it above its current-law level.
+            capped = min(value, 0.50) if param_name == "bracket" else value
+            reform_dict[param_path][str(year)] = capped
         reform_dict[param_path]["2045-01-01.2100-12-31"] = 0
 
     # Add CBO elasticities
