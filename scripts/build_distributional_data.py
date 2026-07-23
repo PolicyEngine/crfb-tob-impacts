@@ -33,10 +33,13 @@ BASELINE_DIR = REPO / "projected_datasets_v2pop"
 ANCHOR_YEARS = [2026, 2030] + list(range(2035, 2101, 5))
 
 # Reforms scored on the certified-reproduction environment pair with
-# baselines from the SAME rebuilt datasets (exported per-household by
-# crfb-cert/tmp/export_baseline_households.py), per the same-family rule in
-# docs/current/magi100-provenance.md. Everything else pairs with the
-# published v2pop/no-clone family below.
+# baselines from the SAME datasets (exported per-household by the
+# crfb-cert/tmp export scripts), per the same-family rule in
+# docs/current/magi100-provenance.md. Through 2070 that is the certrepro
+# rebuild; from 2075 both reforms were rescored on the published no-clone
+# far-horizon datasets (docs/current/tax-panel-2005-provenance.md, the
+# 2070->2075 seam fix), so the far years pair with no-clone exports.
+NOCLONE_START_YEAR = 2075
 CERTREPRO_PREFIXES = {
     "magi100": "magi100_certrepro_20260706",
     "tax_panel_2005": "tax_panel_2005_certrepro_20260717",
@@ -45,9 +48,12 @@ CERTREPRO_CELL_ROOTS = {
     "magi100": REPO / "tmp" / "full_h5_magi100",
     "tax_panel_2005": REPO / "tmp" / "full_h5_tax_panel_2005",
 }
+NOCLONE_FARFIX_PREFIX = "noclone_farfix_20260722"
+NOCLONE_FARFIX_ROOT = REPO / "tmp" / "full_h5_noclone_farfix"
 CERTREPRO_BASELINE_DIR = (
     REPO.parent / "crfb-cert" / "tmp" / "baseline_households_certrepro"
 )
+NOCLONE_BASELINE_DIR = REPO.parent / "crfb-cert" / "tmp" / "baseline_households_noclone"
 REFORMS = (
     [f"option{i}" for i in range(1, 13)]
     + ["reverse_roth", "tax93"]
@@ -63,9 +69,14 @@ NOCLONE_CACHE = REPO / "tmp" / "r2_cache_noclone"
 
 def scenario_path(year: int, reform: str) -> Path:
     if reform in CERTREPRO_PREFIXES:
-        prefix = CERTREPRO_PREFIXES[reform]
+        if year >= NOCLONE_START_YEAR:
+            root = NOCLONE_FARFIX_ROOT
+            prefix = NOCLONE_FARFIX_PREFIX
+        else:
+            root = CERTREPRO_CELL_ROOTS[reform]
+            prefix = CERTREPRO_PREFIXES[reform]
         return (
-            CERTREPRO_CELL_ROOTS[reform]
+            root
             / prefix
             / "reform_full_h5"
             / f"year={year}"
@@ -122,7 +133,10 @@ def baseline_households(year: int) -> pd.DataFrame:
 def certrepro_baseline_households(year: int) -> pd.DataFrame:
     """Same-family baseline for certrepro-scored reforms, from the exported
     per-household CSVs (certified worktree, policyengine-us 1.700.2)."""
-    path = CERTREPRO_BASELINE_DIR / f"{year}.csv"
+    directory = (
+        NOCLONE_BASELINE_DIR if year >= NOCLONE_START_YEAR else CERTREPRO_BASELINE_DIR
+    )
+    path = directory / f"{year}.csv"
     if not path.exists():
         raise FileNotFoundError(
             f"{path} — run crfb-cert/tmp/export_baseline_households.py {year}"

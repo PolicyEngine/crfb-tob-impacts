@@ -13,8 +13,8 @@ option except the no-senior-deduction option.
 | Reform | 10-year (nominal $B) | 75-year PV ($B) | OASDI PV ($B) | Medicare HI PV ($B) |
 | --- | --- | --- | --- | --- |
 | Full repeal | -1,659 | -10,879 | -6,206 | -4,673 |
-| Full MAGI inclusion | +201 | +812 | +467 | +345 |
-| 2005 Tax Panel deduction | -37 | -440 | -250 | -189 |
+| Full MAGI inclusion | +201 | +877 | +503 | +374 |
+| 2005 Tax Panel deduction | -37 | -529 | -300 | -228 |
 | 85% taxation | +419 | +1,313 | +757 | +556 |
 | 85% + deduction | +182 | +801 | +457 | +344 |
 | No senior deduction | +52 | +50 | +10 | -1 |

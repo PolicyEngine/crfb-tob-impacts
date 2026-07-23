@@ -76,12 +76,9 @@ directly (`scripts/tax_panel_2005_aggregate.py`).
   every anchor year — any regime capped at 85% of benefits raises weakly
   less than taxing 85% for everyone. Enforced by the aggregation script;
   holds at all 18 anchors (impacts are negative, option2's positive).
-- Anchor path is smooth within each dataset family: −$1.9B (2026) →
-  −$2.7B (2030) → −$58.8B (2070) → −$88.8B (2100), with the known
-  2070→2075 far-horizon family seam (−$58.8B → −$41.2B) matching the
-  published magi100 series' seam at the same years (+$71.0B → +$69.3B).
-  Certrepro baseline drift vs published: 0.00% through 2070, +4.5–5.9%
-  at 2075–2100 — the same-rebuild pairing neutralizes it.
+- Anchor path (post far-anchor fix, below): −$1.9B (2026) → −$2.7B
+  (2030) → −$58.8B (2070) → −$75.6B (2075) → −$141.1B (2100), smooth
+  through the far-horizon boundary.
 - `scripts/assemble_tax_panel_2005_results.py` scales to billions, linearly
   interpolates non-anchor years (panel convention), refuses partial
   assembly; rows carry `run_prefix=tax_panel_2005_certrepro_20260717`.
@@ -103,24 +100,54 @@ second tier).
 
 ## Headline results
 
-Roughly revenue-neutral in the budget window, a growing loss thereafter:
-−$1.9B (2026), −$36.5B over 2026–2035 nominal, −$88.8B by 2100;
-75-year total −$2,932B undiscounted. Present value at the Trustees
-effective rates (per-fund discounting, panel convention): −$440B under the
-dashboard's default baseline-shares split; summing the statutory-split
-tiers instead gives −$435B (OASDI +$40.3B, HI −$475.4B) — the small gap is
-the two splits discounting different fund shares at different rates.
+Roughly revenue-neutral in the budget window, a growing loss thereafter
+(figures post far-anchor fix): −$1.9B (2026), −$36.5B over 2026–2035
+nominal, −$141.1B by 2100; 75-year total −$4,271.5B undiscounted.
+Present value at the Trustees effective rates (per-fund discounting,
+panel convention): −$546.0B under the dashboard's default
+baseline-shares split; summing the statutory-split tiers instead gives
+−$524.5B (OASDI +$40.1B, HI −$564.6B) — the gap is the two splits
+discounting different fund shares at different rates.
 
-Under the statutory (current-law) trust-fund split the loss is entirely
-Medicare HI's: the 50%-per-dollar phase-in reaches the 85% cap far more
-slowly than current law's 85% second-tier rate, shrinking the
-above-50%-of-benefits region (HI −$3.1B in 2026 to −$88.6B in 2100), while
-OASDI gains slightly for most of the horizon (+$1–2B/year through
-mid-century — the lower entry point pulls additional lower-income units
-into the below-50% tier) before fading to about zero by 2100. The 75-year
-PV decomposition: OASDI +$40.3B, HI −$475.4B.
+Under the statutory (current-law) trust-fund split the loss is almost
+entirely Medicare HI's: the 50%-per-dollar phase-in reaches the 85% cap
+far more slowly than current law's 85% second-tier rate, shrinking the
+above-50%-of-benefits region, while OASDI gains slightly for most of the
+horizon (the lower entry point pulls additional lower-income units into
+the below-50% tier). The 75-year PV decomposition: OASDI +$40.1B, HI
+−$564.6B.
 
 The near-zero budget-window net is consistent with the 2005 Panel's own
 revenue-neutral framing; the widening later loss is the unindexed 50%
 phase-in lagging current law's faster tier-2 saturation as wage growth
 concentrates retirees in that band.
+
+## Far-anchor family fix (2026-07-22)
+
+CRFB (Anthony Colavito) spotted a step at 2070→2075 (−0.035% → −0.020%
+of GDP). Root cause: the pinned certification worktree predates the
+donor-clone deletion — `DONOR_CLONE_START_YEAR = 2075` in its
+v2_pipeline adds 32,000 cloned households (4,000 donors × 8) to the
+2075–2100 datasets (107,112 records vs 75,112 at 2070), spreading the
+same aggregate benefits across more, smaller units and pushing the
+at-85%-cap share from 41% to 53% — while the published panel's far
+anchors use the no-clone family. The seam was an inconsistency between
+the two certrepro-scored reforms and the rest of the panel, not a
+property of the published methodology.
+
+Fix: both reforms' 2075–2100 anchors rescored on the published no-clone
+datasets (local `projected_datasets_v2pop/{2075..2100}.h5`,
+sha-verified against
+`docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json`),
+run prefix `noclone_farfix_20260722`, certified env (pe-us 1.700.2).
+Gate: option2@2075 rescored on the same dataset reproduces the
+published +$103.4174B to the dollar, proving env + family + the
+published-baseline pairing. Anchors ≤2070 unchanged; rows re-spliced
+and re-interpolated (`scripts/fix_far_anchor_family.py`); cells on R2
+under the new prefix. 2075 anchor: −$41.2B (cloned) → −$75.6B
+(no-clone), on-trend from 2070; the late-century flattening in %-of-GDP
+terms (−0.037% → −0.028% by 2100) is the genuine 85%-cap saturation.
+Headline updates: 75-year −$4,271.5B undiscounted; statutory-split PV
+−$524.5B (OASDI +$40.1B / HI −$564.6B). The 10-year window is
+unaffected. Far-year deciles rebuilt against no-clone per-household
+baseline exports (`crfb-cert/tmp/baseline_households_noclone/`).

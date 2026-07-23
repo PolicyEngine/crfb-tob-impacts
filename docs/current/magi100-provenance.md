@@ -60,3 +60,16 @@ baselines exported from the certified worktree
 `scripts/build_distributional_data.py`). All-decile losses concentrated in
 the middle (deciles 4-7), matching the threshold-crossing mechanism; decile
 sums mirror the certified revenue impacts within ~1-6%.
+
+## Far-anchor family fix (2026-07-22)
+
+The 2075–2100 anchors were rescored on the published no-clone datasets
+(run prefix `noclone_farfix_20260722`; see
+docs/current/tax-panel-2005-provenance.md for the donor-clone diagnosis
+and the option2@2075 exact sentinel). The certrepro worktree's far-year
+datasets carried 32,000 donor-clone households, mismatching the
+published panel's no-clone far family and producing a small 2070→2075
+step (+$71.0B → +$69.3B). Post-fix path: +$71.0B (2070) → +$88.3B
+(2075) → +$217.4B (2100), smooth; 75-year PV at the Trustees effective
+rates +$886.0B (was +$812.0B on the cloned far years). Anchors ≤2070
+and the 10-year window are unchanged.
