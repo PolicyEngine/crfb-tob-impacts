@@ -32,7 +32,7 @@ DEFAULT_TOB_BASELINE = REPO / "data" / "ssa_tob_baseline_75year.csv"
 DEFAULT_BEHAVIORAL_EXACT_OUTPUT = REPO / "tmp" / "behavioral_endpoint_exact_preview.csv"
 DEFAULT_BEHAVIORAL_DISPLAY_OUTPUT = REPO / "tmp" / "behavioral_display_preview.csv"
 DEFAULT_METADATA_OUTPUT = REPO / "tmp" / "behavioral_display_preview.metadata.json"
-INTERPOLATED_RUN_PREFIX = "behavioral_endpoint_ratio_interpolation_20260719"
+INTERPOLATED_RUN_PREFIX = "behavioral_anchor_ratio_interpolation_20260723"
 INTERPOLATED_BASELINE_SOURCE = "v2pop_tr2026_static_full_h5_display"
 EXACT_BASELINE_SOURCE = "v2pop_tr2026_baseline_h5"
 
@@ -77,6 +77,9 @@ def _display_path(path: Path) -> str:
 
 
 def _validate_endpoint_panel(frame: pd.DataFrame) -> None:
+    """Every standard reform needs the 2026/2100 endpoints; additional exact
+    interior anchor cells (e.g. option12@2062, option6@2033) are allowed and
+    become piecewise ratio-interpolation anchors."""
     standard = frame[frame["reform_name"].isin(STANDARD_REFORMS)].copy()
     standard["year"] = standard["year"].astype(int)
     duplicates = standard.duplicated(["reform_name", "year"], keep=False)
@@ -108,7 +111,6 @@ def _published_behavioral_endpoints(
     exact = endpoint_aggregate.copy()
     exact = exact[exact["reform_name"].isin(STANDARD_REFORMS)].copy()
     exact["year"] = exact["year"].astype(int)
-    exact = exact[exact["year"].isin(ENDPOINT_YEARS)].copy()
     _validate_endpoint_panel(exact)
 
     exact = _scale_dollars_to_billions(exact)
@@ -145,10 +147,17 @@ def _endpoint_ratio(
     return float("nan")
 
 
-def _interpolate_ratio(start: float, end: float, year: int) -> float:
-    span = ENDPOINT_YEARS[1] - ENDPOINT_YEARS[0]
-    weight = (year - ENDPOINT_YEARS[0]) / span
+def _interpolate_ratio(
+    start: float, end: float, year: int, left: int, right: int
+) -> float:
+    weight = (year - left) / (right - left)
     return start + (end - start) * weight
+
+
+def _bracketing_anchors(anchor_years: list[int], year: int) -> tuple[int, int]:
+    left = max(y for y in anchor_years if y < year)
+    right = min(y for y in anchor_years if y > year)
+    return left, right
 
 
 def _behavioral_annual_for_reform(
@@ -160,6 +169,11 @@ def _behavioral_annual_for_reform(
 ) -> pd.DataFrame:
     static_group = static_group.sort_values("year").set_index("year")
     endpoint_group = endpoint_group.sort_values("year").set_index("year")
+    # All exact behavioral cells for this reform are anchors: the required
+    # 2026/2100 endpoints plus any interior completion anchors (e.g.
+    # option12@2062, where the phase-out kink makes a single 2026->2100
+    # ratio segment misrepresent every mid-century year).
+    anchor_years = sorted(int(y) for y in endpoint_group.index)
     rows: list[dict[str, Any]] = []
 
     for year in ANNUAL_YEARS:
@@ -173,40 +187,43 @@ def _behavioral_annual_for_reform(
             if column in static_row:
                 row[column] = float(static_row[column])
 
+        if year in anchor_years:
+            segment = (year, year)
+        else:
+            segment = _bracketing_anchors(anchor_years, year)
+
         for column in IMPACT_RATIO_COLUMNS:
             if (
                 column not in static_group.columns
                 or column not in endpoint_group.columns
             ):
                 continue
-            endpoint_ratios: dict[int, float] = {}
-            endpoint_values: dict[int, float] = {}
-            for endpoint_year in ENDPOINT_YEARS:
-                static_value = float(static_group.loc[endpoint_year, column])
-                behavioral_value = float(endpoint_group.loc[endpoint_year, column])
-                endpoint_values[endpoint_year] = behavioral_value
-                endpoint_ratios[endpoint_year] = _endpoint_ratio(
+            if year in anchor_years:
+                row[column] = float(endpoint_group.loc[year, column])
+                continue
+            anchor_ratios: dict[int, float] = {}
+            anchor_values: dict[int, float] = {}
+            for anchor_year in segment:
+                static_value = float(static_group.loc[anchor_year, column])
+                behavioral_value = float(endpoint_group.loc[anchor_year, column])
+                anchor_values[anchor_year] = behavioral_value
+                anchor_ratios[anchor_year] = _endpoint_ratio(
                     behavioral_value=behavioral_value,
                     static_value=static_value,
                     fallback_records=fallback_records,
                     reform_name=reform_name,
-                    year=endpoint_year,
+                    year=anchor_year,
                     column=column,
                 )
 
-            if year in ENDPOINT_YEARS:
-                row[column] = endpoint_values[year]
-            elif any(pd.isna(value) for value in endpoint_ratios.values()):
+            left, right = segment
+            if any(pd.isna(value) for value in anchor_ratios.values()):
                 row[column] = _interpolate_ratio(
-                    endpoint_values[ENDPOINT_YEARS[0]],
-                    endpoint_values[ENDPOINT_YEARS[1]],
-                    year,
+                    anchor_values[left], anchor_values[right], year, left, right
                 )
             else:
                 ratio = _interpolate_ratio(
-                    endpoint_ratios[ENDPOINT_YEARS[0]],
-                    endpoint_ratios[ENDPOINT_YEARS[1]],
-                    year,
+                    anchor_ratios[left], anchor_ratios[right], year, left, right
                 )
                 row[column] = float(static_row[column]) * ratio
 
@@ -219,7 +236,7 @@ def _behavioral_annual_for_reform(
         # other reforms carry their TOB impacts in the net columns and keep
         # gains/losses at zero, so deriving net from them would zero real
         # values.
-        if year not in ENDPOINT_YEARS:
+        if year not in anchor_years:
             if all(
                 column in row
                 for column in ("tob_oasdi_impact", "tob_medicare_hi_impact")
@@ -228,8 +245,8 @@ def _behavioral_annual_for_reform(
                     row["tob_medicare_hi_impact"]
                 )
             structural = any(
-                abs(float(endpoint_group.loc[endpoint_year, column])) > 1e-6
-                for endpoint_year in ENDPOINT_YEARS
+                abs(float(endpoint_group.loc[anchor_year, column])) > 1e-6
+                for anchor_year in anchor_years
                 for column in ("oasdi_gain", "oasdi_loss", "hi_gain", "hi_loss")
                 if column in endpoint_group.columns
             )
@@ -250,7 +267,7 @@ def _behavioral_annual_for_reform(
                     row[impact_column]
                 )
 
-        if year in ENDPOINT_YEARS:
+        if year in anchor_years:
             endpoint_row = endpoint_group.loc[year].to_dict()
             for column in (
                 "scenario_h5_uri",
@@ -346,6 +363,15 @@ def build_behavioral_display(
         "post_obbba_tob_baseline_applied": False,
         "standard_reforms": list(STANDARD_REFORMS),
         "endpoint_years": list(ENDPOINT_YEARS),
+        "interior_anchor_years": {
+            reform: sorted(
+                int(year)
+                for year in exact.loc[exact["reform_name"] == reform, "year"]
+                if int(year) not in ENDPOINT_YEARS
+            )
+            for reform in STANDARD_REFORMS
+            if len(exact.loc[exact["reform_name"] == reform]) > len(ENDPOINT_YEARS)
+        },
         "annual_display_years": list(ANNUAL_YEARS),
         "exact_endpoint_rows": int(len(exact)),
         "dashboard_row_count": int(len(display)),
@@ -362,9 +388,11 @@ def build_behavioral_display(
         ),
         "interpolation_method": (
             "For each reform and impact metric, compute behavioral/static ratios "
-            "at 2026 and 2100 exact full-H5 endpoints, linearly interpolate the "
-            "ratio by year, and multiply the static annual row by that ratio. "
-            "Baseline levels are copied from the static current-law baseline."
+            "at every exact full-H5 behavioral anchor (the 2026/2100 endpoints "
+            "plus any interior completion anchors), linearly interpolate the "
+            "ratio within each consecutive anchor segment, and multiply the "
+            "static annual row by that ratio. Baseline levels are copied from "
+            "the static current-law baseline."
         ),
         "zero_static_denominator_fallbacks": fallback_records,
         "manual_weight_aggregation_used": False,

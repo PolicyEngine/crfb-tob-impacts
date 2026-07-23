@@ -94,11 +94,16 @@ function DecileBars({ rows, basis }: { rows: DecileImpact[]; basis: Basis }) {
 
 function interpolateDeciles(
   byYear: Record<string, DecileImpact[]>,
-  anchors: number[],
   year: number,
 ): DecileImpact[] {
   if (byYear[String(year)]) return byYear[String(year)];
-  const sorted = [...anchors].sort((a, b) => a - b);
+  // Interpolation neighbors come from this reform's own exact cells, not the
+  // artifact-wide anchor header: per-reform coverage differs (extra
+  // budget-window and completion anchors), and using the global header
+  // previously picked wrong 2027 neighbors when 2028 data existed.
+  const sorted = Object.keys(byYear)
+    .map(Number)
+    .sort((a, b) => a - b);
   const lower = [...sorted].reverse().find((y) => y <= year);
   const upper = sorted.find((y) => y >= year);
   if (lower === undefined) return byYear[String(sorted[0])] ?? [];
@@ -170,7 +175,7 @@ export function DistributionalSection({
     );
   }
 
-  const rows = interpolateDeciles(data.data[reformId] ?? {}, years, year);
+  const rows = interpolateDeciles(data.data[reformId] ?? {}, year);
 
   return (
     <section className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white px-6 py-5">

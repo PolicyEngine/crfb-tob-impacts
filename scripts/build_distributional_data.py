@@ -30,7 +30,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 BASELINE_DIR = REPO / "projected_datasets_v2pop"
-ANCHOR_YEARS = [2026, 2030] + list(range(2035, 2101, 5))
+ANCHOR_YEARS = [2026, 2028, 2029, 2030] + list(range(2035, 2101, 5))
 
 # Reforms scored on the certified-reproduction environment pair with
 # baselines from the SAME datasets (exported per-household by the
@@ -260,10 +260,16 @@ def main() -> int:
         baselines.clear()
         gc.collect()
 
+    # The header must describe the merged artifact, not this invocation: a
+    # per-reform merge run with a year subset previously clobbered the
+    # header and hid 2028/2029 anchors from the dashboard's interpolation.
+    merged_years = sorted(
+        {int(year) for by_year in data.values() for year in by_year}
+    )
     payload = {
         "schema": "crfb_distributional/v1",
         "metric": "change in household net income by baseline income decile",
-        "anchor_years": years,
+        "anchor_years": merged_years,
         "reforms": REFORMS,
         "note": (
             "Deciles rank households by baseline net income. avg_change is the "

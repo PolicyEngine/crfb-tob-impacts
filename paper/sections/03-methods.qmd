@@ -337,10 +337,18 @@ relevant to these reforms: the temporary-deduction sunset at the end of `2028`
 and the state-and-local-tax reversion at the end of `2029`. Exact anchors at
 `2028` and `2029` bracket both. A third reform, `option6`, phases its
 employer-payroll-tax inclusion in annually and caps it at `2033`; exact anchors at
-`2032` and `2033` capture that corner. The remaining phased reforms are either
-immediate (`option5`, `reverse_roth`) or follow a smooth straight-line ramp
-(`option12`), so they need no additional anchors. The infill therefore adds four
-budget-window years for the affected reforms rather than the full annual panel.
+`2032` and `2033` capture that corner. A fourth, `option12`, follows a
+straight-line phase-out — linear between anchors along the ramp — but the ramp
+meets the flat when the phase-out completes in `2062`, between the `2060` and
+`2065` grid anchors. An exact anchor at `2062` captures that completion corner;
+`option5`, whose operative settings `option12` reaches at completion, is scored
+at the same year as a convergence check, and the two exact `2062` scores agree
+to the dollar. (This anchor was added in the 2026-07 audit: interpolating
+straight across the corner had displayed a $19.5B gap between the two reforms
+in `2062` that closed only at the `2065` anchor.) The remaining phased reforms
+are immediate (`option5`, `reverse_roth`) and need no additional anchors. The
+infill therefore adds these completion and budget-window years for the affected
+reforms rather than the full annual panel.
 
 ### Version-consistency requirement
 
