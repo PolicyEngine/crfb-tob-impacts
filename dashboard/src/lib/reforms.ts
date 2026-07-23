@@ -224,7 +224,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     interpretation:
       "This is the mirror image of a Roth-style Social Security swap: contributions become deductible and benefits become fully taxable.",
     scoringNote:
-      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
   },
   {
     id: "tax93",
@@ -240,7 +240,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     interpretation:
       "Sits between the 90% and 95% options; useful as the Goss-consistent estimate of the taxable share of benefits.",
     scoringNote:
-      "Proposal definition is implemented; dashboard results should be added only after full reform H5 cells have been modeled and aggregated from saved H5 artifacts.",
+      "Scored on the certified full-H5 pipeline at the standard anchor years, with intermediate years interpolated.",
   },
   {
     id: "magi100",
@@ -263,7 +263,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     name: "2005 Tax Panel Simple Deduction",
     shortName: "2005 Tax Panel deduction",
     description:
-      "Replace the current income thresholds with the 2005 President's Advisory Panel's simple deduction: 85% of benefits count as taxable income, offset by a deduction that phases out at 50 cents per dollar of income above $22,000 (single) or $44,000 (married), without the Panel's inflation indexing.",
+      "Replace the current income thresholds with the 2005 President's Advisory Panel's simple deduction: 85% of benefits count as taxable income, offset by a deduction that phases out at 50 cents per dollar of income above $22,000 (single, head of household, or surviving spouse) or $44,000 (married filing jointly), without the Panel's inflation indexing.",
     category: "Simplification",
     mechanism:
       "Implements the report's Figure 5.11 worksheet: taxable benefits equal 50% of income above $22,000/$44,000, capped at 85% of benefits, with 85% of benefits counted in the income test. Thresholds are fixed in nominal terms; the Panel proposed CPI indexing, and CRFB requested this unindexed variant.",

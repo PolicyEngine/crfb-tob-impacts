@@ -106,7 +106,7 @@ nominal, −$141.1B by 2100; 75-year total −$4,271.5B undiscounted.
 Present value at the Trustees effective rates (per-fund discounting,
 panel convention): −$529B as displayed on the dashboard (default baseline-shares split
 plus the general-fund line, each discounted at its fund's rates); summing the statutory-split tiers instead gives
-−$524.5B (OASDI +$40.1B, HI −$564.6B) — the gap is the two splits
+−$503.9B (OASDI +$39.0B, HI −$542.9B) — the gap is the two splits
 discounting different fund shares at different rates.
 
 Under the statutory (current-law) trust-fund split the loss is almost
