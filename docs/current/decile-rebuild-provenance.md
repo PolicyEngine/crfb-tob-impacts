@@ -44,7 +44,9 @@ longer re-simulates a baseline at build time.
 `distributional.json` rebuilt for all 16 reforms (option6 additionally
 at its 2032/2033 anchors, on the bracket-capped cells). Post-rebuild
 option7 phantom check: decile sums 2029-2100 are +$0.12B to +$0.31B —
-same-runtime residual noise, down from −$8.5B.
+same-runtime residual noise, down from −$8.5B. All 249 cell artifacts
+(scenario.h5 + metadata.json) uploaded to
+`r2://axiom-corpus/crfb/reform_full_h5/legacy_deciles_certenv_20260723/…`.
 
 ## H-04 — the mirror "failures" are an accounting-scope difference
 
