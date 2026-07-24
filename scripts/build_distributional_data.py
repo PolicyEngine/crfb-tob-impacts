@@ -1,14 +1,17 @@
 """Build per-reform, per-year distributional impact by income decile.
 
-For each anchor year we run one baseline simulation to get each household's
-baseline net income and income decile, then diff every reform's saved
-reform-output H5 (already cached locally from the aggregation runs) against
-that baseline by household. The result is the average and percentage change
-in household net income within each baseline income decile.
+For each anchor year, load the certified-env per-household baseline export
+(net income, weight; certrepro family through 2070, no-clone from 2075) and
+diff every reform's certified-env reform-leg H5 against it by household.
+Reform legs and baseline come from the SAME runtime — audit H-03 showed the
+June production legs carry household-level runtime drift against any other
+baseline (a no-op reform summed to -$8.5B of phantom decile change). The
+result is the average and percentage change in household net income within
+each baseline income decile.
 
 All weighting goes through MicroSeries/MicroDataFrame. The script never fetches
-PolicyEngine weight variables directly; weights are carried from the calculated
-baseline MicroSeries into the joined distributional table.
+PolicyEngine weight variables directly; weights are carried from the exported
+baseline into the joined distributional table.
 
 Usage:
     uv run python scripts/build_distributional_data.py \
@@ -29,7 +32,6 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-BASELINE_DIR = REPO / "projected_datasets_v2pop"
 ANCHOR_YEARS = [2026, 2028, 2029, 2030] + list(range(2035, 2101, 5))
 
 # Reforms scored on the certified-reproduction environment pair with
@@ -60,11 +62,35 @@ REFORMS = (
     + sorted(CERTREPRO_PREFIXES)
 )
 
-# The reform-output H5s were cached locally by the aggregation runs. Static
-# 2026-2070 live under the original prefix cache; 2075-2100 under the no-clone
-# cache. Each entry maps a year to (cache_root, run_prefix).
-STATIC_CACHE = REPO / "tmp" / "reform_full_h5_r2_cache_v2pop"
-NOCLONE_CACHE = REPO / "tmp" / "r2_cache_noclone"
+# The 14 legacy reforms' decile legs were rescored in the certified env
+# (audit H-03: the June production legs' household_net_income carries
+# runtime drift vs any locally computable baseline — a no-op reform showed
+# -$8.5B of phantom decile change). Cells scored earlier in the same env
+# under other prefixes are reused rather than rerun.
+LEGACY_PREFIX = "legacy_deciles_certenv_20260723"
+LEGACY_ROOT = REPO / "tmp" / "full_h5_legacy_deciles"
+LEGACY_OVERRIDES = {
+    ("option6", 2029): (
+        REPO / "tmp" / "full_h5_option6fix",
+        "option6_bracketfix_20260723",
+    ),
+    ("option6", 2030): (
+        REPO / "tmp" / "full_h5_option6fix",
+        "option6_bracketfix_20260723",
+    ),
+    ("option6", 2032): (
+        REPO / "tmp" / "full_h5_option6fix",
+        "option6_bracketfix_20260723",
+    ),
+    ("option6", 2033): (
+        REPO / "tmp" / "full_h5_option6fix",
+        "option6_bracketfix_20260723",
+    ),
+    ("option7", 2100): (REPO / "tmp" / "full_h5_h03_roottest", "h03_roottest_20260723"),
+}
+# option6's employer-payroll ramp has exact anchors at 2032/2033; only its
+# cells exist there, and other reforms skip those years.
+OPTION6_EXTRA_YEARS = [2032, 2033]
 
 
 def scenario_path(year: int, reform: str) -> Path:
@@ -75,26 +101,14 @@ def scenario_path(year: int, reform: str) -> Path:
         else:
             root = CERTREPRO_CELL_ROOTS[reform]
             prefix = CERTREPRO_PREFIXES[reform]
-        return (
-            root
-            / prefix
-            / "reform_full_h5"
-            / f"year={year}"
-            / f"reform={reform}"
-            / "scenario.h5"
-        )
-    if year <= 2070:
-        return (
-            STATIC_CACHE
-            / "axiom-corpus/crfb/reform_full_h5/v2pop_tr2026_20260611"
-            / "reform_full_h5"
-            / f"year={year}"
-            / f"reform={reform}"
-            / "scenario.h5"
-        )
+    elif (reform, year) in LEGACY_OVERRIDES:
+        root, prefix = LEGACY_OVERRIDES[(reform, year)]
+    else:
+        root = LEGACY_ROOT
+        prefix = LEGACY_PREFIX
     return (
-        NOCLONE_CACHE
-        / "axiom-corpus/crfb/reform_full_h5/v2pop_tr2026_noclone_20260612"
+        root
+        / prefix
         / "reform_full_h5"
         / f"year={year}"
         / f"reform={reform}"
@@ -102,37 +116,12 @@ def scenario_path(year: int, reform: str) -> Path:
     )
 
 
-def baseline_households(year: int) -> pd.DataFrame:
-    """Baseline household net income + weighted decile, by household_id."""
-    from policyengine_us import Microsimulation
-
-    from src.pipeline import _tax_assumption_reform
-
-    sim = Microsimulation(
-        dataset=str(BASELINE_DIR / f"{year}.h5"),
-        reform=_tax_assumption_reform(year),
-    )
-    hh_id = sim.calc("household_id", period=year).reset_index(drop=True)
-    net = sim.calc("household_net_income", period=year)
-    weights = net.weights.reset_index(drop=True)
-    net = net.reset_index(drop=True)
-    frame = mdf.MicroDataFrame(
-        {
-            "household_id": pd.Series(hh_id).reset_index(drop=True),
-            "baseline_net_income": pd.Series(net).reset_index(drop=True),
-        },
-        weights=weights,
-    )
-    # Population-weighted income deciles on baseline household net income.
-    frame["decile"] = frame["baseline_net_income"].decile_rank().astype(int)
-    del sim
-    gc.collect()
-    return frame
-
-
 def certrepro_baseline_households(year: int) -> pd.DataFrame:
-    """Same-family baseline for certrepro-scored reforms, from the exported
-    per-household CSVs (certified worktree, policyengine-us 1.700.2)."""
+    """Per-household baseline from the certified-env exports — the one
+    baseline every reform pairs with (audit H-03: reform legs and baseline
+    must come from the same runtime for per-household diffs to mean
+    anything; a live re-simulation under a different env showed benefit-
+    sized phantom diffs on a no-op reform)."""
     directory = (
         NOCLONE_BASELINE_DIR if year >= NOCLONE_START_YEAR else CERTREPRO_BASELINE_DIR
     )
@@ -220,7 +209,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    years = [int(y) for y in args.years.split(",")] if args.years else ANCHOR_YEARS
+    years = (
+        [int(y) for y in args.years.split(",")]
+        if args.years
+        else sorted(ANCHOR_YEARS + OPTION6_EXTRA_YEARS)
+    )
     reforms = args.reforms.split(",") if args.reforms else list(REFORMS)
     unknown = sorted(set(reforms) - set(REFORMS))
     if unknown:
@@ -236,15 +229,11 @@ def main() -> int:
         baselines: dict[str, pd.DataFrame] = {}
 
         def baseline_for(reform: str) -> pd.DataFrame:
-            family = "certrepro" if reform in CERTREPRO_PREFIXES else "published"
-            if family not in baselines:
-                print(f"baseline {year} ({family})…", flush=True)
-                baselines[family] = (
-                    certrepro_baseline_households(year)
-                    if family == "certrepro"
-                    else baseline_households(year)
-                )
-            return baselines[family]
+            # One certified-env export baseline per year for every reform.
+            if "export" not in baselines:
+                print(f"baseline {year} (certified export)…", flush=True)
+                baselines["export"] = certrepro_baseline_households(year)
+            return baselines["export"]
 
         for reform in reforms:
             try:
@@ -263,9 +252,7 @@ def main() -> int:
     # The header must describe the merged artifact, not this invocation: a
     # per-reform merge run with a year subset previously clobbered the
     # header and hid 2028/2029 anchors from the dashboard's interpolation.
-    merged_years = sorted(
-        {int(year) for by_year in data.values() for year in by_year}
-    )
+    merged_years = sorted({int(year) for by_year in data.values() for year in by_year})
     payload = {
         "schema": "crfb_distributional/v1",
         "metric": "change in household net income by baseline income decile",
@@ -275,8 +262,15 @@ def main() -> int:
             "Deciles rank households by baseline net income. avg_change is the "
             "mean dollar change in net income per household in the decile; "
             "pct_change is the decile's aggregate net-income change as a "
-            "percent of its baseline net income. Computed from saved reform "
-            "microdata against a baseline simulation; anchor years only."
+            "percent of its baseline net income. Computed from certified-env "
+            "reform microdata against same-runtime baseline exports; anchor "
+            "years only. Net income is all-in for the household: it includes "
+            "state income-tax and benefit knock-ons the model computes, so "
+            "decile sums exceed the federal revenue column wherever those "
+            "knock-ons are material - most visibly for the employer payroll "
+            "swap reforms, where states tax the same newly included employer "
+            "contributions (e.g. option5 2050: -$100B household net income = "
+            "-$17B federal - $81B state - $2B benefits)."
         ),
         "data": data,
     }

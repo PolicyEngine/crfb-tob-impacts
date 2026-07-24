@@ -247,9 +247,13 @@ export function DistributionalSection({
       ) : null}
 
       <p className="mt-3 text-xs leading-5 text-[var(--pe-color-text-tertiary)]">
-        Deciles rank households by baseline net income, computed from the saved
-        reform microdata against a baseline simulation. Each year shown is
-        computed directly from full reform microsimulation output.
+        Deciles rank households by baseline net income, computed from reform
+        microsimulation output against a same-model baseline. Net income is
+        all-in for the household: it includes state income-tax and benefit
+        knock-ons the model computes, so decile totals can exceed the federal
+        revenue impact where those knock-ons are material — most visibly for
+        the employer payroll swap options, where states tax the same newly
+        included employer contributions.
       </p>
     </section>
   );

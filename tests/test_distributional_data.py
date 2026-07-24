@@ -64,10 +64,17 @@ def test_decile_impacts_preserves_microdataframe_weights_after_merge() -> None:
 
 
 def test_each_reform_year_has_ten_deciles(dist: dict) -> None:
-    anchor_years = {str(y) for y in dist["anchor_years"]}
+    # The header is the union of coverage across reforms; per-reform
+    # coverage differs (option6 has extra completion anchors at 2032/2033),
+    # so every reform must cover the common grid, not the whole header.
+    common_years = {
+        str(y) for y in [2026, 2028, 2029, 2030] + list(range(2035, 2101, 5))
+    }
+    assert common_years.issubset({str(y) for y in dist["anchor_years"]})
+    assert {"2032", "2033"}.issubset(dist["data"]["option6"].keys())
     for reform in STANDARD_REFORMS:
         years = dist["data"][reform]
-        assert anchor_years.issubset(years.keys()), reform
+        assert common_years.issubset(years.keys()), reform
         for year, rows in years.items():
             assert [r["decile"] for r in rows] == list(range(1, 11)), (reform, year)
             for r in rows:
