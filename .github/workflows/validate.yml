@@ -33,7 +33,10 @@ jobs:
       - name: Install dependencies
         run: |
           uv venv --python 3.13
-          uv pip install --no-sources -e ".[dev]" modal google-cloud-storage
+          # Pin ruff to the lockfile version: the dev extra's floor constraint
+          # otherwise floats to new releases whose lint defaults (e.g. the
+          # 0.16.0 import-sort change) fail on committed code.
+          uv pip install --no-sources -e ".[dev]" "ruff==0.15.5" modal google-cloud-storage
 
       - name: Ruff
         run: |
