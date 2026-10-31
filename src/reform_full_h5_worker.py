@@ -223,8 +223,8 @@ def save_complete_microsimulation_h5(
     It computes output entity arrays and persists entity tables; aggregate
     fiscal totals are a downstream post-H5 concern. The taxation-of-benefits
     revenue variables hold exactly what the engine's own formulas compute,
-    signed, read unweighted at their native tax-unit level; nothing here
-    re-derives the trust-fund split.
+    read unweighted at their native tax-unit level; nothing here floors,
+    caps or re-derives the trust-fund split.
     """
 
     output_path = Path(output_path)
