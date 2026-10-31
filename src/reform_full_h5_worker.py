@@ -7,7 +7,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from typing import Any, Callable
+from typing import Any
 import hashlib
 import json
 import os
@@ -195,18 +195,6 @@ def _calculate_native_entity(
     return _as_1d_array(values)
 
 
-def _delete_non_input_cached_arrays(branch: Any) -> int:
-    input_variables = set(getattr(branch, "input_variables", []))
-    deleted = 0
-    for population in getattr(branch, "populations", {}).values():
-        for holder in list(getattr(population, "_holders", {}).values()):
-            if holder.variable.name in input_variables:
-                continue
-            holder.delete_arrays()
-            deleted += 1
-    return deleted
-
-
 def _calculate_unweighted(
     sim: Any,
     variable_name: str,
@@ -218,90 +206,6 @@ def _calculate_unweighted(
     except TypeError:
         values = sim.calculate(variable_name, period=year)
     return _as_1d_array(values)
-
-
-def materialize_tob_revenue_pair(
-    sim: Any,
-    *,
-    year: int,
-    progress: Callable[[str], None] | None = None,
-) -> dict[str, Any]:
-    """Materialize TOB revenue variables without duplicate branch formulas.
-
-    This computes raw tax-unit arrays only. It performs no weighted aggregation.
-    """
-
-    from policyengine_core.periods import period as get_period
-
-    def emit(message: str) -> None:
-        if progress is not None:
-            progress(message)
-
-    period = get_period(year)
-    emit("materialize TOB: tax_unit_social_security")
-    gross_ss = _calculate_unweighted(
-        sim,
-        "tax_unit_social_security",
-        year=year,
-    )
-    emit("materialize TOB: tax_unit_taxable_social_security")
-    taxable_ss = _calculate_unweighted(
-        sim,
-        "tax_unit_taxable_social_security",
-        year=year,
-    )
-    emit("materialize TOB: full income_tax")
-    tax_full_ss = _calculate_unweighted(sim, "income_tax", year=year)
-    parameters = sim.tax_benefit_system.parameters(period).gov.ssa.revenue
-    capped_taxable_ss = np.minimum(
-        taxable_ss,
-        parameters.oasdi_share_of_gross_ss * gross_ss,
-    )
-
-    no_ss_branch_name = "crfb_tob_no_taxable_ss"
-    emit("materialize TOB: no-taxable-SS branch")
-    branch_no_ss = sim.get_branch(no_ss_branch_name, clone_system=True)
-    try:
-        branch_no_ss.tax_benefit_system.neutralize_variable(
-            "tax_unit_taxable_social_security"
-        )
-        no_ss_deleted = _delete_non_input_cached_arrays(branch_no_ss)
-        tax_no_ss = _calculate_unweighted(branch_no_ss, "income_tax", year=year)
-    finally:
-        sim.branches.pop(no_ss_branch_name, None)
-
-    capped_branch_name = "crfb_tob_capped_taxable_ss"
-    emit("materialize TOB: capped-taxable-SS branch")
-    branch_capped = sim.get_branch(capped_branch_name, clone_system=True)
-    try:
-        capped_deleted = _delete_non_input_cached_arrays(branch_capped)
-        tax_unit_population = branch_capped.populations["tax_unit"]
-        holder = tax_unit_population.get_holder("tax_unit_taxable_social_security")
-        holder.set_input(period, capped_taxable_ss)
-        tax_capped_ss = _calculate_unweighted(branch_capped, "income_tax", year=year)
-    finally:
-        sim.branches.pop(capped_branch_name, None)
-
-    emit("materialize TOB: cache OASDI/HI arrays")
-    oasdi = np.maximum(tax_capped_ss - tax_no_ss, 0)
-    medicare_hi = np.maximum(tax_full_ss - tax_capped_ss, 0)
-    sim.populations["tax_unit"].get_holder("tob_revenue_oasdi").put_in_cache(
-        oasdi,
-        period,
-        sim.branch_name,
-    )
-    sim.populations["tax_unit"].get_holder("tob_revenue_medicare_hi").put_in_cache(
-        medicare_hi,
-        period,
-        sim.branch_name,
-    )
-    return {
-        "materialized": sorted(TOB_REVENUE_VARIABLES),
-        "method": "single_shared_three_tax_state_pass",
-        "weighted_aggregation_used": False,
-        "no_ss_branch_deleted_cached_arrays": int(no_ss_deleted),
-        "capped_branch_deleted_cached_arrays": int(capped_deleted),
-    }
 
 
 def save_complete_microsimulation_h5(
@@ -317,7 +221,10 @@ def save_complete_microsimulation_h5(
 
     This function is deliberately independent of the legacy aggregate scorer.
     It computes output entity arrays and persists entity tables; aggregate
-    fiscal totals are a downstream post-H5 concern.
+    fiscal totals are a downstream post-H5 concern. The taxation-of-benefits
+    revenue variables hold exactly what the engine's own formulas compute,
+    signed, read unweighted at their native tax-unit level; nothing here
+    re-derives the trust-fund split.
     """
 
     output_path = Path(output_path)
@@ -330,15 +237,7 @@ def save_complete_microsimulation_h5(
         entity: pd.DataFrame(index=np.arange(count)) for entity, count in counts.items()
     }
     variables_by_entity = variables_by_entity or full_h5_output_variable_manifest()
-    requested_tob_variables = {
-        variable_name
-        for variables in variables_by_entity.values()
-        for variable_name in variables
-        if variable_name in TOB_REVENUE_VARIABLES
-    }
-    tob_materialization = None
-    if requested_tob_variables == TOB_REVENUE_VARIABLES:
-        tob_materialization = materialize_tob_revenue_pair(sim, year=year)
+    materialized_tob_variables: list[str] = []
 
     skipped: list[dict[str, Any]] = []
     variables = getattr(getattr(sim, "tax_benefit_system", None), "variables", {})
@@ -356,22 +255,16 @@ def save_complete_microsimulation_h5(
                     }
                 )
                 continue
-            if variable_name in TOB_REVENUE_VARIABLES and tob_materialization is None:
-                skipped.append(
-                    {
-                        "variable": variable_name,
-                        "entity": entity,
-                        "reason": "TOB pair materializer did not run",
-                    }
-                )
-                continue
             try:
-                values = _calculate_native_entity(
-                    sim,
-                    variable_name,
-                    year=year,
-                    entity=entity,
-                )
+                if variable_name in TOB_REVENUE_VARIABLES:
+                    values = _calculate_unweighted(sim, variable_name, year=year)
+                else:
+                    values = _calculate_native_entity(
+                        sim,
+                        variable_name,
+                        year=year,
+                        entity=entity,
+                    )
             except Exception as error:
                 skipped.append(
                     {
@@ -394,6 +287,8 @@ def save_complete_microsimulation_h5(
                 )
                 continue
             entity_frames[entity][variable_name] = values
+            if variable_name in TOB_REVENUE_VARIABLES:
+                materialized_tob_variables.append(variable_name)
 
     empty_entities = [
         entity for entity, dataframe in entity_frames.items() if dataframe.empty
@@ -450,7 +345,17 @@ def save_complete_microsimulation_h5(
         "skipped_variable_count": int(len(skipped)),
         "capture_policy": "checked full-output variable manifest materialized from the reform microsimulation",
         "output_variable_manifest": variables_by_entity,
-        "tob_materialization": tob_materialization,
+        "tob_materialization": (
+            {
+                "materialized": sorted(materialized_tob_variables),
+                "method": "engine_formulas",
+                "source": "policyengine-us tob_revenue_* variables",
+                "post_processing": "none",
+                "weighted_aggregation_used": False,
+            }
+            if materialized_tob_variables
+            else None
+        ),
     }
 
 

@@ -10,7 +10,6 @@ from policyengine_core.periods import period as get_period
 from policyengine_core.reforms import Reform
 
 from .hi_expenditures import hi_expenditures_for_year
-from .reform_full_h5_worker import materialize_tob_revenue_pair
 from .reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -398,13 +397,16 @@ def compute_trust_fund_gap(
     *,
     year: int,
     hi_expenditures: float,
-    materialize_tob: bool = True,
     progress: Callable[[str], None] | None = None,
 ) -> TrustFundGap:
-    """Compute SS and HI gaps with MicroSeries sums only."""
+    """Compute SS and HI gaps with MicroSeries sums only.
 
-    if materialize_tob:
-        materialize_tob_revenue_pair(sim, year=year, progress=progress)
+    The trust-fund income sums take tob_revenue_oasdi and
+    tob_revenue_medicare_hi straight from the engine's formulas.
+    """
+
+    if progress is not None:
+        progress("summing trust-fund income and benefits")
     ss_income = sum(
         _calculate_sum(sim, name, year=year) for name in SS_INCOME_VARIABLES
     )
@@ -472,9 +474,14 @@ def compute_scenario_aggregate_from_sim(
     year: int,
     progress: Callable[[str], None] | None = None,
 ) -> ScenarioAggregate:
-    """Aggregate a prepared sim, including sims with set_input benefit cuts."""
+    """Aggregate a prepared sim, including sims with set_input benefit cuts.
 
-    materialize_tob_revenue_pair(sim, year=year, progress=progress)
+    The taxation-of-benefits totals sum the engine's tob_revenue_oasdi and
+    tob_revenue_medicare_hi.
+    """
+
+    if progress is not None:
+        progress("summing taxation-of-benefits revenue from the engine")
     tob_medicare_hi = _calculate_sum(
         sim,
         "tob_revenue_medicare_hi",
@@ -564,7 +571,6 @@ def build_solvent_baseline_state(
         base,
         year=year,
         hi_expenditures=hi_expenditures_value,
-        materialize_tob=False,
     )
     emit("reading current-law Social Security vector")
     social_security = base.calculate("social_security", period=year)

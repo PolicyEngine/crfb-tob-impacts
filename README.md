@@ -44,8 +44,9 @@ table is accepted. These constraints are part of the production contract:
   annual behavioral rows by interpolating each reform's behavioral/static
   multiplier across display years. Do not fan labor-supply-response scoring out
   per year.
-- OASDI/HI decomposition is an endpoint pass that reuses
-  `materialize_tob_revenue_pair`; do not duplicate trust-fund split formulas.
+- OASDI/HI decomposition reads the engine's `tob_revenue_oasdi` and
+  `tob_revenue_medicare_hi` as computed, signed; do not re-derive the
+  trust-fund split in this repo.
 - Long Modal baseline/scoring cells are nonpreemptible, because preemption lost
   prior far-horizon work before it could commit.
 - The public result surface is `results.csv` plus
