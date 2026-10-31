@@ -247,6 +247,113 @@ def _log(message: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Name resolution: every scaling and cap name resolves to a frame column or
+# raises
+# ---------------------------------------------------------------------------
+
+SCALE_LISTS = {
+    "EARNINGS_SCALE_CANDIDATES": EARNINGS_SCALE_CANDIDATES,
+    "SOCIAL_SECURITY_SCALE_CANDIDATES": SOCIAL_SECURITY_SCALE_CANDIDATES,
+    "OTHER_INCOME_SCALE_CANDIDATES": OTHER_INCOME_SCALE_CANDIDATES,
+}
+
+
+def assert_scale_lists_disjoint(lists: dict[str, tuple[str, ...]] = SCALE_LISTS):
+    """Raise if a name repeats within a list or appears in two scale lists.
+
+    Alpha, beta and gamma multiply their lists one after another, so a name
+    in two lists (or twice in one) would be scaled twice.
+    """
+    owner: dict[str, str] = {}
+    for list_name, names in lists.items():
+        for name in names:
+            if name in owner:
+                raise ValueError(
+                    f"{name} appears in both {owner[name]} and {list_name}; "
+                    "it would be scaled twice."
+                )
+            owner[name] = list_name
+
+
+def _check_known_absent_input(name: str, variables) -> None:
+    variable = variables.get(name)
+    if variable is None:
+        raise ValueError(
+            f"{name} is on KNOWN_ABSENT_INPUTS but the engine has no such variable."
+        )
+    if getattr(variable, "formulas", None) or getattr(variable, "adds", None):
+        raise ValueError(
+            f"{name} is on KNOWN_ABSENT_INPUTS but the engine computes it, so "
+            "an absent column does not mean zero; scale its stored leaves."
+        )
+
+
+def resolve_frame_columns(
+    df: pd.DataFrame,
+    names,
+    year: int,
+    *,
+    list_name: str,
+    variables=None,
+) -> tuple[list[str], dict[str, str]]:
+    """Map each name to its ``{name}__{year}`` column in the year frame.
+
+    Returns (columns, absent): ``absent`` holds the names left out because
+    they sit on KNOWN_ABSENT_INPUTS, with the reason. Any other name without
+    a column raises, naming every such name. With ``variables`` (the engine's
+    variable registry), each absent name must be an engine input without a
+    formula, so leaving it out cannot drop computed income.
+    """
+    columns: list[str] = []
+    absent: dict[str, str] = {}
+    missing: list[str] = []
+    seen: set[str] = set()
+    for name in names:
+        if name in seen:
+            raise ValueError(f"{list_name} names {name} twice.")
+        seen.add(name)
+        column = f"{name}__{year}"
+        if column in df.columns:
+            columns.append(column)
+        elif name in KNOWN_ABSENT_INPUTS:
+            if variables is not None:
+                _check_known_absent_input(name, variables)
+            absent[name] = KNOWN_ABSENT_INPUTS[name]
+        else:
+            missing.append(name)
+    if missing:
+        details = []
+        for name in missing:
+            leaves = PRE_2X_NAME_LEAVES.get(name)
+            details.append(
+                f"{name} (PolicyEngine US 2.x stores it as {', '.join(leaves)})"
+                if leaves
+                else name
+            )
+        raise ValueError(
+            f"{list_name}: no year-{year} frame column for "
+            + "; ".join(details)
+            + ". Add each to the list's stored leaves or, if the base "
+            "genuinely lacks it, to KNOWN_ABSENT_INPUTS with the reason."
+        )
+    return columns, absent
+
+
+def scale_frame_columns(
+    df: pd.DataFrame,
+    columns: list[str],
+    factor: float,
+    *,
+    rows: np.ndarray | None = None,
+) -> None:
+    """Multiply ``columns`` by ``factor`` in place, on ``rows`` only if given."""
+    if rows is None:
+        df[columns] = df[columns] * factor
+    else:
+        df.loc[rows, columns] = df.loc[rows, columns] * factor
+
+
+# ---------------------------------------------------------------------------
 # Stage A: materialize the base dataset at the target year
 # ---------------------------------------------------------------------------
 
@@ -357,30 +464,71 @@ def _tr2026_gdp_growth(from_year: int, to_year: int) -> float:
     )
 
 
-def cap_longrun_income_growth(df: pd.DataFrame, sim, year: int) -> dict:
+def growth_cap_uprating_parameter(variable_name: str, variables) -> str:
+    """The parameter that uprates ``variable_name``; raises if there is none.
+
+    A capped variable without an uprating parameter has no category growth to
+    compare with GDP, so skipping it would leave its growth uncapped silently.
+    """
+    variable = variables.get(variable_name)
+    if variable is None:
+        raise ValueError(f"GROWTH_CAP_VARIABLES: the engine has no {variable_name}.")
+    uprating = getattr(variable, "uprating", None)
+    if not uprating:
+        raise ValueError(
+            f"GROWTH_CAP_VARIABLES: {variable_name} has no uprating parameter, "
+            "so its growth cannot be compared with GDP. Name the parameter "
+            "that grows it or drop it from the list."
+        )
+    return uprating
+
+
+def cap_longrun_income_growth(
+    df: pd.DataFrame, sim, year: int, audit: dict | None = None
+) -> dict:
     """Cap each category's post-2034 cumulative growth at nominal GDP.
 
-    Returns {variable: factor} for the categories that were scaled down.
+    Every name in GROWTH_CAP_VARIABLES must resolve to a frame column (or sit
+    on KNOWN_ABSENT_INPUTS) and carry an uprating parameter, in every year;
+    otherwise this raises. The cap compares the growth of the parameter that
+    uprates each variable's per-record values. Returns {variable: factor} for
+    the categories that were scaled down; ``audit``, if given, receives each
+    capped-list variable's parameter, growth and factor.
     """
+    variables = sim.tax_benefit_system.variables
+    columns, _ = resolve_frame_columns(
+        df,
+        GROWTH_CAP_VARIABLES,
+        year,
+        list_name="GROWTH_CAP_VARIABLES",
+        variables=variables,
+    )
+    upratings = {
+        column: growth_cap_uprating_parameter(column.rsplit("__", 1)[0], variables)
+        for column in columns
+    }
     if year <= GROWTH_CAP_BASE_YEAR:
         return {}
     gdp_growth = _tr2026_gdp_growth(GROWTH_CAP_BASE_YEAR, year)
     parameters = sim.tax_benefit_system.parameters
     factors: dict[str, float] = {}
-    for variable_name in GROWTH_CAP_VARIABLES:
-        variable = sim.tax_benefit_system.variables.get(variable_name)
-        uprating = getattr(variable, "uprating", None) if variable else None
-        column = f"{variable_name}__{year}"
-        if uprating is None or column not in df.columns:
-            continue
+    for column, uprating in upratings.items():
+        variable_name = column.rsplit("__", 1)[0]
         parameter = parameters.get_child(uprating)
         category_growth = float(
             parameter(f"{year}-01-01") / parameter(f"{GROWTH_CAP_BASE_YEAR}-01-01")
         )
+        factor = min(1.0, gdp_growth / category_growth)
+        if audit is not None:
+            audit[variable_name] = {
+                "uprating_parameter": uprating,
+                "category_growth": category_growth,
+                "gdp_growth": gdp_growth,
+                "factor": factor,
+            }
         if category_growth <= gdp_growth:
             continue
-        factor = gdp_growth / category_growth
-        df[column] = df[column] * factor
+        scale_frame_columns(df, [column], factor)
         factors[variable_name] = factor
     return factors
 
@@ -675,8 +823,9 @@ def _solve_other_income_gamma(
 
     def total_tob_at(gamma: float) -> float:
         probe_df = df.copy()
-        scaled = probe_df.loc[beneficiary_person_mask, other_income_columns] * gamma
-        probe_df.loc[beneficiary_person_mask, other_income_columns] = scaled
+        scale_frame_columns(
+            probe_df, other_income_columns, gamma, rows=beneficiary_person_mask
+        )
         sim = _sim_from_frame(probe_df, year, reform)
         vectors = _household_vectors(sim, year)
         del sim
@@ -790,6 +939,7 @@ def build_year(
     """Build one calibrated year dataset; returns the sentinel record."""
     from src.engine import base_microsimulation, dataset_microsimulation
 
+    assert_scale_lists_disjoint()
     start_time = time.monotonic()
     output_dir = Path(output_dir)
     output_path = output_dir / f"{year}.h5"
@@ -822,12 +972,25 @@ def build_year(
             f"records above ${repair['cap']:,.0f} "
             f"(${repair['amount_zeroed'] / 1e9:,.1f}B unweighted)"
         )
-    growth_caps = cap_longrun_income_growth(df, sim, year)
+    growth_cap_audit: dict = {}
+    growth_caps = cap_longrun_income_growth(df, sim, year, audit=growth_cap_audit)
     if growth_caps:
         capped = ", ".join(
             f"{name} x{factor:.2f}" for name, factor in growth_caps.items()
         )
         _log(f"  [growth cap] post-2034 growth capped at GDP: {capped}")
+    scale_columns: dict[str, list[str]] = {}
+    absent_inputs: dict[str, str] = {}
+    for list_name, names in SCALE_LISTS.items():
+        columns, absent = resolve_frame_columns(
+            df,
+            names,
+            year,
+            list_name=list_name,
+            variables=sim.tax_benefit_system.variables,
+        )
+        scale_columns[list_name] = columns
+        absent_inputs.update(absent)
     cap = float(
         sim.tax_benefit_system.parameters(
             f"{year}-01-01"
@@ -879,22 +1042,19 @@ def build_year(
         cap=cap,
         payroll_target=economic_targets["payroll_total"],
     )
-    ss_columns = [
-        f"{var}__{year}"
-        for var in SOCIAL_SECURITY_SCALE_CANDIDATES
-        if f"{var}__{year}" in df.columns
-    ]
+    ss_columns = scale_columns["SOCIAL_SECURITY_SCALE_CANDIDATES"]
     ss_person_total = df[ss_columns].sum(axis=1).to_numpy()
     ss_current = float((ss_person_total * person_demo_weights).sum())
+    if ss_current <= 0:
+        raise RuntimeError(
+            f"Social Security columns {ss_columns} sum to {ss_current:,.0f}; "
+            "the benefit scale needs a positive base."
+        )
     beta = economic_targets["ss_total"] / ss_current
 
-    earnings_columns = [
-        f"{var}__{year}"
-        for var in EARNINGS_SCALE_CANDIDATES
-        if f"{var}__{year}" in df.columns
-    ]
-    df[earnings_columns] = df[earnings_columns] * alpha
-    df[ss_columns] = df[ss_columns] * beta
+    earnings_columns = scale_columns["EARNINGS_SCALE_CANDIDATES"]
+    scale_frame_columns(df, earnings_columns, alpha)
+    scale_frame_columns(df, ss_columns, beta)
     _log(
         f"  [stage C] earnings scale alpha={alpha:.4f}, "
         f"benefits scale beta={beta:.4f} "
@@ -905,11 +1065,7 @@ def build_year(
 
     # ----- Stage C-gamma: other income of beneficiary households -----
     reform = _tax_assumption_reform(year)
-    other_income_columns = [
-        f"{var}__{year}"
-        for var in OTHER_INCOME_SCALE_CANDIDATES
-        if f"{var}__{year}" in df.columns
-    ]
+    other_income_columns = scale_columns["OTHER_INCOME_SCALE_CANDIDATES"]
     household_has_ss = (
         np.bincount(
             person_household_index,
@@ -929,9 +1085,7 @@ def build_year(
         person_household_index,
         tob_targets,
     )
-    df.loc[beneficiary_person_mask, other_income_columns] = (
-        df.loc[beneficiary_person_mask, other_income_columns] * gamma
-    )
+    scale_frame_columns(df, other_income_columns, gamma, rows=beneficiary_person_mask)
     _log(
         f"  [stage C-gamma] other-income scale gamma={gamma:.4f} "
         f"({len(other_income_columns)} columns, "
@@ -1119,6 +1273,7 @@ def build_year(
         "input_repairs": repair_log,
         "enum_sanitization": enum_log,
         "longrun_growth_caps": growth_caps,
+        "longrun_growth_cap_audit": growth_cap_audit,
         "value_scaling": {
             "alpha_earnings_scale": alpha,
             "beta_benefits_scale": beta,
@@ -1127,6 +1282,8 @@ def build_year(
             "earnings_columns": earnings_columns,
             "social_security_columns": ss_columns,
             "other_income_columns": other_income_columns,
+            "absent_inputs_left_unscaled": absent_inputs,
+            "payroll_cap": cap,
             "beneficiary_person_rows": int(beneficiary_person_mask.sum()),
         },
         "profile": {

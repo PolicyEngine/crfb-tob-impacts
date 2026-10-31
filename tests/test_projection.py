@@ -370,5 +370,5 @@ def test_growth_cap_call_site_present():
     from src import pipeline
 
     source = inspect.getsource(pipeline.build_year)
-    assert "cap_longrun_income_growth(df, sim, year)" in source
+    assert "cap_longrun_income_growth(df, sim, year" in source
     assert '"longrun_growth_caps": growth_caps' in inspect.getsource(pipeline)
