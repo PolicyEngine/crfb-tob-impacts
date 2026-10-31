@@ -164,9 +164,11 @@ GAMMA_MAX_PROBES = 4
 # PolicyEngine US documents it as "not an additional gross income source
 # separate from partnership_income", which partnership_s_corp_income covers.
 INCOME_GUARD_GROUPS = {
+    # long_term_capital_gains_on_collectibles stays out: PolicyEngine US
+    # documents it as a memo item that long-term capital gains already
+    # include, so adding it would count collectibles gains twice.
     "preferential_investment_income": (
         "long_term_capital_gains_before_response",
-        "long_term_capital_gains_on_collectibles",
         "qualified_dividend_income",
     ),
     "ordinary_nonpayroll_income": (
