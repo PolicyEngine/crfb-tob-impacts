@@ -222,7 +222,11 @@ INPUT_REPAIR_CAPS = {
 # forever (qualified dividends at about 5% per year against TR2026
 # nominal GDP near 3.5%), so AGI outruns GDP at far horizons. Through
 # 2034 the CBO-vintage growth stands; from 2035 each category's
-# cumulative growth is capped at the TR2026 nominal-GDP path.
+# cumulative growth is capped at the TR2026 nominal-GDP path. Category
+# growth is the national total's growth: PolicyEngine US 2.x uprates each
+# input by its total divided by population (household weights carry
+# population growth), so the cap reads the total that per-capita series
+# derives from.
 GROWTH_CAP_BASE_YEAR = 2034
 GROWTH_CAP_VARIABLES = (
     "taxable_interest_income",
@@ -343,6 +347,24 @@ def resolve_frame_columns(
             "genuinely lacks it, to KNOWN_ABSENT_INPUTS with the reason."
         )
     return columns, absent
+
+
+def reject_pre_2x_names_in_frame(df: pd.DataFrame, year: int) -> None:
+    """Raise if the frame stores a name the lists replaced with its leaves.
+
+    A stored value overrides the engine's formula or adds-aggregate for that
+    name, so scaling its leaves would leave the value the engine uses
+    unscaled.
+    """
+    stored = sorted(
+        name for name in PRE_2X_NAME_LEAVES if f"{name}__{year}" in df.columns
+    )
+    if stored:
+        raise ValueError(
+            f"The year-{year} frame stores {stored}; each would override the "
+            "value computed from the scaled leaves "
+            f"{[PRE_2X_NAME_LEAVES[name] for name in stored]}."
+        )
 
 
 def scale_frame_columns(
@@ -489,6 +511,30 @@ def growth_cap_uprating_parameter(variable_name: str, variables) -> str:
     return uprating
 
 
+def growth_cap_total_parameter(uprating: str, parameters) -> str:
+    """The national-total series whose growth the cap compares with GDP.
+
+    PolicyEngine US 2.x points each dollar input at ``<total>_per_capita``,
+    the total divided by population, and records the total in the series'
+    ``derived_from`` metadata. Comparing that per-capita growth with total GDP
+    growth would let a category's total outgrow GDP by population growth, so
+    the cap reads the total. A series that is not derived per capita (as on
+    1.x) is itself the total. A ``_per_capita`` series with no recorded total
+    raises.
+    """
+    parameter = parameters.get_child(uprating)
+    metadata = getattr(parameter, "metadata", None) or {}
+    derived_from = metadata.get("derived_from")
+    if derived_from:
+        return derived_from
+    if uprating.endswith("_per_capita"):
+        raise ValueError(
+            f"{uprating} is a per-capita series with no derived_from total, so "
+            "its category growth cannot be compared with GDP."
+        )
+    return uprating
+
+
 def cap_longrun_income_growth(
     df: pd.DataFrame, sim, year: int, audit: dict | None = None
 ) -> dict:
@@ -496,10 +542,12 @@ def cap_longrun_income_growth(
 
     Every name in GROWTH_CAP_VARIABLES must resolve to a frame column (or sit
     on KNOWN_ABSENT_INPUTS) and carry an uprating parameter, in every year;
-    otherwise this raises. The cap compares the growth of the parameter that
-    uprates each variable's per-record values. Returns {variable: factor} for
+    otherwise this raises. Category growth is the growth of the national
+    total behind each variable's uprating series (see
+    growth_cap_total_parameter); a category growing faster than GDP has its
+    values scaled so its growth matches GDP's. Returns {variable: factor} for
     the categories that were scaled down; ``audit``, if given, receives each
-    capped-list variable's parameter, growth and factor.
+    capped-list variable's parameters, growth and factor.
     """
     variables = sim.tax_benefit_system.variables
     columns, _ = resolve_frame_columns(
@@ -509,18 +557,18 @@ def cap_longrun_income_growth(
         list_name="GROWTH_CAP_VARIABLES",
         variables=variables,
     )
-    upratings = {
-        column: growth_cap_uprating_parameter(column.rsplit("__", 1)[0], variables)
-        for column in columns
-    }
+    parameters = sim.tax_benefit_system.parameters
+    sources = {}
+    for column in columns:
+        uprating = growth_cap_uprating_parameter(column.rsplit("__", 1)[0], variables)
+        sources[column] = (uprating, growth_cap_total_parameter(uprating, parameters))
     if year <= GROWTH_CAP_BASE_YEAR:
         return {}
     gdp_growth = _tr2026_gdp_growth(GROWTH_CAP_BASE_YEAR, year)
-    parameters = sim.tax_benefit_system.parameters
     factors: dict[str, float] = {}
-    for column, uprating in upratings.items():
+    for column, (uprating, total) in sources.items():
         variable_name = column.rsplit("__", 1)[0]
-        parameter = parameters.get_child(uprating)
+        parameter = parameters.get_child(total)
         category_growth = float(
             parameter(f"{year}-01-01") / parameter(f"{GROWTH_CAP_BASE_YEAR}-01-01")
         )
@@ -528,6 +576,7 @@ def cap_longrun_income_growth(
         if audit is not None:
             audit[variable_name] = {
                 "uprating_parameter": uprating,
+                "growth_parameter": total,
                 "category_growth": category_growth,
                 "gdp_growth": gdp_growth,
                 "factor": factor,
@@ -1078,6 +1127,7 @@ def build_year(
     else:
         sim = base_microsimulation(reform=stage_a_reform)
     df = materialize_year_frame(sim, year)
+    reject_pre_2x_names_in_frame(df, year)
     enum_log = sanitize_enum_inputs(df, sim, year)
     for variable, count in enum_log.items():
         _log(f"  [sanitize] {variable}: coerced {count:,} invalid enum values")

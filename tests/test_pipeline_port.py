@@ -206,6 +206,13 @@ def test_resolver_rejects_a_repeated_name():
         )
 
 
+def test_a_frame_storing_a_pre_2x_aggregate_raises():
+    df = _frame(2050, ["partnership_income", "partnership_s_corp_income"])
+    with pytest.raises(ValueError, match="partnership_s_corp_income"):
+        pipeline.reject_pre_2x_names_in_frame(df, 2050)
+    pipeline.reject_pre_2x_names_in_frame(_frame(2050, ["partnership_income"]), 2050)
+
+
 # ---------------------------------------------------------------------------
 # Growth cap
 # ---------------------------------------------------------------------------
@@ -272,6 +279,47 @@ def test_growth_cap_raises_for_a_capped_variable_without_uprating(monkeypatch):
     with pytest.raises(ValueError, match="partnership_income has no uprating"):
         pipeline.cap_longrun_income_growth(
             _cap_frame(2060), _cap_sim({}, variables=variables), 2060
+        )
+
+
+def test_growth_cap_compares_the_total_behind_a_per_capita_series(monkeypatch):
+    monkeypatch.setattr(pipeline, "_tr2026_gdp_growth", lambda a, b: 1.5)
+    year = 2060
+    variables, growth, metadata = {}, {}, {}
+    for name in pipeline.GROWTH_CAP_VARIABLES:
+        total = f"calibration.gov.irs.soi.{name}"
+        per_capita = f"{total}_per_capita"
+        variables[name] = FakeVariable(uprating=per_capita)
+        metadata[per_capita] = {"derived_from": total}
+        # Per-capita growth stays under GDP's; the total grows faster.
+        growth[per_capita] = 0.01
+        growth[total] = 0.01
+    fast = "partnership_income"
+    growth[f"calibration.gov.irs.soi.{fast}"] = 0.05
+    sim = SimpleNamespace(
+        tax_benefit_system=SimpleNamespace(
+            variables=variables,
+            parameters=FakeParameters(1.0, growth, metadata),
+        )
+    )
+    audit: dict = {}
+
+    factors = pipeline.cap_longrun_income_growth(_cap_frame(year), sim, year, audit)
+
+    total_growth = 1.05 ** (year - pipeline.GROWTH_CAP_BASE_YEAR)
+    assert factors == {fast: pytest.approx(1.5 / total_growth)}
+    assert audit[fast]["uprating_parameter"].endswith(f"{fast}_per_capita")
+    assert audit[fast]["growth_parameter"] == f"calibration.gov.irs.soi.{fast}"
+
+
+def test_growth_cap_raises_for_a_per_capita_series_without_its_total():
+    variables = {
+        name: FakeVariable(uprating=f"calibration.fake.{name}_per_capita")
+        for name in pipeline.GROWTH_CAP_VARIABLES
+    }
+    with pytest.raises(ValueError, match="no derived_from total"):
+        pipeline.cap_longrun_income_growth(
+            _cap_frame(2030), _cap_sim({}, variables=variables), 2030
         )
 
 
@@ -351,6 +399,7 @@ def test_load_economic_assumption_reform_accepts_reform_classes_and_dicts(
         "def factory():\n"
         "    return trustees\n"
         "PAIR = (trustees, trustees)\n"
+        "CAP = {'gov.irs.payroll.social_security.cap': {'2030-01-01': 250000}}\n"
     )
     monkeypatch.syspath_prepend(str(tmp_path))
 
@@ -366,6 +415,8 @@ def test_load_economic_assumption_reform_accepts_reform_classes_and_dicts(
         loaded,
         loaded,
     )
+    from_dict = pipeline.load_economic_assumption_reform("fake_assumption_module:CAP")
+    assert isinstance(from_dict, type) and issubclass(from_dict, Reform)
     with pytest.raises(TypeError, match="factory"):
         pipeline.load_economic_assumption_reform("fake_assumption_module:factory")
     with pytest.raises(ValueError, match="module:attribute"):
@@ -474,6 +525,35 @@ def test_build_year_raises_when_a_scaled_input_is_missing(monkeypatch, tmp_path)
     assert not (tmp_path / f"{year}.h5").exists()
 
 
+def test_build_year_raises_when_the_frame_stores_a_pre_2x_aggregate(
+    monkeypatch, tmp_path
+):
+    year = 2030
+    frame = fakes.make_frame(year)
+    frame[f"partnership_s_corp_income__{year}"] = 1.0
+    fakes.install(monkeypatch, FakeEngine(year, frame, _growth_rates()))
+    with pytest.raises(ValueError, match="partnership_s_corp_income"):
+        pipeline.build_year(year, "fake-base", tmp_path)
+
+
+def test_scorers_refuse_a_dataset_built_with_the_economic_reform():
+    from src.tax_assumption_loader import (
+        load_tax_assumption_reform_for_metadata,
+        tax_assumption_contract_from_metadata,
+    )
+
+    metadata = {
+        "economic_assumption": {"active": True, "reform": "pkg.mod:trustees_2026"},
+        "tax_assumption": {"name": None},
+    }
+    with pytest.raises(ValueError, match="trustees_2026"):
+        tax_assumption_contract_from_metadata(metadata, 2050)
+    with pytest.raises(ValueError, match="no scorer applies"):
+        load_tax_assumption_reform_for_metadata(metadata, 2050)
+    metadata["economic_assumption"]["active"] = False
+    assert tax_assumption_contract_from_metadata(metadata, 2050).active is False
+
+
 @pytest.mark.parametrize("year,tax", [(2030, None), (2040, FakeTaxReform)])
 def test_economic_reform_reaches_every_simulation_ahead_of_tax(
     monkeypatch, tmp_path, year, tax
@@ -536,6 +616,53 @@ def _comparable(metadata):
     metadata = json.loads(json.dumps(metadata))
     metadata["sentinel"].pop("duration_seconds")
     return metadata
+
+
+DETERMINISM_SCRIPT = """
+import hashlib, json, sys
+from pathlib import Path
+import pytest
+from src import pipeline
+from tests import pipeline_fakes as fakes
+year, out = 2050, Path(sys.argv[1])
+rates = {f"calibration.fake.{n}": 0.02
+         for n in fakes.frame_variable_names() + list(pipeline.KNOWN_ABSENT_INPUTS)}
+rates["calibration.fake.qualified_dividend_income"] = 0.09
+engine = fakes.FakeEngine(year, fakes.make_frame(year, seed=7), rates)
+with pytest.MonkeyPatch.context() as patch:
+    fakes.install(patch, engine)
+    pipeline.build_year(year, "fake-base", out,
+                        economic_assumption_reform=fakes.FakeEconomicReform)
+metadata = json.loads((out / f"{year}.h5.metadata.json").read_text())
+metadata["sentinel"].pop("duration_seconds")
+written = engine.written[str(out / f"{year}.h5")]
+digest = hashlib.sha256(json.dumps(metadata, sort_keys=True).encode())
+digest.update(written.to_numpy().tobytes())
+print(digest.hexdigest())
+"""
+
+
+def test_build_year_is_deterministic_across_processes(tmp_path):
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parent.parent
+    digests = []
+    for hash_seed in ("1", "2"):
+        out = tmp_path / f"seed{hash_seed}"
+        env = {**os.environ, "PYTHONHASHSEED": hash_seed}
+        result = subprocess.run(
+            [sys.executable, "-c", DETERMINISM_SCRIPT, str(out)],
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        digests.append(result.stdout.strip().splitlines()[-1])
+    assert digests[0] == digests[1]
 
 
 def test_build_year_is_deterministic(monkeypatch, tmp_path):

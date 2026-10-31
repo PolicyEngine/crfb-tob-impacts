@@ -64,9 +64,15 @@ class FakeVariable:
 class FakeParameters:
     """Callable parameter tree with uprating series for the growth cap."""
 
-    def __init__(self, cap: float, growth_rates: dict[str, float]):
+    def __init__(
+        self,
+        cap: float,
+        growth_rates: dict[str, float],
+        metadata: dict[str, dict] | None = None,
+    ):
         self.cap = cap
         self.growth_rates = growth_rates
+        self.metadata = metadata or {}
 
     def __call__(self, instant: str):
         return SimpleNamespace(
@@ -80,12 +86,20 @@ class FakeParameters:
         )
 
     def get_child(self, path: str):
-        rate = self.growth_rates[path]
+        return FakeSeries(self, path)
 
-        def series(instant: str) -> float:
-            return (1 + rate) ** (int(instant[:4]) - 2000)
 
-        return series
+class FakeSeries:
+    """A parameter growing at a constant rate from 2000, with metadata."""
+
+    def __init__(self, parameters: FakeParameters, path: str):
+        self.parameters = parameters
+        self.path = path
+        self.metadata = parameters.metadata.get(path, {})
+
+    def __call__(self, instant: str) -> float:
+        rate = self.parameters.growth_rates[self.path]
+        return (1 + rate) ** (int(instant[:4]) - 2000)
 
 
 def frame_variable_names() -> list[str]:

@@ -60,8 +60,10 @@ def test_every_name_resolves_is_known_absent_or_raises(names, present):
     if missing:
         with pytest.raises(ValueError) as error:
             pipeline.resolve_frame_columns(df, names, YEAR, list_name="L")
-        for name in missing:
-            assert name in str(error.value)
+        message = str(error.value)
+        listed = message.split("frame column for ", 1)[1].split(". Add each", 1)[0]
+        reported = [item.split(" (", 1)[0] for item in listed.split("; ")]
+        assert reported == missing
         return
     columns, absent = pipeline.resolve_frame_columns(df, names, YEAR, list_name="L")
     assert columns == [f"{name}__{YEAR}" for name in names if name in present]

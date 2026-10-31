@@ -16,7 +16,7 @@ DEFAULT_VARIABLES = [
     "self_employment_income",
     "self_employment_income_before_lsr",
     "partnership_s_corp_income",
-    "partnership_se_income",
+    "partnership_self_employment_net_earnings",
     "sstb_self_employment_income_before_lsr",
     "farm_operations_income",
     "qualified_dividend_income",

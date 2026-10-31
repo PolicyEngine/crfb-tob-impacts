@@ -274,6 +274,16 @@ def tax_assumption_contract_from_metadata(
     metadata: dict,
     year: int,
 ) -> TaxAssumptionContract:
+    economic_assumption = metadata.get("economic_assumption") or {}
+    if economic_assumption.get("active"):
+        # Scorers rebuild only the tax assumption reform. A dataset calibrated
+        # under an economic assumption reform as well would be scored without
+        # it and drift off its targets, so refuse it until a scorer applies it.
+        raise ValueError(
+            "Dataset was built with the economic assumption reform "
+            f"{economic_assumption.get('reform')!r}, which no scorer applies "
+            "yet; refusing to score it under the tax assumption alone."
+        )
     tax_assumption = metadata.get("tax_assumption") or {}
     name = tax_assumption.get("name")
     if name in (None, "", CURRENT_LAW_LITERAL_ASSUMPTION):
