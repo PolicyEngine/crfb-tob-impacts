@@ -680,14 +680,16 @@ def household_structure(df: pd.DataFrame, year: int):
 # ---------------------------------------------------------------------------
 
 
-def write_year_h5(df: pd.DataFrame, year: int, output_path: Path) -> None:
+def write_year_h5(
+    df: pd.DataFrame, year: int, output_path: Path, *, reform=None
+) -> None:
     """Materialize the input dataframe into a runnable PolicyEngine H5."""
     from policyengine_core.data.dataset import Dataset
 
     from src.engine import base_microsimulation
 
     dataset = Dataset.from_dataframe(df, year)
-    sim = base_microsimulation()
+    sim = base_microsimulation(reform=reform)
     sim.dataset = dataset
     sim.build_from_dataset()
 
@@ -942,6 +944,86 @@ def _tax_assumption_reform(year: int):
     )
 
 
+# ---------------------------------------------------------------------------
+# Economic assumption reform
+# ---------------------------------------------------------------------------
+
+
+def compose_reforms(*reforms):
+    """Compose reforms in the order given, dropping ``None``.
+
+    PolicyEngine applies a tuple of reforms left to right, so the first
+    reform's parameter changes are in place before the next one runs.
+    """
+    active = tuple(reform for reform in reforms if reform is not None)
+    if not active:
+        return None
+    if len(active) == 1:
+        return active[0]
+    return active
+
+
+def _validated_reform(candidate, spec: str):
+    from policyengine_core.reforms import Reform
+
+    if isinstance(candidate, type) and issubclass(candidate, Reform):
+        return candidate
+    if isinstance(candidate, dict):
+        return Reform.from_dict(candidate, country_id="us")
+    if isinstance(candidate, tuple) and candidate:
+        return tuple(_validated_reform(item, spec) for item in candidate)
+    raise TypeError(
+        f"{spec} is a {type(candidate).__name__}; an economic assumption "
+        "reform must be a Reform subclass, a parameter dict, or a tuple of "
+        "those. Point at the reform itself, not at a factory that builds it."
+    )
+
+
+def load_economic_assumption_reform(spec: str):
+    """Import the reform named by ``module:attribute`` (attribute may be
+    dotted) and check that it is a reform."""
+    import importlib
+
+    module_name, separator, attribute = spec.partition(":")
+    if not separator or not module_name or not attribute:
+        raise ValueError(f"Expected module:attribute, got {spec!r}.")
+    target = importlib.import_module(module_name)
+    for part in attribute.split("."):
+        target = getattr(target, part)
+    return _validated_reform(target, spec)
+
+
+def economic_assumption_provenance(spec: str) -> dict:
+    """The ``module:attribute`` path, plus the module file and its hash."""
+    import hashlib
+    import importlib
+
+    module = importlib.import_module(spec.partition(":")[0])
+    module_file = getattr(module, "__file__", None)
+    return {
+        "reform": spec,
+        "module_file": module_file,
+        "module_sha256": (
+            hashlib.sha256(Path(module_file).read_bytes()).hexdigest()
+            if module_file
+            else None
+        ),
+    }
+
+
+def _reform_label(reform) -> str:
+    if isinstance(reform, tuple):
+        return " + ".join(_reform_label(item) for item in reform)
+    if isinstance(reform, type):
+        return f"{reform.__module__}:{reform.__qualname__}"
+    return type(reform).__name__
+
+
+def _contribution_cap(sim, year: int) -> float:
+    parameters = sim.tax_benefit_system.parameters(f"{year}-01-01")
+    return float(parameters.gov.irs.payroll.social_security.cap)
+
+
 def _gap_table(label: str, achieved: dict, targets: dict) -> None:
     _log(f"  [{label}]")
     for name, target in targets.items():
@@ -959,8 +1041,17 @@ def build_year(
     *,
     base_dataset_label: str | None = None,
     policyengine_us_version: str | None = None,
+    economic_assumption_reform=None,
+    economic_assumption_metadata: dict | None = None,
 ) -> dict:
-    """Build one calibrated year dataset; returns the sentinel record."""
+    """Build one calibrated year dataset; returns the sentinel record.
+
+    ``economic_assumption_reform`` (off by default) applies to every
+    simulation in the build: alone in Stage A and the H5 writer, which carried
+    no reform before, and composed ahead of the tax assumption reform in the
+    gamma probes and the artifact validation. ``economic_assumption_metadata``
+    is recorded in the year metadata as its provenance.
+    """
     from src.engine import base_microsimulation, dataset_microsimulation
 
     assert_scale_lists_disjoint()
@@ -981,10 +1072,11 @@ def build_year(
     # outputs and shadow their formulas downstream. The certified populace base
     # is the default; an explicit local base_dataset path (a candidate build not
     # yet certified) is loaded as an unmanaged dataset, for sentinels.
+    stage_a_reform = economic_assumption_reform
     if base_dataset and Path(str(base_dataset)).is_file():
-        sim = dataset_microsimulation(base_dataset)
+        sim = dataset_microsimulation(base_dataset, reform=stage_a_reform)
     else:
-        sim = base_microsimulation()
+        sim = base_microsimulation(reform=stage_a_reform)
     df = materialize_year_frame(sim, year)
     enum_log = sanitize_enum_inputs(df, sim, year)
     for variable, count in enum_log.items():
@@ -1015,11 +1107,11 @@ def build_year(
         )
         scale_columns[list_name] = columns
         absent_inputs.update(absent)
-    cap = float(
-        sim.tax_benefit_system.parameters(
-            f"{year}-01-01"
-        ).gov.irs.payroll.social_security.cap
-    )
+    # The cap read sees the economic assumption reform. The tax assumption
+    # reform cannot move it (it rewrites only parameters uprated by
+    # gov.irs.uprating; the cap follows gov.ssa.nawi), and Stage C2 checks
+    # that against the fully composed reform.
+    cap = _contribution_cap(sim, year)
     gross_wages = np.asarray(
         sim.calculate("payroll_tax_gross_wages", period=year).values
     )
@@ -1088,7 +1180,7 @@ def build_year(
     df[f"household_weight__{year}"] = demographic_weights[person_household_index]
 
     # ----- Stage C-gamma: other income of beneficiary households -----
-    reform = _tax_assumption_reform(year)
+    reform = compose_reforms(economic_assumption_reform, _tax_assumption_reform(year))
     other_income_columns = scale_columns["OTHER_INCOME_SCALE_CANDIDATES"]
     household_has_ss = (
         np.bincount(
@@ -1119,10 +1211,17 @@ def build_year(
 
     start_weights = demographic_weights
 
-    write_year_h5(df, year, output_path)
+    write_year_h5(df, year, output_path, reform=stage_a_reform)
 
     # ----- Stage C2: artifact-true validation -----
     sim2 = dataset_microsimulation(str(output_path), reform=reform)
+    composed_cap = _contribution_cap(sim2, year)
+    if composed_cap != cap:
+        raise RuntimeError(
+            f"The contribution cap is ${cap:,.0f} in Stage A but "
+            f"${composed_cap:,.0f} under the composed reform; alpha was solved "
+            "against the wrong cap."
+        )
     vectors = _household_vectors(sim2, year)
     sim2_household_ids = np.asarray(
         sim2.calculate("household_id", period=year, map_to="household").values
@@ -1237,6 +1336,16 @@ def build_year(
 
     income_tax_total = float(vectors["income_tax"] @ final_weights)
     elapsed = time.monotonic() - start_time
+    economic_assumption = {
+        "active": economic_assumption_reform is not None,
+        "applies_before": "tax_assumption",
+        "reform": (
+            _reform_label(economic_assumption_reform)
+            if economic_assumption_reform is not None
+            else None
+        ),
+        **(economic_assumption_metadata or {}),
+    }
 
     sentinel = {
         "year": year,
@@ -1262,6 +1371,7 @@ def build_year(
             for metric, value in audit.items()
         },
         "gates_passed": gates["passed"],
+        "economic_assumption_reform": economic_assumption["reform"],
     }
 
     metadata = {
@@ -1328,6 +1438,7 @@ def build_year(
             "not_law": True,
             "files": target_source_provenance(),
         },
+        "economic_assumption": economic_assumption,
         "tax_assumption": {
             "name": TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
             "start_year": TAX_ASSUMPTION_START_YEAR,
