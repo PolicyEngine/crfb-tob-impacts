@@ -65,22 +65,47 @@ PERSON_LEVEL_IDENTITY_INPUTS = (
     "person_marital_unit_id",
 )
 
+# Every scaling and growth-cap list names stored inputs: the leaves the year
+# frame carries. PolicyEngine US 2.x turned several names the 1.x lists used
+# into formulas or adds-aggregates, which the frame never carries (see
+# _pseudo_input_variables). Each such name maps to the stored leaves below,
+# and every leaf of one name takes the same factor.
+PRE_2X_NAME_LEAVES = {
+    "partnership_se_income": ("partnership_self_employment_net_earnings",),
+    "long_term_capital_gains": ("long_term_capital_gains_before_response",),
+    "taxable_pension_income": (
+        "taxable_public_pension_income",
+        "taxable_private_pension_income",
+    ),
+    "tax_exempt_pension_income": (
+        "tax_exempt_public_pension_income",
+        "tax_exempt_private_pension_income",
+    ),
+    "partnership_s_corp_income": ("partnership_income", "s_corp_income"),
+    "social_security_retirement": ("social_security_retirement_reported",),
+    "social_security_disability": ("social_security_disability_reported",),
+    "social_security_survivors": ("social_security_survivors_reported",),
+    "social_security_dependents": ("social_security_dependents_reported",),
+}
+
 # Earnings-type inputs rescaled by the payroll factor alpha. Wage rates move
 # with earnings so the implied hours stay fixed.
 EARNINGS_SCALE_CANDIDATES = (
     "employment_income_before_lsr",
     "self_employment_income_before_lsr",
     "sstb_self_employment_income_before_lsr",
-    "partnership_se_income",
+    "partnership_self_employment_net_earnings",
     "farm_operations_income",
     "hourly_wage",
 )
 
+# PolicyEngine US 2.x computes the four benefit variables by formula from
+# these stored reported inputs.
 SOCIAL_SECURITY_SCALE_CANDIDATES = (
-    "social_security_retirement",
-    "social_security_disability",
-    "social_security_survivors",
-    "social_security_dependents",
+    "social_security_retirement_reported",
+    "social_security_disability_reported",
+    "social_security_survivors_reported",
+    "social_security_dependents_reported",
 )
 
 # Non-earnings, non-Social-Security income of beneficiary households,
@@ -91,18 +116,36 @@ OTHER_INCOME_SCALE_CANDIDATES = (
     "tax_exempt_interest_income",
     "qualified_dividend_income",
     "non_qualified_dividend_income",
-    "long_term_capital_gains",
+    "long_term_capital_gains_before_response",
     "short_term_capital_gains",
     "non_sch_d_capital_gains",
     "taxable_ira_distributions",
-    "taxable_pension_income",
-    "tax_exempt_pension_income",
+    "taxable_public_pension_income",
+    "taxable_private_pension_income",
+    "tax_exempt_public_pension_income",
+    "tax_exempt_private_pension_income",
     "rental_income",
     "farm_rent_income",
     "estate_income",
-    "partnership_s_corp_income",
+    "partnership_income",
+    "s_corp_income",
     "miscellaneous_income",
 )
+
+# Inputs a scaling or cap list names that the base may not store. Each is a
+# PolicyEngine US input with no formula, so an absent column means the engine
+# reads its default of zero and there is nothing to scale; build_year checks
+# that against the engine. Any other name that fails to resolve raises.
+KNOWN_ABSENT_INPUTS = {
+    "taxable_public_pension_income": (
+        "populace_us_2024 stores only taxable_private_pension_income, with no "
+        "public-pension column"
+    ),
+    "tax_exempt_public_pension_income": (
+        "populace_us_2024 stores only tax_exempt_private_pension_income, with "
+        "no public-pension column"
+    ),
+}
 
 # Gamma is a bounded calibration nudge, not a free knob: at 1.25 it can
 # close modest TOB gaps, but larger values distort the income side (the
@@ -180,16 +223,19 @@ GROWTH_CAP_VARIABLES = (
     "tax_exempt_interest_income",
     "qualified_dividend_income",
     "non_qualified_dividend_income",
-    "long_term_capital_gains",
+    "long_term_capital_gains_before_response",
     "short_term_capital_gains",
     "non_sch_d_capital_gains",
     "taxable_ira_distributions",
-    "taxable_pension_income",
-    "tax_exempt_pension_income",
+    "taxable_public_pension_income",
+    "taxable_private_pension_income",
+    "tax_exempt_public_pension_income",
+    "tax_exempt_private_pension_income",
     "rental_income",
     "farm_rent_income",
     "estate_income",
-    "partnership_s_corp_income",
+    "partnership_income",
+    "s_corp_income",
     "miscellaneous_income",
     "qualified_bdc_income",
     "qualified_reit_and_ptp_income",
