@@ -158,6 +158,11 @@ GAMMA_MAX_PROBES = 4
 # Income-side guard groups (mirroring the v1 production calibration):
 # the final calibration must not change these aggregate income totals,
 # so weight tilts cannot inflate other income to reach the TOB target.
+# Components are engine variables, calculated (not read from the frame), so
+# adds-aggregates such as partnership_s_corp_income belong here; a name the
+# engine lacks raises. partnership_self_employment_net_earnings stays out:
+# PolicyEngine US documents it as "not an additional gross income source
+# separate from partnership_income", which partnership_s_corp_income covers.
 INCOME_GUARD_GROUPS = {
     "preferential_investment_income": (
         "long_term_capital_gains_before_response",
@@ -171,7 +176,6 @@ INCOME_GUARD_GROUPS = {
         "taxable_interest_income",
         "tax_exempt_interest_income",
         "partnership_s_corp_income",
-        "partnership_se_income",
         "estate_income",
         "rental_income",
         "farm_income",
@@ -882,13 +886,29 @@ def _id_columns(df: pd.DataFrame, year: int) -> list[str]:
 
 
 def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
-    """Household-level income-guard group vectors from a simulation."""
+    """Household-level income-guard group vectors from a simulation.
+
+    Raises if the engine lacks any component, naming each one. A group whose
+    total is zero everywhere cannot take a positive calibration target, so it
+    is left out and logged.
+    """
+    variables = sim.tax_benefit_system.variables
+    unknown = sorted(
+        {
+            component
+            for components in INCOME_GUARD_GROUPS.values()
+            for component in components
+            if component not in variables
+        }
+    )
+    if unknown:
+        raise ValueError(
+            f"INCOME_GUARD_GROUPS names variables the engine lacks: {unknown}."
+        )
     groups = {}
     for group_name, components in INCOME_GUARD_GROUPS.items():
         total = None
         for component in components:
-            if component not in sim.tax_benefit_system.variables:
-                continue
             values = np.asarray(
                 sim.calculate(component, period=year, map_to="household").values,
                 dtype=float,
@@ -896,6 +916,8 @@ def _income_guard_vectors(sim, year: int) -> dict[str, np.ndarray]:
             total = values if total is None else total + values
         if total is not None and np.abs(total).sum() > 1e-6:
             groups[f"income_guard_{group_name}"] = total
+        else:
+            _log(f"  [income guards] {group_name} is zero; not constrained")
     return groups
 
 
