@@ -128,10 +128,8 @@ def test_chunking_leaves_room_for_the_guards_frames(year_file):
         sys.setrecursionlimit(before)
 
 
-def test_the_reform_reaches_every_chunk(year_file):
+def _low_cap_reform():
     from policyengine_core.reforms import Reform
-
-    engine, path = year_file
 
     class LowCap(Reform):
         def apply(self):
@@ -143,12 +141,30 @@ def test_the_reform_reaches_every_chunk(year_file):
 
             self.modify_parameters(modify)
 
-    chunked = engine.household_vectors(path, YEAR, VARIABLES, reform=LowCap, n_chunks=2)
-    whole = _whole_file(path, reform=LowCap)
+    return LowCap
+
+
+def test_the_reform_reaches_every_chunk(year_file):
+    engine, path = year_file
+    reform = _low_cap_reform()
+    chunked = engine.household_vectors(path, YEAR, VARIABLES, reform=reform, n_chunks=2)
+    whole = _whole_file(path, reform=reform)
     baseline = _whole_file(path)
     name = "taxable_earnings_for_social_security"
     assert chunked[name].sum() < baseline[name].sum()
     np.testing.assert_allclose(chunked[name], whole[name], rtol=1e-5, atol=0.01)
+
+
+def test_a_frame_simulation_keeps_its_reform(year_file):
+    engine, path = year_file
+    dataset = engine.year_file_dataset(path, YEAR)
+    name = "taxable_earnings_for_social_security"
+    sim = engine.frame_microsimulation(dataset, reform=_low_cap_reform())
+    capped = sim.calculate(name, period=YEAR, map_to="household").values
+    np.testing.assert_allclose(
+        capped, _whole_file(path, reform=_low_cap_reform())[name]
+    )
+    assert capped.sum() < _whole_file(path)[name].sum()
 
 
 def test_year_file_keeps_entity_rows_and_decodes_strings(year_file, tmp_path):

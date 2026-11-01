@@ -814,7 +814,8 @@ def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
-    assert probes[0]["gamma"] == pipeline.GAMMA_MAX
+    assert [probes[0]["gamma"], probes[1]["gamma"]] == [pipeline.GAMMA_MAX, gamma]
+    assert len(probes) == 2
     assert 1 < gamma < pipeline.GAMMA_MAX
     assert abs(probes[-1]["total_tob"] / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
 
