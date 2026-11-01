@@ -280,15 +280,25 @@ def calibrate_entropy_constraints(
             step = np.linalg.solve(hessian, gradient)
         except np.linalg.LinAlgError:
             step = np.linalg.lstsq(hessian, gradient, rcond=None)[0]
-        # Backtracking line search on the dual objective.
+        # Backtracking line search on the dual objective. Close to the optimum
+        # the objective stops resolving before the gradient does, so a step
+        # within the objective's rounding error counts if it shrinks the
+        # gradient.
         objective = dual_objective(beta)
+        objective_rounding = (
+            4 * np.finfo(float).eps * (w.sum() + abs(targets_scaled @ beta))
+        )
         step_size = 1.0
         improved = False
         for _ in range(80):
             candidate = beta - step_size * step
             w_candidate = weights_for(candidate)
             candidate_objective = float(w_candidate.sum() - targets_scaled @ candidate)
-            if candidate_objective < objective:
+            candidate_gradient = A_scaled.T @ w_candidate - targets_scaled
+            if candidate_objective < objective or (
+                candidate_objective <= objective + objective_rounding
+                and np.max(np.abs(candidate_gradient)) < gradient_norm
+            ):
                 beta = candidate
                 improved = True
                 break

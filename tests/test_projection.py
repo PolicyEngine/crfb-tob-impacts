@@ -152,6 +152,21 @@ def test_entropy_survives_a_warm_start_that_overflows():
     np.testing.assert_allclose(A.T @ weights, targets, rtol=1e-8)
 
 
+def test_entropy_converges_below_the_objectives_rounding():
+    # The objective stops resolving with the dual gradient near 2e-6, above the
+    # acceptance limit, so a line search on the objective alone stalls there.
+    rng = np.random.default_rng(4031)
+    rows = int(rng.integers(6, 100))
+    columns = int(rng.integers(2, min(rows, 12)))
+    A = rng.lognormal(0, rng.uniform(0, 5), (rows, columns))
+    A *= rng.random((rows, columns)) > 0.3
+    A[:, 0] = 1
+    baseline = rng.lognormal(rng.uniform(-2, 15), rng.uniform(0.1, 3), rows)
+    targets = A.T @ (baseline * np.exp(rng.normal(0, rng.uniform(0, 4), rows)))
+    _, info = calibrate_entropy_constraints(A, targets, baseline)
+    assert info["dual_gradient_norm"] < 1e-10
+
+
 def test_entropy_raises_on_infeasible_targets():
     A, targets, base = _toy_problem()
     bad = targets.copy()

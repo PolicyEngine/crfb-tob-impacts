@@ -21,6 +21,33 @@ def _problem(seed, rows, spread):
     return A, targets, baseline
 
 
+def _wide_problem(seed):
+    """Feasible targets, with columns and weights spread over many magnitudes."""
+    rng = np.random.default_rng(seed)
+    rows = int(rng.integers(6, 100))
+    columns = int(rng.integers(2, min(rows, 12)))
+    A = rng.lognormal(0, rng.uniform(0, 5), (rows, columns))
+    A *= rng.random((rows, columns)) > 0.3
+    A[:, 0] = 1
+    baseline = rng.lognormal(rng.uniform(-2, 15), rng.uniform(0.1, 3), rows)
+    targets = A.T @ (baseline * np.exp(rng.normal(0, rng.uniform(0, 4), rows)))
+    return A, targets, baseline
+
+
+@settings(deadline=None, max_examples=300)
+@given(seed=st.integers(0, 2**32 - 1))
+def test_a_returned_solution_meets_every_target(seed):
+    A, targets, baseline = _wide_problem(seed)
+    try:
+        weights, _ = calibrate_entropy_constraints(A, targets, baseline)
+    except RuntimeError as error:
+        # A problem this wide can outrun the iteration budget. It must say so.
+        assert "did not converge" in str(error)
+        return
+    assert (weights > 0).all()
+    np.testing.assert_allclose(A.T @ weights, targets, rtol=1e-4)
+
+
 @settings(deadline=None, max_examples=200)
 @given(
     seed=st.integers(0, 2**32 - 1),
