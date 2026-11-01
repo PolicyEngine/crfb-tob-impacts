@@ -814,10 +814,7 @@ def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
-    assert [probe["gamma"] for probe in probes[:2]] == [
-        pipeline.GAMMA_MAX,
-        pytest.approx(1.0733, abs=1e-4),
-    ]
+    assert [probe["gamma"] for probe in probes[:2]] == [pipeline.GAMMA_MAX, 1.0]
     assert len(probes) == 3
     assert 1 < gamma < pipeline.GAMMA_MAX
     assert abs(probes[-1]["total_tob"] / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
@@ -842,11 +839,7 @@ def test_an_inelastic_year_above_target_still_reaches_it(monkeypatch, tmp_path):
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
     assert gamma == 1.0
-    assert [probe["gamma"] for probe in probes] == [
-        pipeline.GAMMA_MAX,
-        pytest.approx(1.1754, abs=1e-4),
-        1.0,
-    ]
+    assert [probe["gamma"] for probe in probes] == [pipeline.GAMMA_MAX, 1.0]
 
 
 def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_path):
@@ -858,6 +851,7 @@ def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_pat
     assert gamma == pytest.approx(1 / pipeline.GAMMA_MAX)
     assert [probe["gamma"] for probe in probes] == [
         pipeline.GAMMA_MAX,
+        1.0,
         pytest.approx(1 / pipeline.GAMMA_MAX),
     ]
 

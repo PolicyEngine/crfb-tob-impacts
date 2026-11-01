@@ -348,12 +348,17 @@ def test_one_power_law_ends_within_tolerance(root, elasticity):
     assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
 
 
+def _tax_bracket_total(gamma):
+    # Ordinary tax on one income that crosses two bracket edges as gamma moves.
+    income = 76500 * gamma
+    return 6545 - 0.1 * max(66500 - income, 0) + 0.02 * max(income - 92050, 0)
+
+
 def test_the_search_can_need_every_probe_it_has():
-    total = _rising_total(0.8407, (0.05, 8.0), 0.75)
-    gamma, probes, accepted = _search(total)
+    gamma, probes, accepted = _search(_tax_bracket_total, target=6350)
     _assert_the_search_held(gamma, probes, accepted)
     assert len(probes) == 1 + pipeline.GAMMA_MAX_PROBES
-    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+    assert abs(_tax_bracket_total(gamma) / 6350 - 1) <= pipeline.GAMMA_TOLERANCE
 
 
 @settings(max_examples=50, deadline=None)
@@ -403,19 +408,16 @@ def test_no_tob_at_gamma_one_still_brackets_the_target():
 
 @pytest.mark.parametrize("elasticity", [0.0, -0.5])
 def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
-    gamma, probes, accepted = _search(
-        lambda gamma: 66.0 * (gamma / pipeline.GAMMA_MAX) ** elasticity
-    )
+    gamma, probes, accepted = _search(lambda gamma: 80.0 * gamma**elasticity)
     _assert_the_search_held(gamma, probes, accepted)
     assert [probe["gamma"] for probe in probes] == [
         pipeline.GAMMA_MAX,
-        pytest.approx(1.1345, abs=1e-4),
         1.0,
         1 / pipeline.GAMMA_MAX,
     ]
 
 
-def test_two_probes_on_a_plateau_still_find_gamma_one():
+def test_a_plateau_past_gamma_one_still_finds_gamma_one():
     # One tax unit whose benefits reach the 85% cap just past gamma 1.
     def total(gamma):
         income = 33950 * gamma
@@ -436,7 +438,29 @@ def test_two_probes_on_a_plateau_still_find_gamma_one():
     gamma, probes, accepted = _search(total)
     _assert_the_search_held(gamma, probes, accepted)
     assert gamma == 1.0
+    assert len(probes) == 2
+
+
+def test_a_plateau_at_the_top_of_the_range_still_ends_within_tolerance():
+    def total(gamma):
+        return 63 * (0.97 + 3 * min(max(gamma - 1.11, 0), 0.02))
+
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
     assert len(probes) == 3
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    root=st.floats(min_value=0.8, max_value=1.2),
+    elasticity=st.floats(min_value=0.05, max_value=3.0),
+)
+def test_a_year_above_target_at_the_bound_tries_gamma_one_next(root, elasticity):
+    gamma, probes, accepted = _search(_rising_total(root, (elasticity,) * 2, 1.0))
+    _assert_the_search_held(gamma, probes, accepted)
+    if probes[0]["total_tob"] > 63.0 * (1 + pipeline.GAMMA_TOLERANCE):
+        assert probes[1]["gamma"] == 1.0
 
 
 # Total TOB in $B by gamma, read on a projected 2,000-household sample.
@@ -472,6 +496,8 @@ MEASURED_TOTALS = {
     root=st.floats(min_value=0.92, max_value=1.22),
 )
 def test_a_measured_curve_reaches_any_root_in_range(year, root):
+    # This assumes totals run log-linear between readings. The readings can't
+    # show that, and they speak for the sample, not the nation.
     readings = MEASURED_TOTALS[year]
     log_gammas = np.log(list(readings))
     log_totals = np.log(list(readings.values()))
@@ -484,6 +510,25 @@ def test_a_measured_curve_reaches_any_root_in_range(year, root):
     _assert_the_search_held(gamma, probes, accepted)
     assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
     assert len(probes) <= 4
+
+
+def test_a_kink_between_readings_does_not_stall_the_search():
+    # Every 2027 reading holds, with a jump that starts just below gamma 1.
+    log_gammas, log_totals = (
+        np.log(values)
+        for values in np.array(
+            sorted({**MEASURED_TOTALS[2027], 0.99: 80.1, 1.001: 87.1}.items())
+        ).T
+    )
+
+    def total(gamma):
+        rise = np.interp(np.log(gamma), log_gammas, log_totals)
+        return 63.0 * np.exp(rise - np.log(84.7))
+
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == 1.0
+    assert len(probes) == 2
 
 
 def test_a_negative_total_at_gamma_one_still_brackets_the_target():
@@ -522,48 +567,6 @@ def test_a_total_that_is_not_finite_raises(bad_probe, bad_total):
 
     with pytest.raises(ValueError, match="Total TOB for 2040"):
         _search(total)
-
-
-@settings(max_examples=200, deadline=None)
-@given(
-    overshoot=st.floats(min_value=1.0 + pipeline.GAMMA_TOLERANCE, max_value=1e12),
-)
-def test_the_step_after_an_overshoot_stays_inside_the_bounds(overshoot):
-    gamma = pipeline._gamma_after_overshoot(63.0 * overshoot, 63.0)
-    assert 1 / pipeline.GAMMA_MAX <= gamma < pipeline.GAMMA_MAX
-
-
-@settings(max_examples=100, deadline=None)
-@given(
-    overshoot=st.floats(min_value=1.03, max_value=1.07),
-    elasticity=st.floats(min_value=0.40, max_value=0.60),
-)
-def test_a_year_near_the_measured_elasticity_takes_two_probes(overshoot, elasticity):
-    root = pipeline.GAMMA_MAX * overshoot ** (-1 / elasticity)
-    total = _rising_total(root, (elasticity, elasticity), 1.0)
-    gamma, probes, accepted = _search(total)
-    _assert_the_search_held(gamma, probes, accepted)
-    assert len(probes) == 2
-    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
-
-
-def _overshoot_stepping_to(log_gamma):
-    return np.exp(
-        (np.log(pipeline.GAMMA_MAX) - log_gamma) * pipeline.GAMMA_PRIOR_ELASTICITY
-    )
-
-
-@pytest.mark.parametrize("log_gamma", [-0.03, 0.0, 0.03])
-def test_a_step_that_predicts_gamma_one_takes_gamma_one(log_gamma):
-    assert (
-        pipeline._gamma_after_overshoot(_overshoot_stepping_to(log_gamma), 1.0) == 1.0
-    )
-
-
-@pytest.mark.parametrize("log_gamma", [-0.05, 0.05])
-def test_a_step_clear_of_gamma_one_keeps_its_own_value(log_gamma):
-    gamma = pipeline._gamma_after_overshoot(_overshoot_stepping_to(log_gamma), 1.0)
-    assert gamma == pytest.approx(np.exp(log_gamma))
 
 
 def test_a_year_above_target_at_the_bound_reaches_its_targets():

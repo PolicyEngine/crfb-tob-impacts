@@ -209,9 +209,6 @@ KNOWN_ABSENT_INPUTS = {
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 5
-# What the probe after an overshoot assumes for total TOB's elasticity to gamma.
-# The full base measured 0.476 at 2027, between gamma 1 and the upper bound.
-GAMMA_PRIOR_ELASTICITY = 0.48
 # A stored value shadows its formula, and a stored tax measure freezes every
 # tax state the TOB variables compare, which gives zero TOB and raises nothing.
 # The writer refuses any computed variable but this id, the records' own.
@@ -1017,29 +1014,12 @@ def _log_slope(first: dict, second: dict) -> float:
     )
 
 
-def _gamma_after_overshoot(total: float, target_total: float) -> float:
-    """The probe after a year ends above target at the upper bound.
-
-    A step by the prior elasticity saves the pass a bracket from gamma 1 would
-    cost. A step that predicts gamma 1 within tolerance takes gamma 1 itself, so
-    a year that needs no scaling gets none.
-    """
-    log_gamma = np.log(GAMMA_MAX) + (
-        (np.log(target_total) - np.log(total)) / GAMMA_PRIOR_ELASTICITY
-    )
-    if abs(log_gamma) <= GAMMA_TOLERANCE / GAMMA_PRIOR_ELASTICITY:
-        return 1.0
-    return float(max(np.exp(log_gamma), 1 / GAMMA_MAX))
-
-
 def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     """The next gamma to probe, or None once no gamma in range can get closer.
 
     Probes on both sides of the target bracket it, and interpolating in logs
     lands on the answer for a constant elasticity.
-    Probes all above the target try gamma 1, then extrapolate down, as far as
-    the lower bound. Two probes on a saturated stretch of the curve would
-    otherwise extrapolate from a slope that holds nowhere else.
+    Probes all above the target extrapolate down, as far as the lower bound.
     """
     above = sorted(
         (probe for probe in probes if probe["total_tob"] > target_total),
@@ -1058,8 +1038,6 @@ def _next_gamma(probes: list[dict], target_total: float) -> float | None:
         return float(gamma) if highest["gamma"] < gamma < lowest["gamma"] else None
     if lowest["gamma"] <= 1 / GAMMA_MAX:
         return None
-    if lowest["gamma"] > 1:
-        return 1.0
     slope = _log_slope(above[1], lowest)
     if slope <= 0:
         return 1 / GAMMA_MAX
@@ -1091,7 +1069,8 @@ def _solve_other_income_gamma(
     settles such a year and also supplies its vectors. Those readings carry the
     shortcut, not the formulas: a household's TOB can fall as its income passes
     the 0% capital gains band. Near years overshoot at the bound, as 2027 does
-    on the full base, and step down by the prior elasticity.
+    on the full base, and search from gamma 1. A step by the measured elasticity
+    would save a pass on a smooth curve and stall on a kinked one.
 
     Returns (gamma, probe history, the accepted probe's file digest and
     household vectors). The frame is NOT modified.
@@ -1131,9 +1110,7 @@ def _solve_other_income_gamma(
     if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
         return gamma, probes, evaluated[gamma]
 
-    next_gamma = None
-    if total > target_total:
-        next_gamma = _gamma_after_overshoot(total, target_total)
+    next_gamma = 1.0 if total > target_total else None
     for _ in range(GAMMA_MAX_PROBES):
         if next_gamma is None:
             break
