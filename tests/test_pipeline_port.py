@@ -789,3 +789,26 @@ def test_a_failed_gamma_probe_leaves_no_file(monkeypatch, tmp_path):
     with pytest.raises(RuntimeError, match="probe failed"):
         _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("rows", [1_000, 60_000])
+def test_row_scaling_keeps_float32_at_any_size(rows):
+    # 60,000 rows of 20 columns selects over a million cells, where pandas
+    # hands the product to numexpr and it comes back as float64.
+    rng = np.random.default_rng(0)
+    frame = pd.DataFrame(
+        {
+            f"column_{index}": rng.uniform(0, 1e4, rows).astype(np.float32)
+            for index in range(20)
+        }
+    )
+    chosen = rng.random(rows) < 0.9
+    expected = frame.to_numpy(copy=True)
+    expected[chosen] *= 1.1
+
+    pipeline.scale_frame_columns(
+        frame, list(frame.columns), np.float64(1.1), rows=chosen
+    )
+
+    assert set(frame.dtypes) == {np.dtype("float32")}
+    np.testing.assert_array_equal(frame.to_numpy(), expected)

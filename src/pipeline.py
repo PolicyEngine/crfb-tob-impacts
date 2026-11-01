@@ -447,7 +447,9 @@ def gross_income_stored_inputs(df: pd.DataFrame, sim, year: int) -> set[str]:
             if "." in name:
                 parameters.get_child(name)(instant)
                 return
-            raise ValueError(f"Gross-income source graph names unknown variable {name}.")
+            raise ValueError(
+                f"Gross-income source graph names unknown variable {name}."
+            )
         adds = getattr(variable, "adds", None)
         if isinstance(adds, str):
             adds = parameters.get_child(adds)(instant)
@@ -524,11 +526,19 @@ def scale_frame_columns(
     *,
     rows: np.ndarray | None = None,
 ) -> None:
-    """Multiply ``columns`` by ``factor`` in place, on ``rows`` only if given."""
+    """Multiply ``columns`` by ``factor`` in place, on ``rows`` only if given.
+
+    Row-wise scaling goes a column at a time. Above a million cells pandas
+    hands a frame's product to numexpr, which promotes float32 to float64, and
+    ``.loc`` then refuses to write the result back.
+    """
     if rows is None:
         df[columns] = df[columns] * factor
-    else:
-        df.loc[rows, columns] = df.loc[rows, columns] * factor
+        return
+    for column in columns:
+        values = df[column].to_numpy(copy=True)
+        values[rows] *= float(factor)
+        df[column] = values
 
 
 # ---------------------------------------------------------------------------
@@ -827,8 +837,7 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
             projection_failures.append(f"{var_name}: {error}")
     if projection_failures:
         raise ValueError(
-            f"Cannot materialize inputs for {year}: "
-            + "; ".join(projection_failures)
+            f"Cannot materialize inputs for {year}: " + "; ".join(projection_failures)
         )
 
     # Household weights at the target year (includes uprated population
@@ -1019,9 +1028,7 @@ def _solve_other_income_gamma(
             probe_df, other_income_columns, gamma, rows=beneficiary_person_mask
         )
         try:
-            write_year_h5(
-                probe_df, year, probe_path, reform=economic_assumption_reform
-            )
+            write_year_h5(probe_df, year, probe_path, reform=economic_assumption_reform)
             del probe_df
             vectors = _household_vectors(probe_path, year, reform)
         finally:
