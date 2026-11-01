@@ -797,7 +797,7 @@ def _tob_vectors(total_at_gamma):
     return vectors
 
 
-def test_a_saturated_year_needs_two_probes(monkeypatch, tmp_path):
+def test_a_saturated_year_needs_one_probe(monkeypatch, tmp_path):
     frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
     # The full base at 2100 starts 17.5% short with an elasticity near 0.45.
     vectors = _tob_vectors(lambda gamma: 63.0 * 0.825 * gamma**0.45)
@@ -805,24 +805,30 @@ def test_a_saturated_year_needs_two_probes(monkeypatch, tmp_path):
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
     assert gamma == pipeline.GAMMA_MAX
-    assert [record["gamma"] for record in probes] == [1.0, pipeline.GAMMA_MAX]
+    assert [record["gamma"] for record in probes] == [pipeline.GAMMA_MAX]
+
+
+def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+    vectors = _tob_vectors(lambda gamma: 63.0 * 0.95 * gamma**0.5)
+
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+
+    assert probes[0]["gamma"] == pipeline.GAMMA_MAX
+    assert 1 < gamma < pipeline.GAMMA_MAX
+    assert abs(probes[-1]["total_tob"] / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
 
 
 def test_the_accepted_probe_returns_its_own_vectors(monkeypatch, tmp_path):
     frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
-
-    def total(gamma):
-        # The bound falls short of the probe before it, so the best gamma
-        # isn't the last one tried.
-        if gamma == pytest.approx(1.0):
-            return 63.0 * 0.90
-        return 63.0 * (0.95 if gamma == pytest.approx(pipeline.GAMMA_MAX) else 0.97)
+    # The second probe lands closest, so the best gamma isn't the last one tried.
+    totals = iter((1.10, 1.04, 0.92, 0.93, 0.94))
 
     gamma, probes, (digest, vectors) = _solve_gamma(
-        monkeypatch, tmp_path, frame, [], _tob_vectors(total)
+        monkeypatch, tmp_path, frame, [], _tob_vectors(lambda _: 63.0 * next(totals))
     )
 
-    assert len(probes) == 3
+    assert len(probes) > 2
     assert gamma == probes[1]["gamma"]
     assert vectors["gamma"] == pytest.approx(gamma)
     expected = tmp_path / "expected.h5"

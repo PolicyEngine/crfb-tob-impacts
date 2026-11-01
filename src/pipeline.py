@@ -1031,6 +1031,10 @@ def _solve_other_income_gamma(
     to other income. When probes show that, the solver stops at the best
     bounded gamma and the final entropy calibration closes the rest.
 
+    The upper bound goes first. Every year measured so far falls short of the
+    target there, and because TOB rises with other income, that one probe
+    settles the year and also supplies its vectors.
+
     Returns (gamma, probe history, the accepted probe's file digest and
     household vectors). The frame is NOT modified.
     """
@@ -1062,13 +1066,13 @@ def _solve_other_income_gamma(
         )
         return total
 
-    gamma = 1.0
+    gamma = GAMMA_MAX
     total = total_tob_at(gamma)
     if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
         return gamma, probes, evaluated[gamma]
 
     elasticity = GAMMA_PRIOR_ELASTICITY  # refined after the second probe
-    for _ in range(GAMMA_MAX_PROBES):
+    for _ in range(GAMMA_MAX_PROBES if total > target_total else 0):
         ratio = target_total / total
         gamma_next = gamma * ratio ** (1 / elasticity)
         gamma_next = min(max(gamma_next, 1 / GAMMA_MAX), GAMMA_MAX)
