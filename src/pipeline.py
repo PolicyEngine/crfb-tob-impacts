@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import ast
 import gc
+import hashlib
 import inspect
 import json
 import textwrap
@@ -208,6 +209,9 @@ KNOWN_ABSENT_INPUTS = {
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
+# Total TOB's response to other income, measured on the projected sample at
+# 2036, 2037 and 2100. A wrong prior costs a probe, not accuracy.
+GAMMA_PRIOR_ELASTICITY = 0.5
 HOUSEHOLD_VECTOR_VARIABLES = (
     "social_security",
     "taxable_earnings_for_social_security",
@@ -950,6 +954,18 @@ def write_year_h5(
     gc.collect()
 
 
+def year_file_digest(path: Path) -> str:
+    """SHA-256 of a year file's stored arrays, leaving out its attributes."""
+    digest = hashlib.sha256()
+    with h5py.File(path, "r") as handle:
+        for variable in sorted(handle):
+            for period in sorted(handle[variable]):
+                values = handle[variable][period][()]
+                digest.update(f"{variable}/{period}/{values.dtype}".encode())
+                digest.update(values.tobytes())
+    return digest.hexdigest()
+
+
 def update_h5_household_weights(
     output_path: Path, year: int, household_weights: np.ndarray
 ) -> None:
@@ -1006,7 +1022,7 @@ def _solve_other_income_gamma(
     demographic_weights: np.ndarray,
     person_household_index: np.ndarray,
     tob_targets: dict[str, float],
-) -> tuple[float, list[dict]]:
+) -> tuple[float, list[dict], tuple[str, dict[str, np.ndarray]]]:
     """Scale beneficiary households' other income toward the Trustees
     taxation-of-benefits target.
 
@@ -1015,10 +1031,12 @@ def _solve_other_income_gamma(
     to other income. When probes show that, the solver stops at the best
     bounded gamma and the final entropy calibration closes the rest.
 
-    Returns (gamma, probe history). The frame is NOT modified.
+    Returns (gamma, probe history, the accepted probe's file digest and
+    household vectors). The frame is NOT modified.
     """
     target_total = tob_targets["oasdi_tob"] + tob_targets["hi_tob"]
     probes: list[dict] = []
+    evaluated: dict[float, tuple[str, dict[str, np.ndarray]]] = {}
     # The suffix keeps a probe out of every "*.h5" scan of the output folder.
     probe_path = output_path.with_suffix(".gamma-probe")
 
@@ -1030,11 +1048,13 @@ def _solve_other_income_gamma(
         try:
             write_year_h5(probe_df, year, probe_path, reform=economic_assumption_reform)
             del probe_df
+            digest = year_file_digest(probe_path)
             vectors = _household_vectors(probe_path, year, reform)
         finally:
             probe_path.unlink(missing_ok=True)
         total = float((vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights)
         probes.append({"gamma": gamma, "total_tob": total})
+        evaluated[gamma] = digest, vectors
         _log(
             f"    [gamma probe] gamma={gamma:.3f} -> total TOB "
             f"${total / 1e9:,.1f}B vs target ${target_total / 1e9:,.1f}B "
@@ -1045,9 +1065,9 @@ def _solve_other_income_gamma(
     gamma = 1.0
     total = total_tob_at(gamma)
     if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
-        return gamma, probes
+        return gamma, probes, evaluated[gamma]
 
-    elasticity = 1.5  # prior; refined after the second probe
+    elasticity = GAMMA_PRIOR_ELASTICITY  # refined after the second probe
     for _ in range(GAMMA_MAX_PROBES):
         ratio = target_total / total
         gamma_next = gamma * ratio ** (1 / elasticity)
@@ -1060,7 +1080,7 @@ def _solve_other_income_gamma(
                 elasticity = implied
         gamma, total = gamma_next, total_next
         if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
-            return gamma, probes
+            return gamma, probes, evaluated[gamma]
         if gamma in (GAMMA_MAX, 1 / GAMMA_MAX):
             break
         if implied is not None and implied < 0.2:
@@ -1073,7 +1093,7 @@ def _solve_other_income_gamma(
         f"{best['total_tob'] / target_total - 1:+.1%}; final calibration "
         "closes the remainder"
     )
-    return best["gamma"], probes
+    return best["gamma"], probes, evaluated[best["gamma"]]
 
 
 def _id_columns(df: pd.DataFrame, year: int) -> list[str]:
@@ -1340,7 +1360,7 @@ def build_year(
         > 0
     )
     beneficiary_person_mask = household_has_ss[person_household_index]
-    gamma, gamma_probes = _solve_other_income_gamma(
+    gamma, gamma_probes, (probe_digest, probe_vectors) = _solve_other_income_gamma(
         df,
         year,
         output_path,
@@ -1368,7 +1388,13 @@ def build_year(
         handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR] = json.dumps(economic_assumption)
 
     # ----- Stage C2: artifact-true validation -----
-    vectors = _household_vectors(output_path, year, reform)
+    # The accepted probe ran the model on these same arrays, and a pass over
+    # the full base takes over an hour.
+    vectors = (
+        probe_vectors
+        if year_file_digest(output_path) == probe_digest
+        else _household_vectors(output_path, year, reform)
+    )
     sim2 = dataset_microsimulation(str(output_path), reform=reform)
     composed_cap = _contribution_cap(sim2, year)
     if composed_cap != cap:

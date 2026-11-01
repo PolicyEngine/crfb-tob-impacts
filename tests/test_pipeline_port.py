@@ -8,6 +8,7 @@ model.
 
 from __future__ import annotations
 
+import itertools
 import json
 from types import SimpleNamespace
 
@@ -735,7 +736,8 @@ def test_build_year_is_deterministic(monkeypatch, tmp_path):
 def _solve_gamma(monkeypatch, tmp_path, frame, written, vectors):
     def write(probe, year, path, *, reform=None):
         written.append(probe.copy())
-        path.write_bytes(b"probe")
+        with h5py.File(path, "w") as handle:
+            handle.create_dataset(f"dividends/{year}", data=probe.dividends.to_numpy())
 
     monkeypatch.setattr(pipeline, "write_year_h5", write)
     monkeypatch.setattr(pipeline, "_household_vectors", vectors)
@@ -767,7 +769,7 @@ def test_gamma_probes_scale_only_beneficiaries_by_the_recorded_gamma(
             "hi_tob": np.array([0.0]),
         }
 
-    gamma, probes = _solve_gamma(monkeypatch, tmp_path, frame, written, vectors)
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, written, vectors)
 
     assert gamma == pytest.approx(1.1, abs=0.05)
     assert len(probes) == len(written) >= 2
@@ -778,6 +780,99 @@ def test_gamma_probes_scale_only_beneficiaries_by_the_recorded_gamma(
         assert record["total_tob"] == pytest.approx(probe.dividends.sum())
     pd.testing.assert_frame_equal(frame, original)
     assert list(tmp_path.iterdir()) == []
+
+
+def _tob_vectors(total_at_gamma):
+    """Vectors whose total TOB follows ``total_at_gamma`` and name their gamma."""
+
+    def vectors(path, year, reform):
+        with h5py.File(path, "r") as handle:
+            gamma = handle[f"dividends/{year}"][()][0] / 10.0
+        return {
+            "oasdi_tob": np.array([total_at_gamma(gamma)]),
+            "hi_tob": np.array([0.0]),
+            "gamma": gamma,
+        }
+
+    return vectors
+
+
+def test_a_saturated_year_needs_two_probes(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+    # The full base at 2100 starts 17.5% short with an elasticity near 0.45.
+    vectors = _tob_vectors(lambda gamma: 63.0 * 0.825 * gamma**0.45)
+
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+
+    assert gamma == pipeline.GAMMA_MAX
+    assert [record["gamma"] for record in probes] == [1.0, pipeline.GAMMA_MAX]
+
+
+def test_the_accepted_probe_returns_its_own_vectors(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+
+    def total(gamma):
+        # The bound falls short of the probe before it, so the best gamma
+        # isn't the last one tried.
+        if gamma == pytest.approx(1.0):
+            return 63.0 * 0.90
+        return 63.0 * (0.95 if gamma == pytest.approx(pipeline.GAMMA_MAX) else 0.97)
+
+    gamma, probes, (digest, vectors) = _solve_gamma(
+        monkeypatch, tmp_path, frame, [], _tob_vectors(total)
+    )
+
+    assert len(probes) == 3
+    assert gamma == probes[1]["gamma"]
+    assert vectors["gamma"] == pytest.approx(gamma)
+    expected = tmp_path / "expected.h5"
+    with h5py.File(expected, "w") as handle:
+        scaled = np.array([10.0 * gamma, 20.0 * gamma, 30.0])
+        handle.create_dataset("dividends/2040", data=scaled)
+    assert digest == pipeline.year_file_digest(expected)
+
+
+def test_a_year_file_digest_follows_arrays_and_not_attributes(tmp_path):
+    first, second = tmp_path / "first.h5", tmp_path / "second.h5"
+    for path, order in ((first, ("a", "b")), (second, ("b", "a"))):
+        with h5py.File(path, "w") as handle:
+            for name in order:
+                handle.create_dataset(f"{name}/2040", data=np.arange(3.0))
+    with h5py.File(second, "r+") as handle:
+        handle.attrs["economic_assumption"] = "{}"
+    assert pipeline.year_file_digest(first) == pipeline.year_file_digest(second)
+
+    with h5py.File(second, "r+") as handle:
+        handle["a/2040"][1] = 7.0
+    assert pipeline.year_file_digest(first) != pipeline.year_file_digest(second)
+
+
+def _record_vector_paths(monkeypatch):
+    paths = []
+    original = pipeline._household_vectors
+
+    def recorded(path, year, reform):
+        paths.append(path)
+        return original(path, year, reform)
+
+    monkeypatch.setattr(pipeline, "_household_vectors", recorded)
+    return paths
+
+
+def test_the_accepted_probe_replaces_the_final_pass(monkeypatch, tmp_path):
+    paths = _record_vector_paths(monkeypatch)
+    _build(monkeypatch, tmp_path, 2050)
+    assert paths
+    assert {path.suffix for path in paths} == {".gamma-probe"}
+
+
+def test_a_final_file_unlike_its_probe_gets_its_own_pass(monkeypatch, tmp_path):
+    paths = _record_vector_paths(monkeypatch)
+    digests = itertools.count()
+    monkeypatch.setattr(pipeline, "year_file_digest", lambda path: next(digests))
+    _build(monkeypatch, tmp_path, 2050)
+    assert paths[-1] == tmp_path / "2050.h5"
+    assert sum(path == tmp_path / "2050.h5" for path in paths) == 1
 
 
 def test_a_failed_gamma_probe_leaves_no_file(monkeypatch, tmp_path):

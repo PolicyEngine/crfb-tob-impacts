@@ -13,10 +13,13 @@ Invariants (each holds for every input the strategies draw):
    faster than GDP, and brings each one's growth down to GDP's.
 5. build_year is deterministic: the same inputs give the same sentinel,
    metadata, weights and written frame.
+6. Reusing the accepted probe's vectors gives what a fresh pass over the final
+   file gives.
 """
 
 from __future__ import annotations
 
+import itertools
 import json
 import tempfile
 from pathlib import Path
@@ -231,3 +234,24 @@ def test_build_year_is_deterministic_for_any_seed(seed, year, economic):
     assert a[0] == b[0]
     assert a[1] == b[1]
     pd.testing.assert_frame_equal(a[2], b[2])
+
+
+@settings(max_examples=6, deadline=None)
+@given(
+    seed=st.integers(min_value=0, max_value=10_000),
+    year=st.sampled_from([2030, 2050]),
+    economic=st.sampled_from([None, fakes.FakeEconomicReform]),
+)
+def test_reusing_the_accepted_probe_changes_nothing(seed, year, economic):
+    digests = itertools.count()
+    with (
+        tempfile.TemporaryDirectory() as first,
+        tempfile.TemporaryDirectory() as second,
+        pytest.MonkeyPatch.context() as patch,
+    ):
+        reused = _fake_build(year, seed, Path(first), economic)
+        patch.setattr(pipeline, "year_file_digest", lambda path: next(digests))
+        computed = _fake_build(year, seed, Path(second), economic)
+    assert reused[0] == computed[0]
+    assert reused[1] == computed[1]
+    pd.testing.assert_frame_equal(reused[2], computed[2])

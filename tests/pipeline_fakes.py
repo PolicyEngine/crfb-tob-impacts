@@ -96,9 +96,7 @@ class FakeParameters:
     def get_child(self, path: str):
         if path == "gov.irs.gross_income.sources":
             return lambda instant: [
-                name
-                for names in pipeline.SCALE_LISTS.values()
-                for name in names
+                name for names in pipeline.SCALE_LISTS.values() for name in names
             ]
         return FakeSeries(self, path)
 
@@ -309,8 +307,8 @@ class FakeEngine:
             }
 
         module.household_vectors = household_vectors
-        module.stage_a_microsimulation = (
-            lambda base_dataset, reform=None: base_microsimulation(reform=reform)
+        module.stage_a_microsimulation = lambda base_dataset, reform=None: (
+            base_microsimulation(reform=reform)
         )
         return module
 
@@ -327,6 +325,10 @@ class FakeEngine:
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with h5py.File(output_path, "w") as handle:
             handle.create_dataset(f"household_weight/{year}", data=weights)
+            for column in df.columns.drop(f"household_weight__{year}"):
+                if df[column].dtype.kind in "fiub":
+                    name = column.rsplit("__", 1)[0]
+                    handle.create_dataset(f"{name}/{year}", data=df[column].to_numpy())
 
 
 def install(monkeypatch, engine: FakeEngine, *, tax_reform=None) -> None:
