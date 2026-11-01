@@ -66,8 +66,9 @@ def test_stage_a_preserves_runtime_gate(monkeypatch):
 
 @pytest.mark.parametrize("local", [False, True])
 @pytest.mark.parametrize("entity_level", [False, True])
+@pytest.mark.parametrize(("year", "stored"), [(2030, 2030), (2050, 2036)])
 def test_no_reform_limits_only_entity_level_sources(
-    monkeypatch, tmp_path, local, entity_level
+    monkeypatch, tmp_path, local, entity_level, year, stored
 ):
     engine = load_engine(monkeypatch)
     gate = []
@@ -93,10 +94,10 @@ def test_no_reform_limits_only_entity_level_sources(
     model = types.ModuleType("policyengine.tax_benefit_models.us.model")
     model._managed_release_bundle = lambda uri, source: {"uri": uri, "source": source}
     monkeypatch.setitem(sys.modules, model.__name__, model)
-    sim = engine.stage_a_microsimulation(path if local else None, 2030)
+    sim = engine.stage_a_microsimulation(path if local else None, year)
     assert gate == [True]
     assert calls == [
-        {"dataset": str(path), **({"dataset_end_year": 2030} if entity_level else {})}
+        {"dataset": str(path), **({"dataset_end_year": stored} if entity_level else {})}
     ]
     if not local:
         assert sim.policyengine_bundle == {
@@ -131,8 +132,9 @@ def test_certified_source_uses_managed_resolution(monkeypatch):
 
 @pytest.mark.parametrize("local", [False, True])
 @pytest.mark.parametrize("per_capita_built", [False, True])
+@pytest.mark.parametrize(("year", "stored"), [(2030, 2030), (2050, 2036)])
 def test_reform_reaches_extension_and_simulation(
-    monkeypatch, tmp_path, local, per_capita_built
+    monkeypatch, tmp_path, local, per_capita_built, year, stored
 ):
     engine = load_engine(monkeypatch)
     monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
@@ -166,16 +168,16 @@ def test_reform_reaches_extension_and_simulation(
         monkeypatch.setitem(sys.modules, module.__name__, module)
     if not per_capita_built:
         with pytest.raises(RuntimeError, match="add_per_capita_uprating"):
-            engine.stage_a_microsimulation(path if local else None, 2050, reform=reform)
+            engine.stage_a_microsimulation(path if local else None, year, reform=reform)
         assert calls == [("system", {"reform": reform})]
     else:
         sim = engine.stage_a_microsimulation(
-            path if local else None, 2050, reform=reform
+            path if local else None, year, reform=reform
         )
         assert calls == [
             ("system", {"reform": reform}),
             ("single", {"file_path": str(path)}),
-            ("extend", single, {"end_year": 2050, "system": system}),
+            ("extend", single, {"end_year": stored, "system": system}),
             ("sim", {"dataset": multi, "reform": reform}),
         ]
         if not local:

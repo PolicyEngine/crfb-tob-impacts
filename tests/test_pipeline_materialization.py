@@ -44,7 +44,13 @@ class ProjectionSimulation:
         if name in self.failures:
             raise RuntimeError(f"cannot project {name}")
         values = self.frame[f"{name}__2024"].to_numpy(copy=True)
-        if period != 2024 and name in ("employment_income_before_lsr", "rental_income"):
+        if period != 2024 and name == "person_id":
+            # The real formula numbers rows past the stored years.
+            values = np.arange(len(values))
+        elif period != 2024 and name in (
+            "employment_income_before_lsr",
+            "rental_income",
+        ):
             values *= 2
         elif name == "age":
             values += period - 2024
@@ -80,7 +86,9 @@ def test_materialization_projects_inputs_ids_and_target_year_weights():
     np.testing.assert_array_equal(frame["household_weight__2050"], [3.0, 4.0])
     for variable in pipeline.PERSON_LEVEL_IDENTITY_INPUTS:
         np.testing.assert_array_equal(frame[f"{variable}__2050"], [10, 20])
-        assert (variable, 2050, None) in sim.calls
+        if variable != "person_id":
+            assert (variable, 2050, None) in sim.calls
+    assert ("person_id", 2050, None) not in sim.calls
     assert ("household_id", 2050, "household") in sim.calls
     assert "person_weight__2050" not in frame
     pd.testing.assert_frame_equal(sim.frame, original)

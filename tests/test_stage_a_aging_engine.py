@@ -70,38 +70,44 @@ def aged_frames(tmp_path_factory, request):
         economic_assumptions, "extend_single_year_dataset", record_extension
     )
     sim = engine.stage_a_microsimulation(path, 2050, reform=DoubleGrowth)
-    default = Microsimulation(dataset=str(path), dataset_end_year=2050)
+    default = Microsimulation(
+        dataset=str(path), dataset_end_year=engine.STAGE_A_STORED_END_YEAR
+    )
     # Keep the real constructor's system for the separate manual dataset.
     (reformed_system,) = aging_systems
-    manual_dataset = extend_single_year_dataset(
+    fully_stored = extend_single_year_dataset(
         USSingleYearDataset(file_path=str(path)), end_year=2050, system=reformed_system
     )
-    manual = Microsimulation(dataset=manual_dataset, reform=DoubleGrowth)
+    manual = Microsimulation(dataset=fully_stored, reform=DoubleGrowth)
     yield {
         "sim": sim,
         "default": default,
         "manual": manual,
+        "stored_end_year": engine.STAGE_A_STORED_END_YEAR,
         "system": reformed_system,
         "frame": pipeline.materialize_year_frame(sim, 2050),
         "path": path,
     }
 
 
-def test_frame_matches_manually_extended_simulation(aged_frames):
+def test_frame_matches_fully_stored_simulation(aged_frames):
     data = aged_frames
     pd.testing.assert_frame_equal(
         data["frame"],
         pipeline.materialize_year_frame(data["manual"], 2050),
-        check_exact=True,
+        check_exact=False,
+        rtol=1e-6,
     )
     for name in pipeline.GROWTH_CAP_VARIABLES:
-        np.testing.assert_array_equal(
+        np.testing.assert_allclose(
             data["frame"][f"{name}__2050"],
             data["manual"].calculate(name, period=2050).values,
+            rtol=1e-6,
         )
     assert int(data["sim"].default_calculation_period) == 2024
     np.testing.assert_array_equal(data["frame"]["person_id__2050"], [10, 20, 30])
-    assert data["sim"].dataset.years[-1] == 2050
+    assert data["sim"].dataset.years[-1] == data["stored_end_year"]
+    assert data["manual"].dataset.years[-1] == 2050
 
 
 def test_reformed_national_growth_agrees_with_frame_and_cap(aged_frames):

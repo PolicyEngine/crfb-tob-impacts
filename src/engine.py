@@ -18,6 +18,11 @@ from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
 
+# Last year Stage A stores. Each stored year costs memory in proportion to the
+# base. Past this year Core uprates each input from its last stored year with
+# the simulation's own parameters, which reach the same values.
+STAGE_A_STORED_END_YEAR = 2036
+
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
     """A Microsimulation on the certified populace base.
@@ -71,8 +76,9 @@ def _is_single_year_entity_file(source: str) -> bool:
 
 
 def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
-    """Load Stage A, aging single-year inputs only through the requested year.
+    """Load Stage A, storing aged inputs through ``year`` at the latest.
 
+    Storage stops at ``STAGE_A_STORED_END_YEAR``, and later years age lazily.
     An economic reform must reach dataset extension as well as calculation.
     Certified bases use the managed loader's resolution helpers and bundle
     record; explicit local bases retain the project runtime gate.
@@ -88,8 +94,9 @@ def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
         )
     from policyengine_us import Microsimulation
 
+    stored_end_year = min(year, STAGE_A_STORED_END_YEAR)
     if reform is None:
-        kwargs = {"dataset_end_year": year} if single_year else {}
+        kwargs = {"dataset_end_year": stored_end_year} if single_year else {}
         sim = Microsimulation(dataset=source, **kwargs)
     else:
         from policyengine_us.data.dataset_schema import USSingleYearDataset
@@ -103,7 +110,9 @@ def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
                 "add_per_capita_uprating after applying the reform."
             )
         dataset = extend_single_year_dataset(
-            USSingleYearDataset(file_path=source), end_year=year, system=system
+            USSingleYearDataset(file_path=source),
+            end_year=stored_end_year,
+            system=system,
         )
         sim = Microsimulation(dataset=dataset, reform=reform)
     if uri is not None:

@@ -802,6 +802,12 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
         new_column = f"{var_name}__{year}"
         if var_name in ("household_weight", "person_weight"):
             continue
+        if var_name == "person_id":
+            # Its formula renumbers rows past the stored years, while group
+            # ids have no formula and carry forward. Claim-age draws key on
+            # person_id, so every year keeps the source ids.
+            df = df.rename(columns={column: new_column})
+            continue
         try:
             df[new_column] = _project_variable_to_person_rows(
                 sim, df, var_name=var_name, year=year, base_period=base_period
