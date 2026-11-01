@@ -258,6 +258,15 @@ def calibrate_entropy_constraints(
     except np.linalg.LinAlgError:
         beta = np.zeros(A.shape[1])
 
+    def dual_objective(beta_vec: np.ndarray) -> float:
+        return float(weights_for(beta_vec).sum() - targets_scaled @ beta_vec)
+
+    # The warm start assumes small adjustments. Far from the baseline it can
+    # overflow the exponential and strand the line search, so keep it only if
+    # it beats the baseline on the convex dual.
+    if not dual_objective(beta) < dual_objective(np.zeros(A.shape[1])):
+        beta = np.zeros(A.shape[1])
+
     gradient_norm = np.inf
     for _ in range(max_iters):
         w = weights_for(beta)
@@ -272,7 +281,7 @@ def calibrate_entropy_constraints(
         except np.linalg.LinAlgError:
             step = np.linalg.lstsq(hessian, gradient, rcond=None)[0]
         # Backtracking line search on the dual objective.
-        objective = float(w.sum() - targets_scaled @ beta)
+        objective = dual_objective(beta)
         step_size = 1.0
         improved = False
         for _ in range(80):

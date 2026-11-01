@@ -139,6 +139,19 @@ def test_entropy_audit_reports_concentration():
     assert audit["max_weight_ratio"] >= 1.0
 
 
+def test_entropy_survives_a_warm_start_that_overflows():
+    # Correlated heavy-tailed columns with targets far from the baseline send
+    # the least-squares warm start where the exponential overflows.
+    rng = np.random.default_rng(2648)
+    baseline = np.full(40, 10.0)
+    heavy = rng.lognormal(0, 2.0, 40) * (rng.random(40) < 0.5)
+    A = np.column_stack([np.ones(40), heavy, heavy * rng.uniform(0.5, 1.5, 40)])
+    targets = A.T @ (baseline * np.exp(rng.normal(0, 1.5, 40)))
+    weights, _ = calibrate_entropy_constraints(A, targets, baseline)
+    assert (weights > 0).all()
+    np.testing.assert_allclose(A.T @ weights, targets, rtol=1e-8)
+
+
 def test_entropy_raises_on_infeasible_targets():
     A, targets, base = _toy_problem()
     bad = targets.copy()
