@@ -399,6 +399,16 @@ def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
     ]
 
 
+@pytest.mark.parametrize("bad_gamma", [pipeline.GAMMA_MAX, 1.0])
+@pytest.mark.parametrize("bad_total", [float("nan"), float("inf")])
+def test_a_total_that_is_not_finite_raises(bad_gamma, bad_total):
+    def total(gamma):
+        return bad_total if gamma == bad_gamma else 80.0 * gamma**0.5
+
+    with pytest.raises(ValueError, match="Total TOB for 2040"):
+        _search(total)
+
+
 def test_a_year_above_target_at_the_bound_reaches_its_targets():
     with tempfile.TemporaryDirectory() as folder:
         sentinel, _, _ = _fake_build(2030, 2801, Path(folder), None)

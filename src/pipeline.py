@@ -1093,6 +1093,8 @@ def _solve_other_income_gamma(
         finally:
             probe_path.unlink(missing_ok=True)
         total = float((vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights)
+        if not np.isfinite(total):
+            raise ValueError(f"Total TOB for {year} at gamma {gamma} is {total}.")
         probes.append({"gamma": gamma, "total_tob": total})
         evaluated[gamma] = digest, vectors
         _log(
