@@ -1,0 +1,131 @@
+"""Exercise the real year writer and engine on a synthetic person frame."""
+
+import sys
+from types import SimpleNamespace
+
+import h5py
+import numpy as np
+import pandas as pd
+import pytest
+
+from src import pipeline
+
+
+def test_reported_benefits_survive_real_year_writer(tmp_path, monkeypatch):
+    engine = pytest.importorskip("policyengine_us")
+    from policyengine_core.data.dataset import Dataset
+    from policyengine_us.system import system
+
+    reported = pipeline.SOCIAL_SECURITY_SCALE_CANDIDATES
+    if any(name not in system.variables for name in reported):
+        pytest.skip("The installed engine predates reported benefit inputs")
+
+    year = 2050
+    frame = pd.DataFrame(
+        {
+            **{
+                f"{name}__{year}": [100, 200]
+                for name in pipeline.PERSON_LEVEL_IDENTITY_INPUTS
+            },
+            f"age__{year}": [70, 72],
+            f"household_weight__{year}": [2.0, 3.0],
+            **{
+                f"{name}__{year}": [1_000.0 * index, 2_000.0 * index]
+                for index, name in enumerate(reported, start=1)
+            },
+        }
+    )
+
+    def frame_simulation(dataset, reform=None):
+        return engine.Microsimulation(dataset=dataset, reform=reform)
+
+    # Replace only the runtime gate; dataframe loading, holders, H5 writing and
+    # the simulation reloaded from the H5 remain real.
+    monkeypatch.setitem(
+        sys.modules,
+        "src.engine",
+        SimpleNamespace(frame_microsimulation=frame_simulation),
+    )
+    reference = frame_simulation(Dataset.from_dataframe(frame, year))
+    benefits = [name.removesuffix("_reported") for name in reported]
+    expected = {
+        name: np.asarray(reference.calculate(name, period=year)).copy()
+        for name in (*benefits, "social_security")
+    }
+    assert all(values.sum() > 0 for values in expected.values())
+
+    output_path = tmp_path / "2050.h5"
+    pipeline.write_year_h5(frame, year, output_path)
+
+    with h5py.File(output_path, "r") as handle:
+        for name in reported:
+            np.testing.assert_array_equal(
+                handle[f"{name}/{year}"][...], frame[f"{name}__{year}"]
+            )
+        assert all(name not in handle for name in (*benefits, "social_security"))
+
+    reloaded = engine.Microsimulation(dataset=str(output_path))
+    for name, values in expected.items():
+        np.testing.assert_array_equal(
+            np.asarray(reloaded.calculate(name, period=year)), values
+        )
+
+
+def _write_one_variable(tmp_path, monkeypatch, name, definition):
+    holder = SimpleNamespace(
+        get_known_periods=lambda: ["2050"], get_array=lambda period: np.zeros(1)
+    )
+    sim = SimpleNamespace(
+        tax_benefit_system=SimpleNamespace(variables={name: definition}),
+        get_holder=lambda variable: holder,
+    )
+    monkeypatch.setattr(pipeline, "_sim_from_frame", lambda df, year, reform: sim)
+    path = tmp_path / "2050.h5"
+    pipeline.write_year_h5(pd.DataFrame({f"{name}__2050": [1.0]}), 2050, path)
+    return path
+
+
+@pytest.mark.parametrize(
+    "computed",
+    [{"formulas": {"2020": len}}, {"adds": ["a", "b"]}, {"subtracts": ["a"]}],
+)
+def test_the_year_writer_refuses_a_computed_variable(tmp_path, monkeypatch, computed):
+    definition = SimpleNamespace(
+        **{"formulas": {}, "adds": None, "subtracts": None, **computed}
+    )
+    with pytest.raises(RuntimeError, match="leaked into the year frame"):
+        _write_one_variable(tmp_path, monkeypatch, "some_tax", definition)
+    assert not (tmp_path / "2050.h5").exists()
+
+
+def test_the_year_writer_keeps_inputs_and_the_person_id(tmp_path, monkeypatch):
+    plain = SimpleNamespace(formulas={}, adds=None, subtracts=None)
+    assert _write_one_variable(tmp_path, monkeypatch, "age", plain).exists()
+    computed = SimpleNamespace(formulas={"2020": len}, adds=None, subtracts=None)
+    assert _write_one_variable(tmp_path, monkeypatch, "person_id", computed).exists()
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "employment_income",
+        "irs_employment_income",
+        "payroll_tax_gross_wages",
+        "taxable_self_employment_income",
+        "taxable_earnings_for_social_security",
+        "social_security",
+        "tob_revenue_oasdi",
+        "tob_revenue_medicare_hi",
+        "income_tax",
+        "income_tax_before_refundable_credits",
+        "employment_income_behavioral_response",
+    ],
+)
+def test_the_engine_computes_each_variable_that_could_freeze_tob(name):
+    pytest.importorskip("policyengine_us")
+    from policyengine_us.system import system
+
+    if name not in system.variables:
+        pytest.skip("The installed engine predates this variable")
+    definition = system.variables[name]
+    assert definition.formulas or definition.adds or definition.subtracts

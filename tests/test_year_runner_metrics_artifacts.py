@@ -168,7 +168,7 @@ def test__given_active_tax_assumption_metadata__then_load_baseline_applies_match
     baseline_reform = object()
 
     monkeypatch.setattr(
-        "src.year_runner.load_tax_assumption_reform_for_dataset",
+        "src.year_runner.load_scoring_assumption_reform_for_dataset",
         lambda dataset_name, year: baseline_reform,
     )
 
@@ -200,7 +200,7 @@ def test__given_active_tax_assumption_metadata__then_explicit_baseline_reform_is
     explicit_reform = object()
 
     monkeypatch.setattr(
-        "src.year_runner.load_tax_assumption_reform_for_dataset",
+        "src.year_runner.load_scoring_assumption_reform_for_dataset",
         lambda dataset_name, year: metadata_reform,
     )
 
@@ -242,7 +242,7 @@ def test__given_active_tax_assumption_metadata__then_reform_scoring_rejects_unta
     dataset_path.write_text("", encoding="utf-8")
     _write_tax_assumption_metadata(dataset_path)
     monkeypatch.setattr(
-        "src.year_runner.load_tax_assumption_reform_for_dataset",
+        "src.year_runner.load_scoring_assumption_reform_for_dataset",
         lambda dataset_name, year: object(),
     )
     baseline = BaselineResult(
@@ -278,7 +278,7 @@ def test__given_tagged_tax_assumption_baseline__then_reform_scoring_stacks_basel
     policy_reform = object()
 
     monkeypatch.setattr(
-        "src.year_runner.load_tax_assumption_reform_for_dataset",
+        "src.year_runner.load_scoring_assumption_reform_for_dataset",
         lambda dataset_name, year: baseline_reform,
     )
 
@@ -344,7 +344,7 @@ def test_compute_reform_result_saves_requested_household_metrics(
     policy_reform = object()
 
     monkeypatch.setattr(
-        "src.year_runner.load_tax_assumption_reform_for_dataset",
+        "src.year_runner.load_scoring_assumption_reform_for_dataset",
         lambda dataset_name, year: None,
     )
 

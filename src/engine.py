@@ -1,9 +1,9 @@
 """Construct PolicyEngine US microsimulations through policyengine.py.
 
-Every simulation in this project is built through policyengine.py's certified
-("managed") release bundle, never by constructing ``policyengine_us``
-simulations directly. The managed path enforces the model<->data version
-pairing recorded in the release manifest: a populace dataset run under a model
+Certified-base simulations use policyengine.py's managed release bundle or
+its dataset-resolution helpers. Project-built and explicit local datasets
+retain the certified runtime version gate. The managed path enforces the
+model<->data version pairing recorded in the release manifest: a populace dataset run under a model
 version it was not calibrated for silently produces wrong aggregates. (Loaded
 through bare ``policyengine_us`` on a mismatched runtime, the certified base's
 income tax landed at 75% of the CBO target; through the managed path on the
@@ -13,9 +13,14 @@ matched version it lands at 99%.)
 from __future__ import annotations
 
 import importlib.metadata as _metadata
+from pathlib import Path
+import sys
 from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
+
+HOUSEHOLD_VECTOR_CHUNKS = 8
+CHUNKED_RECURSION_LIMIT = 4000
 
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
@@ -44,6 +49,200 @@ def dataset_microsimulation(dataset: Any, reform: Any = None, **kwargs: Any):
     from policyengine_us import Microsimulation
 
     return Microsimulation(dataset=str(dataset), reform=reform, **kwargs)
+
+
+def frame_microsimulation(dataset: Any, reform: Any = None):
+    """A Microsimulation on a year frame's in-memory Core dataset.
+
+    The frame supplies every entity, so no base file loads. The project's
+    runtime gate applies as it does to ``dataset_microsimulation``.
+    """
+    _require_certified_runtime()
+    from policyengine_us import Microsimulation
+
+    return Microsimulation(dataset=dataset, reform=reform)
+
+
+def year_file_dataset(path: Any, year: int):
+    """A year file's arrays as entity tables, which chunking requires.
+
+    The one-year multi-year wrapper keeps the constructor from extending it.
+    """
+    import h5py
+    import pandas as pd
+    from policyengine_core.periods import ETERNITY
+    from policyengine_us.data.dataset_schema import (
+        USMultiYearDataset,
+        USSingleYearDataset,
+    )
+    from policyengine_us.system import system
+
+    tables: dict[str, dict] = {}
+    with h5py.File(path, "r") as handle:
+        for variable, periods in handle.items():
+            definition = system.variables[variable]
+            # A lifetime input holds one value under ETERNITY, not the year.
+            period = "ETERNITY" if "ETERNITY" in periods else str(year)
+            if period == "ETERNITY" and definition.definition_period != ETERNITY:
+                raise KeyError(f"{variable} is annual but stores an ETERNITY array.")
+            values = periods[period][()]
+            if values.dtype.kind == "S":
+                values = values.astype(str)
+            entity = definition.entity.key
+            tables.setdefault(entity, {})[variable] = values
+    frames = {entity: pd.DataFrame(columns) for entity, columns in tables.items()}
+    return USMultiYearDataset(
+        datasets=[USSingleYearDataset(**frames, time_period=year)]
+    )
+
+
+def chunked_entity_tables(
+    path: Any,
+    year: int,
+    variables: Any,
+    build_simulation: Any,
+    n_chunks: int = HOUSEHOLD_VECTOR_CHUNKS,
+) -> tuple[Any, dict]:
+    """Calculate ``variables`` on a year file, a household chunk at a time.
+
+    Returns the year's entity tables and, for each entity, a table in file
+    order holding the requested variables native to it.
+    """
+    _require_certified_runtime()
+    from policyengine_us.tools.calculate_chunked import calculate_chunked
+
+    # The household guard adds two frames for each variable in a calculation
+    # chain, which takes a long behavioral chain past Python's default limit.
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), CHUNKED_RECURSION_LIMIT))
+    dataset = year_file_dataset(path, year)
+    result = calculate_chunked(
+        build_simulation, list(variables), year, n_chunks, dataset=dataset
+    )
+    return dataset.get_year(year), result.entities
+
+
+def household_vectors(
+    path: Any,
+    year: int,
+    variables: Any,
+    reform: Any = None,
+    n_chunks: int = HOUSEHOLD_VECTOR_CHUNKS,
+) -> dict:
+    """Household totals of ``variables`` from a year file, a chunk at a time.
+
+    The TOB variables' counterfactual income tax makes one whole-population
+    simulation too large for the full base. Totals line up with the file's
+    household order.
+    """
+    import numpy as np
+    import pandas as pd
+    from policyengine_us import Microsimulation
+    from policyengine_us.system import system
+
+    single, tables = chunked_entity_tables(
+        path,
+        year,
+        variables,
+        lambda chunk: Microsimulation(dataset=chunk, reform=reform),
+        n_chunks=n_chunks,
+    )
+    household_ids = pd.Index(single.household.household_id)
+    person_households = household_ids.get_indexer(single.person.person_household_id)
+    vectors = {}
+    for variable in variables:
+        entity = system.variables[variable].entity.key
+        table = tables[entity]
+        if entity == "household":
+            owners = household_ids.get_indexer(table.household_id)
+        elif entity == "person":
+            owners = person_households
+        else:
+            links = pd.Series(
+                person_households,
+                index=single.person[f"person_{entity}_id"].to_numpy(),
+            )
+            owners = (
+                links.groupby(level=0)
+                .first()
+                .reindex(table[f"{entity}_id"])
+                .to_numpy(dtype=int)
+            )
+        vectors[variable] = np.bincount(
+            owners,
+            weights=table[variable].to_numpy(dtype=float),
+            minlength=len(household_ids),
+        )
+    return vectors
+
+
+def _certified_base_source() -> tuple[str, str]:
+    """Resolve the same pinned source and local mirror as the managed loader."""
+    from policyengine.provenance.dataset_sources import materialize_dataset_source
+    from policyengine.provenance.manifest import (
+        resolve_local_managed_dataset_source,
+        resolve_managed_dataset_reference,
+    )
+
+    uri = resolve_managed_dataset_reference("us")
+    source = resolve_local_managed_dataset_source("us", uri)
+    return uri, str(materialize_dataset_source(source))
+
+
+def _is_single_year_entity_file(source: str) -> bool:
+    import pandas as pd
+
+    with pd.HDFStore(source, mode="r") as store:
+        keys = set(store.keys())
+    return {"/person", "/household", "/tax_unit"}.issubset(keys) and not any(
+        key.startswith(("/person/", "/household/", "/tax_unit/")) for key in keys
+    )
+
+
+def stage_a_microsimulation(base_dataset: Any, reform: Any = None):
+    """Load Stage A with only the base year stored.
+
+    Each stored year holds its own copy of the inputs it changes, so storing
+    every year through 2100 would not fit in memory on the full base. The
+    constructor's default extension would also age inputs on default parameters
+    through its last year. Instead, Core uprates each input from the base year
+    with the simulation's own parameters. Certified bases use the managed
+    loader's resolution helpers and bundle record; explicit local bases retain
+    the project runtime gate.
+    """
+    _require_certified_runtime()
+    local = bool(base_dataset) and Path(str(base_dataset)).is_file()
+    uri, source = (None, str(base_dataset)) if local else _certified_base_source()
+    single_year = _is_single_year_entity_file(source)
+    if reform is not None and not single_year:
+        raise ValueError(
+            f"Economic input aging requires an entity-level single-year base: {source}. "
+            "A multi-year base may already contain values aged on another path."
+        )
+    from policyengine_us import Microsimulation
+
+    dataset = source
+    if single_year:
+        from policyengine_us.data.dataset_schema import (
+            USMultiYearDataset,
+            USSingleYearDataset,
+        )
+
+        # The constructor extends a single-year file but takes a multi-year
+        # dataset as it stands.
+        dataset = USMultiYearDataset(datasets=[USSingleYearDataset(file_path=source)])
+    sim = Microsimulation(dataset=dataset, reform=reform)
+    if reform is not None and not getattr(
+        sim.tax_benefit_system, "_per_capita_uprating_built", False
+    ):
+        raise RuntimeError(
+            "Economic input aging requires the simulation's system to run "
+            "add_per_capita_uprating after applying the reform."
+        )
+    if uri is not None:
+        from policyengine.tax_benefit_models.us.model import _managed_release_bundle
+
+        sim.policyengine_bundle = _managed_release_bundle(uri, source)
+    return sim
 
 
 def certified_base_uri() -> str:

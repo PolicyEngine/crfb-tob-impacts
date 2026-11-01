@@ -1,0 +1,217 @@
+"""Chunked household vectors agree with a whole-file simulation."""
+
+import sys
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from src import pipeline
+from tests.test_stage_a_aging import load_engine
+
+YEAR = 2050
+VARIABLES = (
+    "social_security",
+    "taxable_earnings_for_social_security",
+    "tob_revenue_oasdi",
+    "tob_revenue_medicare_hi",
+    "income_tax",
+    "adjusted_gross_income",
+)
+
+
+@pytest.fixture
+def year_file(tmp_path, monkeypatch):
+    pytest.importorskip("policyengine_us.tools.calculate_chunked")
+    engine = load_engine(monkeypatch)
+    monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
+    monkeypatch.setitem(sys.modules, "src.engine", engine)
+    # Household 30 holds two tax units, and household 20 one couple. The file
+    # sorts group tables by id, while people here still reach them out of order.
+    household = np.array([10, 20, 20, 30, 30, 40])
+    tax_unit = np.array([9, 2, 2, 7, 4, 1])
+    frame = pd.DataFrame(
+        {
+            f"person_id__{YEAR}": [101, 102, 103, 104, 105, 106],
+            f"age__{YEAR}": [70, 72, 68, 45, 19, 80],
+            f"household_weight__{YEAR}": [2.0, 3.0, 3.0, 4.0, 4.0, 5.0],
+            f"employment_income_before_lsr__{YEAR}": [
+                0.0,
+                60_000.0,
+                0.0,
+                400_000.0,
+                8_000.0,
+                0.0,
+            ],
+            f"social_security_retirement_reported__{YEAR}": [
+                90_000.0,
+                70_000.0,
+                40_000.0,
+                0.0,
+                0.0,
+                120_000.0,
+            ],
+            f"taxable_private_pension_income__{YEAR}": [
+                300_000.0,
+                90_000.0,
+                0.0,
+                0.0,
+                0.0,
+                50_000.0,
+            ],
+        }
+    )
+    for entity, ids in {
+        "household": household,
+        "family": household,
+        "spm_unit": household,
+        "tax_unit": tax_unit,
+        "marital_unit": np.array([1, 2, 2, 3, 4, 5]),
+    }.items():
+        frame[f"{entity}_id__{YEAR}"] = ids
+        frame[f"person_{entity}_id__{YEAR}"] = ids
+    path = tmp_path / f"{YEAR}.h5"
+    pipeline.write_year_h5(frame, YEAR, path)
+    return engine, path
+
+
+def _whole_file(path, reform=None):
+    from policyengine_us import Microsimulation
+
+    sim = Microsimulation(dataset=str(path), reform=reform)
+    return {
+        name: np.asarray(
+            sim.calculate(name, period=YEAR, map_to="household").values, dtype=float
+        )
+        for name in VARIABLES
+    }
+
+
+@pytest.mark.parametrize("n_chunks", [1, 2, 3])
+def test_chunked_vectors_match_the_whole_file(year_file, n_chunks):
+    engine, path = year_file
+    whole = _whole_file(path)
+    chunked = engine.household_vectors(path, YEAR, VARIABLES, n_chunks=n_chunks)
+    assert sum(values.sum() for name, values in whole.items() if "tob" in name) > 0
+    for name in VARIABLES:
+        np.testing.assert_allclose(chunked[name], whole[name], rtol=1e-5, atol=0.01)
+
+
+def test_vectors_follow_a_group_table_out_of_id_order(year_file):
+    import h5py
+    from policyengine_us.system import system
+
+    engine, path = year_file
+    expected = engine.household_vectors(path, YEAR, VARIABLES, n_chunks=2)
+    with h5py.File(path, "r+") as handle:
+        ids = handle[f"tax_unit_id/{YEAR}"][()]
+        assert (ids == np.sort(ids)).all()
+        for variable, periods in handle.items():
+            if system.variables[variable].entity.key == "tax_unit":
+                periods[str(YEAR)][...] = periods[str(YEAR)][()][::-1]
+    reversed_table = engine.household_vectors(path, YEAR, VARIABLES, n_chunks=2)
+    assert expected["income_tax"].any()
+    for name in VARIABLES:
+        np.testing.assert_allclose(reversed_table[name], expected[name], rtol=1e-5)
+
+
+def test_chunking_leaves_room_for_the_guards_frames(year_file):
+    engine, path = year_file
+    before = sys.getrecursionlimit()
+    sys.setrecursionlimit(1000)
+    try:
+        engine.chunked_entity_tables(
+            path, YEAR, ["age"], engine.frame_microsimulation, n_chunks=1
+        )
+        assert sys.getrecursionlimit() >= engine.CHUNKED_RECURSION_LIMIT
+    finally:
+        sys.setrecursionlimit(before)
+
+
+def _low_cap_reform():
+    from policyengine_core.reforms import Reform
+
+    class LowCap(Reform):
+        def apply(self):
+            def modify(parameters):
+                parameters.get_child("gov.irs.payroll.social_security.cap").update(
+                    period=str(YEAR), value=10_000.0
+                )
+                return parameters
+
+            self.modify_parameters(modify)
+
+    return LowCap
+
+
+def test_the_reform_reaches_every_chunk(year_file):
+    engine, path = year_file
+    reform = _low_cap_reform()
+    chunked = engine.household_vectors(path, YEAR, VARIABLES, reform=reform, n_chunks=2)
+    whole = _whole_file(path, reform=reform)
+    baseline = _whole_file(path)
+    name = "taxable_earnings_for_social_security"
+    assert chunked[name].sum() < baseline[name].sum()
+    np.testing.assert_allclose(chunked[name], whole[name], rtol=1e-5, atol=0.01)
+
+
+def test_a_frame_simulation_keeps_its_reform(year_file):
+    engine, path = year_file
+    dataset = engine.year_file_dataset(path, YEAR)
+    name = "taxable_earnings_for_social_security"
+    sim = engine.frame_microsimulation(dataset, reform=_low_cap_reform())
+    capped = sim.calculate(name, period=YEAR, map_to="household").values
+    np.testing.assert_allclose(
+        capped, _whole_file(path, reform=_low_cap_reform())[name]
+    )
+    assert capped.sum() < _whole_file(path)[name].sum()
+
+
+def test_year_file_keeps_entity_rows_and_decodes_strings(year_file, tmp_path):
+    import h5py
+
+    engine, path = year_file
+    with h5py.File(path, "r+") as handle:
+        handle.create_dataset(
+            f"county_fips/{YEAR}", data=np.array([b"06037"] * 4, dtype="S5")
+        )
+    single = engine.year_file_dataset(path, YEAR).get_year(YEAR)
+    assert len(single.person) == 6
+    assert len(single.household) == 4
+    assert len(single.tax_unit) == 5
+    assert single.household.county_fips.tolist() == ["06037"] * 4
+
+
+def test_year_file_reads_a_lifetime_input(year_file):
+    import h5py
+    from policyengine_us import Microsimulation
+
+    engine, path = year_file
+    heads = np.array([True, True, False, True, False, True])
+    with h5py.File(path, "r+") as handle:
+        handle.create_dataset("is_household_head/ETERNITY", data=heads)
+    single = engine.year_file_dataset(path, YEAR).get_year(YEAR)
+    assert single.person.is_household_head.tolist() == heads.tolist()
+    _, entities = engine.chunked_entity_tables(
+        path,
+        YEAR,
+        ["is_household_head"],
+        lambda chunk: Microsimulation(dataset=chunk),
+        n_chunks=2,
+    )
+    assert entities["person"].is_household_head.tolist() == heads.tolist()
+
+
+@pytest.mark.parametrize(
+    "periods",
+    [(str(YEAR + 1),), ("ETERNITY",), (str(YEAR), "ETERNITY")],
+)
+def test_year_file_refuses_an_annual_input_outside_the_year(year_file, periods):
+    import h5py
+
+    engine, path = year_file
+    with h5py.File(path, "r+") as handle:
+        for period in periods:
+            handle.create_dataset(f"is_blind/{period}", data=np.zeros(6, dtype=bool))
+    with pytest.raises(KeyError):
+        engine.year_file_dataset(path, YEAR)

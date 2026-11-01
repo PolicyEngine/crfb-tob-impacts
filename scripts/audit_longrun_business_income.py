@@ -4,10 +4,18 @@ import argparse
 import csv
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from policyengine_us import Microsimulation
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.tax_assumption_loader import (  # noqa: E402
+    load_economic_assumption_reform_for_dataset,
+)
 
 
 DEFAULT_VARIABLES = [
@@ -16,7 +24,7 @@ DEFAULT_VARIABLES = [
     "self_employment_income",
     "self_employment_income_before_lsr",
     "partnership_s_corp_income",
-    "partnership_se_income",
+    "partnership_self_employment_net_earnings",
     "sstb_self_employment_income_before_lsr",
     "farm_operations_income",
     "qualified_dividend_income",
@@ -58,7 +66,13 @@ def _series_stats(sim: Microsimulation, variable: str, year: int) -> dict[str, o
 
 
 def audit_h5(path: Path, year: int, variables: list[str]) -> list[dict[str, object]]:
-    sim = Microsimulation(dataset=str(path))
+    # The file's recorded economic assumption reform (checked against its
+    # module hash) carries into the audit; as before, it applies no tax
+    # assumption.
+    sim = Microsimulation(
+        dataset=str(path),
+        reform=load_economic_assumption_reform_for_dataset(path),
+    )
     rows: list[dict[str, object]] = []
     for variable in variables:
         if variable not in sim.tax_benefit_system.variables:

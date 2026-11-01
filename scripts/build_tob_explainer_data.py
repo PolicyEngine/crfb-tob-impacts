@@ -130,6 +130,10 @@ def build_context(baseline_dir: Path) -> list[dict]:
     from policyengine_us import Microsimulation
 
     from src.pipeline import _tax_assumption_reform
+    from src.tax_assumption_loader import (
+        compose_reforms,
+        load_economic_assumption_reform_for_dataset,
+    )
 
     records = []
     for year in CONTEXT_YEARS:
@@ -137,7 +141,13 @@ def build_context(baseline_dir: Path) -> list[dict]:
         if not dataset.exists():
             print(f"context {year}: dataset missing, skipping", file=sys.stderr)
             continue
-        sim = Microsimulation(dataset=str(dataset), reform=_tax_assumption_reform(year))
+        # The dataset's recorded economic assumption reform (checked against
+        # its module hash) applies ahead of the tax assumption, as in the build.
+        reform = compose_reforms(
+            load_economic_assumption_reform_for_dataset(dataset),
+            _tax_assumption_reform(year),
+        )
+        sim = Microsimulation(dataset=str(dataset), reform=reform)
         ss_hh = sim.calc("social_security", period=year, map_to="household")
         tob_oasdi_hh = sim.calc("tob_revenue_oasdi", period=year, map_to="household")
         tob_hi_hh = sim.calc("tob_revenue_medicare_hi", period=year, map_to="household")

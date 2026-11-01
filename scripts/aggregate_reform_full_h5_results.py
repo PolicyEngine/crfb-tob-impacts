@@ -47,6 +47,13 @@ def _display_path(path: Path) -> str:
         return str(resolved)
 
 
+def _optional_str(value: Any) -> str | None:
+    if value is None or (isinstance(value, float) and value != value):
+        return None
+    text = str(value).strip()
+    return text or None
+
+
 def _parse_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -174,8 +181,60 @@ def _baseline_from_existing_results(path: Path) -> dict[int, BaselineResult]:
             tax_assumption_active=_parse_bool(
                 row.get("baseline_tax_assumption_active", False)
             ),
+            economic_assumption_reform=_optional_str(
+                row.get("baseline_economic_assumption_reform")
+            ),
+            economic_assumption_module_sha256=_optional_str(
+                row.get("baseline_economic_assumption_module_sha256")
+            ),
         )
     return baselines
+
+
+def _cell_metadata_object(record: dict[str, Any]) -> R2Object:
+    """The cell's metadata.json, which the worker uploads beside scenario.h5."""
+    metadata_uri = _optional_str(record.get("metadata_uri"))
+    if metadata_uri is None:
+        scenario_uri = str(record["scenario_h5_uri"])
+        if not scenario_uri.endswith("/scenario.h5"):
+            raise ValueError(
+                f"Cannot locate metadata.json for {scenario_uri!r}: no metadata_uri "
+                "and the scenario URI does not end in /scenario.h5."
+            )
+        metadata_uri = scenario_uri.removesuffix("scenario.h5") + "metadata.json"
+    return _parse_r2_uri(metadata_uri)
+
+
+def require_matching_economic_assumption(
+    *,
+    baseline: BaselineResult,
+    cell_metadata: dict[str, Any],
+    year: int,
+    reform_id: str,
+) -> None:
+    """Refuse to difference a cell and a baseline scored under different
+    economic assumptions: the difference would report the assumption as a
+    policy effect."""
+    record = cell_metadata.get("economic_assumption") or {}
+    cell = (
+        (
+            _optional_str(record.get("reform")),
+            _optional_str(record.get("module_sha256")),
+        )
+        if record.get("active")
+        else (None, None)
+    )
+    base = (
+        _optional_str(baseline.economic_assumption_reform),
+        _optional_str(baseline.economic_assumption_module_sha256),
+    )
+    if cell != base:
+        raise ValueError(
+            f"{reform_id} {year}: the reform cell ran under the economic "
+            f"assumption {cell[0]!r} (module_sha256 {cell[1]!r}) and the "
+            f"baseline under {base[0]!r} (module_sha256 {base[1]!r}); "
+            "refusing to difference them."
+        )
 
 
 def _load_or_compute_baseline(
@@ -253,6 +312,18 @@ def aggregate_live_full_h5_results(
             obj=scenario_obj,
             cache_dir=cache_dir,
             expected_sha256=expected_sha,
+        )
+        metadata_path = _download_r2_object(
+            client=client,
+            obj=_cell_metadata_object(record),
+            cache_dir=cache_dir,
+            expected_sha256=None,
+        )
+        require_matching_economic_assumption(
+            baseline=baseline,
+            cell_metadata=json.loads(metadata_path.read_text(encoding="utf-8")),
+            year=year,
+            reform_id=reform_id,
         )
         reform_totals = _aggregate_full_output_h5(scenario_path)
         row = build_reform_result_from_aggregates(
