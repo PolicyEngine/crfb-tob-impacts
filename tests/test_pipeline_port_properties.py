@@ -410,8 +410,33 @@ def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
     assert [probe["gamma"] for probe in probes] == [
         pipeline.GAMMA_MAX,
         pytest.approx(1.1345, abs=1e-4),
+        1.0,
         1 / pipeline.GAMMA_MAX,
     ]
+
+
+def test_two_probes_on_a_plateau_still_find_gamma_one():
+    # One tax unit whose benefits reach the 85% cap just past gamma 1.
+    def total(gamma):
+        income = 33950 * gamma
+        combined = income + 6000
+        included = min(
+            10200,
+            0.5 * min(max(combined - 25000, 0), 9000) + 0.85 * max(combined - 34000, 0),
+        )
+
+        def tax(taxable):
+            above_deduction = max(taxable - 16100, 0)
+            return 0.1 * min(above_deduction, 12400) + 0.12 * max(
+                above_deduction - 12400, 0
+            )
+
+        return 63 * (tax(income + included) - tax(income)) / 1146.9
+
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == 1.0
+    assert len(probes) == 3
 
 
 def test_a_negative_total_at_gamma_one_still_brackets_the_target():

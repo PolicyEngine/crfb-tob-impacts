@@ -1037,7 +1037,9 @@ def _next_gamma(probes: list[dict], target_total: float) -> float | None:
 
     Probes on both sides of the target bracket it, and interpolating in logs
     lands on the answer for a constant elasticity.
-    Probes all above the target extrapolate down, as far as the lower bound.
+    Probes all above the target try gamma 1, then extrapolate down, as far as
+    the lower bound. Two probes on a saturated stretch of the curve would
+    otherwise extrapolate from a slope that holds nowhere else.
     """
     above = sorted(
         (probe for probe in probes if probe["total_tob"] > target_total),
@@ -1056,6 +1058,8 @@ def _next_gamma(probes: list[dict], target_total: float) -> float | None:
         return float(gamma) if highest["gamma"] < gamma < lowest["gamma"] else None
     if lowest["gamma"] <= 1 / GAMMA_MAX:
         return None
+    if lowest["gamma"] > 1:
+        return 1.0
     slope = _log_slope(above[1], lowest)
     if slope <= 0:
         return 1 / GAMMA_MAX

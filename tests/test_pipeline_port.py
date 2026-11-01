@@ -841,8 +841,12 @@ def test_an_inelastic_year_above_target_still_reaches_it(monkeypatch, tmp_path):
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
-    assert gamma == pytest.approx(0.9301, abs=1e-3)
-    assert len(probes) == 3
+    assert gamma == 1.0
+    assert [probe["gamma"] for probe in probes] == [
+        pipeline.GAMMA_MAX,
+        pytest.approx(1.1754, abs=1e-4),
+        1.0,
+    ]
 
 
 def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_path):
