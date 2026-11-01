@@ -208,6 +208,7 @@ KNOWN_ABSENT_INPUTS = {
 # final calibration absorbs any residual.
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
+# Counts the probes after the upper bound, so a year can run six model passes.
 GAMMA_MAX_PROBES = 5
 # A stored value shadows its formula, and a stored tax measure freezes every
 # tax state the TOB variables compare, which gives zero TOB and raises nothing.
