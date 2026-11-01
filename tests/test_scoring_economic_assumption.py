@@ -188,6 +188,43 @@ def test_editing_the_module_after_the_build_raises(monkeypatch, tmp_path):
         sys.modules.pop("edited_assumption_module", None)
 
 
+def test_a_mismatched_module_is_never_run(monkeypatch, tmp_path):
+    marker = tmp_path / "ran"
+    module = tmp_path / "unrun_assumption_module.py"
+    module.write_text(
+        "from pathlib import Path\n"
+        f"Path({str(marker)!r}).write_text('ran')\n"
+        "from policyengine_core.reforms import Reform\n"
+        "class trustees(Reform):\n"
+        "    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    metadata = _metadata(
+        economic={
+            "active": True,
+            "applies_before": "tax_assumption",
+            "reform": "unrun_assumption_module:trustees",
+            "module_sha256": WRONG_SHA,
+        }
+    )
+    with pytest.raises(ValueError, match=WRONG_SHA):
+        loader.load_economic_assumption_reform_for_metadata(metadata)
+    assert not marker.exists()
+    assert "unrun_assumption_module" not in sys.modules
+
+
+def test_a_module_that_cannot_be_found_raises():
+    metadata = _metadata(
+        economic={
+            "active": True,
+            "reform": "no_such_assumption_module_anywhere:trustees",
+            "module_sha256": WRONG_SHA,
+        }
+    )
+    with pytest.raises(ValueError, match="cannot find the file"):
+        loader.load_economic_assumption_reform_for_metadata(metadata)
+
+
 def test_output_metadata_records_the_reform_and_hash():
     contract = loader.economic_assumption_contract_from_metadata(
         _metadata(economic=sf.economic_record())
@@ -502,6 +539,9 @@ class _Stop(Exception):
 
 
 def _patch_microsimulation(monkeypatch) -> list:
+    from scripts import audit_longrun_business_income
+    from src import pipeline
+
     reforms: list = []
 
     class Microsimulation:
@@ -512,8 +552,10 @@ def _patch_microsimulation(monkeypatch) -> list:
     module = ModuleType("policyengine_us")
     module.Microsimulation = Microsimulation
     monkeypatch.setitem(sys.modules, "policyengine_us", module)
-    from src import pipeline
-
+    # The audit script binds Microsimulation when it is imported.
+    monkeypatch.setattr(
+        audit_longrun_business_income, "Microsimulation", Microsimulation
+    )
     monkeypatch.setattr(pipeline, "_tax_assumption_reform", lambda year: FakeTaxReform)
     return reforms
 
@@ -529,7 +571,11 @@ def _patch_microsimulation(monkeypatch) -> list:
 def test_diagnostics_scripts_apply_the_recorded_economic_reform_first(
     monkeypatch, tmp_path, economic, expected
 ):
-    from scripts import build_baseline_diagnostics, build_tob_explainer_data
+    from scripts import (
+        audit_longrun_business_income,
+        build_baseline_diagnostics,
+        build_tob_explainer_data,
+    )
 
     reforms = _patch_microsimulation(monkeypatch)
     dataset = sf.write_dataset(tmp_path, YEAR, economic=economic())
@@ -537,6 +583,14 @@ def test_diagnostics_scripts_apply_the_recorded_economic_reform_first(
         build_baseline_diagnostics.year_aggregates(dataset, YEAR)
     with pytest.raises(_Stop):
         build_tob_explainer_data.build_context(tmp_path)
-    assert [flatten_reform(reform) for reform in reforms] == [expected, expected]
+    with pytest.raises(_Stop):
+        # The audit applies no tax assumption, before and after this change.
+        audit_longrun_business_income.audit_h5(dataset, YEAR, ["income_tax"])
+    audited = expected[:-1]
+    assert [flatten_reform(reform) for reform in reforms] == [
+        expected,
+        expected,
+        audited,
+    ]
     if economic() is None:
-        assert reforms == [FakeTaxReform, FakeTaxReform]
+        assert reforms == [FakeTaxReform, FakeTaxReform, None]

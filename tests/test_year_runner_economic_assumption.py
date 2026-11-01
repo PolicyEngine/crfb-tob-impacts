@@ -14,6 +14,8 @@ Invariants (see tests/test_scoring_economic_assumption.py for the full list):
    the order the reforms apply in.
 4. No assumption, no change: without an economic assumption the year runner
    passes the engine exactly the reforms it passed before.
+5. Aggregation differences a full-H5 cell only against a baseline scored
+   under the same economic assumption.
 """
 
 from __future__ import annotations
@@ -346,8 +348,8 @@ def test_static_scoring_from_metadata_equals_hand_composition(monkeypatch, tmp_p
     )
     _assert_same_numbers(worker_row, by_hand)
 
-    # The comparison has power: leaving the assumption out, or applying the
-    # policy before it, changes the result.
+    # The comparison has power: dropping any reform, or swapping two, changes
+    # the reform simulation's totals.
     without = _by_hand(frame, economic=False)
     assert without["employer_ss_tax_revenue"] != pytest.approx(
         by_hand["employer_ss_tax_revenue"]
@@ -355,10 +357,18 @@ def test_static_scoring_from_metadata_equals_hand_composition(monkeypatch, tmp_p
     ordered = sf.fake_aggregate(
         frame, YEAR, (FakeEconomicReform, FakeTaxReform, FakePolicyReform)
     )
-    misordered = sf.fake_aggregate(
-        frame, YEAR, (FakePolicyReform, FakeEconomicReform, FakeTaxReform)
-    )
-    assert misordered.taxable_payroll != pytest.approx(ordered.taxable_payroll)
+    for wrong in (
+        (FakePolicyReform, FakeEconomicReform, FakeTaxReform),
+        (FakeTaxReform, FakeEconomicReform, FakePolicyReform),
+        (FakeEconomicReform, FakePolicyReform),
+        (FakeTaxReform, FakePolicyReform),
+        (FakeEconomicReform, FakeTaxReform),
+    ):
+        totals = sf.fake_aggregate(frame, YEAR, wrong)
+        assert (totals.taxable_payroll, totals.tob_total) != (
+            pytest.approx(ordered.taxable_payroll),
+            pytest.approx(ordered.tob_total),
+        ), wrong
 
 
 def test_behavioral_scoring_from_metadata_equals_hand_composition(
@@ -400,3 +410,131 @@ def test_year_runner_module_binds_the_real_engine():
     assert sys.modules["src.engine"].dataset_microsimulation is (
         year_runner.dataset_microsimulation
     )
+
+
+# ---------------------------------------------------------------------------
+# Full-H5 aggregation pairs each cell with a baseline under the same assumption
+# ---------------------------------------------------------------------------
+
+SCENARIO_URI = "r2://bucket/run/reform_full_h5/year=2050/reform=option1/scenario.h5"
+
+
+def _aggregate(monkeypatch, tmp_path, *, cell_economic, baseline_economic):
+    import pandas as pd
+
+    from scripts import aggregate_reform_full_h5_results as agg
+
+    status = tmp_path / "status.csv"
+    pd.DataFrame(
+        [
+            {
+                "year": YEAR,
+                "reform_name": "option1",
+                "reform_h5_status": "complete",
+                "scenario_h5_uri": SCENARIO_URI,
+                "metadata_uri": "",
+                "output_h5_sha256": "",
+                "scoring_type": "static",
+            }
+        ]
+    ).to_csv(status, index=False)
+    baseline_row = {
+        "year": YEAR,
+        "baseline_revenue": 10.0,
+        "baseline_tob_medicare_hi": 1.0,
+        "baseline_tob_oasdi": 2.0,
+        "baseline_tob_total": 3.0,
+        "baseline_tax_assumption_name": sf.TAX_NAME,
+        "baseline_tax_assumption_active": True,
+    }
+    if baseline_economic:
+        baseline_row["baseline_economic_assumption_reform"] = sf.ECONOMIC_SPEC
+        baseline_row["baseline_economic_assumption_module_sha256"] = sf.sha256(
+            fakes.__file__
+        )
+    existing = tmp_path / "results.csv"
+    pd.DataFrame([baseline_row]).to_csv(existing, index=False)
+    cell_metadata = {
+        "economic_assumption": (
+            loader.economic_assumption_output_metadata(
+                loader.economic_assumption_contract_from_metadata(
+                    {"economic_assumption": sf.economic_record()}
+                )
+            )
+            if cell_economic
+            else {"active": False, "reform": None}
+        )
+    }
+    downloaded: list = []
+
+    def download(*, client, obj, cache_dir, expected_sha256):
+        downloaded.append(obj.key)
+        path = tmp_path / "cache" / obj.key
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if obj.key.endswith("metadata.json"):
+            path.write_text(json.dumps(cell_metadata))
+        else:
+            path.write_bytes(b"scenario")
+        return path
+
+    monkeypatch.setattr(agg, "_r2_client_from_env", lambda: object())
+    monkeypatch.setattr(agg, "_download_r2_object", download)
+    monkeypatch.setattr(
+        agg,
+        "_aggregate_full_output_h5",
+        lambda path: year_runner.ScenarioAggregate(*([20.0] * 8)),
+    )
+    output = tmp_path / "out.csv"
+    agg.aggregate_live_full_h5_results(
+        live_status_path=status,
+        existing_results_path=existing,
+        baseline_dir=tmp_path / "no-baselines",
+        cache_dir=tmp_path / "cache",
+        output_path=output,
+        summary_path=tmp_path / "summary.json",
+        compute_missing_baselines=False,
+        limit=None,
+    )
+    return pd.read_csv(output, keep_default_na=False), downloaded
+
+
+@pytest.mark.parametrize(
+    "cell_economic,baseline_economic",
+    [(True, False), (False, True)],
+    ids=["cell-only", "baseline-only"],
+)
+def test_aggregation_refuses_a_cell_and_baseline_under_different_assumptions(
+    monkeypatch, tmp_path, cell_economic, baseline_economic
+):
+    with pytest.raises(ValueError, match="refusing to difference"):
+        _aggregate(
+            monkeypatch,
+            tmp_path,
+            cell_economic=cell_economic,
+            baseline_economic=baseline_economic,
+        )
+
+
+def test_aggregation_pairs_a_cell_with_a_baseline_under_the_same_assumption(
+    monkeypatch, tmp_path
+):
+    rows, _ = _aggregate(
+        monkeypatch, tmp_path, cell_economic=True, baseline_economic=True
+    )
+    (row,) = rows.to_dict(orient="records")
+    assert row["baseline_economic_assumption_reform"] == sf.ECONOMIC_SPEC
+    assert row["revenue_impact"] == pytest.approx(10.0)
+
+
+def test_aggregation_without_an_economic_assumption_is_unchanged(monkeypatch, tmp_path):
+    rows, downloaded = _aggregate(
+        monkeypatch, tmp_path, cell_economic=False, baseline_economic=False
+    )
+    (row,) = rows.to_dict(orient="records")
+    assert row["revenue_impact"] == pytest.approx(10.0)
+    assert row["baseline_economic_assumption_reform"] == ""
+    # With no metadata_uri recorded, the metadata sits beside scenario.h5.
+    assert downloaded == [
+        "run/reform_full_h5/year=2050/reform=option1/scenario.h5",
+        "run/reform_full_h5/year=2050/reform=option1/metadata.json",
+    ]

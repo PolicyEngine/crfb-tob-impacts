@@ -1,11 +1,16 @@
 """Fakes for driving the scorers on datasets that record an economic assumption.
 
 The scorers read a dataset's metadata, load the reforms it records and hand a
-composed reform to the engine. These fakes stand in for the engine with a rule
-that depends on the order reforms apply in: the economic assumption reform sets
-the contribution cap and the policy reform scales whatever cap it finds, so a
-scorer that composed the reforms in the wrong order, or left one out, reports
-different totals.
+composed reform to the engine. These fakes stand in for the engine with rules
+that depend on the order reforms apply in:
+
+- the economic assumption reform sets the contribution cap and a wage index;
+- the tax assumption reform indexes the benefit-taxation threshold by the wage
+  index in force when it applies, so it must follow the economic assumption;
+- the policy reform scales whatever cap it finds.
+
+A scorer that drops any of the three reforms, or swaps two of them, reports
+different totals whenever both the economic and the tax assumption apply.
 """
 
 from __future__ import annotations
@@ -15,6 +20,8 @@ import json
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
+import numpy as np
+
 from src import tax_assumption_loader as loader
 from tests import pipeline_fakes as fakes
 from tests.pipeline_fakes import FakeEconomicReform, FakeTaxReform, flatten_reform
@@ -22,6 +29,7 @@ from tests.pipeline_fakes import FakeEconomicReform, FakeTaxReform, flatten_refo
 ECONOMIC_SPEC = "tests.pipeline_fakes:FakeEconomicReform"
 TAX_NAME = loader.TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION
 POLICY_CAP_SCALE = 1.1
+ECONOMIC_WAGE_INDEX = 1.3
 LABOR_RESPONSE_PER_CAP_DOLLAR = 0.01
 
 
@@ -33,19 +41,37 @@ class FakeRateReform:
     """Marker solvency payroll-rate reform."""
 
 
-def cap_after(reform) -> float:
-    """The contribution cap once each reform has applied, left to right."""
+def parameters_after(reform) -> tuple[float, float]:
+    """The cap and the benefit-taxation threshold once each reform has
+    applied, left to right."""
     cap = fakes.CAP
+    wage_index = 1.0
+    threshold = fakes.SS_THRESHOLD
     for part in flatten_reform(reform):
         if part is FakeEconomicReform:
             cap = fakes.ECONOMIC_CAP
+            wage_index = ECONOMIC_WAGE_INDEX
+        elif part is FakeTaxReform:
+            threshold = fakes.SS_THRESHOLD * wage_index
         elif part is FakePolicyReform:
             cap *= POLICY_CAP_SCALE
-    return cap
+    return cap, threshold
+
+
+def cap_after(reform) -> float:
+    return parameters_after(reform)[0]
+
+
+def person_tob(frame, year: int, threshold: float):
+    """pipeline_fakes.person_tob with the threshold as a parameter."""
+    ss = fakes._social_security(frame, year)
+    provisional = fakes._other_income(frame, year) + 0.5 * ss
+    included = np.minimum(0.85 * ss, 0.5 * np.maximum(provisional - threshold, 0))
+    return 0.12 * included, 0.05 * included
 
 
 class SequencedSimulation(fakes.FakeSimulation):
-    """The pipeline fake with the order-sensitive cap rule.
+    """The pipeline fake with the order-sensitive rules.
 
     Like a reform simulation in the engine, it has a baseline branch built under
     no reform unless a scorer installs one.
@@ -53,12 +79,18 @@ class SequencedSimulation(fakes.FakeSimulation):
 
     def __init__(self, frame, year, reform, growth_rates=None):
         super().__init__(frame, year, reform, growth_rates or {})
-        self.cap = cap_after(reform)
+        self.cap, self.threshold = parameters_after(reform)
         self.baseline = SimpleNamespace(reform=None) if reform is not None else None
 
     @staticmethod
     def default_tax_benefit_system(reform=None):
         return SimpleNamespace(reform=reform)
+
+    def _person_values(self, variable: str):
+        if variable in ("tob_revenue_oasdi", "tob_revenue_medicare_hi"):
+            oasdi, hi = person_tob(self.frame, self.year, self.threshold)
+            return oasdi if variable == "tob_revenue_oasdi" else hi
+        return super()._person_values(variable)
 
 
 def fake_aggregate(frame, year: int, reform, *, baseline_reform=None):
