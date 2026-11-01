@@ -45,7 +45,10 @@ from src.projection import (
 )
 from src.tax_assumption_loader import (
     TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
+    compose_reforms,
+    economic_assumption_provenance,  # noqa: F401 - re-exported for the build script
     load_canonical_tax_assumption_reform,
+    load_economic_assumption_reform,  # noqa: F401 - re-exported for the build script
 )
 
 TAX_ASSUMPTION_START_YEAR = 2035
@@ -996,68 +999,9 @@ def _tax_assumption_reform(year: int):
 # ---------------------------------------------------------------------------
 # Economic assumption reform
 # ---------------------------------------------------------------------------
-
-
-def compose_reforms(*reforms):
-    """Compose reforms in the order given, dropping ``None``.
-
-    PolicyEngine applies a tuple of reforms left to right, so the first
-    reform's parameter changes are in place before the next one runs.
-    """
-    active = tuple(reform for reform in reforms if reform is not None)
-    if not active:
-        return None
-    if len(active) == 1:
-        return active[0]
-    return active
-
-
-def _validated_reform(candidate, spec: str):
-    from policyengine_core.reforms import Reform
-
-    if isinstance(candidate, type) and issubclass(candidate, Reform):
-        return candidate
-    if isinstance(candidate, dict):
-        return Reform.from_dict(candidate, country_id="us")
-    if isinstance(candidate, tuple) and candidate:
-        return tuple(_validated_reform(item, spec) for item in candidate)
-    raise TypeError(
-        f"{spec} is a {type(candidate).__name__}; an economic assumption "
-        "reform must be a Reform subclass, a parameter dict, or a tuple of "
-        "those. Point at the reform itself, not at a factory that builds it."
-    )
-
-
-def load_economic_assumption_reform(spec: str):
-    """Import the reform named by ``module:attribute`` (attribute may be
-    dotted) and check that it is a reform."""
-    import importlib
-
-    module_name, separator, attribute = spec.partition(":")
-    if not separator or not module_name or not attribute:
-        raise ValueError(f"Expected module:attribute, got {spec!r}.")
-    target = importlib.import_module(module_name)
-    for part in attribute.split("."):
-        target = getattr(target, part)
-    return _validated_reform(target, spec)
-
-
-def economic_assumption_provenance(spec: str) -> dict:
-    """The ``module:attribute`` path, plus the module file and its hash."""
-    import hashlib
-    import importlib
-
-    module = importlib.import_module(spec.partition(":")[0])
-    module_file = getattr(module, "__file__", None)
-    return {
-        "reform": spec,
-        "module_file": module_file,
-        "module_sha256": (
-            hashlib.sha256(Path(module_file).read_bytes()).hexdigest()
-            if module_file
-            else None
-        ),
-    }
+# compose_reforms, load_economic_assumption_reform and
+# economic_assumption_provenance live in src.tax_assumption_loader, so the
+# scorers can load the reform a dataset recorded without importing the builder.
 
 
 def _reform_label(reform) -> str:

@@ -536,7 +536,10 @@ def test_build_year_raises_when_the_frame_stores_a_pre_2x_aggregate(
         pipeline.build_year(year, "fake-base", tmp_path)
 
 
-def test_scorers_refuse_a_dataset_built_with_the_economic_reform():
+def test_tax_only_paths_refuse_a_dataset_built_with_the_economic_reform():
+    # Scorers load both reforms with load_scoring_assumption_reform_for_metadata
+    # (tests/test_scoring_economic_assumption.py); a path that rebuilds only the
+    # tax assumption still refuses the dataset.
     from src.tax_assumption_loader import (
         load_tax_assumption_reform_for_metadata,
         tax_assumption_contract_from_metadata,
@@ -548,7 +551,7 @@ def test_scorers_refuse_a_dataset_built_with_the_economic_reform():
     }
     with pytest.raises(ValueError, match="trustees_2026"):
         tax_assumption_contract_from_metadata(metadata, 2050)
-    with pytest.raises(ValueError, match="no scorer applies"):
+    with pytest.raises(ValueError, match="does not apply"):
         load_tax_assumption_reform_for_metadata(metadata, 2050)
     metadata["economic_assumption"]["active"] = False
     assert tax_assumption_contract_from_metadata(metadata, 2050).active is False
