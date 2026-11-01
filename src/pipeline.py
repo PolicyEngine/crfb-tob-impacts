@@ -19,8 +19,11 @@ calibration misses targets or publication gates fail.
 
 from __future__ import annotations
 
+import ast
 import gc
-import sys
+import inspect
+import json
+import textwrap
 import time
 from pathlib import Path
 
@@ -44,6 +47,7 @@ from src.projection import (
     write_json,
 )
 from src.tax_assumption_loader import (
+    H5_ECONOMIC_ASSUMPTION_ATTR,
     TRUSTEES_2025_CORE_THRESHOLDS_ASSUMPTION,
     compose_reforms,
     economic_assumption_provenance,  # noqa: F401 - re-exported for the build script
@@ -123,6 +127,10 @@ OTHER_INCOME_SCALE_CANDIDATES = (
     "short_term_capital_gains",
     "non_sch_d_capital_gains",
     "taxable_ira_distributions",
+    "taxable_sep_distributions",
+    "taxable_401k_distributions",
+    "taxable_403b_distributions",
+    "keogh_distributions",
     "taxable_public_pension_income",
     "taxable_private_pension_income",
     "tax_exempt_public_pension_income",
@@ -134,6 +142,49 @@ OTHER_INCOME_SCALE_CANDIDATES = (
     "s_corp_income",
     "miscellaneous_income",
 )
+
+# These stored sources retain engine uprating, but receive no alpha, beta or
+# gamma calibration factor. Every exception is explicit so new stored gross
+# income cannot silently fall outside the calibration policy.
+UNSCALED_GROSS_INCOME_SOURCES = {
+    "salt_refund_income": "A refund of state tax, rather than a current income flow.",
+    "alimony_income": "A transfer between former spouses, not newly generated income.",
+    "unemployment_compensation": (
+        "An insurance benefit; neither earnings nor retirement/investment income."
+    ),
+    "weeks_unemployed": (
+        "A duration input determining unemployment benefits, not an income amount."
+    ),
+    "disability_benefits": (
+        "An insurance benefit; neither earnings nor retirement/investment income."
+    ),
+    "tax_exempt_disability_benefits": (
+        "The excluded portion of disability insurance, not an additional income flow."
+    ),
+    "divorce_year": "An alimony taxability selector, not an income amount.",
+    "age": "An eligibility and contribution-limit selector, not income.",
+    "is_full_time_college_student": (
+        "A dependent-status selector for Social Security taxability, not income."
+    ),
+    "is_related_to_head_or_spouse": (
+        "A filing-status selector for Social Security taxability, not income."
+    ),
+    "is_separated": (
+        "A filing-status selector for Social Security taxability, not income."
+    ),
+    "is_surviving_spouse": (
+        "A filing-status selector for Social Security taxability, not income."
+    ),
+    "tax_unit_role_input": (
+        "Assigns income to a filer or dependent; it is not an income amount."
+    ),
+    "traditional_401k_contributions_desired": (
+        "A retirement deferral reducing taxable wages, not an additional gross flow."
+    ),
+    "roth_401k_contributions_desired": (
+        "A retirement deferral used to allocate contribution limits, not gross income."
+    ),
+}
 
 # Inputs a scaling or cap list names that the base may not store. Each is a
 # PolicyEngine US input with no formula, so an absent column means the engine
@@ -163,13 +214,18 @@ GAMMA_MAX_PROBES = 4
 # so weight tilts cannot inflate other income to reach the TOB target.
 # Components are engine variables, calculated (not read from the frame), so
 # adds-aggregates such as partnership_s_corp_income belong here; a name the
-# engine lacks raises. partnership_self_employment_net_earnings stays out:
+# engine lacks raises. Its partnership_income and s_corp_income leaves stay
+# out so each source is counted once.
+# partnership_self_employment_net_earnings stays out:
 # PolicyEngine US documents it as "not an additional gross income source
 # separate from partnership_income", which partnership_s_corp_income covers.
 INCOME_GUARD_GROUPS = {
     # long_term_capital_gains_on_collectibles stays out: PolicyEngine US
     # documents it as a memo item that long-term capital gains already
     # include, so adding it would count collectibles gains twice.
+    # qualified_bdc_income and qualified_reit_and_ptp_income are QBID memo
+    # inputs within dividends, and farm_income is a Schedule J averaging
+    # input. None is a gov.irs.gross_income.sources entry.
     "preferential_investment_income": (
         "long_term_capital_gains_before_response",
         "qualified_dividend_income",
@@ -183,7 +239,6 @@ INCOME_GUARD_GROUPS = {
         "partnership_s_corp_income",
         "estate_income",
         "rental_income",
-        "farm_income",
         "farm_operations_income",
         "farm_rent_income",
         "miscellaneous_income",
@@ -195,8 +250,6 @@ INCOME_GUARD_GROUPS = {
         "taxable_sep_distributions",
         "tax_exempt_ira_distributions",
         "tax_exempt_private_pension_income",
-        "qualified_bdc_income",
-        "qualified_reit_and_ptp_income",
     ),
 }
 # Guards apply to every year: without them the final calibration can
@@ -240,6 +293,10 @@ GROWTH_CAP_VARIABLES = (
     "short_term_capital_gains",
     "non_sch_d_capital_gains",
     "taxable_ira_distributions",
+    "taxable_sep_distributions",
+    "taxable_401k_distributions",
+    "taxable_403b_distributions",
+    "keogh_distributions",
     "taxable_public_pension_income",
     "taxable_private_pension_income",
     "tax_exempt_public_pension_income",
@@ -350,6 +407,87 @@ def resolve_frame_columns(
             "genuinely lacks it, to KNOWN_ABSENT_INPUTS with the reason."
         )
     return columns, absent
+
+
+def gross_income_stored_inputs(df: pd.DataFrame, sim, year: int) -> set[str]:
+    """Find stored inputs behind the engine's gross-income source list.
+
+    Follow adds aggregates and named variable references in the active formula,
+    stopping when a stored column overrides a formula. The traversal also sees
+    stored taxability selectors, which need an explicit unscaled reason.
+    """
+    system = sim.tax_benefit_system
+    variables, parameters = system.variables, system.parameters
+    instant = f"{year}-01-01"
+    sources = parameters.get_child("gov.irs.gross_income.sources")(instant)
+    stored = {column.rsplit("__", 1)[0] for column in df.columns}
+    reached: set[str] = set()
+    seen: set[str] = set()
+
+    def visit(name):
+        if name in seen:
+            return
+        seen.add(name)
+        if name in stored:
+            reached.add(name)
+            return
+        variable = variables.get(name)
+        if variable is None:
+            # Adds can include a parameter amount (for example the Alaska
+            # dividend), which supplies no stored input to classify.
+            if "." in name:
+                parameters.get_child(name)(instant)
+                return
+            raise ValueError(f"Gross-income source graph names unknown variable {name}.")
+        adds = getattr(variable, "adds", None)
+        if isinstance(adds, str):
+            adds = parameters.get_child(adds)(instant)
+        dependencies = set(adds or ())
+        formulas = getattr(variable, "formulas", None) or {}
+        if hasattr(variable, "get_formula"):
+            formula = variable.get_formula(str(year))
+        else:
+            active = sorted(date for date in formulas if str(date) <= instant)
+            formula = formulas[active[-1]] if active else None
+        if formula is not None:
+            try:
+                tree = ast.parse(textwrap.dedent(inspect.getsource(formula)))
+            except (OSError, TypeError, SyntaxError) as error:
+                raise ValueError(
+                    f"Cannot inspect gross-income formula inputs for {name}."
+                ) from error
+            # Include names assigned to local lists before add(...), as well
+            # as the usual direct person("input", period) calls.
+            dependencies.update(
+                node.value
+                for node in ast.walk(tree)
+                if isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and node.value in variables
+            )
+        for dependency in sorted(dependencies):
+            visit(dependency)
+
+    for source in sources:
+        visit(source)
+    return reached
+
+
+def assert_gross_income_sources_classified(df: pd.DataFrame, sim, year: int) -> None:
+    """Require a scaling policy or an explicit exception for every stored source."""
+    scaled = {name for names in SCALE_LISTS.values() for name in names}
+    missing = sorted(
+        gross_income_stored_inputs(df, sim, year)
+        - scaled
+        - UNSCALED_GROSS_INCOME_SOURCES.keys()
+    )
+    if missing:
+        raise ValueError(
+            "Stored gross-income inputs have no scaling policy: "
+            + ", ".join(missing)
+            + ". Add them to a scaling list or UNSCALED_GROSS_INCOME_SOURCES "
+            "with an explicit reason."
+        )
 
 
 def reject_pre_2x_names_in_frame(df: pd.DataFrame, year: int) -> None:
@@ -474,7 +612,9 @@ def _project_variable_to_person_rows(sim, df, *, var_name, year, base_period):
     )
     if membership_column is None:
         raise ValueError(f"No membership column for {var_name} ({entity_key}).")
-    entity_ids = np.asarray(sim.calculate(f"{entity_key}_id", map_to=entity_key).values)
+    entity_ids = np.asarray(
+        sim.calculate(f"{entity_key}_id", period=year, map_to=entity_key).values
+    )
     if len(entity_ids) != len(values):
         raise ValueError(f"Cannot align {var_name} on {entity_key}.")
     aligned = df[membership_column].map(dict(zip(entity_ids, values)))
@@ -656,7 +796,7 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
     if drop:
         df = df.drop(columns=drop)
 
-    fallback_renames = []
+    projection_failures = []
     for column in [c for c in df.columns if f"__{base_period}" in c]:
         var_name = column.replace(f"__{base_period}", "")
         new_column = f"{var_name}__{year}"
@@ -666,17 +806,15 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
             df[new_column] = _project_variable_to_person_rows(
                 sim, df, var_name=var_name, year=year, base_period=base_period
             )
-            df = df.drop(columns=[column])
-        except Exception as error:
-            fallback_renames.append(f"{var_name}: {error}")
-            df = df.rename(columns={column: new_column})
-    if fallback_renames:
-        _log(
-            f"  [materialize {year}] carried base-year values for "
-            f"{len(fallback_renames)} variables"
+            if new_column != column:
+                df = df.drop(columns=[column])
+        except Exception as error:  # noqa: BLE001 - aggregate projection failures
+            projection_failures.append(f"{var_name}: {error}")
+    if projection_failures:
+        raise ValueError(
+            f"Cannot materialize inputs for {year}: "
+            + "; ".join(projection_failures)
         )
-        for line in fallback_renames[:5]:
-            print(f"    {line}", file=sys.stderr)
 
     # Household weights at the target year (includes uprated population
     # level); person weights derive from household weights at runtime.
@@ -690,14 +828,10 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
     df[f"household_weight__{year}"] = df[f"person_household_id__{year}"].map(
         hh_to_weight
     )
-    df = df.drop(
-        columns=[
-            f"household_weight__{base_period}",
-            f"person_weight__{base_period}",
-            f"person_weight__{year}",
-        ],
-        errors="ignore",
-    )
+    weight_columns = [f"person_weight__{base_period}", f"person_weight__{year}"]
+    if base_period != year:
+        weight_columns.append(f"household_weight__{base_period}")
+    df = df.drop(columns=weight_columns, errors="ignore")
     return df
 
 
@@ -1040,17 +1174,32 @@ def build_year(
     """Build one calibrated year dataset; returns the sentinel record.
 
     ``economic_assumption_reform`` (off by default) applies to every
-    simulation in the build: alone in Stage A and the H5 writer, which carried
-    no reform before, and composed ahead of the tax assumption reform in the
-    gamma probes and the artifact validation. ``economic_assumption_metadata``
-    is recorded in the year metadata as its provenance.
+    simulation in the build. Stage A extends single-year stored inputs through
+    ``year`` using the reformed system's per-capita series. The reform applies
+    alone in the H5 writer and ahead of the tax assumption in the gamma probes
+    and artifact validation. ``economic_assumption_metadata`` records its
+    provenance in both the H5 and the metadata sidecar.
     """
-    from src.engine import base_microsimulation, dataset_microsimulation
+    from src.engine import dataset_microsimulation, stage_a_microsimulation
 
     assert_scale_lists_disjoint()
     start_time = time.monotonic()
     output_dir = Path(output_dir)
     output_path = output_dir / f"{year}.h5"
+    economic_assumption = {
+        "active": economic_assumption_reform is not None,
+        "applies_before": "tax_assumption",
+        "reform": (
+            _reform_label(economic_assumption_reform)
+            if economic_assumption_reform is not None
+            else None
+        ),
+        **(economic_assumption_metadata or {}),
+    }
+    if economic_assumption_reform is not None:
+        economic_assumption.update(
+            inputs_aged_under_assumption=True, input_aging_end_year=year
+        )
     _log(f"\n===== building {year} =====")
 
     economic_targets = load_economic_targets(year)
@@ -1065,13 +1214,10 @@ def build_year(
     # outputs and shadow their formulas downstream. The certified populace base
     # is the default; an explicit local base_dataset path (a candidate build not
     # yet certified) is loaded as an unmanaged dataset, for sentinels.
-    stage_a_reform = economic_assumption_reform
-    if base_dataset and Path(str(base_dataset)).is_file():
-        sim = dataset_microsimulation(base_dataset, reform=stage_a_reform)
-    else:
-        sim = base_microsimulation(reform=stage_a_reform)
+    sim = stage_a_microsimulation(base_dataset, year, reform=economic_assumption_reform)
     df = materialize_year_frame(sim, year)
     reject_pre_2x_names_in_frame(df, year)
+    assert_gross_income_sources_classified(df, sim, year)
     enum_log = sanitize_enum_inputs(df, sim, year)
     for variable, count in enum_log.items():
         _log(f"  [sanitize] {variable}: coerced {count:,} invalid enum values")
@@ -1205,7 +1351,10 @@ def build_year(
 
     start_weights = demographic_weights
 
-    write_year_h5(df, year, output_path, reform=stage_a_reform)
+    write_year_h5(df, year, output_path, reform=economic_assumption_reform)
+
+    with h5py.File(output_path, "r+") as handle:
+        handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR] = json.dumps(economic_assumption)
 
     # ----- Stage C2: artifact-true validation -----
     sim2 = dataset_microsimulation(str(output_path), reform=reform)
@@ -1330,16 +1479,6 @@ def build_year(
 
     income_tax_total = float(vectors["income_tax"] @ final_weights)
     elapsed = time.monotonic() - start_time
-    economic_assumption = {
-        "active": economic_assumption_reform is not None,
-        "applies_before": "tax_assumption",
-        "reform": (
-            _reform_label(economic_assumption_reform)
-            if economic_assumption_reform is not None
-            else None
-        ),
-        **(economic_assumption_metadata or {}),
-    }
 
     sentinel = {
         "year": year,

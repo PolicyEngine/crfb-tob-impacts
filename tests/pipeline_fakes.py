@@ -24,6 +24,9 @@ CAP = 150_000.0
 ECONOMIC_CAP = 180_000.0
 SS_THRESHOLD = 25_000.0
 PRE_SCALED_TOB_TARGET_FACTOR = 1.03
+# Keep enough recipients below the 85% inclusion ceiling for the higher TOB
+# target to remain feasible while calibration holds total benefits fixed.
+OTHER_INCOME_SAMPLE_FACTOR = 0.2
 
 EARNINGS = (
     "employment_income_before_lsr",
@@ -91,6 +94,12 @@ class FakeParameters:
         )
 
     def get_child(self, path: str):
+        if path == "gov.irs.gross_income.sources":
+            return lambda instant: [
+                name
+                for names in pipeline.SCALE_LISTS.values()
+                for name in names
+            ]
         return FakeSeries(self, path)
 
 
@@ -133,6 +142,8 @@ def make_frame(year: int, *, seed: int = 0, households: int = 120) -> pd.DataFra
         columns[name] = np.where(
             rng.uniform(size=n) < 0.4, rng.lognormal(9, 1, size=n), 0.0
         )
+        if name in pipeline.OTHER_INCOME_SCALE_CANDIDATES:
+            columns[name] *= OTHER_INCOME_SAMPLE_FACTOR
     columns["person_id"] = np.arange(n) + 1
     columns["household_id"] = person_household
     columns["person_household_id"] = person_household
@@ -283,6 +294,9 @@ class FakeEngine:
 
         module.base_microsimulation = base_microsimulation
         module.dataset_microsimulation = dataset_microsimulation
+        module.stage_a_microsimulation = (
+            lambda base_dataset, year, reform=None: base_microsimulation(reform=reform)
+        )
         return module
 
     def write_year_h5(self, df, year, output_path, *, reform=None):

@@ -96,6 +96,14 @@ def test_each_list_replaces_pre_2x_names_with_their_stored_leaves(list_name):
     expected = []
     for name in PRE_2X_LISTS[list_name]:
         expected.extend(pipeline.PRE_2X_NAME_LEAVES.get(name, (name,)))
+    if list_name in ("OTHER_INCOME_SCALE_CANDIDATES", "GROWTH_CAP_VARIABLES"):
+        index = expected.index("taxable_ira_distributions") + 1
+        expected[index:index] = [
+            "taxable_sep_distributions",
+            "taxable_401k_distributions",
+            "taxable_403b_distributions",
+            "keogh_distributions",
+        ]
     assert list(CURRENT_LISTS[list_name]) == expected
 
 
@@ -575,6 +583,14 @@ def test_economic_reform_reaches_every_simulation_ahead_of_tax(
             assert parts == (FakeEconomicReform, *fakes.flatten_reform(tax))
     assert metadata["economic_assumption"]["active"] is True
     assert metadata["economic_assumption"]["reform"].endswith(":FakeEconomicReform")
+    assert metadata["economic_assumption"]["inputs_aged_under_assumption"] is True
+    assert metadata["economic_assumption"]["input_aging_end_year"] == year
+    from src.tax_assumption_loader import H5_ECONOMIC_ASSUMPTION_ATTR
+
+    with h5py.File(tmp_path / f"{year}.h5", "r") as handle:
+        assert json.loads(handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR]) == metadata[
+            "economic_assumption"
+        ]
     assert sentinel["economic_assumption_reform"].endswith(":FakeEconomicReform")
 
 
@@ -588,6 +604,37 @@ def test_without_the_hook_the_build_is_unchanged(monkeypatch, tmp_path):
         "applies_before": "tax_assumption",
         "reform": None,
     }
+
+
+def test_economic_marker_precedes_final_build_validation(monkeypatch, tmp_path):
+    from src.tax_assumption_loader import (
+        H5_ECONOMIC_ASSUMPTION_ATTR,
+        load_tax_assumption_metadata_for_dataset,
+    )
+
+    engine = FakeEngine(2030, fakes.make_frame(2030), _growth_rates())
+    fakes.install(monkeypatch, engine)
+    monkeypatch.setattr(
+        pipeline,
+        "evaluate_publication_gates",
+        lambda *args: {"passed": False, "failures": ["validation failed"]},
+    )
+    with pytest.raises(RuntimeError, match="publication gates failed"):
+        pipeline.build_year(
+            2030,
+            "fake-base",
+            tmp_path,
+            economic_assumption_reform=FakeEconomicReform,
+            economic_assumption_metadata={"module_sha256": "a" * 64},
+        )
+    assert not (tmp_path / "2030.h5.metadata.json").exists()
+    with h5py.File(tmp_path / "2030.h5", "r") as handle:
+        record = json.loads(handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR])
+    assert record["active"] is True
+    assert record["inputs_aged_under_assumption"] is True
+    assert record["input_aging_end_year"] == 2030
+    with pytest.raises(FileNotFoundError, match="sidecar"):
+        load_tax_assumption_metadata_for_dataset(tmp_path / "2030.h5")
 
 
 def test_cap_read_sees_the_economic_reform(monkeypatch, tmp_path):

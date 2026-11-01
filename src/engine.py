@@ -1,9 +1,9 @@
 """Construct PolicyEngine US microsimulations through policyengine.py.
 
-Every simulation in this project is built through policyengine.py's certified
-("managed") release bundle, never by constructing ``policyengine_us``
-simulations directly. The managed path enforces the model<->data version
-pairing recorded in the release manifest: a populace dataset run under a model
+Certified-base simulations use policyengine.py's managed release bundle or
+its dataset-resolution helpers. Project-built and explicit local datasets
+retain the certified runtime version gate. The managed path enforces the
+model<->data version pairing recorded in the release manifest: a populace dataset run under a model
 version it was not calibrated for silently produces wrong aggregates. (Loaded
 through bare ``policyengine_us`` on a mismatched runtime, the certified base's
 income tax landed at 75% of the CBO target; through the managed path on the
@@ -13,6 +13,7 @@ matched version it lands at 99%.)
 from __future__ import annotations
 
 import importlib.metadata as _metadata
+from pathlib import Path
 from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
@@ -44,6 +45,72 @@ def dataset_microsimulation(dataset: Any, reform: Any = None, **kwargs: Any):
     from policyengine_us import Microsimulation
 
     return Microsimulation(dataset=str(dataset), reform=reform, **kwargs)
+
+
+def _certified_base_source() -> tuple[str, str]:
+    """Resolve the same pinned source and local mirror as the managed loader."""
+    from policyengine.provenance.dataset_sources import materialize_dataset_source
+    from policyengine.provenance.manifest import (
+        resolve_local_managed_dataset_source,
+        resolve_managed_dataset_reference,
+    )
+
+    uri = resolve_managed_dataset_reference("us")
+    source = resolve_local_managed_dataset_source("us", uri)
+    return uri, str(materialize_dataset_source(source))
+
+
+def _is_single_year_entity_file(source: str) -> bool:
+    import pandas as pd
+
+    with pd.HDFStore(source, mode="r") as store:
+        keys = set(store.keys())
+    return {"/person", "/household", "/tax_unit"}.issubset(keys) and not any(
+        key.startswith(("/person/", "/household/", "/tax_unit/")) for key in keys
+    )
+
+
+def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
+    """Load Stage A, aging single-year inputs only through the requested year.
+
+    An economic reform must reach dataset extension as well as calculation.
+    Certified bases use the managed loader's resolution helpers and bundle
+    record; explicit local bases retain the project runtime gate.
+    """
+    _require_certified_runtime()
+    local = bool(base_dataset) and Path(str(base_dataset)).is_file()
+    uri, source = (None, str(base_dataset)) if local else _certified_base_source()
+    single_year = _is_single_year_entity_file(source)
+    if reform is not None and not single_year:
+        raise ValueError(
+            f"Economic input aging requires an entity-level single-year base: {source}. "
+            "A multi-year base may already contain values aged on another path."
+        )
+    from policyengine_us import Microsimulation
+
+    if reform is None:
+        kwargs = {"dataset_end_year": year} if single_year else {}
+        sim = Microsimulation(dataset=source, **kwargs)
+    else:
+        from policyengine_us.data.dataset_schema import USSingleYearDataset
+        from policyengine_us.data.economic_assumptions import extend_single_year_dataset
+        from policyengine_us.system import CountryTaxBenefitSystem
+
+        system = CountryTaxBenefitSystem(reform=reform)
+        if not getattr(system, "_per_capita_uprating_built", False):
+            raise RuntimeError(
+                "Economic input aging requires CountryTaxBenefitSystem to run "
+                "add_per_capita_uprating after applying the reform."
+            )
+        dataset = extend_single_year_dataset(
+            USSingleYearDataset(file_path=source), end_year=year, system=system
+        )
+        sim = Microsimulation(dataset=dataset, reform=reform)
+    if uri is not None:
+        from policyengine.tax_benefit_models.us.model import _managed_release_bundle
+
+        sim.policyengine_bundle = _managed_release_bundle(uri, source)
+    return sim
 
 
 def certified_base_uri() -> str:

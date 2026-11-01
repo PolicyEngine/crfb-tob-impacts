@@ -33,6 +33,7 @@ TAX_ASSUMPTION_FACTORY_ALIASES = {
 }
 H5_LONG_TERM_CONTRACT_ATTR = "policyengine_long_term_contract"
 H5_TAX_ASSUMPTION_ATTR = "policyengine_long_term_tax_assumption"
+H5_ECONOMIC_ASSUMPTION_ATTR = "policyengine_economic_assumption"
 DEFAULT_REQUIRED_TARGET_SOURCE = "trustees_2025_current_law"
 DEFAULT_MINIMUM_CALIBRATION_QUALITY = "exact"
 ALLOW_EXTERNAL_TAX_ASSUMPTION_ENV = "CRFB_ALLOW_EXTERNAL_TAX_ASSUMPTION_MODULE"
@@ -327,15 +328,26 @@ def _load_embedded_h5_tax_assumption_metadata(dataset_path: Path) -> dict:
     try:
         with h5py.File(dataset_path, "r") as store:
             contract = _load_json_h5_attr(store.attrs, H5_LONG_TERM_CONTRACT_ATTR)
-            if contract:
-                return contract
-
-            tax_assumption = _load_json_h5_attr(
-                store.attrs,
-                H5_TAX_ASSUMPTION_ATTR,
-            )
-            if tax_assumption:
-                return {"tax_assumption": tax_assumption}
+            if not contract:
+                tax_assumption = _load_json_h5_attr(
+                    store.attrs,
+                    H5_TAX_ASSUMPTION_ATTR,
+                )
+                contract = {"tax_assumption": tax_assumption} if tax_assumption else {}
+            if H5_ECONOMIC_ASSUMPTION_ATTR in store.attrs:
+                economic_assumption = _load_json_h5_attr(
+                    store.attrs, H5_ECONOMIC_ASSUMPTION_ATTR
+                )
+                if (
+                    "economic_assumption" in contract
+                    and contract["economic_assumption"] != economic_assumption
+                ):
+                    raise ValueError(
+                        f"Dataset {dataset_path}: embedded economic assumption "
+                        "records disagree."
+                    )
+                contract["economic_assumption"] = economic_assumption
+            return contract
     except OSError:
         return {}
 
@@ -343,14 +355,43 @@ def _load_embedded_h5_tax_assumption_metadata(dataset_path: Path) -> dict:
 
 
 def load_tax_assumption_metadata_for_dataset(dataset_name: Any) -> dict:
+    """Read the sidecar and check its economic record against the H5.
+
+    Legacy files without an embedded record retain their sidecar behavior.
+    An H5 naming an economic assumption requires the complete sidecar, and
+    every field of its economic record must match the embedded copy.
+    """
+    dataset_path = dataset_path_for_contract(dataset_name)
+    embedded = (
+        _load_embedded_h5_tax_assumption_metadata(dataset_path)
+        if dataset_path is not None
+        else {}
+    )
     metadata_path = metadata_path_for_dataset(dataset_name)
     if metadata_path is not None and metadata_path.exists():
-        return json.loads(metadata_path.read_text(encoding="utf-8"))
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        if (
+            "economic_assumption" in embedded
+            and embedded["economic_assumption"] != metadata.get("economic_assumption")
+        ):
+            raise ValueError(
+                f"Dataset {dataset_path}: economic assumption records in the H5 "
+                f"and sidecar {metadata_path} disagree."
+            )
+        return metadata
 
-    dataset_path = dataset_path_for_contract(dataset_name)
-    if dataset_path is None:
+    contract = economic_assumption_contract_from_metadata(embedded)
+    if contract.active:
+        raise FileNotFoundError(
+            f"Dataset {dataset_path} names the economic assumption "
+            f"{contract.reform!r}, but its sidecar {metadata_path} is missing. "
+            "Refusing to score without the build metadata."
+        )
+    # An inactive economy record cannot stand in for the tax contract that
+    # long-run dataset readers already require when no sidecar is available.
+    if set(embedded) == {"economic_assumption"}:
         return {}
-    return _load_embedded_h5_tax_assumption_metadata(dataset_path)
+    return embedded
 
 
 def tax_assumption_contract_from_metadata(
