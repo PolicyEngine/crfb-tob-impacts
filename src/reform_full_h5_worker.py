@@ -36,10 +36,12 @@ from .reform_full_h5_output_manifest import (
     full_h5_output_variable_manifest,
 )
 from .tax_assumption_loader import (
-    load_tax_assumption_reform_for_metadata,
-    load_tax_assumption_reform_for_dataset,
-    tax_assumption_contract_from_metadata,
-    tax_assumption_contract_for_dataset,
+    compose_reforms,
+    economic_assumption_output_metadata,
+    load_scoring_assumption_reform_for_dataset,
+    load_scoring_assumption_reform_for_metadata,
+    scoring_assumptions_for_dataset,
+    scoring_assumptions_from_metadata,
 )
 
 
@@ -116,16 +118,17 @@ def build_policy_reform(reform_id: str, scoring_type: str) -> Any:
     raise ValueError(f"Unsupported scoring_type: {scoring_type}")
 
 
-def _compose_reforms(first: Any | None, second: Any) -> Any:
-    return (first, second) if first is not None else second
-
-
 def install_behavioral_baseline_tax_system(
     sim: Any,
     *,
     baseline_reform: Any | None,
 ) -> dict[str, Any]:
-    """Make LSR comparisons use the same current-law baseline as static scoring."""
+    """Make LSR comparisons use the same baseline as static scoring.
+
+    ``baseline_reform`` is the dataset's economic assumption reform followed by
+    its tax assumption reform, the same reform the scored simulation applies
+    ahead of the policy, so the response measures the policy alone.
+    """
 
     if baseline_reform is None:
         return {
@@ -862,16 +865,21 @@ def run_reform_full_h5_cell(
         if baseline_dataset_validation
         else None
     )
+    # The baseline reform is the dataset's economic assumption reform, then its
+    # tax assumption reform. The scored simulation applies the policy after it
+    # and the behavioral baseline branch applies it alone, so both carry the
+    # assumptions the dataset was calibrated under.
     if verified_metadata is not None:
-        current_law_reform = load_tax_assumption_reform_for_metadata(
+        assumptions = scoring_assumptions_from_metadata(verified_metadata, year)
+        baseline_reform = load_scoring_assumption_reform_for_metadata(
             verified_metadata,
             year,
         )
-        tax_contract = tax_assumption_contract_from_metadata(verified_metadata, year)
     else:
-        current_law_reform = load_tax_assumption_reform_for_dataset(dataset_path, year)
-        tax_contract = tax_assumption_contract_for_dataset(dataset_path, year)
-    combined_reform = _compose_reforms(current_law_reform, policy_reform)
+        assumptions = scoring_assumptions_for_dataset(dataset_path, year)
+        baseline_reform = load_scoring_assumption_reform_for_dataset(dataset_path, year)
+    tax_contract = assumptions.tax_assumption
+    combined_reform = compose_reforms(baseline_reform, policy_reform)
 
     from .engine import dataset_microsimulation
 
@@ -880,7 +888,7 @@ def run_reform_full_h5_cell(
     if scoring_type == "behavioral":
         behavioral_baseline_installation = install_behavioral_baseline_tax_system(
             sim,
-            baseline_reform=current_law_reform,
+            baseline_reform=baseline_reform,
         )
     h5_metadata = save_complete_microsimulation_h5(
         sim,
@@ -925,6 +933,9 @@ def run_reform_full_h5_cell(
             "start_year": tax_contract.start_year,
             "end_year": tax_contract.end_year,
         },
+        "economic_assumption": economic_assumption_output_metadata(
+            assumptions.economic_assumption
+        ),
         "behavioral_baseline_installation": behavioral_baseline_installation,
         "runtime_provenance": runtime_provenance,
         "full_reform_output_h5_saved": True,
