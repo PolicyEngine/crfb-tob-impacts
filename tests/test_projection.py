@@ -167,6 +167,32 @@ def test_entropy_converges_below_the_objectives_rounding():
     assert info["dual_gradient_norm"] < 1e-10
 
 
+def test_entropy_accepts_on_the_final_weights_gradient():
+    # The loop ends on its iteration budget with the last step already inside
+    # the limit, while the gradient it last read still sits above it.
+    baseline = np.full(4, 1e6)
+    A = np.column_stack([np.ones(4), 1 + 0.000406 * np.arange(4)])
+    targets = A.T @ (baseline * np.array([0.5, 0.7, 1.1, 1.7]))
+    _, info = calibrate_entropy_constraints(A, targets, baseline)
+    assert info["dual_gradient_norm"] <= 1e-6
+
+
+@pytest.mark.parametrize("target", [np.inf, np.nan, -np.inf])
+def test_entropy_refuses_a_target_that_is_not_finite(target):
+    rows = 2000
+    with pytest.raises(RuntimeError, match="positive finite targets"):
+        calibrate_entropy_constraints(
+            np.ones((rows, 4)), [rows, rows, target, rows], np.ones(rows)
+        )
+
+
+def test_entropy_refuses_a_diagnostic_that_is_not_a_number():
+    A = np.ones((10, 2))
+    A[3, 1] = np.nan
+    with pytest.raises(RuntimeError, match="did not converge"):
+        calibrate_entropy_constraints(A, [10.0, 10.0], np.ones(10))
+
+
 def test_entropy_raises_on_infeasible_targets():
     A, targets, base = _toy_problem()
     bad = targets.copy()

@@ -70,6 +70,7 @@ def year_file_dataset(path: Any, year: int):
     """
     import h5py
     import pandas as pd
+    from policyengine_core.periods import ETERNITY
     from policyengine_us.data.dataset_schema import (
         USMultiYearDataset,
         USSingleYearDataset,
@@ -79,12 +80,14 @@ def year_file_dataset(path: Any, year: int):
     tables: dict[str, dict] = {}
     with h5py.File(path, "r") as handle:
         for variable, periods in handle.items():
+            definition = system.variables[variable]
             # A lifetime input holds one value under ETERNITY, not the year.
-            period = str(year) if str(year) in periods else "ETERNITY"
+            lifetime = definition.definition_period == ETERNITY
+            period = "ETERNITY" if lifetime and "ETERNITY" in periods else str(year)
             values = periods[period][()]
             if values.dtype.kind == "S":
                 values = values.astype(str)
-            entity = system.variables[variable].entity.key
+            entity = definition.entity.key
             tables.setdefault(entity, {})[variable] = values
     frames = {entity: pd.DataFrame(columns) for entity, columns in tables.items()}
     return USMultiYearDataset(

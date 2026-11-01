@@ -26,8 +26,8 @@ def year_file(tmp_path, monkeypatch):
     engine = load_engine(monkeypatch)
     monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
     monkeypatch.setitem(sys.modules, "src.engine", engine)
-    # Household 30 holds two tax units, and household 20 one couple. Group ids
-    # run out of order, so sorting by id can't line tables up by accident.
+    # Household 30 holds two tax units, and household 20 one couple. The file
+    # sorts group tables by id, while people here still reach them out of order.
     household = np.array([10, 20, 20, 30, 30, 40])
     tax_unit = np.array([9, 2, 2, 7, 4, 1])
     frame = pd.DataFrame(
@@ -95,6 +95,24 @@ def test_chunked_vectors_match_the_whole_file(year_file, n_chunks):
     assert sum(values.sum() for name, values in whole.items() if "tob" in name) > 0
     for name in VARIABLES:
         np.testing.assert_allclose(chunked[name], whole[name], rtol=1e-5, atol=0.01)
+
+
+def test_vectors_follow_a_group_table_out_of_id_order(year_file):
+    import h5py
+    from policyengine_us.system import system
+
+    engine, path = year_file
+    expected = engine.household_vectors(path, YEAR, VARIABLES, n_chunks=2)
+    with h5py.File(path, "r+") as handle:
+        ids = handle[f"tax_unit_id/{YEAR}"][()]
+        assert (ids == np.sort(ids)).all()
+        for variable, periods in handle.items():
+            if system.variables[variable].entity.key == "tax_unit":
+                periods[str(YEAR)][...] = periods[str(YEAR)][()][::-1]
+    reversed_table = engine.household_vectors(path, YEAR, VARIABLES, n_chunks=2)
+    assert expected["income_tax"].any()
+    for name in VARIABLES:
+        np.testing.assert_allclose(reversed_table[name], expected[name], rtol=1e-5)
 
 
 def test_chunking_leaves_room_for_the_guards_frames(year_file):
@@ -168,11 +186,12 @@ def test_year_file_reads_a_lifetime_input(year_file):
     assert entities["person"].is_household_head.tolist() == heads.tolist()
 
 
-def test_year_file_refuses_a_variable_it_cannot_date(year_file):
+@pytest.mark.parametrize("period", [str(YEAR + 1), "ETERNITY"])
+def test_year_file_refuses_an_annual_input_outside_the_year(year_file, period):
     import h5py
 
     engine, path = year_file
     with h5py.File(path, "r+") as handle:
-        handle.create_dataset(f"is_blind/{YEAR + 1}", data=np.zeros(6, dtype=bool))
+        handle.create_dataset(f"is_blind/{period}", data=np.zeros(6, dtype=bool))
     with pytest.raises(KeyError):
         engine.year_file_dataset(path, YEAR)

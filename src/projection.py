@@ -229,13 +229,14 @@ def calibrate_entropy_constraints(
     A = np.asarray(A, dtype=float)
     targets = np.asarray(targets, dtype=float)
     baseline_weights = np.asarray(baseline_weights, dtype=float)
-    if (targets <= 0).any():
+    usable = np.isfinite(targets) & (targets > 0)
+    if not usable.all():
         # All constraint columns in this pipeline are nonnegative
         # (member counts, benefits, payroll, TOB revenue), so a
         # nonpositive target can never be met with positive weights.
         raise RuntimeError(
-            "Entropy calibration requires strictly positive targets; got "
-            f"{targets[targets <= 0]}."
+            "Entropy calibration requires strictly positive finite targets; "
+            f"got {targets[~usable]}."
         )
 
     scales = np.maximum(
@@ -311,10 +312,12 @@ def calibrate_entropy_constraints(
 
     w = weights_for(beta)
     achieved = A.T @ w
+    gradient_norm = float(np.max(np.abs(A_scaled.T @ w - targets_scaled)))
     with np.errstate(divide="ignore", invalid="ignore"):
         pct_errors = np.abs(achieved - targets) / np.maximum(np.abs(targets), 1e-9)
     max_pct = float(np.max(pct_errors))
-    if gradient_norm > 1e-6 or max_pct > 1e-4:
+    # Written so a NaN diagnostic fails instead of passing both comparisons.
+    if not (gradient_norm <= 1e-6 and max_pct <= 1e-4):
         raise RuntimeError(
             "Entropy calibration did not converge: max constraint error "
             f"{max_pct:.3%}, dual gradient norm {gradient_norm:.2e}."

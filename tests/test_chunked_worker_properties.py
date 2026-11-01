@@ -28,6 +28,19 @@ PAIRS = (
     ("spm_unit", "tax_unit"),
     ("tax_unit", "person"),
     ("household", "person"),
+    ("tax_unit", "tax_unit"),
+    ("person", "person"),
+)
+# Each kind of column a variable can hold, with its awkward values.
+COLUMNS = (
+    (
+        np.float32,
+        st.one_of(st.just(float("nan")), AMOUNTS, st.just(float(2**24))),
+    ),
+    (np.float64, st.floats(-1e12, 1e12, allow_nan=False)),
+    (np.int64, st.integers(2**24, 2**40)),
+    (np.int32, st.integers(-(2**31), 2**31 - 1)),
+    (np.bool_, st.booleans()),
 )
 
 
@@ -99,9 +112,9 @@ def test_mapping_agrees_with_core(people, pair, data):
     }
     tables_with_people = {**tables, "person": people.person_id.to_numpy()}
     size = len(tables_with_people[native])
-    amounts = st.one_of(st.just(float("nan")), AMOUNTS, st.just(float(2**24)))
+    dtype, amounts = data.draw(st.sampled_from(COLUMNS))
     values = np.array(
-        data.draw(st.lists(amounts, min_size=size, max_size=size)), dtype=np.float32
+        data.draw(st.lists(amounts, min_size=size, max_size=size)), dtype=dtype
     )
     mapped = _values_on_entity(
         values,
@@ -111,9 +124,9 @@ def test_mapping_agrees_with_core(people, pair, data):
         people=people,
         target_ids=tables_with_people[target],
     )
-    np.testing.assert_array_equal(
-        mapped, core_map_result(values, native, target, people, tables)
-    )
+    expected = core_map_result(values, native, target, people, tables)
+    assert mapped.dtype == expected.dtype
+    np.testing.assert_array_equal(mapped, expected)
 
 
 @pytest.mark.parametrize(
