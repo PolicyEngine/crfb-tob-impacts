@@ -295,7 +295,7 @@ class FakeEngine:
         module.base_microsimulation = base_microsimulation
         module.dataset_microsimulation = dataset_microsimulation
         module.stage_a_microsimulation = (
-            lambda base_dataset, year, reform=None: base_microsimulation(reform=reform)
+            lambda base_dataset, reform=None: base_microsimulation(reform=reform)
         )
         return module
 

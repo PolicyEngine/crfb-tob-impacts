@@ -803,9 +803,9 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
         if var_name in ("household_weight", "person_weight"):
             continue
         if var_name == "person_id":
-            # Its formula renumbers rows past the stored years, while group
-            # ids have no formula and carry forward. Claim-age draws key on
-            # person_id, so every year keeps the source ids.
+            # Its formula numbers rows in any year without a stored value,
+            # while group ids have no formula and carry forward. Claim-age
+            # draws key on person_id, so every year keeps the source ids.
             df = df.rename(columns={column: new_column})
             continue
         try:
@@ -1220,7 +1220,7 @@ def build_year(
     # outputs and shadow their formulas downstream. The certified populace base
     # is the default; an explicit local base_dataset path (a candidate build not
     # yet certified) is loaded as an unmanaged dataset, for sentinels.
-    sim = stage_a_microsimulation(base_dataset, year, reform=economic_assumption_reform)
+    sim = stage_a_microsimulation(base_dataset, reform=economic_assumption_reform)
     df = materialize_year_frame(sim, year)
     reject_pre_2x_names_in_frame(df, year)
     assert_gross_income_sources_classified(df, sim, year)

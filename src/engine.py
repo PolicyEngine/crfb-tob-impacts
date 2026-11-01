@@ -18,11 +18,6 @@ from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
 
-# Last year Stage A stores. Each stored year costs memory in proportion to the
-# base. Past this year Core uprates each input from its last stored year with
-# the simulation's own parameters, which reach the same values.
-STAGE_A_STORED_END_YEAR = 2036
-
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
     """A Microsimulation on the certified populace base.
@@ -75,13 +70,16 @@ def _is_single_year_entity_file(source: str) -> bool:
     )
 
 
-def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
-    """Load Stage A, storing aged inputs through ``year`` at the latest.
+def stage_a_microsimulation(base_dataset: Any, reform: Any = None):
+    """Load Stage A with only the base year stored.
 
-    Storage stops at ``STAGE_A_STORED_END_YEAR``, and later years age lazily.
-    An economic reform must reach dataset extension as well as calculation.
-    Certified bases use the managed loader's resolution helpers and bundle
-    record; explicit local bases retain the project runtime gate.
+    Each stored year holds its own copy of the inputs it changes, so storing
+    every year through 2100 would not fit in memory on the full base. The
+    constructor's default extension would also age inputs on default parameters
+    through its last year. Instead, Core uprates each input from the base year
+    with the simulation's own parameters. Certified bases use the managed
+    loader's resolution helpers and bundle record; explicit local bases retain
+    the project runtime gate.
     """
     _require_certified_runtime()
     local = bool(base_dataset) and Path(str(base_dataset)).is_file()
@@ -94,27 +92,24 @@ def stage_a_microsimulation(base_dataset: Any, year: int, reform: Any = None):
         )
     from policyengine_us import Microsimulation
 
-    stored_end_year = min(year, STAGE_A_STORED_END_YEAR)
-    if reform is None:
-        kwargs = {"dataset_end_year": stored_end_year} if single_year else {}
-        sim = Microsimulation(dataset=source, **kwargs)
-    else:
-        from policyengine_us.data.dataset_schema import USSingleYearDataset
-        from policyengine_us.data.economic_assumptions import extend_single_year_dataset
-        from policyengine_us.system import CountryTaxBenefitSystem
-
-        system = CountryTaxBenefitSystem(reform=reform)
-        if not getattr(system, "_per_capita_uprating_built", False):
-            raise RuntimeError(
-                "Economic input aging requires CountryTaxBenefitSystem to run "
-                "add_per_capita_uprating after applying the reform."
-            )
-        dataset = extend_single_year_dataset(
-            USSingleYearDataset(file_path=source),
-            end_year=stored_end_year,
-            system=system,
+    dataset = source
+    if single_year:
+        from policyengine_us.data.dataset_schema import (
+            USMultiYearDataset,
+            USSingleYearDataset,
         )
-        sim = Microsimulation(dataset=dataset, reform=reform)
+
+        # The constructor extends a single-year file but takes a multi-year
+        # dataset as it stands.
+        dataset = USMultiYearDataset(datasets=[USSingleYearDataset(file_path=source)])
+    sim = Microsimulation(dataset=dataset, reform=reform)
+    if reform is not None and not getattr(
+        sim.tax_benefit_system, "_per_capita_uprating_built", False
+    ):
+        raise RuntimeError(
+            "Economic input aging requires the simulation's system to run "
+            "add_per_capita_uprating after applying the reform."
+        )
     if uri is not None:
         from policyengine.tax_benefit_models.us.model import _managed_release_bundle
 

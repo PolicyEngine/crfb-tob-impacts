@@ -90,17 +90,15 @@ relaunch contract.
 
 For local projected-year builds, `scripts/build_projected_datasets.py` accepts
 `--economic-assumption-reform MODULE:ATTRIBUTE`. This hook is off by default.
-When enabled, Stage A requires an entity-level single-year base and extends it
-with the reformed system's per-capita uprating series, through the requested
-year or `STAGE_A_STORED_END_YEAR`, whichever comes first. Each stored year holds
-a copy of the inputs it changes, so storing every year through 2100 would not
-fit in memory on the full base. Past the stored years, Core uprates each input
-from its last stored year with the simulation's own parameters, so the inputs
-and the income-growth caps stay on the same economic path. A test compares this
-path with a fully stored one on the real engine. A base that already contains
-multiple years is refused because its later inputs may carry a different aging
-path. Builds without the hook stop entity-level input extension at the same
-year.
+When enabled, Stage A requires an entity-level single-year base and stores only
+its base year. Each stored year holds a copy of the inputs it changes, so storing
+every year through 2100 would not fit in memory on the full base. Core uprates
+each input from the base year with the simulation's own parameters, so the
+inputs and the income-growth caps stay on the same economic path. A test
+compares this path with a fully stored one on the real engine. A base that
+already contains multiple years is refused because its later inputs may carry a
+different aging path. Builds without the hook also store only the base year of
+an entity-level file.
 
 The year frame keeps the base file's `person_id` in every year. Its formula
 numbers rows past the stored years, and claim-age draws key on it. Group IDs

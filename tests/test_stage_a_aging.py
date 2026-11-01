@@ -53,7 +53,7 @@ def test_stage_a_rejects_multiyear_base_naming_file(monkeypatch, tmp_path):
         store["person/2024"] = pd.DataFrame({"person_id": [1]})
         store["person/2050"] = pd.DataFrame({"person_id": [1]})
     with pytest.raises(ValueError, match="already_aged.h5"):
-        engine.stage_a_microsimulation(path, 2050, reform=object())
+        engine.stage_a_microsimulation(path, reform=object())
 
 
 def test_stage_a_preserves_runtime_gate(monkeypatch):
@@ -61,14 +61,13 @@ def test_stage_a_preserves_runtime_gate(monkeypatch):
     monkeypatch.setattr(engine, "certified_model_version", lambda: "required")
     monkeypatch.setattr(engine._metadata, "version", lambda name: "different")
     with pytest.raises(RuntimeError, match="requires required"):
-        engine.stage_a_microsimulation(None, 2050, reform=object())
+        engine.stage_a_microsimulation(None, reform=object())
 
 
 @pytest.mark.parametrize("local", [False, True])
 @pytest.mark.parametrize("entity_level", [False, True])
-@pytest.mark.parametrize(("year", "stored"), [(2030, 2030), (2050, 2036)])
-def test_no_reform_limits_only_entity_level_sources(
-    monkeypatch, tmp_path, local, entity_level, year, stored
+def test_no_reform_stores_only_the_base_year_of_entity_files(
+    monkeypatch, tmp_path, local, entity_level
 ):
     engine = load_engine(monkeypatch)
     gate = []
@@ -91,14 +90,17 @@ def test_no_reform_limits_only_entity_level_sources(
 
     country.Microsimulation = construct
     monkeypatch.setitem(sys.modules, "policyengine_us", country)
+    schema = types.ModuleType("policyengine_us.data.dataset_schema")
+    schema.USSingleYearDataset = lambda **kwargs: ("single", kwargs)
+    schema.USMultiYearDataset = lambda **kwargs: ("multi", kwargs)
+    monkeypatch.setitem(sys.modules, schema.__name__, schema)
     model = types.ModuleType("policyengine.tax_benefit_models.us.model")
     model._managed_release_bundle = lambda uri, source: {"uri": uri, "source": source}
     monkeypatch.setitem(sys.modules, model.__name__, model)
-    sim = engine.stage_a_microsimulation(path if local else None, year)
+    sim = engine.stage_a_microsimulation(path if local else None)
     assert gate == [True]
-    assert calls == [
-        {"dataset": str(path), **({"dataset_end_year": stored} if entity_level else {})}
-    ]
+    stored = ("multi", {"datasets": [("single", {"file_path": str(path)})]})
+    assert calls == [{"dataset": stored if entity_level else str(path), "reform": None}]
     if not local:
         assert sim.policyengine_bundle == {
             "uri": "hf://pinned@revision",
@@ -132,9 +134,8 @@ def test_certified_source_uses_managed_resolution(monkeypatch):
 
 @pytest.mark.parametrize("local", [False, True])
 @pytest.mark.parametrize("per_capita_built", [False, True])
-@pytest.mark.parametrize(("year", "stored"), [(2030, 2030), (2050, 2036)])
-def test_reform_reaches_extension_and_simulation(
-    monkeypatch, tmp_path, local, per_capita_built, year, stored
+def test_reform_reaches_a_simulation_storing_only_the_base_year(
+    monkeypatch, tmp_path, local, per_capita_built
 ):
     engine = load_engine(monkeypatch)
     monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
@@ -148,37 +149,28 @@ def test_reform_reaches_extension_and_simulation(
     calls = []
     country = types.ModuleType("policyengine_us")
     country.Microsimulation = lambda **kwargs: (
-        calls.append(("sim", kwargs)) or types.SimpleNamespace()
+        calls.append(("sim", kwargs)) or types.SimpleNamespace(tax_benefit_system=system)
     )
     schema = types.ModuleType("policyengine_us.data.dataset_schema")
     schema.USSingleYearDataset = lambda **kwargs: (
         calls.append(("single", kwargs)) or single
     )
-    economic = types.ModuleType("policyengine_us.data.economic_assumptions")
-    economic.extend_single_year_dataset = lambda dataset, **kwargs: (
-        calls.append(("extend", dataset, kwargs)) or multi
-    )
-    systems = types.ModuleType("policyengine_us.system")
-    systems.CountryTaxBenefitSystem = lambda **kwargs: (
-        calls.append(("system", kwargs)) or system
+    schema.USMultiYearDataset = lambda **kwargs: (
+        calls.append(("multi", kwargs)) or multi
     )
     model = types.ModuleType("policyengine.tax_benefit_models.us.model")
     model._managed_release_bundle = lambda uri, source: (uri, source)
-    for module in (country, schema, economic, systems, model):
+    for module in (country, schema, model):
         monkeypatch.setitem(sys.modules, module.__name__, module)
     if not per_capita_built:
         with pytest.raises(RuntimeError, match="add_per_capita_uprating"):
-            engine.stage_a_microsimulation(path if local else None, year, reform=reform)
-        assert calls == [("system", {"reform": reform})]
+            engine.stage_a_microsimulation(path if local else None, reform=reform)
     else:
-        sim = engine.stage_a_microsimulation(
-            path if local else None, year, reform=reform
-        )
-        assert calls == [
-            ("system", {"reform": reform}),
-            ("single", {"file_path": str(path)}),
-            ("extend", single, {"end_year": stored, "system": system}),
-            ("sim", {"dataset": multi, "reform": reform}),
-        ]
+        sim = engine.stage_a_microsimulation(path if local else None, reform=reform)
         if not local:
             assert sim.policyengine_bundle == ("hf://pinned@revision", str(path))
+    assert calls == [
+        ("single", {"file_path": str(path)}),
+        ("multi", {"datasets": [single]}),
+        ("sim", {"dataset": multi, "reform": reform}),
+    ]

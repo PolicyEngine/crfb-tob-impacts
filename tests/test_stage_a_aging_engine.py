@@ -1,4 +1,4 @@
-"""Real-engine agreement between reformed input aging and category caps."""
+"""Real-engine agreement between base-year aging, full storage and category caps."""
 
 from __future__ import annotations
 
@@ -9,16 +9,25 @@ import pytest
 from src import pipeline
 from tests.test_stage_a_aging import entity_file, load_engine
 
+# Each uses an uprating path the growth caps do not: dataset extension resolves
+# the Social Security components through its own override map.
+OTHER_UPRATED_INPUTS = (
+    "veterans_benefits",
+    "social_security_retirement",
+    "social_security_disability",
+    "social_security_survivors",
+    "social_security_dependents",
+)
+
 
 @pytest.fixture(scope="module")
 def aged_frames(tmp_path_factory, request):
     pytest.importorskip("policyengine_us.data.economic_assumptions")
     from policyengine_core.reforms import Reform
     from policyengine_us import Microsimulation
-    from policyengine_us.data import economic_assumptions
     from policyengine_us.data.dataset_schema import USSingleYearDataset
     from policyengine_us.data.economic_assumptions import extend_single_year_dataset
-    from policyengine_us.system import system
+    from policyengine_us.system import CountryTaxBenefitSystem, system
 
     if not getattr(system, "_per_capita_uprating_built", False):
         pytest.skip("requires the per-capita dataset extension API")
@@ -52,61 +61,50 @@ def aged_frames(tmp_path_factory, request):
 
     with pd.HDFStore(path, "a") as store:
         person = store["person"]
-        for name in names:
+        for name in (*names, *OTHER_UPRATED_INPUTS):
             person[name] = np.array([100.0, 200.0, 300.0])
         store["person"] = person
     monkeypatch = pytest.MonkeyPatch()
     request.addfinalizer(monkeypatch.undo)
     engine = load_engine(monkeypatch)
     monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
-    aging_systems = []
-
-    def record_extension(dataset, **kwargs):
-        if kwargs.get("system") is not None:
-            aging_systems.append(kwargs["system"])
-        return extend_single_year_dataset(dataset, **kwargs)
-
-    monkeypatch.setattr(
-        economic_assumptions, "extend_single_year_dataset", record_extension
-    )
-    sim = engine.stage_a_microsimulation(path, 2050, reform=DoubleGrowth)
-    default = Microsimulation(
-        dataset=str(path), dataset_end_year=engine.STAGE_A_STORED_END_YEAR
-    )
-    # Keep the real constructor's system for the separate manual dataset.
-    (reformed_system,) = aging_systems
+    sim = engine.stage_a_microsimulation(path, reform=DoubleGrowth)
+    default = engine.stage_a_microsimulation(path)
     fully_stored = extend_single_year_dataset(
-        USSingleYearDataset(file_path=str(path)), end_year=2050, system=reformed_system
+        USSingleYearDataset(file_path=str(path)),
+        end_year=2050,
+        system=CountryTaxBenefitSystem(reform=DoubleGrowth),
     )
     manual = Microsimulation(dataset=fully_stored, reform=DoubleGrowth)
     yield {
         "sim": sim,
         "default": default,
         "manual": manual,
-        "stored_end_year": engine.STAGE_A_STORED_END_YEAR,
-        "system": reformed_system,
         "frame": pipeline.materialize_year_frame(sim, 2050),
         "path": path,
     }
 
 
-def test_frame_matches_fully_stored_simulation(aged_frames):
+@pytest.mark.parametrize("year", [2030, 2036, 2037, 2050])
+def test_frame_matches_fully_stored_simulation(aged_frames, year):
     data = aged_frames
+    frame = pipeline.materialize_year_frame(data["sim"], year)
     pd.testing.assert_frame_equal(
-        data["frame"],
-        pipeline.materialize_year_frame(data["manual"], 2050),
+        frame,
+        pipeline.materialize_year_frame(data["manual"], year),
         check_exact=False,
         rtol=1e-6,
     )
     for name in pipeline.GROWTH_CAP_VARIABLES:
         np.testing.assert_allclose(
-            data["frame"][f"{name}__2050"],
-            data["manual"].calculate(name, period=2050).values,
+            frame[f"{name}__{year}"],
+            data["manual"].calculate(name, period=year).values,
             rtol=1e-6,
         )
+    assert frame[f"veterans_benefits__{year}"].iloc[0] > 100
+    np.testing.assert_array_equal(frame[f"person_id__{year}"], [10, 20, 30])
     assert int(data["sim"].default_calculation_period) == 2024
-    np.testing.assert_array_equal(data["frame"]["person_id__2050"], [10, 20, 30])
-    assert data["sim"].dataset.years[-1] == data["stored_end_year"]
+    assert list(data["sim"].dataset.years) == [2024]
     assert data["manual"].dataset.years[-1] == 2050
 
 

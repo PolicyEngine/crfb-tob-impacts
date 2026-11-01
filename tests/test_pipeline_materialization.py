@@ -45,7 +45,7 @@ class ProjectionSimulation:
             raise RuntimeError(f"cannot project {name}")
         values = self.frame[f"{name}__2024"].to_numpy(copy=True)
         if period != 2024 and name == "person_id":
-            # The real formula numbers rows past the stored years.
+            # The real formula numbers rows in years without a stored value.
             values = np.arange(len(values))
         elif period != 2024 and name in (
             "employment_income_before_lsr",
