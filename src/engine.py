@@ -79,7 +79,9 @@ def year_file_dataset(path: Any, year: int):
     tables: dict[str, dict] = {}
     with h5py.File(path, "r") as handle:
         for variable, periods in handle.items():
-            values = periods[str(year)][()]
+            # A lifetime input holds one value under ETERNITY, not the year.
+            period = str(year) if str(year) in periods else "ETERNITY"
+            values = periods[period][()]
             if values.dtype.kind == "S":
                 values = values.astype(str)
             entity = system.variables[variable].entity.key

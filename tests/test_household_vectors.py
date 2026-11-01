@@ -146,3 +146,33 @@ def test_year_file_keeps_entity_rows_and_decodes_strings(year_file, tmp_path):
     assert len(single.household) == 4
     assert len(single.tax_unit) == 5
     assert single.household.county_fips.tolist() == ["06037"] * 4
+
+
+def test_year_file_reads_a_lifetime_input(year_file):
+    import h5py
+    from policyengine_us import Microsimulation
+
+    engine, path = year_file
+    heads = np.array([True, True, False, True, False, True])
+    with h5py.File(path, "r+") as handle:
+        handle.create_dataset("is_household_head/ETERNITY", data=heads)
+    single = engine.year_file_dataset(path, YEAR).get_year(YEAR)
+    assert single.person.is_household_head.tolist() == heads.tolist()
+    _, entities = engine.chunked_entity_tables(
+        path,
+        YEAR,
+        ["is_household_head"],
+        lambda chunk: Microsimulation(dataset=chunk),
+        n_chunks=2,
+    )
+    assert entities["person"].is_household_head.tolist() == heads.tolist()
+
+
+def test_year_file_refuses_a_variable_it_cannot_date(year_file):
+    import h5py
+
+    engine, path = year_file
+    with h5py.File(path, "r+") as handle:
+        handle.create_dataset(f"is_blind/{YEAR + 1}", data=np.zeros(6, dtype=bool))
+    with pytest.raises(KeyError):
+        engine.year_file_dataset(path, YEAR)
