@@ -47,6 +47,18 @@ def dataset_microsimulation(dataset: Any, reform: Any = None, **kwargs: Any):
     return Microsimulation(dataset=str(dataset), reform=reform, **kwargs)
 
 
+def frame_microsimulation(dataset: Any, reform: Any = None):
+    """A Microsimulation on a year frame's in-memory Core dataset.
+
+    The frame supplies every entity, so no base file loads. The project's
+    runtime gate applies as it does to ``dataset_microsimulation``.
+    """
+    _require_certified_runtime()
+    from policyengine_us import Microsimulation
+
+    return Microsimulation(dataset=dataset, reform=reform)
+
+
 def _certified_base_source() -> tuple[str, str]:
     """Resolve the same pinned source and local mirror as the managed loader."""
     from policyengine.provenance.dataset_sources import materialize_dataset_source

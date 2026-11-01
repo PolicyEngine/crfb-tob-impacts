@@ -876,14 +876,7 @@ def write_year_h5(
     df: pd.DataFrame, year: int, output_path: Path, *, reform=None
 ) -> None:
     """Materialize the input dataframe into a runnable PolicyEngine H5."""
-    from policyengine_core.data.dataset import Dataset
-
-    from src.engine import base_microsimulation
-
-    dataset = Dataset.from_dataframe(df, year)
-    sim = base_microsimulation(reform=reform)
-    sim.dataset = dataset
-    sim.build_from_dataset()
+    sim = _sim_from_frame(df, year, reform)
 
     # Dump only the variables the frame intends to ship. Anything else in
     # a holder (defaults, derived caches) would shadow its formula when the
@@ -935,7 +928,7 @@ def write_year_h5(
             group = handle.create_group(variable)
             for period, values in periods.items():
                 group.create_dataset(str(period), data=values)
-    del sim, dataset
+    del sim
     gc.collect()
 
 
@@ -981,21 +974,12 @@ def _household_vectors(sim, year: int):
 
 
 def _sim_from_frame(df: pd.DataFrame, year: int, reform):
-    """In-memory simulation over the current frame (no file round-trip).
-
-    The constructor needs a dataset to scaffold entities before the frame
-    replaces it; the certified populace base (via policyengine.py) supplies it
-    from the managed cache, with no bare-HuggingFace network dependency.
-    """
+    """In-memory simulation over the current frame (no file round-trip)."""
     from policyengine_core.data.dataset import Dataset
 
-    from src.engine import base_microsimulation
+    from src.engine import frame_microsimulation
 
-    dataset = Dataset.from_dataframe(df, year)
-    sim = base_microsimulation(reform=reform)
-    sim.dataset = dataset
-    sim.build_from_dataset()
-    return sim
+    return frame_microsimulation(Dataset.from_dataframe(df, year), reform=reform)
 
 
 def _solve_other_income_gamma(
@@ -1180,11 +1164,11 @@ def build_year(
     """Build one calibrated year dataset; returns the sentinel record.
 
     ``economic_assumption_reform`` (off by default) applies to every
-    simulation in the build. Stage A extends single-year stored inputs through
-    ``year`` using the reformed system's per-capita series. The reform applies
-    alone in the H5 writer and ahead of the tax assumption in the gamma probes
-    and artifact validation. ``economic_assumption_metadata`` records its
-    provenance in both the H5 and the metadata sidecar.
+    simulation in the build. Stage A stores only the base year, and Core ages
+    inputs to ``year`` on the reformed parameters. The reform applies alone in
+    the H5 writer and ahead of the tax assumption in the gamma probes and
+    artifact validation. ``economic_assumption_metadata`` records its provenance
+    in both the H5 and the metadata sidecar.
     """
     from src.engine import dataset_microsimulation, stage_a_microsimulation
 

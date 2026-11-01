@@ -36,17 +36,17 @@ def test_reported_benefits_survive_real_year_writer(tmp_path, monkeypatch):
         }
     )
 
-    def tiny_base(*, reform=None):
-        return engine.Microsimulation(
-            dataset=Dataset.from_dataframe(frame, year), reform=reform
-        )
+    def frame_simulation(dataset, reform=None):
+        return engine.Microsimulation(dataset=dataset, reform=reform)
 
-    # Replace only certified-base resolution; dataframe loading, holders,
-    # H5 writing and the simulation reloaded from the H5 remain real.
+    # Replace only the runtime gate; dataframe loading, holders, H5 writing and
+    # the simulation reloaded from the H5 remain real.
     monkeypatch.setitem(
-        sys.modules, "src.engine", SimpleNamespace(base_microsimulation=tiny_base)
+        sys.modules,
+        "src.engine",
+        SimpleNamespace(frame_microsimulation=frame_simulation),
     )
-    reference = tiny_base()
+    reference = frame_simulation(Dataset.from_dataframe(frame, year))
     benefits = [name.removesuffix("_reported") for name in reported]
     expected = {
         name: np.asarray(reference.calculate(name, period=year)).copy()
