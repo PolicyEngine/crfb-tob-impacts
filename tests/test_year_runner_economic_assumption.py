@@ -168,6 +168,33 @@ def test_reform_scoring_rejects_a_baseline_with_an_assumption_the_dataset_lacks(
         )
 
 
+def test_a_baseline_read_back_from_a_result_row_without_an_assumption_passes(
+    monkeypatch, tmp_path
+):
+    # Result rows write a missing assumption as "", and a baseline rebuilt
+    # from such a row must still match a dataset without one.
+    dataset = sf.write_dataset(tmp_path, YEAR, economic=None)
+    reforms = _record_scenarios(monkeypatch)
+    baseline = year_runner.BaselineResult(
+        *([1.0] * 6),
+        tax_assumption_name=sf.TAX_NAME,
+        tax_assumption_active=True,
+        economic_assumption_reform="",
+        economic_assumption_module_sha256="",
+    )
+    year_runner.compute_reform_result(
+        reform_id="option1",
+        year=YEAR,
+        scoring_type="static",
+        dataset_name=dataset,
+        baseline=baseline,
+        reform_functions={"option1": lambda: FakePolicyReform},
+        behavioral_functions={},
+        employer_net_reforms=frozenset(),
+    )
+    assert reforms == [(FakeTaxReform, FakePolicyReform)]
+
+
 def test_year_runner_behavioral_scoring_refuses_the_economic_assumption(
     monkeypatch, tmp_path
 ):

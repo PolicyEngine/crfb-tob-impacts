@@ -472,11 +472,11 @@ def _validate_baseline_tax_assumption(
     assumptions = _scoring_assumptions(year=year, dataset_name=dataset_name)
     economic = assumptions.economic_assumption
     # A baseline and a reform scored under different economic assumptions
-    # would report the assumption as a policy effect.
-    if (
-        baseline.economic_assumption_reform != economic.reform
-        or baseline.economic_assumption_module_sha256 != economic.module_sha256
-    ):
+    # would report the assumption as a policy effect. Result rows write a
+    # missing assumption as "", so "" and None both mean none.
+    if (baseline.economic_assumption_reform or None) != economic.reform or (
+        baseline.economic_assumption_module_sha256 or None
+    ) != economic.module_sha256:
         raise ValueError(
             "BaselineResult economic assumption does not match dataset metadata "
             f"for {_dataset_path(dataset_name)} in {year}: baseline has "
