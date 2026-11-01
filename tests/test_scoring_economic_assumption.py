@@ -178,6 +178,12 @@ def test_editing_the_module_after_the_build_raises(monkeypatch, tmp_path):
     try:
         with pytest.raises(ValueError, match=built_sha):
             loader.load_economic_assumption_reform_for_metadata(metadata)
+        # A run that loaded the reform before the edit still records what it
+        # applied: the output record does not hash the file again.
+        contract = loader.economic_assumption_contract_from_metadata(metadata)
+        record = loader.economic_assumption_output_metadata(contract)
+        assert record["module_sha256"] == built_sha
+        assert record["loaded_module_file"] == str(module)
     finally:
         sys.modules.pop("edited_assumption_module", None)
 

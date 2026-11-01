@@ -573,16 +573,21 @@ def load_economic_assumption_reform_for_dataset(dataset_name: Any):
 def economic_assumption_output_metadata(
     contract: EconomicAssumptionContract,
 ) -> dict:
-    """The record a scorer writes into its output metadata."""
+    """The record a scorer writes into its output metadata.
+
+    The scorer checked the module hash when it loaded the reform, so this
+    records the contract without hashing the file again: a file edited after
+    the reform loaded would not change the reform the run applied.
+    """
     if not contract.active:
         return {"active": False, "reform": None}
-    provenance = verify_economic_assumption_identity(contract)
+    module = importlib.import_module(contract.reform.partition(":")[0])
     return {
         "active": True,
         "applies_before": ECONOMIC_ASSUMPTION_APPLIES_BEFORE,
         "reform": contract.reform,
         "module_sha256": contract.module_sha256,
-        "loaded_module_file": provenance["module_file"],
+        "loaded_module_file": getattr(module, "__file__", None),
     }
 
 
