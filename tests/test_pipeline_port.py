@@ -588,9 +588,10 @@ def test_economic_reform_reaches_every_simulation_ahead_of_tax(
     from src.tax_assumption_loader import H5_ECONOMIC_ASSUMPTION_ATTR
 
     with h5py.File(tmp_path / f"{year}.h5", "r") as handle:
-        assert json.loads(handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR]) == metadata[
-            "economic_assumption"
-        ]
+        assert (
+            json.loads(handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR])
+            == metadata["economic_assumption"]
+        )
     assert sentinel["economic_assumption_reform"].endswith(":FakeEconomicReform")
 
 
@@ -729,3 +730,62 @@ def test_build_year_is_deterministic(monkeypatch, tmp_path):
         first[0].written[str(tmp_path / "a" / "2040.h5")],
         second[0].written[str(tmp_path / "b" / "2040.h5")],
     )
+
+
+def _solve_gamma(monkeypatch, tmp_path, frame, written, vectors):
+    def write(probe, year, path, *, reform=None):
+        written.append(probe.copy())
+        path.write_bytes(b"probe")
+
+    monkeypatch.setattr(pipeline, "write_year_h5", write)
+    monkeypatch.setattr(pipeline, "_household_vectors", vectors)
+    return pipeline._solve_other_income_gamma(
+        frame,
+        2040,
+        tmp_path / "2040.h5",
+        None,
+        None,
+        ["dividends"],
+        np.array([True, True, False]),
+        np.array([1.0]),
+        np.zeros(3, dtype=int),
+        {"oasdi_tob": 63.0, "hi_tob": 0.0},
+    )
+
+
+def test_gamma_probes_scale_only_beneficiaries_by_the_recorded_gamma(
+    monkeypatch, tmp_path
+):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0], "wages": [1.0, 2.0, 3.0]})
+    original = frame.copy()
+    written = []
+
+    def vectors(path, year, reform):
+        assert path.exists()
+        return {
+            "oasdi_tob": np.array([written[-1].dividends.sum()]),
+            "hi_tob": np.array([0.0]),
+        }
+
+    gamma, probes = _solve_gamma(monkeypatch, tmp_path, frame, written, vectors)
+
+    assert gamma == pytest.approx(1.1, abs=0.05)
+    assert len(probes) == len(written) >= 2
+    for probe, record in zip(written, probes):
+        scale = record["gamma"]
+        np.testing.assert_allclose(probe.dividends, [10 * scale, 20 * scale, 30])
+        np.testing.assert_array_equal(probe.wages, original.wages)
+        assert record["total_tob"] == pytest.approx(probe.dividends.sum())
+    pd.testing.assert_frame_equal(frame, original)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_failed_gamma_probe_leaves_no_file(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+
+    def vectors(path, year, reform):
+        raise RuntimeError("probe failed")
+
+    with pytest.raises(RuntimeError, match="probe failed"):
+        _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+    assert list(tmp_path.iterdir()) == []
