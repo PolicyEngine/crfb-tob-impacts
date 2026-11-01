@@ -1010,19 +1010,22 @@ def _solve_other_income_gamma(
     """
     target_total = tob_targets["oasdi_tob"] + tob_targets["hi_tob"]
     probes: list[dict] = []
-    probe_path = output_path.with_name(f"{output_path.stem}.gamma-probe.h5")
+    # The suffix keeps a probe out of every "*.h5" scan of the output folder.
+    probe_path = output_path.with_suffix(".gamma-probe")
 
     def total_tob_at(gamma: float) -> float:
         probe_df = df.copy()
         scale_frame_columns(
             probe_df, other_income_columns, gamma, rows=beneficiary_person_mask
         )
-        write_year_h5(
-            probe_df, year, probe_path, reform=economic_assumption_reform
-        )
-        del probe_df
-        vectors = _household_vectors(probe_path, year, reform)
-        probe_path.unlink(missing_ok=True)
+        try:
+            write_year_h5(
+                probe_df, year, probe_path, reform=economic_assumption_reform
+            )
+            del probe_df
+            vectors = _household_vectors(probe_path, year, reform)
+        finally:
+            probe_path.unlink(missing_ok=True)
         total = float((vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights)
         probes.append({"gamma": gamma, "total_tob": total})
         _log(
