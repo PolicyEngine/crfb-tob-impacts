@@ -160,6 +160,9 @@ def install_behavioral_baseline_tax_system(
     baseline_system.simulation = sim.baseline
     sim.baseline.tax_benefit_system = baseline_system
     sim.baseline.reform = baseline_reform
+    # The branch's populations and holders still hold its first system, so a
+    # reform that changes a variable's definition wouldn't reach them.
+    sim.baseline._bind_to_tax_benefit_system()
     return {
         "installed": True,
         "method": (
@@ -402,29 +405,25 @@ def _values_on_entity(
     """Map a variable's native array to a manifest entity.
 
     The rule matches ``Simulation.map_result``: people see their group's value,
-    and a larger group sums what it contains. Groups nest within households, so
-    splitting a group's value among its people and summing equals summing it.
+    a group's value splits evenly among its people on the way to another group,
+    and a group sums what its people hold in double precision, so a NaN reaches
+    the total.
     """
     if native == target:
         return values
-    if target == "person":
-        return (
-            pd.Series(values, index=ids)
-            .reindex(people[f"person_{native}_id"].to_numpy())
-            .to_numpy()
-        )
-    owners = people[f"person_{target}_id"].to_numpy()
     if native != "person":
-        owners = (
-            pd.Series(owners, index=people[f"person_{native}_id"].to_numpy())
-            .groupby(level=0)
-            .first()
-            .reindex(ids)
-            .to_numpy()
+        memberships = pd.Index(ids).get_indexer(
+            people[f"person_{native}_id"].to_numpy()
         )
-    return (
-        pd.Series(values).groupby(owners).sum().reindex(target_ids).to_numpy()
-    )
+        if (memberships < 0).any():
+            raise ValueError(f"A person's {native} is missing from its table.")
+        if target == "person":
+            return values[memberships]
+        values = values[memberships] / np.bincount(memberships)[memberships]
+    owners = pd.Index(target_ids).get_indexer(people[f"person_{target}_id"].to_numpy())
+    if (owners < 0).any():
+        raise ValueError(f"A person's {target} is missing from its table.")
+    return np.bincount(owners, weights=values, minlength=len(target_ids))
 
 
 def save_chunked_microsimulation_h5(

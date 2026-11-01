@@ -223,6 +223,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     baseline_reform = object()
     baseline_system = SimpleNamespace(simulation=None)
     fallback_system = SimpleNamespace(simulation=None)
+    bound = []
 
     monkeypatch.setattr(
         "policyengine_us.Microsimulation.default_tax_benefit_system",
@@ -233,7 +234,11 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
 
     class _ManagedSimulation:
         def __init__(self):
-            self.baseline = SimpleNamespace()
+            self.baseline = SimpleNamespace(
+                _bind_to_tax_benefit_system=lambda: bound.append(
+                    self.baseline.tax_benefit_system
+                )
+            )
 
         @staticmethod
         def default_tax_benefit_system(*, reform):
@@ -251,6 +256,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     assert sim.baseline.tax_benefit_system is not fallback_system
     assert baseline_system.simulation is sim.baseline
     assert sim.baseline.reform is baseline_reform
+    assert bound == [baseline_system]
 
 
 def test_save_complete_microsimulation_h5_fails_on_unapproved_skipped_variable(

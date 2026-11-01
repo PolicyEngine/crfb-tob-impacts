@@ -80,7 +80,11 @@ class SequencedSimulation(fakes.FakeSimulation):
     def __init__(self, frame, year, reform, growth_rates=None):
         super().__init__(frame, year, reform, growth_rates or {})
         self.cap, self.threshold = parameters_after(reform)
-        self.baseline = SimpleNamespace(reform=None) if reform is not None else None
+        self.baseline = (
+            SimpleNamespace(reform=None, _bind_to_tax_benefit_system=lambda: None)
+            if reform is not None
+            else None
+        )
 
     @staticmethod
     def default_tax_benefit_system(reform=None):
