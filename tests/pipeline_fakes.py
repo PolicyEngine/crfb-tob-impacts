@@ -16,6 +16,7 @@ from types import SimpleNamespace
 import h5py
 import numpy as np
 import pandas as pd
+from policyengine_core.reforms import Reform
 
 from src import pipeline
 
@@ -33,8 +34,12 @@ EARNINGS = (
 )
 
 
-class FakeEconomicReform:
-    """Marker reform: raises the contribution cap."""
+class FakeEconomicReform(Reform):
+    """Marker reform: raises the contribution cap.
+
+    A Reform subclass, so the scorers' loader accepts the module:attribute
+    path a build records for it. The fakes never apply it.
+    """
 
 
 class FakeTaxReform:
