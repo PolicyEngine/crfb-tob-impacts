@@ -383,6 +383,15 @@ def test_a_surplus_at_the_lower_bound_stops_there(gap, elasticity):
     assert gamma == 1 / pipeline.GAMMA_MAX
 
 
+def test_a_shortfall_at_the_bound_stops_even_if_a_lower_gamma_would_reach():
+    # Intended. A second pass per year would double the rebuild, and every
+    # population reading rose with gamma; one household's TOB can fall instead.
+    gamma, probes, accepted = _search(lambda gamma: 8792.5 - 2250 * gamma, 6542.5)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == pipeline.GAMMA_MAX
+    assert len(probes) == 1
+
+
 def test_no_tob_at_gamma_one_still_brackets_the_target():
     def total(gamma):
         return max(0.0, 63.0 * 8 * (gamma - 1))

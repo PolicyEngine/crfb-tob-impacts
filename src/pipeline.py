@@ -1017,8 +1017,8 @@ def _log_slope(first: dict, second: dict) -> float:
 def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     """The next gamma to probe, or None once no gamma in range can get closer.
 
-    Total TOB rises with gamma. Probes on both sides of the target bracket it,
-    and interpolating in logs lands on the answer for a constant elasticity.
+    Probes on both sides of the target bracket it, and interpolating in logs
+    lands on the answer for a constant elasticity.
     Probes all above the target extrapolate down, as far as the lower bound.
     """
     above = sorted(
@@ -1065,8 +1065,10 @@ def _solve_other_income_gamma(
     bounded gamma and the final entropy calibration closes the rest.
 
     The upper bound goes first. Every year measured so far falls short of the
-    target there, and because TOB rises with other income, that one probe
-    settles the year and also supplies its vectors. A year above target at the
+    target there, and total TOB rose with gamma at every population reading, so
+    that one probe settles the year and also supplies its vectors. Those
+    readings carry the shortcut, not the formulas: a household's TOB can fall
+    as its income passes the 0% capital gains band. A year above target at the
     bound searches from gamma 1.
 
     Returns (gamma, probe history, the accepted probe's file digest and
