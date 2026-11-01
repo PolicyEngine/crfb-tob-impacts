@@ -87,3 +87,22 @@ Generated dashboard and paper data should come from the canonical reform
 pipeline above. Historical local scripts and pinned examples may cite older
 PolicyEngine-US versions; do not treat those examples as the active reform
 relaunch contract.
+
+For local projected-year builds, `scripts/build_projected_datasets.py` accepts
+`--economic-assumption-reform MODULE:ATTRIBUTE`. This hook is off by default.
+When enabled, Stage A requires an entity-level single-year base and extends it
+only through the requested year with the reformed system's per-capita uprating
+series. This keeps the stored inputs and the income-growth caps on the same
+economic path. A base that already contains multiple years is refused because
+its later inputs may carry a different aging path. Builds without the hook
+also stop entity-level input extension at the requested year.
+Beyond the runtime's native extension horizon, explicit extension can preserve
+stored entity IDs and produce small floating-point differences from formula
+extrapolation.
+
+The build applies the economic assumption before the tax assumption in every
+simulation. Each year file embeds the economic record in its H5 and repeats
+it in the metadata sidecar, including whether inputs aged under that assumption
+and the extension's end year. Scorers apply the same recorded economic and tax
+assumptions to the baseline and policy simulations. They refuse disagreeing
+records or an H5 that names an economic assumption whose sidecar is missing.
