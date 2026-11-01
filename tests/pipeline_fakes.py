@@ -297,6 +297,18 @@ class FakeEngine:
         module.frame_microsimulation = lambda dataset, reform=None: (
             base_microsimulation(reform=reform)
         )
+
+        def household_vectors(path, year, variables, reform=None):
+            self.constructed.append(("vectors", reform))
+            sim = FakeSimulation(
+                self.written[str(path)], year, reform, self.growth_rates
+            )
+            return {
+                name: sim.calculate(name, period=year, map_to="household").values
+                for name in variables
+            }
+
+        module.household_vectors = household_vectors
         module.stage_a_microsimulation = (
             lambda base_dataset, reform=None: base_microsimulation(reform=reform)
         )
@@ -316,10 +328,6 @@ class FakeEngine:
         with h5py.File(output_path, "w") as handle:
             handle.create_dataset(f"household_weight/{year}", data=weights)
 
-    def sim_from_frame(self, df, year, reform):
-        self.constructed.append(("gamma_probe", reform))
-        return FakeSimulation(df, year, reform, self.growth_rates)
-
 
 def install(monkeypatch, engine: FakeEngine, *, tax_reform=None) -> None:
     """Point build_year at the fake engine and frame-consistent targets."""
@@ -331,7 +339,6 @@ def install(monkeypatch, engine: FakeEngine, *, tax_reform=None) -> None:
         pipeline, "materialize_year_frame", lambda sim, y: sim.frame.copy()
     )
     monkeypatch.setattr(pipeline, "write_year_h5", engine.write_year_h5)
-    monkeypatch.setattr(pipeline, "_sim_from_frame", engine.sim_from_frame)
     monkeypatch.setattr(pipeline, "_tax_assumption_reform", lambda y: tax_reform)
     monkeypatch.setattr(
         pipeline,

@@ -573,7 +573,7 @@ def test_economic_reform_reaches_every_simulation_ahead_of_tax(
         monkeypatch, tmp_path, year, economic=FakeEconomicReform, tax=tax
     )
     stages = {stage for stage, _ in engine.constructed}
-    assert stages == {"stage_a", "writer", "gamma_probe", "dataset"}
+    assert stages == {"stage_a", "writer", "vectors", "dataset"}
     for stage, reform in engine.constructed:
         parts = fakes.flatten_reform(reform)
         assert parts[0] is FakeEconomicReform, stage

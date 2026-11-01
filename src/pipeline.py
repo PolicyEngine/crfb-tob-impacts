@@ -208,6 +208,15 @@ KNOWN_ABSENT_INPUTS = {
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
+HOUSEHOLD_VECTOR_VARIABLES = (
+    "social_security",
+    "taxable_earnings_for_social_security",
+    "social_security_taxable_self_employment_income",
+    "tob_revenue_oasdi",
+    "tob_revenue_medicare_hi",
+    "income_tax",
+    "adjusted_gross_income",
+)
 
 # Income-side guard groups (mirroring the v1 production calibration):
 # the final calibration must not change these aggregate income totals,
@@ -952,24 +961,19 @@ def update_h5_household_weights(
 # ---------------------------------------------------------------------------
 
 
-def _household_vectors(sim, year: int):
-    """Household-level target vectors from a simulation."""
+def _household_vectors(path, year: int, reform) -> dict[str, np.ndarray]:
+    """Household-level target vectors from a year file."""
+    from src.engine import household_vectors
 
-    def hh(variable):
-        return np.asarray(
-            sim.calculate(variable, period=year, map_to="household").values
-        )
-
-    payroll = hh("taxable_earnings_for_social_security") + hh(
-        "social_security_taxable_self_employment_income"
-    )
+    values = household_vectors(path, year, HOUSEHOLD_VECTOR_VARIABLES, reform=reform)
     return {
-        "ss_total": hh("social_security"),
-        "payroll_total": payroll,
-        "oasdi_tob": hh("tob_revenue_oasdi"),
-        "hi_tob": hh("tob_revenue_medicare_hi"),
-        "income_tax": hh("income_tax"),
-        "agi": hh("adjusted_gross_income"),
+        "ss_total": values["social_security"],
+        "payroll_total": values["taxable_earnings_for_social_security"]
+        + values["social_security_taxable_self_employment_income"],
+        "oasdi_tob": values["tob_revenue_oasdi"],
+        "hi_tob": values["tob_revenue_medicare_hi"],
+        "income_tax": values["income_tax"],
+        "agi": values["adjusted_gross_income"],
     }
 
 
@@ -985,6 +989,8 @@ def _sim_from_frame(df: pd.DataFrame, year: int, reform):
 def _solve_other_income_gamma(
     df: pd.DataFrame,
     year: int,
+    output_path: Path,
+    economic_assumption_reform,
     reform,
     other_income_columns: list[str],
     beneficiary_person_mask: np.ndarray,
@@ -1004,16 +1010,19 @@ def _solve_other_income_gamma(
     """
     target_total = tob_targets["oasdi_tob"] + tob_targets["hi_tob"]
     probes: list[dict] = []
+    probe_path = output_path.with_name(f"{output_path.stem}.gamma-probe.h5")
 
     def total_tob_at(gamma: float) -> float:
         probe_df = df.copy()
         scale_frame_columns(
             probe_df, other_income_columns, gamma, rows=beneficiary_person_mask
         )
-        sim = _sim_from_frame(probe_df, year, reform)
-        vectors = _household_vectors(sim, year)
-        del sim
-        gc.collect()
+        write_year_h5(
+            probe_df, year, probe_path, reform=economic_assumption_reform
+        )
+        del probe_df
+        vectors = _household_vectors(probe_path, year, reform)
+        probe_path.unlink(missing_ok=True)
         total = float((vectors["oasdi_tob"] + vectors["hi_tob"]) @ demographic_weights)
         probes.append({"gamma": gamma, "total_tob": total})
         _log(
@@ -1324,6 +1333,8 @@ def build_year(
     gamma, gamma_probes = _solve_other_income_gamma(
         df,
         year,
+        output_path,
+        economic_assumption_reform,
         reform,
         other_income_columns,
         beneficiary_person_mask,
@@ -1347,6 +1358,7 @@ def build_year(
         handle.attrs[H5_ECONOMIC_ASSUMPTION_ATTR] = json.dumps(economic_assumption)
 
     # ----- Stage C2: artifact-true validation -----
+    vectors = _household_vectors(output_path, year, reform)
     sim2 = dataset_microsimulation(str(output_path), reform=reform)
     composed_cap = _contribution_cap(sim2, year)
     if composed_cap != cap:
@@ -1355,7 +1367,6 @@ def build_year(
             f"${composed_cap:,.0f} under the composed reform; alpha was solved "
             "against the wrong cap."
         )
-    vectors = _household_vectors(sim2, year)
     sim2_household_ids = np.asarray(
         sim2.calculate("household_id", period=year, map_to="household").values
     )

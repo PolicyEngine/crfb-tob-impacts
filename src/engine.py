@@ -18,6 +18,8 @@ from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
 
+HOUSEHOLD_VECTOR_CHUNKS = 8
+
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
     """A Microsimulation on the certified populace base.
@@ -57,6 +59,91 @@ def frame_microsimulation(dataset: Any, reform: Any = None):
     from policyengine_us import Microsimulation
 
     return Microsimulation(dataset=dataset, reform=reform)
+
+
+def year_file_dataset(path: Any, year: int):
+    """A year file's arrays as entity tables, which chunking requires.
+
+    The one-year multi-year wrapper keeps the constructor from extending it.
+    """
+    import h5py
+    import pandas as pd
+    from policyengine_us.data.dataset_schema import (
+        USMultiYearDataset,
+        USSingleYearDataset,
+    )
+    from policyengine_us.system import system
+
+    tables: dict[str, dict] = {}
+    with h5py.File(path, "r") as handle:
+        for variable, periods in handle.items():
+            values = periods[str(year)][()]
+            if values.dtype.kind == "S":
+                values = values.astype(str)
+            entity = system.variables[variable].entity.key
+            tables.setdefault(entity, {})[variable] = values
+    frames = {entity: pd.DataFrame(columns) for entity, columns in tables.items()}
+    return USMultiYearDataset(
+        datasets=[USSingleYearDataset(**frames, time_period=year)]
+    )
+
+
+def household_vectors(
+    path: Any,
+    year: int,
+    variables: Any,
+    reform: Any = None,
+    n_chunks: int = HOUSEHOLD_VECTOR_CHUNKS,
+) -> dict:
+    """Household totals of ``variables`` from a year file, a chunk at a time.
+
+    The TOB variables' counterfactual income tax makes one whole-population
+    simulation too large for the full base. Totals line up with the file's
+    household order.
+    """
+    _require_certified_runtime()
+    import numpy as np
+    import pandas as pd
+    from policyengine_us import Microsimulation
+    from policyengine_us.system import system
+    from policyengine_us.tools.calculate_chunked import calculate_chunked
+
+    dataset = year_file_dataset(path, year)
+    result = calculate_chunked(
+        lambda chunk: Microsimulation(dataset=chunk, reform=reform),
+        list(variables),
+        year,
+        n_chunks,
+        dataset=dataset,
+    )
+    single = dataset.get_year(year)
+    household_ids = pd.Index(single.household.household_id)
+    person_households = household_ids.get_indexer(single.person.person_household_id)
+    vectors = {}
+    for variable in variables:
+        entity = system.variables[variable].entity.key
+        table = result.entities[entity]
+        if entity == "household":
+            owners = household_ids.get_indexer(table.household_id)
+        elif entity == "person":
+            owners = person_households
+        else:
+            links = pd.Series(
+                person_households,
+                index=single.person[f"person_{entity}_id"].to_numpy(),
+            )
+            owners = (
+                links.groupby(level=0)
+                .first()
+                .reindex(table[f"{entity}_id"])
+                .to_numpy(dtype=int)
+            )
+        vectors[variable] = np.bincount(
+            owners,
+            weights=table[variable].to_numpy(dtype=float),
+            minlength=len(household_ids),
+        )
+    return vectors
 
 
 def _certified_base_source() -> tuple[str, str]:
