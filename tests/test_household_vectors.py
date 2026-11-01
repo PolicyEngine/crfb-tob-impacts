@@ -97,6 +97,19 @@ def test_chunked_vectors_match_the_whole_file(year_file, n_chunks):
         np.testing.assert_allclose(chunked[name], whole[name], rtol=1e-5, atol=0.01)
 
 
+def test_chunking_leaves_room_for_the_guards_frames(year_file):
+    engine, path = year_file
+    before = sys.getrecursionlimit()
+    sys.setrecursionlimit(1000)
+    try:
+        engine.chunked_entity_tables(
+            path, YEAR, ["age"], engine.frame_microsimulation, n_chunks=1
+        )
+        assert sys.getrecursionlimit() >= engine.CHUNKED_RECURSION_LIMIT
+    finally:
+        sys.setrecursionlimit(before)
+
+
 def test_the_reform_reaches_every_chunk(year_file):
     from policyengine_core.reforms import Reform
 

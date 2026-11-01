@@ -14,11 +14,13 @@ from __future__ import annotations
 
 import importlib.metadata as _metadata
 from pathlib import Path
+import sys
 from typing import Any
 
 from policyengine.tax_benefit_models.us import managed_microsimulation, us_latest
 
 HOUSEHOLD_VECTOR_CHUNKS = 8
+CHUNKED_RECURSION_LIMIT = 4000
 
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
@@ -103,6 +105,9 @@ def chunked_entity_tables(
     _require_certified_runtime()
     from policyengine_us.tools.calculate_chunked import calculate_chunked
 
+    # The household guard adds two frames for each variable in a calculation
+    # chain, which takes a long behavioral chain past Python's default limit.
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), CHUNKED_RECURSION_LIMIT))
     dataset = year_file_dataset(path, year)
     result = calculate_chunked(
         build_simulation, list(variables), year, n_chunks, dataset=dataset
