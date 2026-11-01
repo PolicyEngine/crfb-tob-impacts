@@ -1026,8 +1026,6 @@ def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     log_gamma = np.log(lowest["gamma"])
     if below:
         highest = max(below, key=lambda probe: probe["gamma"])
-        if highest["gamma"] >= lowest["gamma"]:
-            return None
         if highest["total_tob"] <= 0:
             return float(np.sqrt(highest["gamma"] * lowest["gamma"]))
         slope = np.log(lowest["total_tob"] / highest["total_tob"]) / np.log(

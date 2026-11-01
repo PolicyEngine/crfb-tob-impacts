@@ -300,6 +300,7 @@ def _assert_the_search_held(gamma, probes, accepted):
     tried = [probe["gamma"] for probe in probes]
     assert len(set(tried)) == len(tried)
     assert len(tried) <= 1 + pipeline.GAMMA_MAX_PROBES
+    assert all(1 / pipeline.GAMMA_MAX <= value <= pipeline.GAMMA_MAX for value in tried)
     assert vectors["gamma"] == pytest.approx(gamma)
     assert digest == vectors["digest"]
 
@@ -376,6 +377,26 @@ def test_a_surplus_at_the_lower_bound_stops_there(gap, elasticity):
     gamma, probes, accepted = _search(total)
     _assert_the_search_held(gamma, probes, accepted)
     assert gamma == 1 / pipeline.GAMMA_MAX
+
+
+def test_no_tob_at_gamma_one_still_brackets_the_target():
+    def total(gamma):
+        return max(0.0, 63.0 * 8 * (gamma - 1))
+
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+@pytest.mark.parametrize("elasticity", [0.0, -0.5])
+def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
+    gamma, probes, accepted = _search(lambda gamma: 80.0 * gamma**elasticity)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert [probe["gamma"] for probe in probes] == [
+        pipeline.GAMMA_MAX,
+        1.0,
+        1 / pipeline.GAMMA_MAX,
+    ]
 
 
 def test_a_year_above_target_at_the_bound_reaches_its_targets():
