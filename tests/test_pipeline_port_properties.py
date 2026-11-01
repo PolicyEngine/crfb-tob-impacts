@@ -258,6 +258,9 @@ def test_reusing_the_accepted_probe_changes_nothing(seed, year, economic):
     pd.testing.assert_frame_equal(reused[2], computed[2])
 
 
+WEIGHT = 2.0
+
+
 def _search(total_at_gamma, target=63.0):
     """The gamma search on a stand-in whose TOB follows ``total_at_gamma``."""
 
@@ -268,9 +271,10 @@ def _search(total_at_gamma, target=63.0):
     def vectors(path, year, reform):
         with h5py.File(path, "r") as handle:
             gamma = float(handle[f"dividends/{year}"][()][0]) / 10.0
+        total = total_at_gamma(gamma)
         return {
-            "oasdi_tob": np.array([total_at_gamma(gamma)]),
-            "hi_tob": np.array([0.0]),
+            "oasdi_tob": np.array([0.6 * total]) / WEIGHT,
+            "hi_tob": np.array([0.4 * total]) / WEIGHT,
             "gamma": gamma,
             "digest": pipeline.year_file_digest(path),
         }
@@ -289,9 +293,9 @@ def _search(total_at_gamma, target=63.0):
             None,
             ["dividends"],
             np.array([True]),
-            np.array([1.0]),
+            np.array([WEIGHT]),
             np.zeros(1, dtype=int),
-            {"oasdi_tob": target, "hi_tob": 0.0},
+            {"oasdi_tob": 0.6 * target, "hi_tob": 0.4 * target},
         )
 
 
@@ -397,6 +401,31 @@ def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
         1.0,
         1 / pipeline.GAMMA_MAX,
     ]
+
+
+def test_a_negative_total_at_gamma_one_still_brackets_the_target():
+    gamma, probes, accepted = _search(lambda gamma: 504 * (gamma - 1.1))
+    _assert_the_search_held(gamma, probes, accepted)
+    assert 1 < gamma < pipeline.GAMMA_MAX
+
+
+def test_totals_too_far_apart_for_a_ratio_still_interpolate():
+    elasticity = 600 * np.log(10) / np.log(pipeline.GAMMA_MAX)
+
+    def total(gamma):
+        return float(np.exp(-300 * np.log(10) + elasticity * np.log(gamma)))
+
+    gamma, probes, accepted = _search(total, target=1.0)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == pytest.approx(1.1180, abs=1e-3)
+
+
+def test_a_bracket_with_no_room_stops_the_search():
+    probes = [
+        {"gamma": np.nextafter(1.0, 2.0), "total_tob": 66.0},
+        {"gamma": 1.0, "total_tob": 60.0},
+    ]
+    assert pipeline._next_gamma(probes, 63.0) is None
 
 
 @pytest.mark.parametrize("bad_gamma", [pipeline.GAMMA_MAX, 1.0])

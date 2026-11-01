@@ -882,6 +882,16 @@ def test_a_year_file_digest_follows_arrays_and_not_attributes(tmp_path):
     assert pipeline.year_file_digest(first) != pipeline.year_file_digest(second)
 
 
+@pytest.mark.parametrize("other", ["b/2040", "a/2041"])
+def test_a_year_file_digest_follows_names_and_periods(tmp_path, other):
+    first, second = tmp_path / "first.h5", tmp_path / "second.h5"
+    with h5py.File(first, "w") as handle:
+        handle.create_dataset("a/2040", data=np.array([1.0, 2.0]))
+    with h5py.File(second, "w") as handle:
+        handle.create_dataset(other, data=np.array([1.0, 2.0]))
+    assert pipeline.year_file_digest(first) != pipeline.year_file_digest(second)
+
+
 def test_a_year_file_digest_tells_types_with_the_same_bytes_apart(tmp_path):
     single, integer = tmp_path / "single.h5", tmp_path / "integer.h5"
     with h5py.File(single, "w") as handle:

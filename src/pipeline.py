@@ -209,20 +209,10 @@ KNOWN_ABSENT_INPUTS = {
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
-# A stored value shadows the formula. Either income tax measure freezes every
+# A stored value shadows its formula, and a stored tax measure freezes every
 # tax state the TOB variables compare, which gives zero TOB and raises nothing.
-DERIVED_VARIABLES = (
-    "employment_income",
-    "irs_employment_income",
-    "payroll_tax_gross_wages",
-    "taxable_self_employment_income",
-    "taxable_earnings_for_social_security",
-    "social_security",
-    "tob_revenue_oasdi",
-    "tob_revenue_medicare_hi",
-    "income_tax",
-    "income_tax_chapter_1",
-)
+# The writer refuses any computed variable but this id, the records' own.
+STORED_COMPUTED_VARIABLES = frozenset({"person_id"})
 HOUSEHOLD_VECTOR_VARIABLES = (
     "social_security",
     "taxable_earnings_for_social_security",
@@ -933,10 +923,16 @@ def write_year_h5(
                     continue
             data[variable][period] = values
 
+    definitions = sim.tax_benefit_system.variables
     leaked = {
         name
         for name in data
-        if name.endswith("_behavioral_response") or name in DERIVED_VARIABLES
+        if name not in STORED_COMPUTED_VARIABLES
+        and (
+            definitions[name].formulas
+            or definitions[name].adds
+            or definitions[name].subtracts
+        )
     }
     if leaked:
         raise RuntimeError(
@@ -1010,6 +1006,14 @@ def _sim_from_frame(df: pd.DataFrame, year: int, reform):
     return frame_microsimulation(Dataset.from_dataframe(df, year), reform=reform)
 
 
+def _log_slope(first: dict, second: dict) -> float:
+    """Total TOB's elasticity between two probes."""
+    return float(
+        (np.log(first["total_tob"]) - np.log(second["total_tob"]))
+        / (np.log(first["gamma"]) - np.log(second["gamma"]))
+    )
+
+
 def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     """The next gamma to probe, or None once no gamma in range can get closer.
 
@@ -1024,26 +1028,20 @@ def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     below = [probe for probe in probes if probe["total_tob"] < target_total]
     lowest = above[0]
     log_gamma = np.log(lowest["gamma"])
+    gap = np.log(target_total) - np.log(lowest["total_tob"])
     if below:
         highest = max(below, key=lambda probe: probe["gamma"])
-        if highest["total_tob"] <= 0:
-            return float(np.sqrt(highest["gamma"] * lowest["gamma"]))
-        slope = np.log(lowest["total_tob"] / highest["total_tob"]) / np.log(
-            lowest["gamma"] / highest["gamma"]
-        )
-        return float(
-            np.exp(log_gamma + np.log(target_total / lowest["total_tob"]) / slope)
-        )
+        if highest["total_tob"] > 0:
+            gamma = np.exp(log_gamma + gap / _log_slope(lowest, highest))
+        else:
+            gamma = np.sqrt(highest["gamma"] * lowest["gamma"])
+        return float(gamma) if highest["gamma"] < gamma < lowest["gamma"] else None
     if lowest["gamma"] <= 1 / GAMMA_MAX:
         return None
-    next_lowest = above[1]
-    slope = np.log(next_lowest["total_tob"] / lowest["total_tob"]) / np.log(
-        next_lowest["gamma"] / lowest["gamma"]
-    )
+    slope = _log_slope(above[1], lowest)
     if slope <= 0:
         return 1 / GAMMA_MAX
-    step = np.log(target_total / lowest["total_tob"]) / slope
-    return float(max(np.exp(log_gamma + step), 1 / GAMMA_MAX))
+    return float(max(np.exp(log_gamma + gap / slope), 1 / GAMMA_MAX))
 
 
 def _solve_other_income_gamma(
