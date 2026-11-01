@@ -45,9 +45,11 @@ try:
         get_tax93_reform,
     )
     from .tax_assumption_loader import (
+        ScoringAssumptions,
         TaxAssumptionContract,
-        load_tax_assumption_reform_for_dataset,
-        tax_assumption_contract_for_dataset,
+        compose_reforms,
+        load_scoring_assumption_reform_for_dataset,
+        scoring_assumptions_for_dataset,
     )
 except ImportError:  # pragma: no cover - script execution fallback
     from engine import dataset_microsimulation
@@ -82,9 +84,11 @@ except ImportError:  # pragma: no cover - script execution fallback
         get_tax93_reform,
     )
     from tax_assumption_loader import (
+        ScoringAssumptions,
         TaxAssumptionContract,
-        load_tax_assumption_reform_for_dataset,
-        tax_assumption_contract_for_dataset,
+        compose_reforms,
+        load_scoring_assumption_reform_for_dataset,
+        scoring_assumptions_for_dataset,
     )
 
 
@@ -148,6 +152,8 @@ class BaselineResult:
     taxable_payroll: float
     tax_assumption_name: str | None = None
     tax_assumption_active: bool = False
+    economic_assumption_reform: str | None = None
+    economic_assumption_module_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -370,6 +376,10 @@ def baseline_result_to_dict(
         "taxable_payroll": float(baseline.taxable_payroll),
         "tax_assumption_name": baseline.tax_assumption_name,
         "tax_assumption_active": bool(baseline.tax_assumption_active),
+        "economic_assumption_reform": baseline.economic_assumption_reform,
+        "economic_assumption_module_sha256": (
+            baseline.economic_assumption_module_sha256
+        ),
     }
 
 
@@ -396,12 +406,20 @@ def _dataset_path(dataset_name: Any) -> Path:
     )
 
 
+def _scoring_assumptions(
+    *,
+    year: int,
+    dataset_name: Any,
+) -> ScoringAssumptions:
+    return scoring_assumptions_for_dataset(dataset_name, year)
+
+
 def _tax_assumption_contract(
     *,
     year: int,
     dataset_name: Any,
 ) -> TaxAssumptionContract:
-    return tax_assumption_contract_for_dataset(dataset_name, year)
+    return _scoring_assumptions(year=year, dataset_name=dataset_name).tax_assumption
 
 
 def _resolve_baseline_reform_for_dataset(
@@ -410,12 +428,21 @@ def _resolve_baseline_reform_for_dataset(
     dataset_name: Any,
     baseline_reform: Any | None,
 ) -> Any | None:
-    contract = _tax_assumption_contract(year=year, dataset_name=dataset_name)
-    if contract.active:
-        return load_tax_assumption_reform_for_dataset(dataset_name, year)
+    """The reform the dataset's baseline runs under: its economic assumption
+    reform, then its tax assumption reform, as its metadata records them."""
+    assumptions = _scoring_assumptions(year=year, dataset_name=dataset_name)
+    if assumptions.economic_assumption.active and baseline_reform is not None:
+        raise ValueError(
+            f"{_dataset_path(dataset_name)} was calibrated under the economic "
+            f"assumption reform {assumptions.economic_assumption.reform!r}; an "
+            "explicit baseline reform cannot replace the reforms its metadata "
+            "records."
+        )
+    if assumptions.active:
+        return load_scoring_assumption_reform_for_dataset(dataset_name, year)
     if baseline_reform is not None:
         return baseline_reform
-    return load_tax_assumption_reform_for_dataset(dataset_name, year)
+    return load_scoring_assumption_reform_for_dataset(dataset_name, year)
 
 
 def _annotate_baseline_tax_assumption(
@@ -424,11 +451,15 @@ def _annotate_baseline_tax_assumption(
     year: int,
     dataset_name: Any,
 ) -> BaselineResult:
-    contract = _tax_assumption_contract(year=year, dataset_name=dataset_name)
+    assumptions = _scoring_assumptions(year=year, dataset_name=dataset_name)
+    contract = assumptions.tax_assumption
+    economic = assumptions.economic_assumption
     return replace(
         baseline,
         tax_assumption_name=contract.name,
         tax_assumption_active=contract.active,
+        economic_assumption_reform=economic.reform,
+        economic_assumption_module_sha256=economic.module_sha256,
     )
 
 
@@ -438,7 +469,22 @@ def _validate_baseline_tax_assumption(
     year: int,
     dataset_name: Any,
 ) -> None:
-    contract = _tax_assumption_contract(year=year, dataset_name=dataset_name)
+    assumptions = _scoring_assumptions(year=year, dataset_name=dataset_name)
+    economic = assumptions.economic_assumption
+    # A baseline and a reform scored under different economic assumptions
+    # would report the assumption as a policy effect.
+    if (
+        baseline.economic_assumption_reform != economic.reform
+        or baseline.economic_assumption_module_sha256 != economic.module_sha256
+    ):
+        raise ValueError(
+            "BaselineResult economic assumption does not match dataset metadata "
+            f"for {_dataset_path(dataset_name)} in {year}: baseline has "
+            f"{baseline.economic_assumption_reform!r} (module_sha256 "
+            f"{baseline.economic_assumption_module_sha256!r}), dataset requires "
+            f"{economic.reform!r} (module_sha256 {economic.module_sha256!r})."
+        )
+    contract = assumptions.tax_assumption
     if not contract.active:
         return
     if (
@@ -1163,6 +1209,8 @@ def baseline_result_from_aggregate(
     *,
     tax_assumption_name: str | None = None,
     tax_assumption_active: bool = False,
+    economic_assumption_reform: str | None = None,
+    economic_assumption_module_sha256: str | None = None,
 ) -> BaselineResult:
     return BaselineResult(
         revenue=aggregate.revenue,
@@ -1173,6 +1221,8 @@ def baseline_result_from_aggregate(
         taxable_payroll=aggregate.taxable_payroll,
         tax_assumption_name=tax_assumption_name,
         tax_assumption_active=tax_assumption_active,
+        economic_assumption_reform=economic_assumption_reform,
+        economic_assumption_module_sha256=economic_assumption_module_sha256,
     )
 
 
@@ -1465,6 +1515,12 @@ def build_reform_result_from_aggregates(
         "year": year,
         "baseline_tax_assumption_name": baseline.tax_assumption_name or "",
         "baseline_tax_assumption_active": baseline.tax_assumption_active,
+        "baseline_economic_assumption_reform": (
+            baseline.economic_assumption_reform or ""
+        ),
+        "baseline_economic_assumption_module_sha256": (
+            baseline.economic_assumption_module_sha256 or ""
+        ),
         "baseline_revenue": baseline.revenue,
         "reform_revenue": reform_totals.revenue,
         "revenue_impact": revenue_impact,
@@ -1498,6 +1554,19 @@ def compute_reform_result(
     baseline_metrics: ScenarioHouseholdMetrics | None = None,
     metric_change_tolerance: float = 1e-9,
 ) -> dict[str, float | int | str]:
+    economic = _scoring_assumptions(
+        year=year, dataset_name=dataset_name
+    ).economic_assumption
+    if scoring_type == "behavioral" and economic.active:
+        # The labor supply response compares the reform with the simulation's
+        # baseline branch, which this path builds under no reform at all, so it
+        # would respond to the economic assumption as if it were policy. The
+        # full-H5 worker installs the dataset's reforms on that branch.
+        raise ValueError(
+            "Behavioral scoring through compute_reform_result does not carry "
+            f"the economic assumption reform {economic.reform!r} into the "
+            "baseline branch; score behavioral cells with the full-H5 worker."
+        )
     baseline_reform = _resolve_baseline_reform_for_dataset(
         year=year,
         dataset_name=dataset_name,
@@ -1511,9 +1580,7 @@ def compute_reform_result(
     reform = build_reform(
         reform_id, scoring_type, reform_functions, behavioral_functions
     )
-    combined_reform = (
-        (baseline_reform, reform) if baseline_reform is not None else reform
-    )
+    combined_reform = compose_reforms(baseline_reform, reform)
     metrics, reform_totals = compute_scenario_household_metrics_and_aggregate(
         year=year,
         dataset_name=dataset_name,
