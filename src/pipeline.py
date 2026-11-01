@@ -212,6 +212,20 @@ GAMMA_MAX_PROBES = 4
 # Total TOB's response to other income, measured on the projected sample at
 # 2036, 2037 and 2100. A wrong prior costs a probe, not accuracy.
 GAMMA_PRIOR_ELASTICITY = 0.5
+# A stored value shadows the formula. Either income tax measure freezes every
+# tax state the TOB variables compare, which gives zero TOB and raises nothing.
+DERIVED_VARIABLES = (
+    "employment_income",
+    "irs_employment_income",
+    "payroll_tax_gross_wages",
+    "taxable_self_employment_income",
+    "taxable_earnings_for_social_security",
+    "social_security",
+    "tob_revenue_oasdi",
+    "tob_revenue_medicare_hi",
+    "income_tax",
+    "income_tax_chapter_1",
+)
 HOUSEHOLD_VECTOR_VARIABLES = (
     "social_security",
     "taxable_earnings_for_social_security",
@@ -925,19 +939,7 @@ def write_year_h5(
     leaked = {
         name
         for name in data
-        if name.endswith("_behavioral_response")
-        or name
-        in (
-            "employment_income",
-            "irs_employment_income",
-            "payroll_tax_gross_wages",
-            "taxable_self_employment_income",
-            "taxable_earnings_for_social_security",
-            "social_security",
-            "tob_revenue_oasdi",
-            "tob_revenue_medicare_hi",
-            "income_tax",
-        )
+        if name.endswith("_behavioral_response") or name in DERIVED_VARIABLES
     }
     if leaked:
         raise RuntimeError(

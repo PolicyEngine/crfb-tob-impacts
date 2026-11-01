@@ -69,3 +69,20 @@ def test_reported_benefits_survive_real_year_writer(tmp_path, monkeypatch):
         np.testing.assert_array_equal(
             np.asarray(reloaded.calculate(name, period=year)), values
         )
+
+
+@pytest.mark.parametrize("name", pipeline.DERIVED_VARIABLES)
+def test_the_year_writer_refuses_a_derived_variable(tmp_path, monkeypatch, name):
+    holder = SimpleNamespace(
+        get_known_periods=lambda: ["2050"], get_array=lambda period: np.zeros(1)
+    )
+    sim = SimpleNamespace(
+        tax_benefit_system=SimpleNamespace(variables=[name]),
+        get_holder=lambda variable: holder,
+    )
+    monkeypatch.setattr(pipeline, "_sim_from_frame", lambda df, year, reform: sim)
+    path = tmp_path / "2050.h5"
+    frame = pd.DataFrame({f"{name}__2050": [1.0]})
+    with pytest.raises(RuntimeError, match="leaked into the year frame"):
+        pipeline.write_year_h5(frame, 2050, path)
+    assert not path.exists()
