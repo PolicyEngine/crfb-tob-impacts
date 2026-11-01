@@ -17,9 +17,11 @@ from .reforms import (
     get_option12_reform,
 )
 from .tax_assumption_loader import (
+    EconomicAssumptionContract,
     TaxAssumptionContract,
-    load_tax_assumption_reform_for_dataset,
-    tax_assumption_contract_for_dataset,
+    economic_assumption_output_metadata,
+    load_scoring_assumption_reform_for_dataset,
+    scoring_assumptions_for_dataset,
 )
 from .trust_fund_allocation import split_revenue_impacts
 
@@ -283,6 +285,9 @@ class SolventBaselineState:
     rate_reform: Any
     reduced_social_security: np.ndarray
     current_law_aggregate: ScenarioAggregate
+    economic_assumption_contract: EconomicAssumptionContract = (
+        EconomicAssumptionContract(active=False)
+    )
 
     def metadata_dict(self) -> dict[str, Any]:
         return {
@@ -290,6 +295,9 @@ class SolventBaselineState:
             "dataset_path": self.dataset_path,
             "tax_assumption_name": self.tax_assumption_contract.name,
             "tax_assumption_active": self.tax_assumption_contract.active,
+            "economic_assumption": economic_assumption_output_metadata(
+                self.economic_assumption_contract
+            ),
             "hi_expenditures": float(self.hi_expenditures),
             "gap_before": self.gap_before.to_dict(),
             "gap_after_stage1": self.gap_after_stage1.to_dict(),
@@ -545,8 +553,12 @@ def build_solvent_baseline_state(
 
     dataset_path = str(dataset_path)
     emit("resolving tax-assumption contract")
-    tax_assumption_contract = tax_assumption_contract_for_dataset(dataset_path, year)
-    current_law_reform = load_tax_assumption_reform_for_dataset(dataset_path, year)
+    # Every simulation below applies the dataset's economic assumption reform,
+    # then its tax assumption reform, ahead of the solvency rates and the
+    # policy, so the solvent baseline and each reform share both assumptions.
+    assumptions = scoring_assumptions_for_dataset(dataset_path, year)
+    tax_assumption_contract = assumptions.tax_assumption
+    current_law_reform = load_scoring_assumption_reform_for_dataset(dataset_path, year)
     hi_data = hi_expenditures_for_year(year)
     hi_expenditures_value = (
         float(hi_expenditures)
@@ -674,6 +686,7 @@ def build_solvent_baseline_state(
         rate_reform=rate_reform,
         reduced_social_security=reduced_social_security,
         current_law_aggregate=current_law_aggregate,
+        economic_assumption_contract=assumptions.economic_assumption,
     )
 
 
