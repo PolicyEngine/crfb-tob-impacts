@@ -534,28 +534,47 @@ def verify_economic_assumption_identity(
 ) -> dict | None:
     """Check that the module the scorer would load is the one the build used.
 
-    Returns the loaded module's provenance, or ``None`` when the contract is
+    Finds the module's file without running the module (its parent packages
+    do run) and compares its sha256 with the recorded one, as
+    economic_assumption_provenance computed it at build time. The hash covers
+    that one file: a reform that re-exports from, or reads, other files is
+    pinned only as far as this file pins them, and a module this process
+    imported before the file changed stays as imported.
+
+    Returns the module's provenance, or ``None`` when the contract is
     inactive. Raises, naming both hashes, when the module file changed.
     """
     if not contract.active:
         return None
-    provenance = economic_assumption_provenance(contract.reform)
-    if provenance["module_sha256"] != contract.module_sha256:
+    module_name = contract.reform.partition(":")[0]
+    spec = importlib.util.find_spec(module_name)
+    module_file = spec.origin if spec is not None and spec.has_location else None
+    if module_file is None:
+        raise ValueError(
+            f"Economic assumption reform {contract.reform!r}: cannot find the "
+            f"file of module {module_name!r} to check it against the recorded "
+            f"module_sha256 {contract.module_sha256}."
+        )
+    module_sha256 = _file_sha256(module_file)
+    if module_sha256 != contract.module_sha256:
         raise ValueError(
             f"Economic assumption reform {contract.reform!r} does not match the "
             "module the dataset was built with: the dataset records "
-            f"module_sha256 {contract.module_sha256}, the loaded module "
-            f"{provenance['module_file']} hashes to "
-            f"{provenance['module_sha256']}."
+            f"module_sha256 {contract.module_sha256}, the module file "
+            f"{module_file} hashes to {module_sha256}."
         )
-    return provenance
+    return {
+        "reform": contract.reform,
+        "module_file": module_file,
+        "module_sha256": module_sha256,
+    }
 
 
 def load_economic_assumption_reform_for_metadata(metadata: dict):
     """The dataset's economic assumption reform, or ``None`` if it has none.
 
-    The module is hashed and checked against the recorded hash before the
-    reform is imported from it.
+    The module's file is hashed and checked against the recorded hash before
+    the module is imported.
     """
     contract = economic_assumption_contract_from_metadata(metadata)
     if not contract.active:
