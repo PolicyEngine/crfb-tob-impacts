@@ -439,6 +439,53 @@ def test_two_probes_on_a_plateau_still_find_gamma_one():
     assert len(probes) == 3
 
 
+# Total TOB in $B by gamma, read on a projected 2,000-household sample.
+MEASURED_TOTALS = {
+    2027: {
+        0.8: 76.5,
+        0.9: 80.1,
+        1.0: 84.7,
+        1.05: 87.1,
+        1.1: 90.2,
+        1.15: 92.8,
+        1.2: 94.5,
+        1.25: 96.4,
+    },
+    2030: {
+        0.8: 94.8,
+        0.9: 100.1,
+        1.0: 106.0,
+        1.05: 109.8,
+        1.1: 113.0,
+        1.15: 116.2,
+        1.2: 118.3,
+        1.25: 120.4,
+    },
+    2036: {0.9: 139.8, 1.0: 149.5, 1.1: 158.1, 1.25: 167.5},
+    2100: {0.9: 2134.5, 1.0: 2267.2, 1.1: 2385.1, 1.25: 2472.5},
+}
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    year=st.sampled_from(sorted(MEASURED_TOTALS)),
+    root=st.floats(min_value=0.92, max_value=1.22),
+)
+def test_a_measured_curve_reaches_any_root_in_range(year, root):
+    readings = MEASURED_TOTALS[year]
+    log_gammas = np.log(list(readings))
+    log_totals = np.log(list(readings.values()))
+
+    def total(gamma):
+        rise = np.interp(np.log(gamma), log_gammas, log_totals)
+        return 63.0 * np.exp(rise - np.interp(np.log(root), log_gammas, log_totals))
+
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+    assert len(probes) <= 4
+
+
 def test_a_negative_total_at_gamma_one_still_brackets_the_target():
     gamma, probes, accepted = _search(lambda gamma: 504 * (gamma - 1.1))
     _assert_the_search_held(gamma, probes, accepted)
