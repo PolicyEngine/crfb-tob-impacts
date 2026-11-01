@@ -161,7 +161,8 @@ def install_behavioral_baseline_tax_system(
         "installed": True,
         "method": (
             "simulation.baseline tax-benefit system replaced with the same "
-            "Trustees/current-law baseline reform used for static aggregation"
+            "baseline reform (economic assumption, then tax assumption) used "
+            "for static aggregation"
         ),
     }
 

@@ -39,13 +39,15 @@ Marc's words -> option ids: "Phased Roth" = **option12**, "repeal" = **option1**
 ## [B1] Build EVERY sim with the dataset's scoring assumptions stacked
 The new certified base stores INPUT data only; the Trustees long-run tax assumption (and, for a
 dataset built with one, the economic assumption reform) is applied at calibration time, not
-baked into the H5. Every scoring path stacks them explicitly from the dataset's
-`{year}.h5.metadata.json`: `load_scoring_assumption_reform_for_dataset(dataset, year)` in
-`src/tax_assumption_loader.py` returns the economic assumption reform first, then the tax
-assumption reform (`None` when the dataset records neither; the tax assumption is inactive
-before 2035). It refuses an economic assumption whose module no longer hashes to the
-`module_sha256` the build recorded. `src/balanced_fix.py`, the full-H5 worker and
-`src/year_runner.py` all call it.
+baked into the H5. The scorers stack them explicitly from the dataset's metadata (its
+`{year}.h5.metadata.json`, or on approved full-H5 runs the metadata file the baseline
+manifest names): `load_scoring_assumption_reform_for_dataset(dataset, year)` in
+`src/tax_assumption_loader.py`, or its `_for_metadata` twin, returns the economic assumption
+reform first, then the tax assumption reform (`None` when the dataset records neither; the
+tax assumption is inactive before 2035). It refuses an economic assumption whose module no
+longer hashes to the `module_sha256` the build recorded. `src/balanced_fix.py` and
+`src/year_runner.py` call the `_for_dataset` form; the full-H5 worker calls whichever matches
+its metadata source.
 - Historical option13 scripts built `Microsimulation(dataset=...)` with NO reform.
   **Do not copy that.** On the new base it yields literal current-law SS
   thresholds, not the Trustees wage-indexed path the base was calibrated against, so every gap,
