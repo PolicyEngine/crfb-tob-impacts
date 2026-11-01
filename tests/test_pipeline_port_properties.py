@@ -25,6 +25,7 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
+import h5py
 import numpy as np
 import pandas as pd
 import pytest
@@ -255,3 +256,129 @@ def test_reusing_the_accepted_probe_changes_nothing(seed, year, economic):
     assert reused[0] == computed[0]
     assert reused[1] == computed[1]
     pd.testing.assert_frame_equal(reused[2], computed[2])
+
+
+def _search(total_at_gamma, target=63.0):
+    """The gamma search on a stand-in whose TOB follows ``total_at_gamma``."""
+
+    def write(probe, year, path, *, reform=None):
+        with h5py.File(path, "w") as handle:
+            handle.create_dataset(f"dividends/{year}", data=probe.dividends.to_numpy())
+
+    def vectors(path, year, reform):
+        with h5py.File(path, "r") as handle:
+            gamma = float(handle[f"dividends/{year}"][()][0]) / 10.0
+        return {
+            "oasdi_tob": np.array([total_at_gamma(gamma)]),
+            "hi_tob": np.array([0.0]),
+            "gamma": gamma,
+            "digest": pipeline.year_file_digest(path),
+        }
+
+    with (
+        tempfile.TemporaryDirectory() as folder,
+        pytest.MonkeyPatch.context() as patch,
+    ):
+        patch.setattr(pipeline, "write_year_h5", write)
+        patch.setattr(pipeline, "_household_vectors", vectors)
+        return pipeline._solve_other_income_gamma(
+            pd.DataFrame({"dividends": [10.0]}),
+            2040,
+            Path(folder) / "2040.h5",
+            None,
+            None,
+            ["dividends"],
+            np.array([True]),
+            np.array([1.0]),
+            np.zeros(1, dtype=int),
+            {"oasdi_tob": target, "hi_tob": 0.0},
+        )
+
+
+def _assert_the_search_held(gamma, probes, accepted):
+    digest, vectors = accepted
+    tried = [probe["gamma"] for probe in probes]
+    assert len(set(tried)) == len(tried)
+    assert len(tried) <= 1 + pipeline.GAMMA_MAX_PROBES
+    assert vectors["gamma"] == pytest.approx(gamma)
+    assert digest == vectors["digest"]
+
+
+def _rising_total(root, elasticities, share, target=63.0):
+    """TOB that crosses ``target`` at ``root``, from two rising power laws."""
+
+    def total(gamma):
+        ratio = gamma / root
+        return target * (
+            share * ratio ** elasticities[0] + (1 - share) * ratio ** elasticities[1]
+        )
+
+    return total
+
+
+ROOTS = st.floats(min_value=1 / pipeline.GAMMA_MAX, max_value=pipeline.GAMMA_MAX)
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    root=ROOTS,
+    elasticities=st.tuples(
+        st.floats(min_value=0.05, max_value=3), st.floats(min_value=0.05, max_value=3)
+    ),
+    share=st.floats(min_value=0, max_value=1),
+)
+def test_a_reachable_target_ends_within_tolerance(root, elasticities, share):
+    total = _rising_total(root, elasticities, share)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+@settings(max_examples=100, deadline=None)
+@given(root=ROOTS, elasticity=st.floats(min_value=0.05, max_value=8))
+def test_one_power_law_ends_within_tolerance(root, elasticity):
+    total = _rising_total(root, (elasticity, elasticity), 1.0)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+def test_the_search_can_need_every_probe_it_has():
+    total = _rising_total(0.8, (0.05, 8.0), 0.5)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert len(probes) == 1 + pipeline.GAMMA_MAX_PROBES
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+@settings(max_examples=50, deadline=None)
+@given(
+    gap=st.floats(min_value=1.03, max_value=3),
+    elasticity=st.floats(min_value=0.05, max_value=3),
+)
+def test_a_shortfall_at_the_bound_settles_the_year(gap, elasticity):
+    root = pipeline.GAMMA_MAX * gap ** (1 / elasticity)
+    total = _rising_total(root, (elasticity, elasticity), 1.0)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == pipeline.GAMMA_MAX
+    assert len(probes) == 1
+
+
+@settings(max_examples=50, deadline=None)
+@given(
+    gap=st.floats(min_value=1.03, max_value=3),
+    elasticity=st.floats(min_value=0.05, max_value=3),
+)
+def test_a_surplus_at_the_lower_bound_stops_there(gap, elasticity):
+    root = 1 / pipeline.GAMMA_MAX / gap ** (1 / elasticity)
+    total = _rising_total(root, (elasticity, elasticity), 1.0)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert gamma == 1 / pipeline.GAMMA_MAX
+
+
+def test_a_year_above_target_at_the_bound_reaches_its_targets():
+    with tempfile.TemporaryDirectory() as folder:
+        sentinel, _, _ = _fake_build(2030, 2801, Path(folder), None)
+    assert 1 < sentinel["gamma_other_income_scale"] < pipeline.GAMMA_MAX

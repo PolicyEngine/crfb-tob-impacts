@@ -810,14 +810,38 @@ def test_a_saturated_year_needs_one_probe(monkeypatch, tmp_path):
 
 def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
     frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
-    vectors = _tob_vectors(lambda gamma: 63.0 * 0.95 * gamma**0.5)
+    vectors = _tob_vectors(lambda gamma: 63.0 * 0.9 * gamma**0.8)
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
-    assert [probes[0]["gamma"], probes[1]["gamma"]] == [pipeline.GAMMA_MAX, gamma]
-    assert len(probes) == 2
+    assert [probe["gamma"] for probe in probes[:2]] == [pipeline.GAMMA_MAX, 1.0]
+    assert len(probes) == 3
     assert 1 < gamma < pipeline.GAMMA_MAX
     assert abs(probes[-1]["total_tob"] / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+def test_a_year_near_target_at_one_keeps_gamma_one(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+    vectors = _tob_vectors(lambda gamma: 63.0 * 1.03 * (gamma / 1.25) ** 0.1)
+
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+
+    assert gamma == 1.0
+    assert len(probes) == 2
+
+
+def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+    vectors = _tob_vectors(lambda gamma: 63.0 * 1.5 * gamma**0.5)
+
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+
+    assert gamma == pytest.approx(1 / pipeline.GAMMA_MAX)
+    assert [probe["gamma"] for probe in probes] == [
+        pipeline.GAMMA_MAX,
+        1.0,
+        pytest.approx(1 / pipeline.GAMMA_MAX),
+    ]
 
 
 def test_the_accepted_probe_returns_its_own_vectors(monkeypatch, tmp_path):
@@ -826,7 +850,11 @@ def test_the_accepted_probe_returns_its_own_vectors(monkeypatch, tmp_path):
     totals = iter((1.10, 1.04, 0.92, 0.93, 0.94))
 
     gamma, probes, (digest, vectors) = _solve_gamma(
-        monkeypatch, tmp_path, frame, [], _tob_vectors(lambda _: 63.0 * next(totals))
+        monkeypatch,
+        tmp_path,
+        frame,
+        [],
+        _tob_vectors(lambda _: 63.0 * next(totals)),
     )
 
     assert len(probes) > 2
@@ -852,6 +880,15 @@ def test_a_year_file_digest_follows_arrays_and_not_attributes(tmp_path):
     with h5py.File(second, "r+") as handle:
         handle["a/2040"][1] = 7.0
     assert pipeline.year_file_digest(first) != pipeline.year_file_digest(second)
+
+
+def test_a_year_file_digest_tells_types_with_the_same_bytes_apart(tmp_path):
+    single, integer = tmp_path / "single.h5", tmp_path / "integer.h5"
+    with h5py.File(single, "w") as handle:
+        handle.create_dataset("a/2040", data=np.array([1.0], dtype=np.float32))
+    with h5py.File(integer, "w") as handle:
+        handle.create_dataset("a/2040", data=np.array([1065353216], dtype=np.int32))
+    assert pipeline.year_file_digest(single) != pipeline.year_file_digest(integer)
 
 
 def _record_vector_paths(monkeypatch):

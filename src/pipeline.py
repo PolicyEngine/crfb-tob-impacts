@@ -209,9 +209,6 @@ KNOWN_ABSENT_INPUTS = {
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
 GAMMA_MAX_PROBES = 4
-# Total TOB's response to other income, measured on the projected sample at
-# 2036, 2037 and 2100. A wrong prior costs a probe, not accuracy.
-GAMMA_PRIOR_ELASTICITY = 0.5
 # A stored value shadows the formula. Either income tax measure freezes every
 # tax state the TOB variables compare, which gives zero TOB and raises nothing.
 DERIVED_VARIABLES = (
@@ -1013,6 +1010,44 @@ def _sim_from_frame(df: pd.DataFrame, year: int, reform):
     return frame_microsimulation(Dataset.from_dataframe(df, year), reform=reform)
 
 
+def _next_gamma(probes: list[dict], target_total: float) -> float | None:
+    """The next gamma to probe, or None once no gamma in range can get closer.
+
+    Total TOB rises with gamma. Probes on both sides of the target bracket it,
+    and interpolating in logs lands on the answer for a constant elasticity.
+    Probes all above the target extrapolate down, as far as the lower bound.
+    """
+    above = sorted(
+        (probe for probe in probes if probe["total_tob"] > target_total),
+        key=lambda probe: probe["gamma"],
+    )
+    below = [probe for probe in probes if probe["total_tob"] < target_total]
+    lowest = above[0]
+    log_gamma = np.log(lowest["gamma"])
+    if below:
+        highest = max(below, key=lambda probe: probe["gamma"])
+        if highest["gamma"] >= lowest["gamma"]:
+            return None
+        if highest["total_tob"] <= 0:
+            return float(np.sqrt(highest["gamma"] * lowest["gamma"]))
+        slope = np.log(lowest["total_tob"] / highest["total_tob"]) / np.log(
+            lowest["gamma"] / highest["gamma"]
+        )
+        return float(
+            np.exp(log_gamma + np.log(target_total / lowest["total_tob"]) / slope)
+        )
+    if lowest["gamma"] <= 1 / GAMMA_MAX:
+        return None
+    next_lowest = above[1]
+    slope = np.log(next_lowest["total_tob"] / lowest["total_tob"]) / np.log(
+        next_lowest["gamma"] / lowest["gamma"]
+    )
+    if slope <= 0:
+        return 1 / GAMMA_MAX
+    step = np.log(target_total / lowest["total_tob"]) / slope
+    return float(max(np.exp(log_gamma + step), 1 / GAMMA_MAX))
+
+
 def _solve_other_income_gamma(
     df: pd.DataFrame,
     year: int,
@@ -1035,7 +1070,8 @@ def _solve_other_income_gamma(
 
     The upper bound goes first. Every year measured so far falls short of the
     target there, and because TOB rises with other income, that one probe
-    settles the year and also supplies its vectors.
+    settles the year and also supplies its vectors. A year above target at the
+    bound searches from gamma 1.
 
     Returns (gamma, probe history, the accepted probe's file digest and
     household vectors). The frame is NOT modified.
@@ -1073,25 +1109,15 @@ def _solve_other_income_gamma(
     if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
         return gamma, probes, evaluated[gamma]
 
-    elasticity = GAMMA_PRIOR_ELASTICITY  # refined after the second probe
-    for _ in range(GAMMA_MAX_PROBES if total > target_total else 0):
-        ratio = target_total / total
-        gamma_next = gamma * ratio ** (1 / elasticity)
-        gamma_next = min(max(gamma_next, 1 / GAMMA_MAX), GAMMA_MAX)
-        total_next = total_tob_at(gamma_next)
-        implied = None
-        if total_next > 0 and total > 0 and gamma_next != gamma:
-            implied = float(np.log(total_next / total) / np.log(gamma_next / gamma))
-            if 0.2 < implied < 6:
-                elasticity = implied
-        gamma, total = gamma_next, total_next
+    next_gamma = 1.0 if total > target_total else None
+    for _ in range(GAMMA_MAX_PROBES):
+        if next_gamma is None:
+            break
+        gamma = next_gamma
+        total = total_tob_at(gamma)
         if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
             return gamma, probes, evaluated[gamma]
-        if gamma in (GAMMA_MAX, 1 / GAMMA_MAX):
-            break
-        if implied is not None and implied < 0.2:
-            # TOB is effectively saturated; more probes cannot help.
-            break
+        next_gamma = _next_gamma(probes, target_total)
 
     best = min(probes, key=lambda p: abs(p["total_tob"] / target_total - 1))
     _log(

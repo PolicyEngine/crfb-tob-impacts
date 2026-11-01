@@ -202,12 +202,16 @@ def test_year_file_reads_a_lifetime_input(year_file):
     assert entities["person"].is_household_head.tolist() == heads.tolist()
 
 
-@pytest.mark.parametrize("period", [str(YEAR + 1), "ETERNITY"])
-def test_year_file_refuses_an_annual_input_outside_the_year(year_file, period):
+@pytest.mark.parametrize(
+    "periods",
+    [(str(YEAR + 1),), ("ETERNITY",), (str(YEAR), "ETERNITY")],
+)
+def test_year_file_refuses_an_annual_input_outside_the_year(year_file, periods):
     import h5py
 
     engine, path = year_file
     with h5py.File(path, "r+") as handle:
-        handle.create_dataset(f"is_blind/{period}", data=np.zeros(6, dtype=bool))
+        for period in periods:
+            handle.create_dataset(f"is_blind/{period}", data=np.zeros(6, dtype=bool))
     with pytest.raises(KeyError):
         engine.year_file_dataset(path, YEAR)

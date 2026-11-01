@@ -82,8 +82,9 @@ def year_file_dataset(path: Any, year: int):
         for variable, periods in handle.items():
             definition = system.variables[variable]
             # A lifetime input holds one value under ETERNITY, not the year.
-            lifetime = definition.definition_period == ETERNITY
-            period = "ETERNITY" if lifetime and "ETERNITY" in periods else str(year)
+            period = "ETERNITY" if "ETERNITY" in periods else str(year)
+            if period == "ETERNITY" and definition.definition_period != ETERNITY:
+                raise KeyError(f"{variable} is annual but stores an ETERNITY array.")
             values = periods[period][()]
             if values.dtype.kind == "S":
                 values = values.astype(str)
