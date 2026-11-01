@@ -901,32 +901,36 @@ def test_a_year_file_digest_tells_types_with_the_same_bytes_apart(tmp_path):
     assert pipeline.year_file_digest(single) != pipeline.year_file_digest(integer)
 
 
-def _record_vector_paths(monkeypatch):
-    paths = []
+def _record_vector_passes(monkeypatch):
+    passes = []
     original = pipeline._household_vectors
 
     def recorded(path, year, reform):
-        paths.append(path)
+        passes.append((path, reform))
         return original(path, year, reform)
 
     monkeypatch.setattr(pipeline, "_household_vectors", recorded)
-    return paths
+    return passes
 
 
 def test_the_accepted_probe_replaces_the_final_pass(monkeypatch, tmp_path):
-    paths = _record_vector_paths(monkeypatch)
+    passes = _record_vector_passes(monkeypatch)
     _build(monkeypatch, tmp_path, 2050)
+    paths = [path for path, _ in passes]
     assert paths
     assert {path.suffix for path in paths} == {".gamma-probe"}
 
 
 def test_a_final_file_unlike_its_probe_gets_its_own_pass(monkeypatch, tmp_path):
-    paths = _record_vector_paths(monkeypatch)
+    passes = _record_vector_passes(monkeypatch)
     digests = itertools.count()
     monkeypatch.setattr(pipeline, "year_file_digest", lambda path: next(digests))
-    _build(monkeypatch, tmp_path, 2050)
-    assert paths[-1] == tmp_path / "2050.h5"
-    assert sum(path == tmp_path / "2050.h5" for path in paths) == 1
+    _build(monkeypatch, tmp_path, 2050, economic=fakes.FakeEconomicReform)
+    final = [reform for path, reform in passes if path == tmp_path / "2050.h5"]
+    assert passes[-1][0] == tmp_path / "2050.h5"
+    assert len(final) == 1
+    assert final[0] is not None
+    assert final[0] == passes[0][1]
 
 
 def test_a_failed_gamma_probe_leaves_no_file(monkeypatch, tmp_path):
