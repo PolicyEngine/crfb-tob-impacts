@@ -26,9 +26,10 @@ def year_file(tmp_path, monkeypatch):
     engine = load_engine(monkeypatch)
     monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
     monkeypatch.setitem(sys.modules, "src.engine", engine)
-    # Household 30 holds two tax units, and household 20 one couple.
+    # Household 30 holds two tax units, and household 20 one couple. Group ids
+    # run out of order, so sorting by id can't line tables up by accident.
     household = np.array([10, 20, 20, 30, 30, 40])
-    tax_unit = np.array([1, 2, 2, 3, 4, 5])
+    tax_unit = np.array([9, 2, 2, 7, 4, 1])
     frame = pd.DataFrame(
         {
             f"person_id__{YEAR}": [101, 102, 103, 104, 105, 106],

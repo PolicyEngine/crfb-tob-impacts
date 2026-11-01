@@ -6,6 +6,13 @@ from copy import deepcopy
 # This manifest defines the CRFB production reform output dataset shape.
 # It starts from the current policyengine.py US output dataset variables and
 # adds CRFB-specific raw variables needed for later post-H5 aggregation.
+#
+# Workers calculate it a household chunk at a time, and every cell shares one
+# column inventory, so a variable belongs here only if it is numeric, local to
+# a household and defined in every scored year. That leaves out race (text),
+# medicaid (state cost aggregates), household_income_decile (a population
+# rank; aggregation ranks households itself) and the SPM net income and poverty
+# variables (the SPM forecast ends in 2035).
 DEFAULT_FULL_H5_OUTPUT_VARIABLES_BY_ENTITY: dict[str, list[str]] = {
     "person": [
         "person_id",
@@ -17,14 +24,12 @@ DEFAULT_FULL_H5_OUTPUT_VARIABLES_BY_ENTITY: dict[str, list[str]] = {
         "person_weight",
         "age",
         "is_male",
-        "race",
         "is_child",
         "is_adult",
         "employment_income",
         "ssi",
         "social_security",
         "medicare_cost",
-        "medicaid",
         "unemployment_compensation",
         "self_employment_income",
         "partnership_s_corp_income",
@@ -50,9 +55,6 @@ DEFAULT_FULL_H5_OUTPUT_VARIABLES_BY_ENTITY: dict[str, list[str]] = {
         "spm_unit_weight",
         "snap",
         "tanf",
-        "spm_unit_net_income",
-        "spm_unit_is_in_spm_poverty",
-        "spm_unit_is_in_deep_spm_poverty",
     ],
     "tax_unit": [
         "tax_unit_id",
@@ -74,7 +76,6 @@ DEFAULT_FULL_H5_OUTPUT_VARIABLES_BY_ENTITY: dict[str, list[str]] = {
         "household_weight",
         "household_count_people",
         "household_net_income",
-        "household_income_decile",
         "household_benefits",
         "household_tax",
         "household_market_income",

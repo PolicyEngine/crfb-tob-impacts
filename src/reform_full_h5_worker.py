@@ -47,6 +47,9 @@ from .tax_assumption_loader import (
 
 WORKER_ENTRYPOINT = "src.reform_full_h5_worker.run_reform_full_h5_cell"
 FULL_H5_DIRNAME = "reform_full_h5"
+# The same count as the rebuild's target vectors: it keeps a full-base cell well
+# below a whole-population simulation's memory.
+WORKER_CHUNKS = 8
 
 
 @dataclass(frozen=True)
@@ -316,6 +319,30 @@ def save_complete_microsimulation_h5(
             "Full reform H5 generation skipped unapproved variables: " + examples
         )
 
+    return _write_entity_frames(
+        entity_frames,
+        output_path,
+        year=year,
+        variables_by_entity=variables_by_entity,
+        skipped=skipped,
+        materialized_tob_variables=materialized_tob_variables,
+        capture_policy=(
+            "checked full-output variable manifest materialized from the "
+            "reform microsimulation"
+        ),
+    )
+
+
+def _write_entity_frames(
+    entity_frames: dict[str, pd.DataFrame],
+    output_path: Path,
+    *,
+    year: int,
+    variables_by_entity: dict[str, list[str]],
+    skipped: list[dict[str, Any]],
+    materialized_tob_variables: list[str],
+    capture_policy: str,
+) -> dict[str, Any]:
     tmp_path = output_path.with_name(f"{output_path.name}.tmp")
     tmp_path.unlink(missing_ok=True)
     with pd.HDFStore(tmp_path, mode="w") as store:
@@ -347,7 +374,7 @@ def save_complete_microsimulation_h5(
         "variable_count": int(sum(item["column_count"] for item in entities.values())),
         "skipped_variables": skipped[:250],
         "skipped_variable_count": int(len(skipped)),
-        "capture_policy": "checked full-output variable manifest materialized from the reform microsimulation",
+        "capture_policy": capture_policy,
         "output_variable_manifest": variables_by_entity,
         "tob_materialization": (
             {
@@ -361,6 +388,108 @@ def save_complete_microsimulation_h5(
             else None
         ),
     }
+
+
+def _values_on_entity(
+    values: np.ndarray,
+    ids: np.ndarray,
+    *,
+    native: str,
+    target: str,
+    people: pd.DataFrame,
+    target_ids: np.ndarray,
+) -> np.ndarray:
+    """Map a variable's native array to a manifest entity.
+
+    The rule matches ``Simulation.map_result``: people see their group's value,
+    and a larger group sums what it contains. Groups nest within households, so
+    splitting a group's value among its people and summing equals summing it.
+    """
+    if native == target:
+        return values
+    if target == "person":
+        return (
+            pd.Series(values, index=ids)
+            .reindex(people[f"person_{native}_id"].to_numpy())
+            .to_numpy()
+        )
+    owners = people[f"person_{target}_id"].to_numpy()
+    if native != "person":
+        owners = (
+            pd.Series(owners, index=people[f"person_{native}_id"].to_numpy())
+            .groupby(level=0)
+            .first()
+            .reindex(ids)
+            .to_numpy()
+        )
+    return (
+        pd.Series(values).groupby(owners).sum().reindex(target_ids).to_numpy()
+    )
+
+
+def save_chunked_microsimulation_h5(
+    build_simulation: Any,
+    dataset_path: str | Path,
+    output_path: str | Path,
+    *,
+    year: int,
+    variables_by_entity: dict[str, list[str]] | None = None,
+    n_chunks: int = WORKER_CHUNKS,
+) -> dict[str, Any]:
+    """Write the manifest's entity tables a household chunk at a time.
+
+    ``build_simulation(dataset)`` returns the cell's simulation on one chunk.
+    Only one chunk simulation lives at once, so memory follows the chunk rather
+    than the population. The tables hold the same arrays, in the same order, as
+    ``save_complete_microsimulation_h5`` writes from a whole-file simulation. A
+    variable that can't be calculated stops the cell.
+    """
+    from policyengine_us.system import system
+
+    from .engine import chunked_entity_tables
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    variables_by_entity = variables_by_entity or full_h5_output_variable_manifest()
+    requested = list(
+        dict.fromkeys(name for names in variables_by_entity.values() for name in names)
+    )
+    single, tables = chunked_entity_tables(
+        dataset_path, year, requested, build_simulation, n_chunks=n_chunks
+    )
+
+    entity_frames: dict[str, pd.DataFrame] = {}
+    materialized_tob_variables: list[str] = []
+    for entity, names in variables_by_entity.items():
+        target_ids = getattr(single, entity)[f"{entity}_id"].to_numpy()
+        columns = {}
+        for name in names:
+            native = system.variables[name].entity.key
+            columns[name] = _values_on_entity(
+                tables[native][name].to_numpy(),
+                tables[native][f"{native}_id"].to_numpy(),
+                native=native,
+                target=entity,
+                people=single.person,
+                target_ids=target_ids,
+            )
+            if name in TOB_REVENUE_VARIABLES:
+                materialized_tob_variables.append(name)
+        entity_frames[entity] = pd.DataFrame(columns, index=np.arange(len(target_ids)))
+
+    metadata = _write_entity_frames(
+        entity_frames,
+        output_path,
+        year=year,
+        variables_by_entity=variables_by_entity,
+        skipped=[],
+        materialized_tob_variables=materialized_tob_variables,
+        capture_policy=(
+            "checked full-output variable manifest materialized from reform "
+            "microsimulations on household chunks"
+        ),
+    )
+    return {**metadata, "household_chunks": int(n_chunks)}
 
 
 def object_store_config_from_env(
@@ -882,21 +1011,26 @@ def run_reform_full_h5_cell(
     tax_contract = assumptions.tax_assumption
     combined_reform = compose_reforms(baseline_reform, policy_reform)
 
-    from .engine import dataset_microsimulation
+    from .engine import frame_microsimulation
 
-    sim = dataset_microsimulation(dataset_path, reform=combined_reform)
     behavioral_baseline_installation = None
-    if scoring_type == "behavioral":
-        behavioral_baseline_installation = install_behavioral_baseline_tax_system(
-            sim,
-            baseline_reform=baseline_reform,
-        )
-    h5_metadata = save_complete_microsimulation_h5(
-        sim,
+
+    def build_simulation(dataset: Any) -> Any:
+        nonlocal behavioral_baseline_installation
+        sim = frame_microsimulation(dataset, reform=combined_reform)
+        if scoring_type == "behavioral":
+            behavioral_baseline_installation = install_behavioral_baseline_tax_system(
+                sim,
+                baseline_reform=baseline_reform,
+            )
+        return sim
+
+    h5_metadata = save_chunked_microsimulation_h5(
+        build_simulation,
+        dataset_path,
         scenario_path,
         year=year,
     )
-    del sim
 
     schema_validation = None
     if expected_schema_manifest_path is not None:

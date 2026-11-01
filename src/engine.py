@@ -88,6 +88,28 @@ def year_file_dataset(path: Any, year: int):
     )
 
 
+def chunked_entity_tables(
+    path: Any,
+    year: int,
+    variables: Any,
+    build_simulation: Any,
+    n_chunks: int = HOUSEHOLD_VECTOR_CHUNKS,
+) -> tuple[Any, dict]:
+    """Calculate ``variables`` on a year file, a household chunk at a time.
+
+    Returns the year's entity tables and, for each entity, a table in file
+    order holding the requested variables native to it.
+    """
+    _require_certified_runtime()
+    from policyengine_us.tools.calculate_chunked import calculate_chunked
+
+    dataset = year_file_dataset(path, year)
+    result = calculate_chunked(
+        build_simulation, list(variables), year, n_chunks, dataset=dataset
+    )
+    return dataset.get_year(year), result.entities
+
+
 def household_vectors(
     path: Any,
     year: int,
@@ -101,28 +123,24 @@ def household_vectors(
     simulation too large for the full base. Totals line up with the file's
     household order.
     """
-    _require_certified_runtime()
     import numpy as np
     import pandas as pd
     from policyengine_us import Microsimulation
     from policyengine_us.system import system
-    from policyengine_us.tools.calculate_chunked import calculate_chunked
 
-    dataset = year_file_dataset(path, year)
-    result = calculate_chunked(
-        lambda chunk: Microsimulation(dataset=chunk, reform=reform),
-        list(variables),
+    single, tables = chunked_entity_tables(
+        path,
         year,
-        n_chunks,
-        dataset=dataset,
+        variables,
+        lambda chunk: Microsimulation(dataset=chunk, reform=reform),
+        n_chunks=n_chunks,
     )
-    single = dataset.get_year(year)
     household_ids = pd.Index(single.household.household_id)
     person_households = household_ids.get_indexer(single.person.person_household_id)
     vectors = {}
     for variable in variables:
         entity = system.variables[variable].entity.key
-        table = result.entities[entity]
+        table = tables[entity]
         if entity == "household":
             owners = household_ids.get_indexer(table.household_id)
         elif entity == "person":

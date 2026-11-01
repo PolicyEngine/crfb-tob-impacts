@@ -181,6 +181,7 @@ def engine_module(frame, year: int, constructed: list) -> ModuleType:
         return sim
 
     module.dataset_microsimulation = dataset_microsimulation
+    module.frame_microsimulation = dataset_microsimulation
     module.base_microsimulation = dataset_microsimulation
     return module
 
@@ -202,12 +203,13 @@ def patch_worker(monkeypatch, worker, *, frame, year: int) -> list:
         lambda **kwargs: {"pip_freeze": {"available": False}},
     )
 
-    def save(sim, path, *, year):
+    def save(build_simulation, dataset_path, path, *, year):
+        build_simulation(dataset_path)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         Path(path).write_bytes(b"scenario")
         return {"sha256": "0" * 64, "size_bytes": 8}
 
-    monkeypatch.setattr(worker, "save_complete_microsimulation_h5", save)
+    monkeypatch.setattr(worker, "save_chunked_microsimulation_h5", save)
     return constructed
 
 
