@@ -208,7 +208,10 @@ KNOWN_ABSENT_INPUTS = {
 # final calibration absorbs any residual.
 GAMMA_MAX = 1.25
 GAMMA_TOLERANCE = 0.02
-GAMMA_MAX_PROBES = 4
+GAMMA_MAX_PROBES = 5
+# What the probe after an overshoot assumes for total TOB's elasticity to gamma.
+# The full base measured 0.476 at 2027, between gamma 1 and the upper bound.
+GAMMA_PRIOR_ELASTICITY = 0.48
 # A stored value shadows its formula, and a stored tax measure freezes every
 # tax state the TOB variables compare, which gives zero TOB and raises nothing.
 # The writer refuses any computed variable but this id, the records' own.
@@ -1014,6 +1017,21 @@ def _log_slope(first: dict, second: dict) -> float:
     )
 
 
+def _gamma_after_overshoot(total: float, target_total: float) -> float:
+    """The probe after a year ends above target at the upper bound.
+
+    A step by the prior elasticity saves the pass a bracket from gamma 1 would
+    cost. A step that predicts gamma 1 within tolerance takes gamma 1 itself, so
+    a year that needs no scaling gets none.
+    """
+    log_gamma = np.log(GAMMA_MAX) + (
+        (np.log(target_total) - np.log(total)) / GAMMA_PRIOR_ELASTICITY
+    )
+    if abs(log_gamma) <= GAMMA_TOLERANCE / GAMMA_PRIOR_ELASTICITY:
+        return 1.0
+    return float(max(np.exp(log_gamma), 1 / GAMMA_MAX))
+
+
 def _next_gamma(probes: list[dict], target_total: float) -> float | None:
     """The next gamma to probe, or None once no gamma in range can get closer.
 
@@ -1064,12 +1082,12 @@ def _solve_other_income_gamma(
     to other income. When probes show that, the solver stops at the best
     bounded gamma and the final entropy calibration closes the rest.
 
-    The upper bound goes first. Every year measured so far falls short of the
-    target there, and total TOB rose with gamma at every population reading, so
-    that one probe settles the year and also supplies its vectors. Those
-    readings carry the shortcut, not the formulas: a household's TOB can fall
-    as its income passes the 0% capital gains band. A year above target at the
-    bound searches from gamma 1.
+    The upper bound goes first. Far years fall short of the target there, and
+    total TOB rose with gamma at every population reading, so that one probe
+    settles such a year and also supplies its vectors. Those readings carry the
+    shortcut, not the formulas: a household's TOB can fall as its income passes
+    the 0% capital gains band. Near years overshoot at the bound, as 2027 does
+    on the full base, and step down by the prior elasticity.
 
     Returns (gamma, probe history, the accepted probe's file digest and
     household vectors). The frame is NOT modified.
@@ -1109,7 +1127,9 @@ def _solve_other_income_gamma(
     if abs(total / target_total - 1) <= GAMMA_TOLERANCE:
         return gamma, probes, evaluated[gamma]
 
-    next_gamma = 1.0 if total > target_total else None
+    next_gamma = None
+    if total > target_total:
+        next_gamma = _gamma_after_overshoot(total, target_total)
     for _ in range(GAMMA_MAX_PROBES):
         if next_gamma is None:
             break

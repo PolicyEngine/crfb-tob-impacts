@@ -349,7 +349,7 @@ def test_one_power_law_ends_within_tolerance(root, elasticity):
 
 
 def test_the_search_can_need_every_probe_it_has():
-    total = _rising_total(0.8, (0.05, 8.0), 0.5)
+    total = _rising_total(0.8407, (0.05, 8.0), 0.75)
     gamma, probes, accepted = _search(total)
     _assert_the_search_held(gamma, probes, accepted)
     assert len(probes) == 1 + pipeline.GAMMA_MAX_PROBES
@@ -403,11 +403,13 @@ def test_no_tob_at_gamma_one_still_brackets_the_target():
 
 @pytest.mark.parametrize("elasticity", [0.0, -0.5])
 def test_a_total_that_never_falls_goes_straight_to_the_lower_bound(elasticity):
-    gamma, probes, accepted = _search(lambda gamma: 80.0 * gamma**elasticity)
+    gamma, probes, accepted = _search(
+        lambda gamma: 66.0 * (gamma / pipeline.GAMMA_MAX) ** elasticity
+    )
     _assert_the_search_held(gamma, probes, accepted)
     assert [probe["gamma"] for probe in probes] == [
         pipeline.GAMMA_MAX,
-        1.0,
+        pytest.approx(1.1345, abs=1e-4),
         1 / pipeline.GAMMA_MAX,
     ]
 
@@ -437,14 +439,59 @@ def test_a_bracket_with_no_room_stops_the_search():
     assert pipeline._next_gamma(probes, 63.0) is None
 
 
-@pytest.mark.parametrize("bad_gamma", [pipeline.GAMMA_MAX, 1.0])
+@pytest.mark.parametrize("bad_probe", [0, 1])
 @pytest.mark.parametrize("bad_total", [float("nan"), float("inf")])
-def test_a_total_that_is_not_finite_raises(bad_gamma, bad_total):
+def test_a_total_that_is_not_finite_raises(bad_probe, bad_total):
+    tried = []
+
     def total(gamma):
-        return bad_total if gamma == bad_gamma else 80.0 * gamma**0.5
+        tried.append(gamma)
+        return bad_total if len(tried) - 1 == bad_probe else 80.0 * gamma**0.5
 
     with pytest.raises(ValueError, match="Total TOB for 2040"):
         _search(total)
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    overshoot=st.floats(min_value=1.0 + pipeline.GAMMA_TOLERANCE, max_value=1e12),
+)
+def test_the_step_after_an_overshoot_stays_inside_the_bounds(overshoot):
+    gamma = pipeline._gamma_after_overshoot(63.0 * overshoot, 63.0)
+    assert 1 / pipeline.GAMMA_MAX <= gamma < pipeline.GAMMA_MAX
+
+
+@settings(max_examples=100, deadline=None)
+@given(
+    overshoot=st.floats(min_value=1.03, max_value=1.07),
+    elasticity=st.floats(min_value=0.40, max_value=0.60),
+)
+def test_a_year_near_the_measured_elasticity_takes_two_probes(overshoot, elasticity):
+    root = pipeline.GAMMA_MAX * overshoot ** (-1 / elasticity)
+    total = _rising_total(root, (elasticity, elasticity), 1.0)
+    gamma, probes, accepted = _search(total)
+    _assert_the_search_held(gamma, probes, accepted)
+    assert len(probes) == 2
+    assert abs(total(gamma) / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
+
+
+def _overshoot_stepping_to(log_gamma):
+    return np.exp(
+        (np.log(pipeline.GAMMA_MAX) - log_gamma) * pipeline.GAMMA_PRIOR_ELASTICITY
+    )
+
+
+@pytest.mark.parametrize("log_gamma", [-0.03, 0.0, 0.03])
+def test_a_step_that_predicts_gamma_one_takes_gamma_one(log_gamma):
+    assert (
+        pipeline._gamma_after_overshoot(_overshoot_stepping_to(log_gamma), 1.0) == 1.0
+    )
+
+
+@pytest.mark.parametrize("log_gamma", [-0.05, 0.05])
+def test_a_step_clear_of_gamma_one_keeps_its_own_value(log_gamma):
+    gamma = pipeline._gamma_after_overshoot(_overshoot_stepping_to(log_gamma), 1.0)
+    assert gamma == pytest.approx(np.exp(log_gamma))
 
 
 def test_a_year_above_target_at_the_bound_reaches_its_targets():

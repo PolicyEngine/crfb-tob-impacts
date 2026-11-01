@@ -814,7 +814,10 @@ def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
-    assert [probe["gamma"] for probe in probes[:2]] == [pipeline.GAMMA_MAX, 1.0]
+    assert [probe["gamma"] for probe in probes[:2]] == [
+        pipeline.GAMMA_MAX,
+        pytest.approx(1.0733, abs=1e-4),
+    ]
     assert len(probes) == 3
     assert 1 < gamma < pipeline.GAMMA_MAX
     assert abs(probes[-1]["total_tob"] / 63.0 - 1) <= pipeline.GAMMA_TOLERANCE
@@ -822,12 +825,24 @@ def test_a_year_above_target_at_the_bound_searches_down(monkeypatch, tmp_path):
 
 def test_a_year_near_target_at_one_keeps_gamma_one(monkeypatch, tmp_path):
     frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
-    vectors = _tob_vectors(lambda gamma: 63.0 * 1.03 * (gamma / 1.25) ** 0.1)
+    # The full base at 2027 read 10.3% above target at the bound and 0.8% below
+    # at gamma 1.
+    vectors = _tob_vectors(lambda gamma: 63.0 * 0.992 * gamma**0.476)
 
     gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
 
     assert gamma == 1.0
     assert len(probes) == 2
+
+
+def test_an_inelastic_year_above_target_still_reaches_it(monkeypatch, tmp_path):
+    frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
+    vectors = _tob_vectors(lambda gamma: 63.0 * 1.03 * (gamma / 1.25) ** 0.1)
+
+    gamma, probes, _ = _solve_gamma(monkeypatch, tmp_path, frame, [], vectors)
+
+    assert gamma == pytest.approx(0.9301, abs=1e-3)
+    assert len(probes) == 3
 
 
 def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_path):
@@ -839,7 +854,6 @@ def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_pat
     assert gamma == pytest.approx(1 / pipeline.GAMMA_MAX)
     assert [probe["gamma"] for probe in probes] == [
         pipeline.GAMMA_MAX,
-        1.0,
         pytest.approx(1 / pipeline.GAMMA_MAX),
     ]
 
@@ -847,7 +861,7 @@ def test_a_year_above_target_at_the_lower_bound_stops_there(monkeypatch, tmp_pat
 def test_the_accepted_probe_returns_its_own_vectors(monkeypatch, tmp_path):
     frame = pd.DataFrame({"dividends": [10.0, 20.0, 30.0]})
     # The second probe lands closest, so the best gamma isn't the last one tried.
-    totals = iter((1.10, 1.04, 0.92, 0.93, 0.94))
+    totals = iter((1.10, 1.04, 0.92, 0.93, 0.94, 0.95))
 
     gamma, probes, (digest, vectors) = _solve_gamma(
         monkeypatch,
