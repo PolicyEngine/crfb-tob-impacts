@@ -1,13 +1,13 @@
-The current release surface contains sixteen reforms: `option1` through
-`option12`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
+We score fifteen reforms: `option1` through `option12`
+except `option6`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
 inclusion (`magi100`), and the 2005 Tax Panel simple deduction
-(`tax_panel_2005`). Every static row is either an exact full-H5
-microsimulation output on the populace baselines or display interpolation
-between those exact anchor-year outputs, as labeled per row in the public
-CSV. Legacy non-contract artifacts are excluded from the dashboard, paper
-exhibits, and release package.
+(`tax_panel_2005`). The tables also report `option6`, a shorter phase-in
+variant of the phased Roth swap, as a sensitivity case. Each static row comes
+either from a full-H5 microsimulation at an anchor year or from linear
+interpolation between anchor years, and the `full_h5_result_type` column of the
+[public results file](https://policyengine.org/us/taxation-of-benefits-reforms/data/results.csv) labels which.
 
-## Ten-year static revenue impacts
+### Ten-year static revenue impacts
 
 | Reform | 2026-2035 Revenue Impact ($B) |
 | --- | --- |
@@ -25,14 +25,15 @@ exhibits, and release package.
 | tax93 | +670.8 |
 | option10 | +734.6 |
 | option8 | +896.2 |
-| option6 | +1,139.8 |
+| option6 (sensitivity) | +1,139.8 |
 | option12 | +1,908.5 |
 
-In the ten-year window, the largest revenue raisers are `option12`
-(+1,908.5 $B) and `option8` (+896.2 $B). The largest revenue
-reduction is `option1` (-1,658.8 $B).
+Over `2026`-`2035`, `option12` raises the most revenue of the
+fifteen reforms ($1,908.5 billion) and
+`option8` the next most ($896.2 billion). `option1` loses the
+most ($1,658.8 billion).
 
-## Terminal-year static impacts
+### Terminal-year static impacts
 
 | Reform | 2100 Revenue Impact ($B) | 2100 TOB Impact ($B) |
 | --- | --- | --- |
@@ -40,7 +41,7 @@ reduction is `option1` (-1,658.8 $B).
 | reverse_roth | -1,045.8 | +988.4 |
 | option12 | -547.8 | -3,319.1 |
 | option5 | -547.8 | -3,319.1 |
-| option6 | -547.8 | -3,319.1 |
+| option6 (sensitivity) | -547.8 | -3,319.1 |
 | tax_panel_2005 | -141.1 | -141.1 |
 | option7 | +0.0 | +0.0 |
 | option4 | +187.1 | +187.1 |
@@ -53,7 +54,10 @@ reduction is `option1` (-1,658.8 $B).
 | option10 | +759.1 | +759.1 |
 | option8 | +1,026.6 | +1,026.6 |
 
-At `2100`, the strongest positive revenue effects come from broader benefit
-taxation options such as `option8` and `option10`. The largest revenue
-reductions are repeal or structural swap options such as `option1`, `option5`,
-and `option12`.
+In `2100`, `option8` raises the most revenue ($1,026.6 billion) and
+`option10` the next most ($759.1 billion). `option1`
+loses the most ($3,319.1 billion), followed by `reverse_roth`
+($1,045.8 billion). By then `option5`, `option12`, and the
+`option6` sensitivity case reach the same end state, with employer
+contributions taxable and no benefits taxed, and each loses
+$547.8 billion.

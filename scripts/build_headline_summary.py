@@ -58,6 +58,12 @@ REFORM_LABELS: dict[str, str] = {
     "reverse_roth": "Reverse Roth",
 }
 SOLVENCY_REFORMS = ("option1", "option2", "option8", "option12")
+# The dashboard menu omits option6; the paper reports it as a sensitivity case.
+SENSITIVITY_REFORMS = ("option6",)
+# For these reforms the default split adds the OASDI and HI net impacts, which
+# measure each fund's employer-contribution gain separately, so the headline
+# total differs from the federal income-tax change in the revenue tables.
+SWAP_REFORMS = ("option5", "option12", "option6")
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -209,6 +215,73 @@ def _fmt(value: float) -> str:
     return f"{value:+,.0f}"
 
 
+def _label(reform: str) -> str:
+    if reform in SENSITIVITY_REFORMS:
+        return f"{REFORM_LABELS[reform]} (sensitivity)"
+    return REFORM_LABELS[reform]
+
+
+def swap_ten_year_gaps() -> dict[str, float]:
+    """Ten-year default-split total less the federal income-tax change, in $B."""
+    gaps = {reform: 0.0 for reform in SWAP_REFORMS}
+    for row in _rows(DATA / "results.csv"):
+        if row.get("scoring_type") != "static" or row["reform_name"] not in gaps:
+            continue
+        if int(row["year"]) > TEN_YEAR_END:
+            continue
+        total, *_ = default_split(row)
+        gaps[row["reform_name"]] += total - float(row["revenue_impact"])
+    return gaps
+
+
+SCENARIO_NAMES = {
+    "scheduled_benefits": "scheduled benefits",
+    "ss_solvent": "the solvency baseline",
+}
+COUNT_WORDS = {1: "one row", 2: "two rows", 3: "three rows"}
+
+
+def _general_fund_note(records: list[dict[str, object]]) -> list[str]:
+    """Name the rows whose totals include general-fund flows, which the tables
+    do not show as a separate column."""
+    rows = [
+        (
+            _label(str(record["reform"])),
+            SCENARIO_NAMES[str(record["baseline_scenario"])],
+            float(record["pv75_general_fund_billions"]),
+        )
+        for record in records
+        if abs(float(record["pv75_general_fund_billions"])) >= 0.5
+    ]
+    if not rows:
+        return ["No row includes general-fund flows."]
+    parts = "; ".join(
+        f"{label} under {scenario} ({'-' if value < 0 else ''}${abs(value):,.0f}"
+        " billion in present value)"
+        for label, scenario, value in rows
+    )
+    return [
+        "We omit a separate general-fund column; the totals include",
+        f"general-fund flows in {COUNT_WORDS[len(rows)]} only: {parts}.",
+    ]
+
+
+def _swap_note() -> list[str]:
+    gaps = swap_ten_year_gaps()
+    if not all(gap > 0 for gap in gaps.values()):
+        raise ValueError("expected each swap's fund total to exceed its revenue change")
+    amounts = [f"${gaps[reform]:,.1f} billion" for reform in SWAP_REFORMS]
+    return [
+        "For the Roth swap, the phased Roth, and the short phase-in Roth",
+        "sensitivity case, the default split adds the two funds' net impacts.",
+        "Over 2026-2035 those sums exceed the change in federal income tax by",
+        f"{amounts[0]}, {amounts[1]}, and {amounts[2]}, because we measure each",
+        "fund's gain from taxing employer contributions separately",
+        "(@sec-swap-accounting); the revenue tables in @sec-results report the",
+        "federal income-tax change.",
+    ]
+
+
 def write_exhibit(records: list[dict[str, object]]) -> None:
     def table(scenario: str) -> str:
         headers = [
@@ -229,7 +302,7 @@ def write_exhibit(records: list[dict[str, object]]) -> None:
                 "| "
                 + " | ".join(
                     [
-                        REFORM_LABELS[str(record["reform"])],
+                        _label(str(record["reform"])),
                         _fmt(float(record["ten_year_nominal_billions"])),
                         _fmt(float(record["pv75_total_billions"])),
                         _fmt(float(record["pv75_oasdi_billions"])),
@@ -242,15 +315,16 @@ def write_exhibit(records: list[dict[str, object]]) -> None:
 
     fragment = "\n".join(
         [
-            "Headline revenue effects per reform under the dashboard's default",
-            "trust-fund split. Ten-year figures are nominal 2026-2035 sums;",
-            "75-year figures discount each fund's 2026-2100 flows at its own",
-            "Trustees effective interest rates (OASDI: Table VI.G1 factors;",
-            "Medicare HI: Table IV.A4, graded to the 4.7 percent ultimate rate",
-            "by 2040), with general-fund flows at the OASDI series. Totals sum",
-            "the discounted components; the general-fund component is not",
-            "shown separately and is zero under the default split for every",
-            "option except the no-senior-deduction option.",
+            "We report each reform's headline revenue effect under the",
+            "dashboard's default trust-fund split. Ten-year figures sum nominal",
+            "2026-2035 flows. Seventy-five-year figures discount each fund's",
+            "2026-2100 flows at its own Trustees effective interest rates (OASDI:",
+            "Table VI.G1 factors; Medicare HI: Table IV.A4, graded to the 4.7",
+            "percent ultimate rate by 2040) and general-fund flows at the OASDI",
+            "series, then add the discounted components.",
+            *_general_fund_note(records),
+            "",
+            *_swap_note(),
             "",
             "**Scored against scheduled benefits:**",
             "",

@@ -1,9 +1,4 @@
-The benchmark layer is best treated as orientation rather than a point-estimate
-competition. The current rebuilt static package continues to sit within the
-broad range established by the first report's benchmark set, but windows and
-policy baselines are not identical.
-
-## Option 1: full repeal benchmark
+### Option 1: full repeal benchmark
 
 | Source | Policy | Scoring | Window | Revenue Impact ($B) |
 | --- | --- | --- | --- | --- |
@@ -13,7 +8,7 @@ policy baselines are not identical.
 | Tax Foundation [@taxfoundation2024trump] | Full repeal | Conventional | 2025-2034 | -1,400.0 |
 | Tax Foundation [@taxfoundation2024trump] | Full repeal | Macroeconomic | 2025-2034 | -1,300.0 |
 
-## Options 2 and 8: broader taxation benchmark
+### Options 2 and 8: broader taxation benchmark
 
 | Source | Policy | Scoring | Window | Revenue Impact ($B) |
 | --- | --- | --- | --- | --- |
@@ -22,7 +17,7 @@ policy baselines are not identical.
 | JCT [@jct2024expenditures] | Current SS tax expenditure | Conventional | 2024-2028 | +318.4 |
 | CBO [@cbo2024pension] | Pension-style basis recovery | Conventional | 2021-2030 | +458.7 |
 
-## Option 7: bonus senior deduction benchmark
+### Option 7: bonus senior deduction benchmark
 
 | Source | Policy | Scoring | Window | Federal revenue ($B) | TOB impact ($B) |
 | --- | --- | --- | --- | --- | --- |

@@ -896,13 +896,17 @@ def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhib
     assert "validation-sentinels.md" not in generator
 
 
-def test_labor_supply_response_exhibit_uses_current_contract():
+def test_labor_supply_response_exhibit_names_static_only_reforms():
     exhibit = (
         REPO_ROOT / "paper" / "exhibits" / "labor-supply-response-status.md"
     ).read_text(encoding="utf-8")
+    static = load_dashboard_results("static")
+    behavioral = load_dashboard_results("behavioral")
+    static_only = sorted(set(static["reform_name"]) - set(behavioral["reform_name"]))
 
-    assert "Labor-supply response rows are generated" in exhibit
-    assert "current full-H5 reform contract" in exhibit
+    assert static_only == ["magi100", "tax_panel_2005"]
+    assert "all but `magi100` and `tax_panel_2005`" in exhibit
+    assert "fourteen contract-standard" not in exhibit
 
 
 def test_public_dashboard_data_cover_full_2026_2100_horizon():

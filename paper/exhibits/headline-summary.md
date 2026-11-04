@@ -1,12 +1,20 @@
-Headline revenue effects per reform under the dashboard's default
-trust-fund split. Ten-year figures are nominal 2026-2035 sums;
-75-year figures discount each fund's 2026-2100 flows at its own
-Trustees effective interest rates (OASDI: Table VI.G1 factors;
-Medicare HI: Table IV.A4, graded to the 4.7 percent ultimate rate
-by 2040), with general-fund flows at the OASDI series. Totals sum
-the discounted components; the general-fund component is not
-shown separately and is zero under the default split for every
-option except the no-senior-deduction option.
+We report each reform's headline revenue effect under the
+dashboard's default trust-fund split. Ten-year figures sum nominal
+2026-2035 flows. Seventy-five-year figures discount each fund's
+2026-2100 flows at its own Trustees effective interest rates (OASDI:
+Table VI.G1 factors; Medicare HI: Table IV.A4, graded to the 4.7
+percent ultimate rate by 2040) and general-fund flows at the OASDI
+series, then add the discounted components.
+We omit a separate general-fund column; the totals include
+general-fund flows in two rows only: No senior deduction under scheduled benefits ($40 billion in present value); Phased Roth under the solvency baseline ($7 billion in present value).
+
+For the Roth swap, the phased Roth, and the short phase-in Roth
+sensitivity case, the default split adds the two funds' net impacts.
+Over 2026-2035 those sums exceed the change in federal income tax by
+$12.7 billion, $36.2 billion, and $24.5 billion, because we measure each
+fund's gain from taxing employer contributions separately
+(@sec-swap-accounting); the revenue tables in @sec-results report the
+federal income-tax change.
 
 **Scored against scheduled benefits:**
 
@@ -25,7 +33,7 @@ option except the no-senior-deduction option.
 | 95% taxation | +735 | +3,159 | +1,811 | +1,348 |
 | 100% taxation | +896 | +4,100 | +2,349 | +1,752 |
 | Roth swap | +426 | -110 | +2,116 | -2,225 |
-| Short phase-in Roth | +1,164 | +850 | +3,005 | -2,155 |
+| Short phase-in Roth (sensitivity) | +1,164 | +850 | +3,005 | -2,155 |
 | Phased Roth | +1,945 | +2,591 | +3,179 | -588 |
 | Reverse Roth | -643 | -4,164 | -7,836 | +3,672 |
 
