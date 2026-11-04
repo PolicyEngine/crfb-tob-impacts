@@ -36,7 +36,11 @@ jobs:
           # Pin ruff to the lockfile version: the dev extra's floor constraint
           # otherwise floats to new releases whose lint defaults (e.g. the
           # 0.16.0 import-sort change) fail on committed code.
-          uv pip install --no-sources -e ".[dev]" "ruff==0.15.5" modal google-cloud-storage
+          # PyPI no longer serves policyengine-us 1.729.0, which
+          # policyengine[us]==4.17.5 pins exactly, so install that release
+          # from its version-bump commit on GitHub (same code, same version).
+          uv pip install --no-sources -e ".[dev]" "ruff==0.15.5" modal google-cloud-storage \
+            "policyengine-us @ https://github.com/PolicyEngine/policyengine-us/archive/180410fe35209fb8201378c1b32dadd38051c342.tar.gz"
 
       - name: Ruff
         run: |
