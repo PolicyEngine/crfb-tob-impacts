@@ -1,0 +1,16 @@
+# Data and code
+
+We publish every reform, year, and trust-fund split on the
+[interactive dashboard](https://policyengine.org/us/taxation-of-benefits-reforms).
+Its
+[results file](https://policyengine.org/us/taxation-of-benefits-reforms/data/results.csv)
+holds every static and labor-supply row, with a column that labels each row an
+exact anchor or an interpolation and the SHA-256 hash of each exact anchor's
+reform H5 file. The
+[crfb-tob-impacts repository](https://github.com/PolicyEngine/crfb-tob-impacts)
+holds the code that projects the microdata, scores the reforms, and builds the
+results tables. There, `scripts/build_headline_summary.py` computes the headline
+summary from the results file and the Trustees' effective interest rates, and
+`scripts/generate_paper_static_exhibits.py` writes the other results tables from
+the same file. The repository's tests fail if the committed tables differ from
+what these scripts produce.

@@ -231,8 +231,8 @@ export function MethodologyDiagram() {
           w={340}
           h={56}
           title="Calibrated year datasets, 2026–2100"
-          caption="Each year feeds the reform panel: 14 options simulated on Modal with"
-          caption2="full-output audit artifacts behind every published number"
+          caption="We run 15 reforms and a sensitivity case on each dataset"
+          caption2="on Modal, with audit artifacts behind every number"
           accent
         />
 

@@ -1,0 +1,48 @@
+# Validation and external context {#sec-validation}
+
+## Internal validation
+
+### Far-horizon calibration
+
+All six far-horizon anchor years (`2075`-`2100`) hit every calibration target on
+real populace records and pass the contributor support gates. Effective sample
+sizes among taxation-of-benefits contributors run `132`-`156` for OASDI and
+`107`-`127` for HI, against a floor of `50` that we apply in every projection
+year. In `2100`, they reach `153` for OASDI and `127` for HI, and the ten
+largest household weights hold `3.4%` of the total weight.
+
+### Reform scoring
+
+In every anchor year, full repeal reduces federal income tax by the full baseline
+revenue from taxing benefits, and taxing all benefits raises revenue in every
+year. The exact `2062` anchors for `option5` and `option12`, which we score
+separately, agree to the dollar in both the static and the labor-supply panels.
+
+### Budget-window anchors
+
+{{< include exhibits/budget-window-anchors.md >}}
+
+### Rough-estimate cross-check
+
+We compare a sample of headline cells with rough estimates that use only public
+aggregates and statutory parameters. The reverse-Roth net effect and the rising
+share of beneficiaries who owe tax on benefits fall within the ranges those
+estimates give. Our estimate for full (100 percent) inclusion differs from a
+rough calculation that assumes the additional standard deduction for aged filers
+and the bonus senior deduction shield low-income beneficiaries from tax. In our
+microsimulation, beneficiaries with little income besides Social Security have
+low adjusted gross income under current partial inclusion. Once the full benefit
+enters income, it exceeds even the enlarged senior deductions for many of them,
+so the added revenue comes from across the lower and middle parts of the income
+distribution.
+
+## External benchmarks
+
+We compare selected reforms with outside estimates from the Congressional Budget
+Office, the Social Security Trustees, the Tax Foundation, and the Joint
+Committee on Taxation [@cbo2024options; @ssa2024trustees;
+@taxfoundation2024trump; @jct2024expenditures; @jct2025bonus]. These
+organizations use different budget windows, scoring conventions, and baselines,
+so we use the comparisons to check scale rather than point estimates.
+
+{{< include exhibits/external-benchmarks.md >}}

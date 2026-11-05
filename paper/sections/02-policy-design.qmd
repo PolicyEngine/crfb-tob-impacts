@@ -1,12 +1,11 @@
 # Policy design
 
-The current reform menu spans four broad families: direct benefit-taxation
-changes, senior-relief redesigns, employer-payroll-tax swaps, and a reverse-Roth
-restructuring. The release series shares one common current-law baseline.
+The fifteen reforms fall into four families: direct changes to benefit
+taxation, senior-deduction and credit redesigns, employer-payroll-tax swaps, and
+a reverse-Roth restructuring. We score them all against one current-law
+baseline.
 
-## Standard options `1-12`
-
-### Direct taxability changes
+## Direct taxability changes
 
 - **`option1`**: full repeal of Social Security benefit taxation beginning in
   `2026`.
@@ -16,15 +15,22 @@ restructuring. The release series shares one common current-law baseline.
 - **`option8`**: tax 100 percent of benefits.
 - **`option9`**: tax 90 percent of benefits.
 - **`option10`**: tax 95 percent of benefits.
-- **`tax93`**: tax 93 percent of benefits. This benchmark applies a uniform
-  93 percent inclusion rate across the taxability tiers; it sits between the
-  90 and 95 percent options and corresponds to the share the Social Security
-  actuaries have used in illustrative full-taxation analyses.
+- **`tax93`**: tax 93 percent of benefits. The Social Security actuaries
+  estimate that taxing the employer-funded and earnings portions of benefits in
+  full would tax about 93 percent of benefits.
+- **`magi100`**: count the full benefit, rather than half, in the combined
+  income that the taxability thresholds test. The thresholds, inclusion rates,
+  and 85 percent cap stay at current law, so beneficiaries owe tax on benefits
+  at lower levels of other income and on a larger share of benefits at a given
+  income.
+- **`tax_panel_2005`**: the simple deduction that the President's Advisory Panel
+  on Federal Tax Reform recommended [@taxpanel2005]. Taxable benefits equal half
+  of income above `$22,000` (`$44,000` for joint filers), where income counts 85
+  percent of benefits, up to a cap of 85 percent of benefits. At CRFB's request,
+  we leave the thresholds unindexed, so they stay fixed in nominal dollars
+  through `2100`.
 
-These options primarily change the size of the taxable-benefit base while
-preserving the current-law trust-fund accounting framework.
-
-### Senior-deduction and credit redesigns
+## Senior-deduction and credit redesigns
 
 - **`option3`**: `option2` plus permanent extension of the temporary bonus
   senior deduction.
@@ -36,19 +42,15 @@ preserving the current-law trust-fund accounting framework.
   nonrefundable Social Security credit with a `6%` phase-out above `$150,000`
   for joint filers and `$75,000` for other filers.
 
-This family matters because the baseline itself changes sharply once the bonus
-senior deduction expires after `2028`, and because a flat credit is more
-progressive than a deduction whose value rises with marginal tax rate.
-In the long-run estimates, the option11 credit phase-out thresholds are treated
-as fixed nominal parameters of the modeled policy. Combined with the Trustees
-wage-indexing treatment for federal deduction thresholds after `2034`, this
-means the remaining tax units with positive gross option11 credit in late years
-can have no pre-credit income-tax liability; the nonrefundable cap then makes
-the gross credit unavailable. This is why the far-horizon option11 revenue
-effect can converge to the option2 effect even though the gross credit variable
-is positive.
+Because the bonus senior deduction expires after `2028`, these reforms change a
+different current law from `2029` on. A deduction's value also rises with the filer's
+marginal tax rate, while a flat credit's value does not. We hold the `option11`
+phase-out thresholds fixed in nominal dollars, as CRFB specified, while wages
+and the other federal income-tax thresholds grow. In the late decades the credit
+reduces almost no income tax, and the `option11` revenue effect converges to the
+`option2` effect by `2075`.
 
-### Employer-payroll-tax swaps
+## Employer-payroll-tax swaps
 
 - **`option5`**: eliminate Social Security benefit taxation and instead treat
   employer payroll-tax contributions as taxable compensation.
@@ -56,15 +58,15 @@ is positive.
   contributions immediately but phases out the OASDI share of benefit taxation
   first and the HI share later.
 
-These options are structurally different from pure benefit-taxation reforms
-because they change the tax base itself, shifting burden from retirees toward
-workers while preserving trust-fund accounting through explicit OASDI/HI
-allocation rules.
+These reforms change the tax base itself and shift income tax from retirees
+toward workers. We credit the income tax on employer contributions to the OASDI
+and HI trust funds by the rules in @sec-swap-accounting.
 
-The raw artifact still retains `option6`, a shorter phase-in variant, for
-lineage and sensitivity checks. It is not shown as a separate CRFB-facing
-Roth option because the publication menu uses the longer `option12` design as
-the phased Roth option.
+We also score `option6`, a shorter phase-in variant, as a sensitivity case. It
+phases the taxable share of employer contributions in from 13 percent in `2026`
+to 100 percent in `2033` and phases benefit taxation out over `2029`-`2044`. The
+dashboard offers `option12` as the phased Roth option and leaves `option6` off
+its menu.
 
 ## Reverse-Roth proposal
 
@@ -73,12 +75,11 @@ the phased Roth option.
   Security payroll taxes paid during working years.
 
 The reverse-Roth reform inverts the timing of Social Security's tax treatment.
-Current law is effectively a partial Roth structure: payroll contributions are
-made from after-tax wages (the employee share is not deductible), and benefits
-are then only partially taxable. The reverse-Roth design moves toward a
-traditional-account structure: it makes the employee payroll contribution
-deductible when paid, and in exchange taxes the full benefit when received.
-Medicare's Hospital Insurance treatment is unchanged. Because the deduction
-accrues to workers and the full-inclusion change falls on beneficiaries, the
-net revenue effect depends on the relative size of the working-age and
-retired populations in each projection year.
+Under current law, Social Security works much like a partial Roth account.
+Workers cannot deduct their share of payroll tax, so they pay it from after-tax
+wages, and beneficiaries later pay income tax on only part of each benefit. The
+reverse-Roth design moves toward a traditional account: workers deduct their
+payroll contribution when they pay it and pay income tax on the full benefit
+when they receive it. The deduction goes to workers and the added tax falls on
+beneficiaries, so the net revenue effect in each year depends on the relative
+size of the working-age and retired populations.

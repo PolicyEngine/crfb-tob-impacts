@@ -1,22 +1,26 @@
 # Paper
 
-This directory is the citable manuscript track for the Social Security
-taxation-of-benefits project.
+This directory holds the Quarto manuscript for the CRFB taxation-of-benefits
+study. The site serves the rendered paper at
+<https://policyengine.org/us/taxation-of-benefits-reforms/paper/>, next to the
+interactive dashboard.
 
-It is intentionally separate from:
+## Publication roles
 
-- `dashboard/` - the live interactive current-results app
-- `docs/current/` - operational methodology, pipeline, and delivery notes
-- `analysis/` - audit findings and rerun diagnostics
+The project publishes in three places:
 
-## Why this exists
+- `dashboard/`: the interactive results explorer and the public results files
+  under `dashboard/public/data/`
+- `paper/`: the citable manuscript, with methods, validation, external
+  benchmarks, and bibliography
+- `docs/current/` and `analysis/`: operational methodology, pipeline and
+  delivery notes, audit findings, and rerun diagnostics
 
-The project now has two distinct publication needs:
-
-1. a stable narrative surface that CRFB and external readers can cite
-2. a live interactive surface for exploring current results
-
-This Quarto manuscript is for the first need. The dashboard remains the second.
+The paper and dashboard cite only results that trace to full-H5 microsimulation
+outputs. Each exact anchor in `results.csv` records its run prefix and the SHA-256 hash
+of its reform H5 file, and the paper's results tables come from generators that
+read the same file. Rerun state, launch identifiers, and recovery details belong
+in the operational notes, not in the paper.
 
 ## Build
 
@@ -26,31 +30,31 @@ From the repo root:
 quarto render paper/index.qmd
 ```
 
-Rendered output will be written to:
-
-- `paper/_build/index.html`
-- `paper/_build/index.pdf` if a working PDF toolchain is available
+Quarto writes `paper/_build/index.html`. `scripts/build_vercel_site.sh` renders
+the paper, builds the dashboard, and copies the rendered paper to
+`.vercel-site/us/taxation-of-benefits-reforms/paper/` for deployment.
 
 ## Authoring model
 
-- `index.qmd` is the main manuscript entrypoint
-- `sections/` contains manuscript sections
-- `exhibits/` contains generated Markdown fragments that the paper includes
-- `references.bib` carries forward the source spine from the original paper and
-  adds the current Trustees and PolicyEngine documentation references
+- `index.qmd` holds the title, abstract, and section includes.
+- `sections/` holds the manuscript sections.
+- `sections/exhibits/`, mirrored in `exhibits/`, holds generated Markdown
+  fragments that the sections include. Regenerate them instead of editing them:
+  - `scripts/generate_paper_static_exhibits.py` writes every fragment except
+    `headline-summary.md`.
+  - `scripts/build_headline_summary.py` writes `headline-summary.md` and
+    `dashboard/public/data/headline_summary.csv`.
+- `references.bib` holds the bibliography.
 
-## Intended workflow
+`tests/test_paper_text.py` checks that the committed fragments match both
+generators, that the paper's reform count matches the dashboard menu, that the
+figures written into the prose match `results.csv` and the projected datasets'
+metadata, and that the manuscript carries no drafting notes.
 
-1. keep the manuscript structure and source coverage current as release
-   artifacts evolve
-2. generate Markdown exhibit fragments from shared artifacts into `exhibits/`
-3. update the small amount of interpretation text that depends on frozen values
-4. render and circulate the manuscript as the citable companion to the dashboard
+## Updating results
 
-## Current status
-
-This is the citable manuscript track for the current release package. It
-preserves the full option menu, methodology, validation framing, exhibit
-contract, and source spine. Remaining work before journal-style circulation is
-primarily editorial: tighten the abstract/conclusion around the frozen release
-and copyedit the generated exhibits.
+1. Publish the new panel to `dashboard/public/data/results.csv`.
+2. Run both generators.
+3. Run `tests/test_paper_text.py`, `tests/test_headline_summary.py`, and
+   `tests/test_release_artifacts.py`, and update any prose figure a test flags.
+4. Render the paper and read every changed section.

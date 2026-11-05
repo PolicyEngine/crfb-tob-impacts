@@ -35,6 +35,8 @@ MENU_REFORMS = tuple(r for r in STANDARD_REFORMS if r not in SENSITIVITY_REFORMS
 SWAP_REFORMS = ("option5", "option6", "option12")
 ENDPOINT_YEARS = (2026, 2100)
 MILESTONE_YEARS = (2035, 2050, 2075, 2100)
+BUDGET_WINDOW_YEARS = (2028, 2029)
+PHASE_IN_CORNER_YEARS = (2032, 2033)
 NUMBER_WORDS = {
     13: "thirteen",
     14: "fourteen",
@@ -46,7 +48,7 @@ RESULTS_CSV_URL = f"{DASHBOARD_URL}/data/results.csv"
 EXACT_STATIC = "exact_full_h5"
 EXACT_BEHAVIORAL = "exact_behavioral_endpoint_full_h5"
 
-# paper/sections/05-results-framework.qmd and 04-results-and-validation.qmd
+# paper/sections/04-results.qmd and 05-validation.qmd
 # include these fragments under level-2 headings, so fragment headings start
 # at level 3 (tests/test_paper_text.py checks the nesting).
 FRAGMENT_HEADING = "###"
@@ -176,8 +178,8 @@ def build_results_overview(df: pd.DataFrame) -> str:
 We score {count_word(len(MENU_REFORMS))} reforms: `option1` through `option12`
 except `option6`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
 inclusion (`magi100`), and the 2005 Tax Panel simple deduction
-(`tax_panel_2005`). The tables also report `option6`, a shorter phase-in
-variant of the phased Roth swap, as a sensitivity case. Each static row comes
+(`tax_panel_2005`). We also report `option6`, a shorter phase-in variant of
+the phased Roth swap, as a sensitivity case. Each static row comes
 either from a full-H5 microsimulation at an anchor year or from linear
 interpolation between anchor years, and the `full_h5_result_type` column of the
 [public results file]({RESULTS_CSV_URL}) labels which.
@@ -317,10 +319,76 @@ def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
     return f"""
 {table}
 
-For {code_list(benefit_taxation)}, the OASDI and HI net impacts sum to the
-revenue impact. For `option12`, they sum to {dollars(gap)} more, because we
-measure each fund's gain from taxing employer contributions separately
-(@sec-swap-accounting).
+In `2100`, the OASDI and HI net impacts sum to the revenue impact for
+{code_list(benefit_taxation)}. For `option12`, they sum to {dollars(gap)} more,
+because we measure each fund's gain from taxing employer contributions
+separately (@sec-swap-accounting).
+"""
+
+
+def straight_line(
+    df: pd.DataFrame, reform: str, year: int, start: int, end: int
+) -> float:
+    """Revenue impact on the straight line between two anchor years, in $B."""
+    values = df[df["reform_name"] == reform].set_index("year")["revenue_impact"]
+    low, high = float(values[start]), float(values[end])
+    return low + (high - low) * (year - start) / (end - start)
+
+
+def build_budget_window_anchors(df: pd.DataFrame) -> str:
+    """Compare the added exact anchors with straight lines between neighbors."""
+    exact = set(
+        df.loc[
+            df["full_h5_result_type"] == EXACT_STATIC, ["reform_name", "year"]
+        ].itertuples(index=False, name=None)
+    )
+    revenue = df.set_index(["reform_name", "year"])["revenue_impact"]
+
+    rows = []
+    gaps = []
+    for reform in STANDARD_REFORMS:
+        row = [label(reform)]
+        for year in BUDGET_WINDOW_YEARS:
+            check((reform, year) in exact, f"{reform} {year} should be exact")
+            line = straight_line(df, reform, year, 2026, 2030)
+            value = float(revenue[(reform, year)])
+            gaps.append((abs(value - line), reform, year))
+            row += [fmt_b(line), fmt_b(value)]
+        rows.append(row)
+    largest_gap, gap_reform, gap_year = max(gaps)
+
+    corner = {}
+    for year in PHASE_IN_CORNER_YEARS:
+        check(("option6", year) in exact, f"option6 {year} should be exact")
+        corner[year] = (
+            straight_line(df, "option6", year, 2030, 2035),
+            float(revenue[("option6", year)]),
+        )
+    first, last = PHASE_IN_CORNER_YEARS
+
+    table = markdown_table(
+        [
+            "Reform",
+            "2028 straight line ($B)",
+            "2028 exact ($B)",
+            "2029 straight line ($B)",
+            "2029 exact ($B)",
+        ],
+        rows,
+    )
+    return f"""
+We add exact anchors for every reform in `2028`, the last year of the temporary
+deductions, and in `2029`, the last year of the higher cap on the
+state-and-local-tax deduction. We compare those anchors with the straight line
+between each reform's `2026` and `2030` anchors. The largest gap,
+{dollars(largest_gap)}, falls in `{gap_year}` for `{gap_reform}`.
+
+{table}
+
+For the `option6` phase-in, the straight line between `2030` and `2035` would
+give {dollars(corner[first][0])} in `{first}` and {dollars(corner[last][0])} in
+`{last}`, against exact anchors of {dollars(corner[first][1])} and
+{dollars(corner[last][1])}.
 """
 
 
@@ -516,16 +584,16 @@ for the `option6` sensitivity case. For each, we simulate full reform H5 files
 at `{ENDPOINT_YEARS[0]}` and `{ENDPOINT_YEARS[1]}`, plus {interior_text}, and
 derive aggregates from those files with PolicyEngine's MicroSeries operations.
 Between anchors, we interpolate each metric's ratio of behavioral to static
-results linearly and apply it to the static annual row; where the static result
+results linearly and apply it to the static annual row. Where the static result
 changes sign within a segment, we interpolate the behavioral values directly.
-The rows appear in the public results file under `scoring_type = behavioral`
-and carry both the income and substitution channels. We treat static scoring as
-primary: the labor-supply results give partial-equilibrium estimates under the
-age-based elasticity schedule in @sec-labor-supply, not official CBO or JCT
-scores.
+We publish the rows in the public results file under
+`scoring_type = behavioral`, with both the income and substitution channels. We
+treat static scoring as primary and the labor-supply results as
+partial-equilibrium estimates under the age-based elasticity schedule in
+@sec-labor-supply.
 
-The table reports each reform's revenue impact with labor-supply responses at
-the two endpoints, and the response effect, which subtracts the static impact.
+For each reform, we report the revenue impact with labor-supply responses at the
+two endpoints and the response effect, which subtracts the static impact.
 
 {table}
 """
@@ -546,6 +614,7 @@ def render_all() -> dict[str, str]:
         "results-overview.md": build_results_overview(static),
         "full-h5-results-summary.md": build_milestones(static),
         "revenue-impacts.md": build_trust_fund_decomposition(static),
+        "budget-window-anchors.md": build_budget_window_anchors(static),
         "external-benchmarks.md": build_external_benchmarks(static),
         "labor-supply-response-status.md": build_labor_supply_responses(
             static, behavioral

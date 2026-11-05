@@ -1,22 +1,20 @@
 We report each reform's headline revenue effect under the
-dashboard's default trust-fund split. Ten-year figures sum nominal
-2026-2035 flows. Seventy-five-year figures discount each fund's
-2026-2100 flows at its own Trustees effective interest rates (OASDI:
-Table VI.G1 factors; Medicare HI: Table IV.A4, graded to the 4.7
-percent ultimate rate by 2040) and general-fund flows at the OASDI
-series, then add the discounted components.
-We omit a separate general-fund column; the totals include
-general-fund flows in two rows only: No senior deduction under scheduled benefits ($40 billion in present value); Phased Roth under the solvency baseline ($7 billion in present value).
+dashboard's default trust-fund split, as nominal sums over 2026-2035
+and as present values over 2026-2100 at each fund's own Trustees
+effective interest rates (@sec-present-value).
+We fold general-fund flows into the totals, where they enter
+two rows: "No senior deduction" under scheduled benefits ($40 billion in present value) and "Phased Roth" under the solvency baseline ($7 billion in present value).
 
 For the Roth swap, the phased Roth, and the short phase-in Roth
-sensitivity case, the default split adds the two funds' net impacts.
+sensitivity case, we add the two funds' net impacts under the default
+split.
 Over 2026-2035 those sums exceed the change in federal income tax by
 $12.7 billion, $36.2 billion, and $24.5 billion, because we measure each
 fund's gain from taxing employer contributions separately
-(@sec-swap-accounting); the revenue tables in @sec-results report the
-federal income-tax change.
+(@sec-swap-accounting). We report the federal income-tax change in the
+revenue tables of @sec-results.
 
-**Scored against scheduled benefits:**
+**Against scheduled benefits:**
 
 | Reform | 10-year (nominal $B) | 75-year PV ($B) | OASDI PV ($B) | Medicare HI PV ($B) |
 | --- | --- | --- | --- | --- |
@@ -37,8 +35,8 @@ federal income-tax change.
 | Phased Roth | +1,945 | +2,591 | +3,179 | -588 |
 | Reverse Roth | -643 | -4,164 | -7,836 | +3,672 |
 
-**Scored against the Social Security solvency baseline (2026-2034
-against scheduled benefits, solvent baseline from 2035):**
+**Against the Social Security solvency baseline (scheduled
+benefits through 2034, solvent baseline from 2035):**
 
 | Reform | 10-year (nominal $B) | 75-year PV ($B) | OASDI PV ($B) | Medicare HI PV ($B) |
 | --- | --- | --- | --- | --- |

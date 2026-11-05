@@ -255,14 +255,20 @@ def _general_fund_note(records: list[dict[str, object]]) -> list[str]:
     ]
     if not rows:
         return ["No row includes general-fund flows."]
-    parts = "; ".join(
-        f"{label} under {scenario} ({'-' if value < 0 else ''}${abs(value):,.0f}"
+    entries = [
+        f'"{label}" under {scenario} ({"-" if value < 0 else ""}${abs(value):,.0f}'
         " billion in present value)"
         for label, scenario, value in rows
-    )
+    ]
+    if len(entries) == 1:
+        parts = entries[0]
+    elif len(entries) == 2:
+        parts = " and ".join(entries)
+    else:
+        parts = ", ".join(entries[:-1]) + ", and " + entries[-1]
     return [
-        "We omit a separate general-fund column; the totals include",
-        f"general-fund flows in {COUNT_WORDS[len(rows)]} only: {parts}.",
+        "We fold general-fund flows into the totals, where they enter",
+        f"{COUNT_WORDS[len(rows)]}: {parts}.",
     ]
 
 
@@ -273,16 +279,19 @@ def _swap_note() -> list[str]:
     amounts = [f"${gaps[reform]:,.1f} billion" for reform in SWAP_REFORMS]
     return [
         "For the Roth swap, the phased Roth, and the short phase-in Roth",
-        "sensitivity case, the default split adds the two funds' net impacts.",
+        "sensitivity case, we add the two funds' net impacts under the default",
+        "split.",
         "Over 2026-2035 those sums exceed the change in federal income tax by",
         f"{amounts[0]}, {amounts[1]}, and {amounts[2]}, because we measure each",
         "fund's gain from taxing employer contributions separately",
-        "(@sec-swap-accounting); the revenue tables in @sec-results report the",
-        "federal income-tax change.",
+        "(@sec-swap-accounting). We report the federal income-tax change in the",
+        "revenue tables of @sec-results.",
     ]
 
 
-def write_exhibit(records: list[dict[str, object]]) -> None:
+def render_exhibit(records: list[dict[str, object]]) -> str:
+    """Return the headline-summary Markdown fragment the paper includes."""
+
     def table(scenario: str) -> str:
         headers = [
             "Reform",
@@ -313,30 +322,31 @@ def write_exhibit(records: list[dict[str, object]]) -> None:
             )
         return "\n".join(lines)
 
-    fragment = "\n".join(
+    return "\n".join(
         [
             "We report each reform's headline revenue effect under the",
-            "dashboard's default trust-fund split. Ten-year figures sum nominal",
-            "2026-2035 flows. Seventy-five-year figures discount each fund's",
-            "2026-2100 flows at its own Trustees effective interest rates (OASDI:",
-            "Table VI.G1 factors; Medicare HI: Table IV.A4, graded to the 4.7",
-            "percent ultimate rate by 2040) and general-fund flows at the OASDI",
-            "series, then add the discounted components.",
+            "dashboard's default trust-fund split, as nominal sums over 2026-2035",
+            "and as present values over 2026-2100 at each fund's own Trustees",
+            "effective interest rates (@sec-present-value).",
             *_general_fund_note(records),
             "",
             *_swap_note(),
             "",
-            "**Scored against scheduled benefits:**",
+            "**Against scheduled benefits:**",
             "",
             table("scheduled_benefits"),
             "",
-            "**Scored against the Social Security solvency baseline (2026-2034",
-            "against scheduled benefits, solvent baseline from 2035):**",
+            "**Against the Social Security solvency baseline (scheduled",
+            "benefits through 2034, solvent baseline from 2035):**",
             "",
             table("ss_solvent"),
             "",
         ]
     )
+
+
+def write_exhibit(records: list[dict[str, object]]) -> None:
+    fragment = render_exhibit(records)
     for directory in EXHIBIT_DIRS:
         (directory / "headline-summary.md").write_text(fragment, encoding="utf-8")
 

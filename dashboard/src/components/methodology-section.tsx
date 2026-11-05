@@ -217,25 +217,25 @@ export function MethodologySection() {
           summary="Static scoring is primary; behavioral labor-response results are supplemental."
         >
           <p>
-            <strong>Static scoring:</strong> holds taxpayer behavior constant
-            and isolates the mechanical effect of policy changes. This is the
-            dashboard&apos;s default scoring surface. All fourteen reforms are
-            computed from full reform H5 microsimulation at anchor years — 2026,
-            2028, 2029, 2030, and every fifth year from 2035 to 2100, with 2032
-            and 2033 added for the employer-payroll Roth option. The 2028 and
-            2029 anchors bracket the senior deduction&apos;s 2028 sunset so the
-            budget window reflects that step rather than smoothing across it.
-            Intermediate years are linearly interpolated to a complete annual
-            series, which is what the revenue-over-time chart traces and what
-            the 75-year and present-value totals aggregate; the distributional
-            charts interpolate between the same anchor years. Each row is tagged
-            as an exact anchor or an interpolated fill, and the exact
-            anchor-year H5 rows are preserved in the production results.
+            <strong>Static scoring:</strong> we hold taxpayer behavior
+            constant, so the estimates show the mechanical effect of each policy
+            change. We compute all fifteen reforms from full reform H5
+            microsimulations at anchor years: 2026, 2028, 2029, 2030, and every
+            fifth year from 2035 to 2100, plus 2062 for the two Roth swaps. The
+            2028 and 2029 anchors bracket the senior deduction&apos;s 2028
+            sunset, so the budget window shows that step instead of smoothing
+            across it. We interpolate linearly between anchors to a complete
+            annual series, which the revenue-over-time chart traces and which we
+            sum for the 75-year and present-value totals. We interpolate the
+            distributional charts between the same anchor years and tag each row
+            of the results file as an exact anchor or an interpolation.
           </p>
           <p className="mt-4">
-            <strong>Supplemental labor-supply response:</strong> uses the same
-            full reform H5 lineage at the 2026 and 2100 endpoints and is
-            available from the Scoring control.
+            <strong>Supplemental labor-supply response:</strong> we also score
+            labor-supply responses for thirteen of the reforms from full reform
+            H5 files at the 2026 and 2100 endpoints, plus 2062 for the two Roth
+            swaps. The charts show static scores, and we publish the
+            labor-supply rows in the results file.
           </p>
         </AccordionItem>
 

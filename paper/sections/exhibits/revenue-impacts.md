@@ -6,7 +6,7 @@
 | option8 | +1,026.6 | +1,026.6 | +10.4 | +1,016.2 |
 | option12 | -547.8 | -3,319.1 | +299.4 | -835.4 |
 
-For `option1`, `option2`, `option4`, and `option8`, the OASDI and HI net impacts sum to the
-revenue impact. For `option12`, they sum to $11.8 billion more, because we
-measure each fund's gain from taxing employer contributions separately
-(@sec-swap-accounting).
+In `2100`, the OASDI and HI net impacts sum to the revenue impact for
+`option1`, `option2`, `option4`, and `option8`. For `option12`, they sum to $11.8 billion more,
+because we measure each fund's gain from taxing employer contributions
+separately (@sec-swap-accounting).

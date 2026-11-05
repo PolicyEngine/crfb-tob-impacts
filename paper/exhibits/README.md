@@ -1,26 +1,13 @@
 # Exhibits
 
-This directory contains generated Markdown fragments that the Quarto manuscript
-includes directly.
+These generated Markdown fragments mirror `paper/sections/exhibits/`, which the
+manuscript sections include. Regenerate them instead of editing them:
 
-Why this exists:
+- `scripts/generate_paper_static_exhibits.py` writes `results-overview.md`,
+  `full-h5-results-summary.md`, `revenue-impacts.md`,
+  `budget-window-anchors.md`, `external-benchmarks.md`,
+  `labor-supply-response-status.md`, and `household-impacts.md`.
+- `scripts/build_headline_summary.py` writes `headline-summary.md`.
 
-- it gives the paper a stable structure before results are frozen
-- it lets the dashboard and paper consume the same underlying artifacts
-- it reduces manual copy-paste drift between the paper and the live app
-
-Expected files:
-
-- `external-benchmarks.md`
-- `results-overview.md`
-- `household-impacts.md`
-- `revenue-impacts.md`
-- `labor-supply-response-status.md`
-
-During drafting these files may contain placeholders. Before publication they
-should be overwritten by generated content derived from the checked result
-artifacts.
-
-Current generator:
-
-- `python ../scripts/generate_paper_static_exhibits.py`
+`tests/test_paper_text.py` fails when a committed fragment differs from its
+generator's output.

@@ -1,8 +1,8 @@
 We score fifteen reforms: `option1` through `option12`
 except `option6`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
 inclusion (`magi100`), and the 2005 Tax Panel simple deduction
-(`tax_panel_2005`). The tables also report `option6`, a shorter phase-in
-variant of the phased Roth swap, as a sensitivity case. Each static row comes
+(`tax_panel_2005`). We also report `option6`, a shorter phase-in variant of
+the phased Roth swap, as a sensitivity case. Each static row comes
 either from a full-H5 microsimulation at an anchor year or from linear
 interpolation between anchor years, and the `full_h5_result_type` column of the
 [public results file](https://policyengine.org/us/taxation-of-benefits-reforms/data/results.csv) labels which.

@@ -1,0 +1,25 @@
+# Results {#sec-results}
+
+## Headline summary {#sec-headline}
+
+{{< include exhibits/headline-summary.md >}}
+
+## Ten-year and terminal-year revenue effects
+
+{{< include exhibits/results-overview.md >}}
+
+## Milestone years
+
+{{< include exhibits/full-h5-results-summary.md >}}
+
+## Trust-fund decomposition
+
+{{< include exhibits/revenue-impacts.md >}}
+
+## Household impacts
+
+{{< include exhibits/household-impacts.md >}}
+
+## Labor-supply responses
+
+{{< include exhibits/labor-supply-response-status.md >}}
