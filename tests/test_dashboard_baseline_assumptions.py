@@ -6,16 +6,32 @@ import json
 from pathlib import Path
 import re
 
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
 from packaging.version import Version
 import pandas as pd
 
 from src import cli
 from src.dashboard_baseline_assumptions import build_calibration_targets
 
+# PyPI no longer serves policyengine-us 1.729.0, the release that
+# policyengine[us]==4.17.5 pins, so CI installs it from an archive of its
+# version-bump commit. Such an archive is immutable; a local or editable
+# checkout, or an archive of a branch or tag, is not.
+POLICYENGINE_US_COMMIT_ARCHIVE = re.compile(
+    r"https://github\.com/PolicyEngine/policyengine-us/archive/[0-9a-f]{40}\.tar\.gz"
+)
+
 
 def _direct_url(package_name: str) -> dict | None:
     text = metadata.distribution(package_name).read_text("direct_url.json")
     return json.loads(text) if text else None
+
+
+def _is_policyengine_us_commit_archive(direct_url: dict) -> bool:
+    return "archive_info" in direct_url and bool(
+        POLICYENGINE_US_COMMIT_ARCHIVE.fullmatch(direct_url.get("url", ""))
+    )
 
 
 def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
@@ -28,11 +44,25 @@ def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
     assert metadata.version("policyengine") == pinned_policyengine.group("version")
     assert Version(metadata.version("policyengine-us")) >= Version("1.691.10")
     assert Version(metadata.version("policyengine-core")) >= Version("3.26.1")
+    # The installed policyengine-us must be the release policyengine pins,
+    # however it was installed.
+    us_requirements = [
+        requirement
+        for requirement in map(Requirement, metadata.requires("policyengine") or [])
+        if canonicalize_name(requirement.name) == "policyengine-us"
+    ]
+    assert us_requirements
+    for requirement in us_requirements:
+        assert requirement.specifier.contains(
+            metadata.version("policyengine-us"), prereleases=True
+        )
     policyengine_direct_url = _direct_url("policyengine")
     if policyengine_direct_url is not None:
         assert (policyengine_direct_url.get("dir_info") or {}).get("editable") is True
-    for package_name in ("policyengine-us", "policyengine-core"):
-        assert _direct_url(package_name) is None
+    policyengine_us_direct_url = _direct_url("policyengine-us")
+    if policyengine_us_direct_url is not None:
+        assert _is_policyengine_us_commit_archive(policyengine_us_direct_url)
+    assert _direct_url("policyengine-core") is None
 
     distribution = metadata.distribution("policyengine-us")
     module_file = "policyengine_us/reforms/ssa/trustees_core_thresholds.py"
