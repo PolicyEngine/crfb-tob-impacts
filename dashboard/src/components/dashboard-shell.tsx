@@ -830,14 +830,14 @@ export function DashboardShell() {
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--pe-color-text-secondary)]">
                   {activeTab === "baseline" ? (
                     <>
-                      Microsimulation baseline outputs, Trustees-following
-                      assumptions, calibration targets, and indexed tax
-                      parameters used by the long-run model.
+                      Microsimulation baseline outputs, calibration targets, references
+                      from the Trustees, and the tax parameters we index in
+                      the long-run model.
                     </>
                   ) : activeTab === "methodology" ? (
                     <>
-                      How each reform is modeled, scored, and projected to 2100
-                      — data sources, the long-run baseline, and behavioral
+                      How we model each reform and score it through 2100 — data
+                      sources, the long-run baseline, and behavioral
                       assumptions.
                     </>
                   ) : (

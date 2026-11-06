@@ -427,7 +427,7 @@ def test_abstract_figures_match_results(static: pd.DataFrame) -> None:
 
     anchor_years = {item["year"] for item in run_record()["baselines"]}
     assert (
-        f"project to {len(anchor_years)} years between {min(anchor_years)} and "
+        f"project to {len(anchor_years)} years from {min(anchor_years)} to "
         f"{max(anchor_years)}"
     ) in abstract
 

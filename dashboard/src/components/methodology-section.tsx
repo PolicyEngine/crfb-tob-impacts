@@ -92,7 +92,7 @@ export function MethodologySection() {
               projections. After 2034, when a category&apos;s index outgrows the
               Trustees nominal GDP path, we scale that category down on every
               record. We index tax parameters as statute does through 2034, and
-              from 2035 we index those tied to the IRS inflation index to
+              from 2035 we switch those on the IRS inflation index to
               PolicyEngine&apos;s wage index.
             </li>
             <li>
@@ -174,7 +174,7 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Data sources"
-          summary="PolicyEngine's populace microdata, calibrated to SSA and CMS projections, with CBO income growth."
+          summary="We calibrate PolicyEngine's populace microdata to SSA and CMS projections, with income growth from CBO."
         >
           <p>
             <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace

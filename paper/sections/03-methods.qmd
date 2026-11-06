@@ -64,15 +64,15 @@ and economics enter through the record values.
 2024 to year $y$ with PolicyEngine's income indexes. Those indexes follow the
 revenue projections of the Congressional Budget Office (CBO) through 2036 and
 hold each category's last growth rate after that. After 2034, we cap each
-category's growth at the Trustees' nominal-GDP growth. When a category's index
-has grown faster than GDP since 2034, we scale that category down on every
+category's index growth at the Trustees' nominal-GDP growth. When a category's
+index has grown faster than GDP since 2034, we scale that category down on every
 record by the ratio of the two. In our projections, we scale down only
 dividends, the investment income that shares their index, and partnership and
 S-corporation income. We cap values on each record, not a category's weighted
 total: from 2035 to 2100, we project partnership and S-corporation income to
 grow 13.0-fold, against 11.1-fold for the Trustees' GDP path. We index tax
-parameters as statute does through 2034, and from 2035 we index those tied to
-the IRS inflation index to wages.
+parameters as statute does through 2034, and from 2035 we switch those on the
+IRS inflation index to wages.
 
 **Stage B: reweight to the projected age distribution.** We shift household
 weights to the projected population in five-year age groups with a light
@@ -132,9 +132,9 @@ the same assumption starts a year later there.
 For the wage index, we use PolicyEngine's own National Average Wage Index
 series, not the Trustees' projection. From 2025 through 2033, our series follows
 CBO's forecast of the Social Security payroll-tax cap, which the law ties to
-average wages; after that, it grows about 3.4 percent a year. It rises about
-9.1-fold from 2033 to 2099, against about 10.2-fold for the average wage index
-in the 2026 Trustees Report. The first bracket threshold for joint filers
+average wages; after that, the series grows about 3.4 percent a year. It rises
+about 9.1-fold from 2033 to 2099, against about 10.2-fold for the average wage
+index in the 2026 Trustees Report. The first bracket threshold for joint filers
 therefore reaches $265,800 in 2100, about 11 percent below the $297,700 that
 Trustees wage growth implies.
 

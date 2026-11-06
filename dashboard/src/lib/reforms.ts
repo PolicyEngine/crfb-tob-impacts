@@ -104,7 +104,7 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
     name: "Short Phase-In Roth Swap",
     shortName: "Short phase-in Roth",
     description:
-      "Short phase-in variant of the phased Roth swap, scored as a sensitivity case.",
+      "Short phase-in variant of the phased Roth swap, which we score as a sensitivity case.",
     category: "Employer payroll-tax swap",
     mechanism:
       "Phases in taxation of employer payroll-tax contributions while phasing out benefit taxation over a shorter transition than the phased Roth swap.",
