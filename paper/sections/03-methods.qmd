@@ -40,13 +40,13 @@ We build on PolicyEngine's populace 2024 household database
 populace from the CPS Annual Social and Economic Supplement
 [@census2024cpsasec], the IRS Public Use File, the Survey of Consumer Finances,
 the Survey of Income and Program Participation, the CPS Outgoing Rotation Group,
-the Medical Expenditure Panel Survey, and the American Community Survey. The
-database flags 42,706 of its 75,112 households, which hold 50.8 percent of its
-weight, as Public Use File clones. Those records keep survey demographics and
-take their tax detail from the Public Use File, or they come from that file's
-highest-income returns. We then apply PolicyEngine's federal income-tax,
-payroll-tax, Social Security benefit-taxation, and benefit-program rules to each
-record.
+the Medical Expenditure Panel Survey, and the American Community Survey.
+PolicyEngine flags 42,706 of the database's 75,112 households, which hold 50.8
+percent of its weight, as Public Use File clones. Each of those records either
+keeps survey demographics and takes its tax detail from the Public Use File or
+comes from that file's highest-income returns. We then apply PolicyEngine's
+federal income-tax, payroll-tax, Social Security benefit-taxation, and
+benefit-program rules to each record.
 
 The projection stores its weights on household records, so the projection and
 scoring code aggregates by household. Benefit taxation depends on each tax
@@ -60,17 +60,19 @@ We build each projection year independently from the same 2024 populace
 cross-section, in four stages. Demographics enter through the household weights,
 and economics enter through the record values.
 
-**Stage A: grow incomes to the target year.** We uprate each income category
-from 2024 to year $y$ with PolicyEngine's income indexes. Those indexes follow
-the revenue projections of the Congressional Budget Office (CBO) through 2036
-and hold each category's last growth rate after that. After 2034, when a category's
-index has grown faster than the Trustees' nominal-GDP path, we scale that category
-down on every record by the ratio of the two. That cap reaches dividends, the
-investment income that shares their index, and partnership and S-corporation
-income. It limits values on each record, not a category's weighted total: from
-2035 to 2100, GDP grows 11.1-fold and partnership and S-corporation income grows
-13.0-fold. We index tax parameters as statute does through 2034, then as we
-describe below.
+**Stage A: grow incomes to the target year.** We grow each income category from
+2024 to year $y$ with PolicyEngine's income indexes. Those indexes follow the
+revenue projections of the Congressional Budget Office (CBO) through 2036 and
+hold each category's last growth rate after that. After 2034, we cap each
+category's growth at the Trustees' nominal-GDP growth. When a category's index
+has grown faster than GDP since 2034, we scale that category down on every
+record by the ratio of the two. In our projections, we scale down only
+dividends, the investment income that shares their index, and partnership and
+S-corporation income. We cap values on each record, not a category's weighted
+total: from 2035 to 2100, we project partnership and S-corporation income to
+grow 13.0-fold, against 11.1-fold for the Trustees' GDP path. We index tax
+parameters as statute does through 2034, and from 2035 we index those tied to
+the IRS inflation index to wages.
 
 **Stage B: reweight to the projected age distribution.** We shift household
 weights to the projected population in five-year age groups with a light
@@ -110,29 +112,29 @@ dollars, as the law sets them and as the Trustees' taxation-of-benefits method
 holds them. Second, we index income-tax parameters as current law does through
 2034. After the tenth projection year, the Trustees assume that income-tax
 brackets rise with average wages rather than chained CPI-U, to avoid indefinite
-bracket compression relative to income levels [@ssa2026trustees]. The Trustees
-Report names income-tax brackets. In May 2026, the Office of the Chief Actuary
-(OACT) at the Social Security Administration (SSA) told PolicyEngine that the
-assumption also covers federal income-tax thresholds such as standard deductions.
-OACT added that its projections implicitly apply wage growth to all income-tax
-parameters, although it does not explicitly model credit
-parameters.[^oact-threshold-email]
+bracket compression relative to income levels [@ssa2026trustees]. In May 2026,
+the Office of the Chief Actuary (OACT) at the Social Security Administration
+(SSA) told PolicyEngine that the assumption covers federal income-tax thresholds
+such as standard deductions, not only brackets. In a second reply, OACT added
+that its projections implicitly apply wage growth to all income-tax parameters,
+although it does not explicitly model credit parameters.[^oact-threshold-email]
 
 From 2035, we therefore index to wages every federal income-tax parameter that
-PolicyEngine otherwise uprates with the IRS inflation index, unless a reform
+PolicyEngine otherwise adjusts with the IRS inflation index, unless a reform
 changes it directly. These parameters include ordinary income-tax brackets,
-standard deductions, the additional standard deduction for aged and blind filers,
-capital-gains thresholds, alternative minimum tax (AMT) thresholds, and credit
-amounts such as the child tax credit and the earned income tax credit. Our 2035
-start follows the 2025 Trustees Report, the report we asked OACT about. The 2026
-report reaches its tenth projection year in 2035, so the same assumption starts
-a year later there.
+standard deductions, the additional standard deduction for aged and blind
+filers, capital-gains thresholds, alternative minimum tax (AMT) thresholds, and
+credit amounts such as the child tax credit and the earned income tax credit. We
+start this indexing in 2035, following the 2025 Trustees Report, the report we
+asked OACT about. The 2026 report reaches its tenth projection year in 2035, so
+the same assumption starts a year later there.
 
-We take the wage path from PolicyEngine's National Average Wage Index parameter,
-not from the Trustees. It follows CBO's forecast of the Social Security
-payroll-tax cap through 2033 and then grows about 3.4 percent a year. It rises
-about 9.1-fold from 2033 to 2099, against about 10.2-fold for the average wage
-index in the 2026 Trustees Report. The first bracket threshold for joint filers
+For the wage index, we use PolicyEngine's own National Average Wage Index
+series, not the Trustees' projection. From 2025 through 2033, our series follows
+CBO's forecast of the Social Security payroll-tax cap, which the law ties to
+average wages; after that, it grows about 3.4 percent a year. It rises about
+9.1-fold from 2033 to 2099, against about 10.2-fold for the average wage index
+in the 2026 Trustees Report. The first bracket threshold for joint filers
 therefore reaches $265,800 in 2100, about 11 percent below the $297,700 that
 Trustees wage growth implies.
 
@@ -148,17 +150,17 @@ credits.
 | Ordinary income-tax brackets | After the tenth projection year, brackets rise with average wages rather than chained CPI-U. | OACT confirmed brackets as part of the long-range assumption. | We index them to wages from 2035. |
 | Standard deduction and related deduction thresholds | The report's paragraph on this assumption does not name them. | OACT confirmed that the long-range assumption covers federal income-tax thresholds, including standard deductions. | We index standard deduction amounts and the aged and blind additions to wages from 2035. |
 | Capital-gains and AMT thresholds | The report's paragraph on this assumption does not name them. | OACT's second reply covers all income-tax parameters. | We index the capital-gains thresholds and the AMT brackets, exemptions, phase-out thresholds, and separate-filing thresholds to wages from 2035. |
-| Credit amounts, refundability limits, and other indexed parameters | The report's paragraph on this assumption does not name them. | OACT's second reply says its projections implicitly apply wage growth to all income-tax parameters, although it does not explicitly model credit parameters. | We index those that PolicyEngine uprates with the IRS inflation index to wages from 2035 unless a reform changes them directly. |
+| Credit amounts, refundability limits, and other indexed parameters | The report's paragraph on this assumption does not name them. | OACT's second reply says its projections implicitly apply wage growth to all income-tax parameters, although it does not explicitly model credit parameters. | We index those that PolicyEngine otherwise adjusts with the IRS inflation index to wages from 2035 unless a reform changes them directly. |
 
 [^oact-threshold-email]: Emails from SSA Office of the Chief Actuary Actuarial
     Services to PolicyEngine, May 5 and May 6, 2026, replying to "Clarification
     on Trustees long-run income-tax threshold assumption." We asked about the
     2025 Trustees Report. The first reply said the long-range assumption applies
     to income-tax rate brackets and federal income-tax thresholds, with standard
-    deductions as an example. We then asked whether to move all inflation-indexed
-    federal income-tax parameters to wages, only threshold-like ones, or a narrower
-    set. The second reply called the first of those the most consistent with the
-    Trustees' projections.
+    deductions as an example. We then asked whether to move all
+    inflation-indexed federal income-tax parameters to wages, only
+    threshold-like ones, or a narrower set. The second reply called moving all
+    of them the most consistent with the Trustees' projections.
 
 We store each projected year in an H5 file (HDF5, a common format for large
 datasets), which holds that year's household weights and input variables. The
@@ -209,10 +211,10 @@ script stops on any year whose final calibration misses a target by more than
 A projection that relied on reweighting alone would have to concentrate weight
 on a few households that owe tax on benefits (contributors) to match far-horizon
 taxation-of-benefits aggregates, forcing a choice between resting the estimates
-on a few records and adding synthetic ones. Because economic
-growth enters through record values rather than weights, the population of
-taxation-of-benefits contributors stays broad even in 2100. The projection adds
-no records: every projected dataset holds only records of the populace database.
+on a few records and adding synthetic ones. Because economic growth enters
+through record values rather than weights, the population of
+taxation-of-benefits contributors stays broad even in 2100. We add no records to
+the populace database in any projected dataset.
 
 We built the datasets under publication gates, and the projection script stops
 on any year that fails one. The gates bound the household weights in every year
@@ -227,7 +229,7 @@ limits, including the years before 2075, and we report the figures in
 We also track the Trustees' covered-worker and beneficiary counts as
 diagnostics, but we do not calibrate to them, or to GDP, average wages, or CPI.
 The model does not compute GDP, and the Trustees' GDP path enters the
-projection only as the growth ceiling after 2034.
+projection only as the growth cap after 2034.
 
 ## Calibration estimator
 
@@ -263,7 +265,7 @@ For each year we record the target and achieved value of each fiscal constraint,
 the largest error on any constraint including the age bins, the share of positive
 weights, the effective sample size, and the top-weight concentration. The entropy
 parameterization keeps every weight positive. When exact positive calibration has
-no solution on the available survey records, the projection script stops with an
+no solution on the available records, the projection script stops with an
 error.
 
 ## Policy simulation and trust-fund accounting {#sec-trust-fund-accounting}
@@ -298,7 +300,7 @@ rest of the revenue impact, including the income-tax cost of deducting employee
 payroll taxes.
 
 The trust-fund decomposition in @sec-results instead uses the model's OASDI and
-HI taxation-of-benefits variables. They credit OASDI with the income tax on
+HI taxation-of-benefits variables. We credit OASDI with the income tax on
 taxable benefits up to 50 percent of benefits and HI with the tax on any taxable
 benefits above that. Senior-deduction and credit changes can move federal income
 tax by more than they move the trust funds' revenue, so a reform can raise
@@ -472,11 +474,12 @@ cohorts.
 
 ## Limitations
 
-The base microdata come from surveys and carry sampling error, item
-nonresponse, and imputation error. We calibrate to selected aggregate margins,
-not to the full joint distribution of age, earnings, Social Security benefits,
-filing status, health spending, and assets. We take long-run HI expenditures
-from the Trustees as an external denominator on the dashboard rather than
-microsimulating HI spending. The labor-supply estimates depend on our elasticity
-choices and omit macroeconomic feedback, portfolio responses, claiming
-responses, mortality changes, and political responses to trust-fund exhaustion.
+The base microdata come from surveys and tax records and carry sampling error,
+item nonresponse, and imputation error. We calibrate to selected aggregate
+margins, not to the full joint distribution of age, earnings, Social Security
+benefits, filing status, health spending, and assets. We take long-run HI
+expenditures from the Trustees as an external denominator on the dashboard
+rather than microsimulating HI spending. The labor-supply estimates depend on
+our elasticity choices and omit macroeconomic feedback, portfolio responses,
+claiming responses, mortality changes, and political responses to trust-fund
+exhaustion.

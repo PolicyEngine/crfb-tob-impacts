@@ -200,11 +200,11 @@ export function BaselineDiagnosticsSection() {
       </div>
       <p className="max-w-3xl text-sm text-muted-foreground">
         Every panel shows the baseline datasets simulated at each modeled
-        year. Solid lines are model output; dashed lines are 2026 Trustees
-        Report targets or references. Panels marked “calibrated” are matched
-        exactly during dataset construction; “diagnostic” panels are
-        unconstrained by-products shown so divergences are visible rather
-        than hidden, including federal income tax.
+        year. Solid lines show model output, and dashed lines show 2026
+        Trustees Report targets or references. We match the series in panels
+        marked “calibrated” exactly during dataset construction. Panels marked
+        “diagnostic”, including federal income tax, show by-products we leave
+        unconstrained.
       </p>
       {rows === null ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

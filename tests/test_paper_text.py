@@ -426,7 +426,10 @@ def test_abstract_figures_match_results(static: pd.DataFrame) -> None:
     assert "from 2060 for the phased" in abstract
 
     anchor_years = {item["year"] for item in run_record()["baselines"]}
-    assert f"project to {len(anchor_years)} anchor years" in abstract
+    assert (
+        f"project to {len(anchor_years)} years between {min(anchor_years)} and "
+        f"{max(anchor_years)}"
+    ) in abstract
 
 
 def test_methods_figures_match_results(
@@ -680,8 +683,8 @@ def test_methods_state_what_the_growth_cap_reached() -> None:
         "qualified_reit_and_ptp_income",
     }
     assert (
-        "That cap reaches dividends, the investment income that shares their index, "
-        "and partnership and S-corporation income."
+        "In our projections, we scale down only dividends, the investment income "
+        "that shares their index, and partnership and S-corporation income."
     ) in methods
 
     diagnostics = pd.read_csv(DIAGNOSTICS).set_index("year")
@@ -690,8 +693,9 @@ def test_methods_state_what_the_growth_cap_reached() -> None:
         return float(diagnostics.loc[2100, column] / diagnostics.loc[2035, column])
 
     assert (
-        f"from 2035 to 2100, GDP grows {growth('gdp'):.1f}-fold and partnership and "
-        f"S-corporation income grows {growth('partnership_s_corp_income'):.1f}-fold"
+        "from 2035 to 2100, we project partnership and S-corporation income to grow "
+        f"{growth('partnership_s_corp_income'):.1f}-fold, against "
+        f"{growth('gdp'):.1f}-fold for the Trustees' GDP path"
     ) in methods
 
 

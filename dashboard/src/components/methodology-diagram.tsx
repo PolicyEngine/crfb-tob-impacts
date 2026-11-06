@@ -134,7 +134,7 @@ export function MethodologyDiagram() {
           h={56}
           title="CBO projections"
           caption="Per-category income growth"
-          caption2="through 2034"
+          caption2="through 2036"
         />
 
         {/* arrows from inputs into the pipeline */}
@@ -172,7 +172,7 @@ export function MethodologyDiagram() {
           w={340}
           h={58}
           title="A. Grow incomes to the target year"
-          caption="We uprate each category on CBO projections; after 2034, we scale"
+          caption="We grow each category on CBO projections; after 2034, we scale"
           caption2="down categories whose index outgrows Trustees nominal GDP"
         />
         <Down x={290} y1={198} y2={214} />
@@ -208,7 +208,7 @@ export function MethodologyDiagram() {
           h={58}
           title="D. Final entropy calibration"
           caption="Exact targets: age, benefits, payroll, OASDI and HI benefit tax,"
-          caption2="plus guards holding investment and other income at incoming totals"
+          caption2="plus guards holding investment and other income at Stage C totals"
         />
         <Down x={290} y1={436} y2={452} />
 

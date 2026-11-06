@@ -13,7 +13,7 @@ abstract: |
   estimate how fifteen reforms to the taxation of Social Security benefits
   would change federal revenue and the Social Security and Medicare trust
   funds through 2100. We simulate each reform on PolicyEngine's populace
-  microdata, which we project to 21 anchor years and calibrate to the 2026
+  microdata, which we project to 21 years between 2026 and 2100 and calibrate to the 2026
   Trustees Reports' projections of current law, including the 2025
   reconciliation act.
   We estimate that repealing the tax on benefits would reduce federal revenue

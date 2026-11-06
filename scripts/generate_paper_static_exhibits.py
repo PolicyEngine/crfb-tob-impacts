@@ -369,8 +369,8 @@ def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
     return f"""
 We estimate that in 2100 {prose("option1")} costs OASDI
 {dollars(net("option1", "oasdi"))} and HI {dollars(net("option1", "hi"))}. Under
-85 or 100 percent taxation, OASDI gains {dollars(net("option2", "oasdi"))}, because
-the model credits it with tax on at most half of benefits, and HI gains the rest.
+85 or 100 percent taxation, OASDI gains {dollars(net("option2", "oasdi"))} and HI
+gains the rest, because we credit OASDI with tax on at most half of benefits.
 {opening("option12")} gains OASDI {dollars(net("option12", "oasdi"))} and costs HI
 {dollars(net("option12", "hi"))}. For this decomposition, we credit each trust
 fund with the revenue the model attributes to it rather than using the default

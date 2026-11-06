@@ -764,9 +764,8 @@ export function BaselineAssumptionsSection() {
               Baseline model outputs and assumptions
             </h3>
             <p className="mt-2 max-w-3xl text-base leading-7 text-[var(--pe-color-text-secondary)]">
-              Direct microsimulation aggregates, Trustees-following reference
-              targets, and the tax parameters that are indexed in the long-run
-              baseline.
+              Direct microsimulation aggregates, reference targets that follow the
+              Trustees, and the tax parameters we index in the long-run baseline.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -902,9 +901,9 @@ export function BaselineAssumptionsSection() {
                 Indexed income-tax thresholds
               </h4>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                Single-filer thresholds used by the baseline path. The vertical
-                marker is the shift from default IRS uprating to PolicyEngine&apos;s
-                wage index.
+                Single-filer thresholds in the baseline path. The vertical marker
+                shows the switch from the IRS inflation index to
+                PolicyEngine&apos;s wage index.
               </p>
             </div>
             <div className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
@@ -1088,9 +1087,9 @@ export function BaselineAssumptionsSection() {
             </h4>
           </div>
           <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            IRS-uprated tax parameters, including credit amounts, follow default
-            IRS uprating through 2034 and PolicyEngine&apos;s National Average
-            Wage Index from 2035 forward.
+            We index the tax parameters that PolicyEngine ties to the IRS inflation
+            index, including credit amounts, to that index through 2034 and to
+            PolicyEngine&apos;s National Average Wage Index from 2035.
           </p>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-sm">

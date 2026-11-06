@@ -20,12 +20,10 @@ and produced the exact rows in ten runs, all on `policyengine-us` 1.700.2,
 runs also apply the
 [`Simulation.delete_arrays` change](https://github.com/PolicyEngine/crfb-tob-impacts/blob/main/docs/current/patches/policyengine-core-3.26.1-delete-arrays.patch)
 from `policyengine-core` 3.30.1, which the substitution response needs. Their
-metadata records the base package version and not that change, so we document it
-in a
-[separate note](https://github.com/PolicyEngine/crfb-tob-impacts/blob/main/docs/current/lsr-substitution-fix-provenance.md).
-A script reads the metadata file of every exact row and writes each run's Python
-and package versions, reforms, and years, and each baseline's calibration, weight,
-and contributor figures, to
+metadata records the base package version and not that change. A script reads
+the metadata file of every exact row and writes each run's Python and package
+versions, reforms, and years, and each baseline's calibration, weight, and
+contributor figures, to
 [`docs/current/run-provenance.json`](https://github.com/PolicyEngine/crfb-tob-impacts/blob/main/docs/current/run-provenance.json).
 
 The

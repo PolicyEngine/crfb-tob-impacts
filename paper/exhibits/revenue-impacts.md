@@ -1,7 +1,7 @@
 We estimate that in 2100 full repeal costs OASDI
 $1,805.4 billion and HI $1,513.7 billion. Under
-85 or 100 percent taxation, OASDI gains $10.4 billion, because
-the model credits it with tax on at most half of benefits, and HI gains the rest.
+85 or 100 percent taxation, OASDI gains $10.4 billion and HI
+gains the rest, because we credit OASDI with tax on at most half of benefits.
 The phased Roth swap gains OASDI $299.4 billion and costs HI
 $835.4 billion. For this decomposition, we credit each trust
 fund with the revenue the model attributes to it rather than using the default

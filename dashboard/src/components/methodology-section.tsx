@@ -87,12 +87,13 @@ export function MethodologySection() {
           </p>
           <BulletList>
             <li>
-              <strong>A. Grow incomes to the target year.</strong> We uprate each
+              <strong>A. Grow incomes to the target year.</strong> We grow each
               income category with its own index, built on CBO revenue
               projections. After 2034, when a category&apos;s index outgrows the
               Trustees nominal GDP path, we scale that category down on every
-              record. We index tax parameters as statute does through 2034 and to
-              PolicyEngine&apos;s wage index after that.
+              record. We index tax parameters as statute does through 2034, and
+              from 2035 we index those tied to the IRS inflation index to
+              PolicyEngine&apos;s wage index.
             </li>
             <li>
               <strong>B. Demographic reweight.</strong> We shift household weights
@@ -116,9 +117,8 @@ export function MethodologySection() {
           <p className="mt-4">
             Reweighting alone can match dollar aggregates only by changing the
             population&apos;s makeup, and value scaling alone cannot shift the
-            age structure, so we use each for its own channel. The projection adds no records:
-            every record in every projected dataset comes from the populace
-            database, and every anchor year clears the publication gates.
+            age structure, so we use each for its own channel. We add no records to the
+            populace database in any projected dataset.
           </p>
         </AccordionItem>
 
@@ -127,10 +127,11 @@ export function MethodologySection() {
           summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every projected dataset."
         >
           <p>
-            <strong>Positive-entropy calibration</strong> matches every target
-            exactly while minimizing divergence from the demographically
-            reweighted weights and keeping all weights positive. Targets come from the 2026 Trustees
-            Report intermediate assumptions:
+            We match every target exactly with <strong>positive-entropy
+            calibration</strong>, which keeps all weights positive and minimizes
+            divergence from the Stage B weights. The age, benefit, payroll, and
+            revenue targets follow the 2026 Trustees Reports&apos; intermediate
+            assumptions:
           </p>
           <BulletList>
             <li>
@@ -154,8 +155,8 @@ export function MethodologySection() {
               benefits revenue to Medicare.
             </li>
             <li>
-              <strong>Income guards</strong> — investment and other non-payroll
-              income held at their totals entering the final calibration.
+              <strong>Income guards</strong> — we hold investment and other
+              non-payroll income at their totals entering the final calibration.
             </li>
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
@@ -173,14 +174,15 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Data sources"
-          summary="populace microdata calibrated to SSA and CMS projections, with CBO income growth."
+          summary="PolicyEngine's populace microdata, calibrated to SSA and CMS projections, with CBO income growth."
         >
           <p>
             <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace
             2024 database, built from primary sources (CPS ASEC, IRS PUF, SCF,
-            SIPP, CPS ORG, MEPS, ACS). It flags about half of its weight as IRS
-            PUF clones, which keep survey demographics and take their tax detail
-            from the PUF or come from its highest-income returns.
+            SIPP, CPS ORG, MEPS, ACS). PolicyEngine flags households that hold
+            about half of the database&apos;s weight as IRS PUF clones. Each clone
+            either keeps survey demographics and takes its tax detail from the PUF
+            or comes from the PUF&apos;s highest-income returns.
           </p>
           <p className="mt-4">
             <strong>Projection targets and inputs:</strong>
@@ -204,10 +206,10 @@ export function MethodologySection() {
               at Trustees GDP growth after 2034.
             </li>
             <li>
-              Wage indexing from PolicyEngine&apos;s National Average Wage Index
-              parameter, which grows more slowly than the Trustees average wage
-              index and reaches about 9.1 times its 2033 level by 2099, against
-              about 10.2 times for the Trustees.
+              Wage indexing from PolicyEngine&apos;s own National Average Wage
+              Index series, which reaches about 9.1 times its 2033 level by
+              2099, against about 10.2 times for the Trustees&apos; average wage
+              index.
             </li>
           </BulletList>
           <p className="mt-4">
@@ -290,8 +292,8 @@ export function MethodologySection() {
             <li>
               <strong>Scheduled benefits:</strong> we score the reform against
               the law as it stands, with Social Security paying full scheduled
-              benefits, and with the long-run tax-parameter treatment we describe
-              in the paper.
+              benefits and with inflation-indexed income-tax parameters following
+              PolicyEngine&apos;s wage index from 2035.
             </li>
             <li>
               <strong>SS solvent:</strong> we score the reform against a
