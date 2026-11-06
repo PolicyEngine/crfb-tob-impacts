@@ -32,11 +32,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv venv --python 3.13
-          # Pin ruff to the lockfile version: the dev extra's floor constraint
-          # otherwise floats to new releases whose lint defaults (e.g. the
-          # 0.16.0 import-sort change) fail on committed code.
-          uv pip install --no-sources -e ".[dev]" "ruff==0.15.5" modal google-cloud-storage
+          # Install the versions uv.lock pins, so new releases of ruff,
+          # pandas or spm-calculator cannot break the guards. PyPI no longer
+          # lists policyengine-us 1.729.0, which policyengine[us]==4.17.5
+          # pins exactly, so skip that one package here and install the same
+          # release from its version-bump commit on GitHub. The lock already
+          # installs its dependencies at their locked versions.
+          uv sync --frozen --python 3.13 --extra dev --no-install-package policyengine-us
+          uv pip install --no-deps \
+            "policyengine-us @ https://github.com/PolicyEngine/policyengine-us/archive/180410fe35209fb8201378c1b32dadd38051c342.tar.gz"
 
       - name: Ruff
         run: |
