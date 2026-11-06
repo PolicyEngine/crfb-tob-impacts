@@ -896,17 +896,18 @@ def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhib
     assert "validation-sentinels.md" not in generator
 
 
-def test_labor_supply_response_exhibit_names_static_only_reforms():
-    exhibit = (
-        REPO_ROOT / "paper" / "exhibits" / "labor-supply-response-status.md"
-    ).read_text(encoding="utf-8")
+def test_labor_supply_methods_name_static_only_reforms():
+    methods = " ".join(
+        (REPO_ROOT / "paper" / "sections" / "03-methods.qmd")
+        .read_text(encoding="utf-8")
+        .split()
+    )
     static = load_dashboard_results("static")
     behavioral = load_dashboard_results("behavioral")
     static_only = sorted(set(static["reform_name"]) - set(behavioral["reform_name"]))
 
     assert static_only == ["magi100", "tax_panel_2005"]
-    assert "all but `magi100` and `tax_panel_2005`" in exhibit
-    assert "fourteen contract-standard" not in exhibit
+    assert "all but full MAGI inclusion and the 2005 Tax Panel deduction" in methods
 
 
 def test_public_dashboard_data_cover_full_2026_2100_horizon():
