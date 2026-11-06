@@ -4,9 +4,10 @@ The paper's generated exhibits must match what the generators produce from the
 committed results panel; the reform count the paper and dashboard state must
 match the reforms the dashboard menu offers; included fragments must nest under
 the heading that includes them; the manuscript must carry no drafting notes;
-every figure written by hand into the prose must match the results panel; and
-each claim about how a run or baseline was produced must match the record that
-scripts/build_run_provenance.py writes from the runs' own metadata files.
+every figure written by hand into the prose must match the results panel; each
+claim about how a run or baseline was produced must match the record that
+scripts/build_run_provenance.py writes from the runs' own metadata files; and a
+reader must meet each reform by one name and every table with intact headers.
 
 Invariants over the published panel and the run record:
 
@@ -17,6 +18,8 @@ Invariants over the published panel and the run record:
 - Every baseline H5 appears in a committed manifest, calibrates exactly, and
   clears every publication gate in every year.
 - Every interpolated row's anchors are the nearest exact years on either side.
+- Every reform code appears once in the paper, in the section that defines it.
+- No exhibit holds a dollar sign that Pandoc could read as closing math.
 """
 
 from __future__ import annotations
@@ -44,12 +47,17 @@ DASHBOARD_METHODOLOGY = (
 )
 EXHIBIT_DIRS = (PAPER / "exhibits", SECTIONS / "exhibits")
 DATASET_METADATA = REPO_ROOT / "projected_datasets_v2pop"
+SOLVENCY_RESULTS = (
+    REPO_ROOT / "dashboard" / "public" / "data" / "balanced_fix_results.csv"
+)
 ECONOMIC_PROJECTIONS = REPO_ROOT / "data" / "ssa_economic_projections.csv"
 MANIFESTS = REPO_ROOT / "docs" / "current" / "manifests"
 FAR_HORIZON_YEARS = range(2075, 2101, 5)
 SUPPORT_FLOOR = 50
 INCLUDE = re.compile(r"\{\{< include (\S+) >\}\}")
 HEADING = re.compile(r"^(#{1,6}) \S")
+REFORM_CODE = re.compile(r"\b(option\d+|reverse_roth|tax93|magi100|tax_panel_2005)\b")
+NUMBER_IN_CODE_FONT = re.compile(r"`[-+]?\$?\d[\d,.]*%?\+?`")
 REPO_FILE_LINK = re.compile(r"crfb-tob-impacts/blob/main/([^)\s]+)\)")
 
 # The limits at the commits that built the published baselines (3de8abb6 and
@@ -99,6 +107,7 @@ DRAFTING_PHRASES = (
     "drafting",
     "earlier internal notes",
     "fixme",
+    "full-h5",
     "interpretation boundary",
     "legacy",
     "placeholder",
@@ -107,6 +116,7 @@ DRAFTING_PHRASES = (
     "release logic",
     "release surface",
     "remaining manuscript work",
+    "rough-estimate",
     "should be overwritten",
     "tbd",
     "the manuscript",
@@ -242,7 +252,8 @@ def test_paper_and_dashboard_state_the_menu_count() -> None:
 
 def test_paper_carries_no_drafting_notes() -> None:
     for name, text in paper_texts().items():
-        lowered = flat(text).lower()
+        # Include directives name source files; a reader never sees them.
+        lowered = flat(INCLUDE.sub("", text)).lower()
         for phrase in DRAFTING_PHRASES:
             assert not re.search(rf"\b{re.escape(phrase)}\b", lowered), (
                 f"{name} contains drafting phrase {phrase!r}"
@@ -266,6 +277,46 @@ def test_dashboard_methodology_shows_no_internal_tracking() -> None:
         assert term not in section, term
     assert "Modal" not in diagram
     assert "Options 5-6" not in section
+
+
+def test_dashboard_methodology_uses_reader_names() -> None:
+    for path in DASHBOARD_METHODOLOGY:
+        text = path.read_text(encoding="utf-8")
+        assert not re.search(r"\bOptions? \d", text), path.name
+        assert not re.search(r"\b(H5|TOB)\b", text), path.name
+
+
+def test_each_reform_code_appears_once_in_the_section_that_defines_it() -> None:
+    design = "paper/sections/02-policy-design.qmd"
+    counts: dict[str, int] = {}
+    for name, text in paper_texts().items():
+        codes = REFORM_CODE.findall(text)
+        if name != design:
+            assert not codes, (name, sorted(set(codes)))
+        for code in codes:
+            counts[code] = counts.get(code, 0) + 1
+    assert counts == {reform: 1 for reform in headline.REFORM_LABELS}
+
+
+def test_every_reform_has_one_table_name_and_one_prose_name() -> None:
+    assert set(exhibits.PROSE_NAMES) == set(headline.REFORM_LABELS)
+    assert set(exhibits.STANDARD_REFORMS) == set(headline.REFORM_LABELS)
+
+
+def test_paper_sets_no_figure_in_code_font() -> None:
+    for name, text in paper_texts().items():
+        assert not NUMBER_IN_CODE_FONT.search(text), (
+            name,
+            NUMBER_IN_CODE_FONT.search(text).group(0),
+        )
+
+
+def test_no_exhibit_dollar_sign_can_close_math() -> None:
+    for path in sorted((SECTIONS / "exhibits").glob("*.md")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.startswith("|"):
+                assert not re.search(r"(?<!\\)\$", line), (path.name, line)
+            assert not re.search(r"(?<!\\)\$(?!\d)", line), (path.name, line)
 
 
 def test_included_fragment_headings_nest_under_the_including_heading() -> None:
@@ -319,7 +370,7 @@ def test_abstract_figures_match_results(static: pd.DataFrame) -> None:
         first_loss = int(revenue[revenue < 0].index.min())
         assert (revenue.loc[: first_loss - 1] > 0).all()
         assert (revenue.loc[first_loss:] < 0).all()
-        assert f"from `{first_loss}` for the {name}" in abstract, reform
+        assert f"from {first_loss} for the {name}" in abstract, reform
 
 
 def test_methods_figures_match_results(
@@ -341,15 +392,15 @@ def test_methods_figures_match_results(
         gap(r, slice(2026, 2035)) for r in ("option5", "option12", "option6")
     ]
     assert (
-        f"by ${ten_year_gaps[0]:.1f} billion for `option5`, "
-        f"${ten_year_gaps[1]:.1f} billion for `option12`, and "
-        f"${ten_year_gaps[2]:.1f} billion for `option6`"
+        f"by ${ten_year_gaps[0]:.1f} billion for the Roth swap, "
+        f"${ten_year_gaps[1]:.1f} billion for the phased Roth swap, and "
+        f"${ten_year_gaps[2]:.1f} billion for the short phase-in Roth"
     ) in methods
     terminal = {
         round(gap(r, slice(2100, 2100)), 1) for r in ("option5", "option12", "option6")
     }
     assert len(terminal) == 1
-    assert f"${terminal.pop():.1f} billion for each in `2100`" in methods
+    assert f"${terminal.pop():.1f} billion for each in 2100" in methods
 
     def straight(reform: str, year: int, start: int, end: int) -> float:
         low, high = cell(static, reform, start), cell(static, reform, end)
@@ -358,7 +409,7 @@ def test_methods_figures_match_results(
     understatement = cell(static, "option7", 2028) - straight(
         "option7", 2028, 2026, 2030
     )
-    assert f"`2028` impact by ${understatement:.1f} billion" in methods
+    assert f"2028 impact by ${understatement:.1f} billion" in methods
     assert cell(static, "option7", 2029) == pytest.approx(0, abs=0.005)
 
     corner_gap = abs(
@@ -370,14 +421,48 @@ def test_methods_figures_match_results(
             cell(frame, "option12", 2062), abs=1e-6
         )
 
+
+def test_solvency_figures_match_results() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    solvent = pd.read_csv(SOLVENCY_RESULTS)
+    phased = solvent[solvent["reform_name"] == "option12"].set_index("year")
+
+    def below_line(column: str) -> float:
+        low, high = phased.loc[2050, column], phased.loc[2075, column]
+        line = low + (high - low) * (2065 - 2050) / (2075 - 2050)
+        return float(line - phased.loc[2065, column])
+
+    oasdi, hi = below_line("oasdi_net_impact"), below_line("hi_net_impact")
+    assert oasdi > 0 and hi > 0
     assert (
-        f"`${cell(static, 'option1', 2030, 'baseline_revenue'):,.1f}` billion"
-        in methods
-    )
-    seam = [cell(static, r, 2030) for r in ("option1", "option7", "option8")]
-    assert (
-        f"`-${abs(seam[0]):.1f}`, `${seam[1]:.1f}`, and `${seam[2]:.1f}` billion"
+        f"OASDI and HI impacts run ${oasdi:.1f} billion and ${hi:.1f} billion below "
+        "a straight line between 2050 and 2075"
     ) in methods
+
+
+def test_labor_supply_methods_match_the_scored_reforms_and_anchors(
+    behavioral: pd.DataFrame,
+) -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    scored = set(behavioral["reform_name"])
+    assert set(exhibits.MENU_REFORMS) - scored == {"magi100", "tax_panel_2005"}
+    assert len(set(exhibits.MENU_REFORMS) & scored) == 13
+    assert set(exhibits.SENSITIVITY_REFORMS) <= scored
+    assert (
+        "thirteen of the fifteen reforms, all but full MAGI inclusion and the 2005 "
+        "Tax Panel deduction, and for the short phase-in Roth"
+    ) in methods
+    assert (
+        "we simulate 2026 and 2100, plus 2062 for the Roth swap and the phased Roth "
+        "swap and 2033 for the short phase-in Roth"
+    ) in methods
+
+    exact = behavioral[
+        behavioral["full_h5_result_type"].isin(provenance.EXACT_RESULT_TYPES)
+    ]
+    extra = {"option5": {2062}, "option12": {2062}, "option6": {2033}}
+    for reform, rows in exact.groupby("reform_name"):
+        assert set(rows["year"]) == {2026, 2100} | extra.get(reform, set()), reform
 
 
 def test_validation_and_design_claims_hold(static: pd.DataFrame) -> None:
@@ -397,8 +482,8 @@ def test_validation_and_design_claims_hold(static: pd.DataFrame) -> None:
     assert cell(static, "option11", 2050) < cell(static, "option2", 2050) - 1
 
 
-def test_income_tax_share_of_gdp_matches_methods(static: pd.DataFrame) -> None:
-    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+def test_income_tax_share_of_gdp_matches_validation(static: pd.DataFrame) -> None:
+    validation = flat((SECTIONS / "05-validation.qmd").read_text(encoding="utf-8"))
     gdp = pd.read_csv(ECONOMIC_PROJECTIONS).set_index("year")["gdp"]
     baseline = static[static["reform_name"] == "option1"].set_index("year")[
         "baseline_revenue"
@@ -406,7 +491,7 @@ def test_income_tax_share_of_gdp_matches_methods(static: pd.DataFrame) -> None:
     share = 100 * baseline / gdp.reindex(baseline.index)
     assert share.notna().all()
     low, high = round(share.min()), round(share.max())
-    assert f"about {low} to {high} percent of GDP" in methods
+    assert f"about {low} to {high} percent of GDP" in validation
 
 
 def dataset_audits() -> dict[int, dict]:
@@ -435,13 +520,11 @@ def test_far_horizon_support_figures_match_dataset_metadata() -> None:
     for fund, label in (("oasdi_tob", "OASDI"), ("hi_tob", "HI")):
         values = [ess(year, fund) for year in FAR_HORIZON_YEARS]
         assert min(values) >= SUPPORT_FLOOR
-        assert (
-            f"`{round(min(values))}`-`{round(max(values))}` for {label}" in validation
-        )
-        assert f"`{round(ess(2100, fund))}` for {label}" in validation
-    assert f"floor of `{SUPPORT_FLOOR}`" in validation
+        assert f"{round(min(values))}-{round(max(values))} for {label}" in validation
+        assert f"{round(ess(2100, fund))} for {label}" in validation
+    assert f"floor of {SUPPORT_FLOOR}" in validation
     top_10 = audits[2100]["calibration_audit"]["top_10_weight_share_pct"]
-    assert f"`{top_10:.1f}%` of the total weight" in validation
+    assert f"{top_10:.1f}% of the total weight" in validation
 
 
 def run_record() -> dict:
@@ -508,12 +591,12 @@ def test_data_and_code_section_matches_the_run_record() -> None:
     runs = record["runs"]
     labor_supply = [run for run in runs if run["scoring_type"] == "behavioral"]
 
-    assert f"Each of the `{record['exact_rows']}` exact rows" in section
+    assert f"Each of the {record['exact_rows']} exact rows" in section
     assert len(runs) == 10 and "in ten runs" in section
     assert len(labor_supply) == 2 and "The two labor-supply runs" in section
-    assert "`policyengine-us` `1.700.2`" in section
-    assert "`policyengine.py` `4.5.1`" in section
-    assert "`policyengine-core` `3.26.1`" in section
+    assert "`policyengine-us` 1.700.2" in section
+    assert "`policyengine.py` 4.5.1" in section
+    assert "`policyengine-core` 3.26.1" in section
 
     linked = REPO_FILE_LINK.findall(text)
     assert {
@@ -550,8 +633,8 @@ def test_every_baseline_calibrates_exactly_and_clears_every_gate() -> None:
     assert largest_error_pct <= 0.000001
 
     validation = flat((SECTIONS / "05-validation.qmd").read_text(encoding="utf-8"))
-    assert f"All `{len(years)}` anchor years" in validation
-    assert "by more than `0.000001%`" in validation
+    assert f"All {len(years)} anchor years" in validation
+    assert "by more than 0.000001%" in validation
 
     def lowest(name: str) -> int:
         return round(
@@ -562,8 +645,8 @@ def test_every_baseline_calibrates_exactly_and_clears_every_gate() -> None:
         )
 
     assert (
-        f"never fall below `{lowest('oasdi_tob')}` for OASDI "
-        f"and `{lowest('hi_tob')}` for HI"
+        f"never fall below {lowest('oasdi_tob')} for OASDI "
+        f"and {lowest('hi_tob')} for HI"
     ) in validation
 
 
@@ -572,22 +655,22 @@ def test_methods_state_the_gates_that_built_the_baselines() -> None:
     limits = {metric: bound for metric, (_, bound) in TOB_CONTRIBUTOR_GATES.items()}
 
     for phrase in (
-        f"at least `{limits['positive_contributor_count']:,}` positive contributors",
+        f"at least {limits['positive_contributor_count']:,} positive contributors",
         "effective sample size of at least "
-        f"`{limits['contributor_effective_sample_size']:.0f}`",
+        f"{limits['contributor_effective_sample_size']:.0f}",
         f"top-10 contribution share of at most "
-        f"`{limits['top_10_contribution_share_pct']:.0f}%`",
-        f"top-100 share of at most `{limits['top_100_contribution_share_pct']:.0f}%`",
+        f"{limits['top_10_contribution_share_pct']:.0f}%",
+        f"top-100 share of at most {limits['top_100_contribution_share_pct']:.0f}%",
         "largest single-contributor share of at most "
-        f"`{limits['max_contribution_share_pct']:.0f}%`",
-        "from `2075`",
+        f"{limits['max_contribution_share_pct']:.0f}%",
+        "from 2075",
     ):
         assert phrase in methods, phrase
 
 
 def test_reform_scoring_claims_count_the_exact_rows() -> None:
     validation = flat((SECTIONS / "05-validation.qmd").read_text(encoding="utf-8"))
-    assert f"all `{run_record()['exact_rows']}` exact rows" in validation
+    assert f"each of the {run_record()['exact_rows']} exact rows" in validation
 
 
 def test_results_contract_traces_every_row() -> None:
@@ -633,13 +716,23 @@ def test_every_baseline_appears_in_a_committed_manifest() -> None:
         assert (item["year"], item["h5_sha256"]) in committed, item["year"]
 
 
-def test_seam_checks_match_the_manifests() -> None:
-    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+def test_baselines_trace_to_the_stated_build_commits() -> None:
+    section = flat((SECTIONS / "06-data-and-code.qmd").read_text(encoding="utf-8"))
+    assert "commits `3de8abb6` and `c5e4f1a6`" in section
+
+    builders = {
+        (item["year"], item["h5_sha256"]): manifest["source_sha"][:8]
+        for manifest in manifests().values()
+        for item in manifest["datasets"]
+    }
+    used = {
+        builders[(item["year"], item["h5_sha256"])]
+        for item in run_record()["baselines"]
+    }
+    assert used == {"3de8abb6", "c5e4f1a6"}
+
     published = manifests()["baseline-dataset-manifest-v2pop.json"]
     infill = manifests()["baseline-dataset-manifest-9f1260b-certinfill.json"]
-
-    assert "commit `3de8abb6`" in methods
-    assert "has the same SHA-256 hash as the published one" in methods
     for manifest in (published, infill):
         assert manifest["source_sha"].startswith("3de8abb6")
     assert manifest_hash(infill, 2030) == manifest_hash(published, 2030)

@@ -278,7 +278,7 @@ def _swap_note() -> list[str]:
         raise ValueError("expected each swap's fund total to exceed its revenue change")
     amounts = [f"${gaps[reform]:,.1f} billion" for reform in SWAP_REFORMS]
     return [
-        "For the Roth swap, the phased Roth, and the short phase-in Roth",
+        "For the Roth swap, the phased Roth swap, and the short phase-in Roth",
         "sensitivity case, we add the two funds' net impacts under the default",
         "split.",
         "Over 2026-2035 those sums exceed the change in federal income tax by",
@@ -289,8 +289,39 @@ def _swap_note() -> list[str]:
     ]
 
 
+def _headline_finding(records: list[dict[str, object]]) -> list[str]:
+    """State the largest loss and largest gain in the first table."""
+    scheduled = {
+        record["reform"]: record
+        for record in records
+        if record["baseline_scenario"] == "scheduled_benefits"
+    }
+
+    def amounts(reform: str) -> tuple[float, float]:
+        record = scheduled[reform]
+        return (
+            float(record["ten_year_nominal_billions"]),
+            float(record["pv75_total_billions"]),
+        )
+
+    repeal_ten, repeal_pv = amounts("option1")
+    full_ten, full_pv = amounts("option8")
+    if not (repeal_ten < 0 and repeal_pv < 0 and full_ten > 0 and full_pv > 0):
+        raise ValueError("expected repeal to lose revenue and full taxation to gain it")
+    return [
+        f"We estimate that full repeal reduces revenue by ${abs(repeal_ten):,.0f}",
+        f"billion over 2026-2035 and ${abs(repeal_pv):,.0f} billion in present value",
+        f"over 75 years, and that 100 percent taxation raises ${full_ten:,.0f}",
+        f"billion and ${full_pv:,.0f} billion.",
+    ]
+
+
 def render_exhibit(records: list[dict[str, object]]) -> str:
     """Return the headline-summary Markdown fragment the paper includes."""
+
+    def row(cells: list[str]) -> str:
+        # Pandoc reads two dollar signs in one row as inline math.
+        return "| " + " | ".join(cell.replace("$", r"\$") for cell in cells) + " |"
 
     def table(scenario: str) -> str:
         headers = [
@@ -301,15 +332,14 @@ def render_exhibit(records: list[dict[str, object]]) -> str:
             "Medicare HI PV ($B)",
         ]
         lines = [
-            "| " + " | ".join(headers) + " |",
+            row(headers),
             "| " + " | ".join(["---"] * len(headers)) + " |",
         ]
         for record in records:
             if record["baseline_scenario"] != scenario:
                 continue
             lines.append(
-                "| "
-                + " | ".join(
+                row(
                     [
                         _label(str(record["reform"])),
                         _fmt(float(record["ten_year_nominal_billions"])),
@@ -318,19 +348,12 @@ def render_exhibit(records: list[dict[str, object]]) -> str:
                         _fmt(float(record["pv75_medicare_hi_billions"])),
                     ]
                 )
-                + " |"
             )
         return "\n".join(lines)
 
     return "\n".join(
         [
-            "We report each reform's headline revenue effect under the",
-            "dashboard's default trust-fund split, as nominal sums over 2026-2035",
-            "and as present values over 2026-2100 at each fund's own Trustees",
-            "effective interest rates (@sec-present-value).",
-            *_general_fund_note(records),
-            "",
-            *_swap_note(),
+            *_headline_finding(records),
             "",
             "**Against scheduled benefits:**",
             "",
@@ -340,6 +363,14 @@ def render_exhibit(records: list[dict[str, object]]) -> str:
             "benefits through 2034, solvent baseline from 2035):**",
             "",
             table("ss_solvent"),
+            "",
+            "Both tables use the dashboard's default trust-fund split",
+            "(@sec-trust-fund-accounting), with nominal sums over 2026-2035 and",
+            "present values over 2026-2100 at each fund's own Trustees effective",
+            "interest rates (@sec-present-value).",
+            *_general_fund_note(records),
+            "",
+            *_swap_note(),
             "",
         ]
     )

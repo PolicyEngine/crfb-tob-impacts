@@ -12,11 +12,16 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from pathlib import Path
+import sys
 
 import pandas as pd
 
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+from scripts.build_headline_summary import REFORM_LABELS  # noqa: E402
+
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
 RESULTS_CSV = REPO / "dashboard" / "public" / "data" / "results.csv"
@@ -33,6 +38,27 @@ STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
 SENSITIVITY_REFORMS = ("option6",)
 MENU_REFORMS = tuple(r for r in STANDARD_REFORMS if r not in SENSITIVITY_REFORMS)
 SWAP_REFORMS = ("option5", "option6", "option12")
+# How running text names each reform. Tables use REFORM_LABELS, the dashboard's
+# names, and paper/sections/02-policy-design.qmd ties both to the results file's
+# reform codes.
+PROSE_NAMES = {
+    "option1": "full repeal",
+    "magi100": "full MAGI inclusion",
+    "tax_panel_2005": "the 2005 Tax Panel deduction",
+    "option2": "85 percent taxation",
+    "option3": "85 percent taxation with the extended senior deduction",
+    "option7": "the senior-deduction repeal",
+    "option4": "the $500 credit",
+    "option11": "the $700 credit",
+    "option9": "90 percent taxation",
+    "tax93": "93 percent taxation",
+    "option10": "95 percent taxation",
+    "option8": "100 percent taxation",
+    "option5": "the Roth swap",
+    "option6": "the short phase-in Roth",
+    "option12": "the phased Roth swap",
+    "reverse_roth": "the reverse Roth",
+}
 ENDPOINT_YEARS = (2026, 2100)
 MILESTONE_YEARS = (2035, 2050, 2075, 2100)
 BUDGET_WINDOW_YEARS = (2028, 2029)
@@ -68,30 +94,36 @@ def dollars(value: float) -> str:
 
 
 def label(reform: str) -> str:
-    if reform in SENSITIVITY_REFORMS:
-        return f"{reform} (sensitivity)"
-    return reform
+    """Name a reform in a table, as the dashboard menu does."""
+    name = REFORM_LABELS[reform]
+    return f"{name} (sensitivity)" if reform in SENSITIVITY_REFORMS else name
+
+
+def prose(reform: str) -> str:
+    return PROSE_NAMES[reform]
+
+
+def opening(reform: str) -> str:
+    """Name a reform at the start of a sentence."""
+    name = PROSE_NAMES[reform]
+    return name[0].upper() + name[1:]
 
 
 def count_word(count: int) -> str:
     return NUMBER_WORDS[count]
 
 
-def code_list(names: Iterable[str]) -> str:
-    items = [f"`{name}`" for name in names]
-    if len(items) == 1:
-        return items[0]
-    if len(items) == 2:
-        return f"{items[0]} and {items[1]}"
-    return ", ".join(items[:-1]) + f", and {items[-1]}"
+def table_row(cells: list[str]) -> str:
+    """Escape dollar signs, since Pandoc reads two in one row as inline math."""
+    return "| " + " | ".join(cell.replace("$", r"\$") for cell in cells) + " |"
 
 
 def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
     lines = [
-        "| " + " | ".join(headers) + " |",
+        table_row(headers),
         "| " + " | ".join(["---"] * len(headers)) + " |",
     ]
-    lines.extend("| " + " | ".join(row) + " |" for row in rows)
+    lines.extend(table_row(row) for row in rows)
     return "\n".join(lines)
 
 
@@ -114,7 +146,7 @@ def load_behavioral() -> pd.DataFrame:
 
 def ordered(reforms: Iterable[str]) -> list[str]:
     present = set(reforms)
-    return [r for r in STANDARD_REFORMS if r in present]
+    return [r for r in REFORM_LABELS if r in present]
 
 
 def build_results_overview(df: pd.DataFrame) -> str:
@@ -130,14 +162,14 @@ def build_results_overview(df: pd.DataFrame) -> str:
     terminal = df[df["year"] == 2100].set_index("reform_name")
 
     ten_year_table = markdown_table(
-        ["Reform", "2026-2035 Revenue Impact ($B)"],
+        ["Reform", "2026-2035 revenue impact ($B)"],
         [
             [label(reform), fmt_b(value)]
             for reform, value in ten_year.sort_values().items()
         ],
     )
     terminal_table = markdown_table(
-        ["Reform", "2100 Revenue Impact ($B)", "2100 TOB Impact ($B)"],
+        ["Reform", "2100 revenue impact ($B)", "2100 benefit-tax revenue impact ($B)"],
         [
             [
                 label(reform),
@@ -175,41 +207,32 @@ def build_results_overview(df: pd.DataFrame) -> str:
     check(swap_loss < 0, "the Roth swaps should lose revenue in 2100")
 
     return f"""
-We score {count_word(len(MENU_REFORMS))} reforms: `option1` through `option12`
-except `option6`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
-inclusion (`magi100`), and the 2005 Tax Panel simple deduction
-(`tax_panel_2005`). We also report `option6`, a shorter phase-in variant of
-the phased Roth swap, as a sensitivity case. Each static row comes
-either from a full-H5 microsimulation at an anchor year or from linear
-interpolation between anchor years, and the `full_h5_result_type` column of the
-[public results file]({RESULTS_CSV_URL}) labels which.
-
 {FRAGMENT_HEADING} Ten-year static revenue impacts
+
+Over 2026-2035, we estimate that {prose(first)} raises the most revenue of the
+{count_word(len(MENU_REFORMS))} reforms ({dollars(menu_ten_year[first])}) and
+{prose(second)} the next most ({dollars(menu_ten_year[second])}).
+{opening(last)} loses the most ({dollars(menu_ten_year[last])}).
 
 {ten_year_table}
 
-Over `2026`-`2035`, `{first}` raises the most revenue of the
-{count_word(len(MENU_REFORMS))} reforms ({dollars(menu_ten_year[first])}) and
-`{second}` the next most ({dollars(menu_ten_year[second])}). `{last}` loses the
-most ({dollars(menu_ten_year[last])}).
-
 {FRAGMENT_HEADING} Terminal-year static impacts
 
-{terminal_table}
-
-In `2100`, `{top}` raises the most revenue ({dollars(menu_terminal[top])}) and
-`{runner_up}` the next most ({dollars(menu_terminal[runner_up])}). `{worst}`
-loses the most ({dollars(menu_terminal[worst])}), followed by `{next_worst}`
-({dollars(menu_terminal[next_worst])}). By then `option5`, `option12`, and the
-`option6` sensitivity case reach the same end state, with employer
-contributions taxable and no benefits taxed, and each loses
+In 2100, we estimate that {prose(top)} raises the most revenue
+({dollars(menu_terminal[top])}) and {prose(runner_up)} the next most
+({dollars(menu_terminal[runner_up])}). {opening(worst)} loses the most
+({dollars(menu_terminal[worst])}), followed by {prose(next_worst)}
+({dollars(menu_terminal[next_worst])}). By then {prose("option5")},
+{prose("option12")}, and {prose("option6")} reach the same end state, with
+employer contributions taxable and no benefits taxed, and each loses
 {dollars(swap_loss)}.
+
+{terminal_table}
 """
 
 
 def build_milestones(df: pd.DataFrame) -> str:
     """Milestone-year static impacts for every scored reform."""
-    n_exact = int((df["full_h5_result_type"] == EXACT_STATIC).sum())
     lineage = df[df["full_h5_result_type"] == EXACT_STATIC]
     check(
         bool(lineage["run_prefix"].notna().all())
@@ -245,7 +268,17 @@ def build_milestones(df: pd.DataFrame) -> str:
             -row.tob_total_impact > employer_tax,
             f"{reform}'s 2075 benefit-tax loss should exceed its employer tax",
         )
-    gainers = ("option2", "option4", "option8", "option10")
+    gainers = (
+        "option2",
+        "option3",
+        "option4",
+        "option8",
+        "option9",
+        "option10",
+        "option11",
+        "tax93",
+        "magi100",
+    )
     for reform in gainers:
         check(
             bool((milestones.loc[reform] > 0).all()) and rising(reform),
@@ -253,7 +286,7 @@ def build_milestones(df: pd.DataFrame) -> str:
         )
 
     milestone_table = markdown_table(
-        ["Reform"] + [str(year) for year in MILESTONE_YEARS],
+        ["Reform"] + [f"{year} ($B)" for year in MILESTONE_YEARS],
         [
             [label(reform)]
             + [fmt_b(float(milestones.loc[reform, year])) for year in MILESTONE_YEARS]
@@ -262,19 +295,13 @@ def build_milestones(df: pd.DataFrame) -> str:
     )
 
     return f"""
-The static panel covers the {count_word(len(MENU_REFORMS))} reforms and the
-`option6` sensitivity case with `{n_exact}` exact full-H5 anchor cells, and we
-interpolate every other annual row linearly between anchors. For each exact
-cell, the public results file records the run prefix and the SHA-256 hash of
-the reform H5 file.
+We estimate that the revenue loss from {prose("option1")} grows at each
+milestone year. {opening("option5")} and {prose("option12")} raise revenue in
+2035 and 2050 but lose it by 2075, when the benefit-tax revenue they repeal
+exceeds the income tax on employer contributions. The revenue gain from every
+reform that taxes more of benefits grows at each milestone year.
 
 {milestone_table}
-
-The revenue loss from `option1` grows at each milestone year. `option5` and
-`option12` raise revenue in `2035` and `2050` but lose it by `2075`, when the
-benefit-taxation revenue they repeal exceeds the income tax on employer
-contributions. The revenue gain from {code_list(gainers)} grows at each
-milestone year.
 """
 
 
@@ -285,11 +312,13 @@ def swap_trust_fund_gap(df: pd.DataFrame, reform: str, year: int) -> float:
 
 
 def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
-    decomposition_reforms = ["option1", "option2", "option4", "option8", "option12"]
+    decomposition_reforms = ordered(
+        ["option1", "option2", "option4", "option8", "option12"]
+    )
     terminal = df[df["year"] == 2100].set_index("reform_name")
     rows = [
         [
-            reform,
+            label(reform),
             fmt_b(terminal.loc[reform, "revenue_impact"]),
             fmt_b(terminal.loc[reform, "tob_total_impact"]),
             fmt_b(terminal.loc[reform, "oasdi_net_impact"]),
@@ -306,23 +335,44 @@ def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
     gap = swap_trust_fund_gap(df, "option12", 2100)
     check(gap > 0, "option12's fund impacts should exceed its revenue impact")
 
+    def net(reform: str, fund: str) -> float:
+        return float(terminal.loc[reform, f"{fund}_net_impact"])
+
+    check(
+        net("option1", "oasdi") < 0 and net("option1", "hi") < 0,
+        "full repeal should cost both funds in 2100",
+    )
+    check(
+        net("option2", "oasdi") > 0
+        and abs(net("option2", "oasdi") - net("option8", "oasdi")) < 0.05,
+        "85 and 100 percent taxation should give OASDI one 2100 gain",
+    )
+    check(
+        net("option12", "oasdi") > 0 and net("option12", "hi") < 0,
+        "the phased Roth swap should gain OASDI and cost HI in 2100",
+    )
+
     table = markdown_table(
         [
             "Reform",
-            "2100 Revenue ($B)",
-            "2100 TOB ($B)",
-            "2100 OASDI Net ($B)",
-            "2100 HI Net ($B)",
+            "2100 revenue ($B)",
+            "2100 benefit-tax revenue ($B)",
+            "2100 OASDI net ($B)",
+            "2100 HI net ($B)",
         ],
         rows,
     )
     return f"""
-{table}
+This table credits each trust fund with the revenue the model attributes to it,
+not the default split in @sec-headline, and applies the rules in
+@sec-swap-accounting to {prose("option12")}. We estimate that in 2100
+{prose("option1")} costs OASDI {dollars(net("option1", "oasdi"))} and HI
+{dollars(net("option1", "hi"))}. Under 85 or 100 percent taxation, OASDI gains
+{dollars(net("option2", "oasdi"))} and HI gains the rest. {opening("option12")}
+gains OASDI {dollars(net("option12", "oasdi"))} and costs HI
+{dollars(net("option12", "hi"))}.
 
-In `2100`, the OASDI and HI net impacts sum to the revenue impact for
-{code_list(benefit_taxation)}. For `option12`, they sum to {dollars(gap)} more,
-because we measure each fund's gain from taxing employer contributions
-separately (@sec-swap-accounting).
+{table}
 """
 
 
@@ -346,7 +396,7 @@ def build_budget_window_anchors(df: pd.DataFrame) -> str:
 
     rows = []
     gaps = []
-    for reform in STANDARD_REFORMS:
+    for reform in ordered(STANDARD_REFORMS):
         row = [label(reform)]
         for year in BUDGET_WINDOW_YEARS:
             check((reform, year) in exact, f"{reform} {year} should be exact")
@@ -377,17 +427,15 @@ def build_budget_window_anchors(df: pd.DataFrame) -> str:
         rows,
     )
     return f"""
-We add exact anchors for every reform in `2028`, the last year of the temporary
-deductions, and in `2029`, the last year of the higher cap on the
-state-and-local-tax deduction. We compare those anchors with the straight line
-between each reform's `2026` and `2030` anchors. The largest gap,
-{dollars(largest_gap)}, falls in `{gap_year}` for `{gap_reform}`.
+Straight lines between each reform's 2026 and 2030 anchors miss the exact 2028
+and 2029 anchors by as much as {dollars(largest_gap)}, for {prose(gap_reform)} in
+{gap_year}.
 
 {table}
 
-For the `option6` phase-in, the straight line between `2030` and `2035` would
-give {dollars(corner[first][0])} in `{first}` and {dollars(corner[last][0])} in
-`{last}`, against exact anchors of {dollars(corner[first][1])} and
+For {prose("option6")}, the straight line between 2030 and 2035 would give
+{dollars(corner[first][0])} in {first} and {dollars(corner[last][0])} in {last},
+against exact anchors of {dollars(corner[first][1])} and
 {dollars(corner[last][1])}.
 """
 
@@ -406,11 +454,11 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     option1_table = markdown_table(
-        ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
+        ["Source", "Policy", "Scoring", "Window", "Revenue impact ($B)"],
         [
             [
                 "PolicyEngine",
-                "option1 full repeal",
+                label("option1"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option1"])),
@@ -447,18 +495,18 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     option2_table = markdown_table(
-        ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
+        ["Source", "Policy", "Scoring", "Window", "Revenue impact ($B)"],
         [
             [
                 "PolicyEngine",
-                "option2 tax 85% uniformly",
+                label("option2"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option2"])),
             ],
             [
                 "PolicyEngine",
-                "option8 tax 100% of benefits",
+                label("option8"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option8"])),
@@ -487,12 +535,12 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
             "Scoring",
             "Window",
             "Federal revenue ($B)",
-            "TOB impact ($B)",
+            "Benefit-tax revenue impact ($B)",
         ],
         [
             [
                 "PolicyEngine",
-                "option7 eliminate bonus senior deduction",
+                label("option7"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option7"])),
@@ -510,15 +558,17 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     return f"""
-{FRAGMENT_HEADING} Option 1: full repeal benchmark
+{FRAGMENT_HEADING} Full repeal
 
 {option1_table}
 
-{FRAGMENT_HEADING} Options 2 and 8: broader taxation benchmark
+{FRAGMENT_HEADING} 85 and 100 percent taxation
 
 {option2_table}
 
-{FRAGMENT_HEADING} Option 7: bonus senior deduction benchmark
+{FRAGMENT_HEADING} Bonus senior deduction
+
+JCT scores enacting the deduction and we score repealing it, so the signs differ.
 
 {option7_table}
 """
@@ -526,11 +576,12 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
 
 def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame) -> str:
     scored = set(behavioral["reform_name"])
-    menu_scored = [r for r in MENU_REFORMS if r in scored]
-    static_only = [r for r in MENU_REFORMS if r not in scored]
-    sensitivity_scored = [r for r in SENSITIVITY_REFORMS if r in scored]
     check(
-        sensitivity_scored == list(SENSITIVITY_REFORMS),
+        [r for r in MENU_REFORMS if r not in scored] == ["magi100", "tax_panel_2005"],
+        "every menu reform but two should carry labor-supply responses",
+    )
+    check(
+        set(SENSITIVITY_REFORMS) <= scored,
         "the sensitivity case should carry labor-supply responses",
     )
 
@@ -540,21 +591,14 @@ def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame)
         for reform, group in exact.groupby("reform_name")
     }
     check(set(anchors) == scored, "every scored reform should have exact anchors")
-    interior: dict[int, list[str]] = {}
     for reform, years in anchors.items():
         check(
             all(year in years for year in ENDPOINT_YEARS),
             f"{reform} should have exact 2026 and 2100 anchors",
         )
-        for year in years:
-            if year not in ENDPOINT_YEARS:
-                interior.setdefault(year, []).append(reform)
-    interior_text = " and ".join(
-        f"`{year}` for {code_list(ordered(reforms))}"
-        for year, reforms in sorted(interior.items(), reverse=True)
-    )
 
     rows = []
+    effects = {}
     for reform in ordered(scored):
         with_responses = behavioral[behavioral["reform_name"] == reform].set_index(
             "year"
@@ -563,8 +607,9 @@ def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame)
         cells = [label(reform)]
         for year in ENDPOINT_YEARS:
             response = float(with_responses.loc[year, "revenue_impact"])
-            cells.append(fmt_b(response))
-            cells.append(fmt_b(response - float(without.loc[year, "revenue_impact"])))
+            effect = response - float(without.loc[year, "revenue_impact"])
+            cells += [fmt_b(response), fmt_b(effect)]
+            effects[reform] = effect
         rows.append(cells)
     table = markdown_table(
         [
@@ -577,20 +622,25 @@ def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame)
         rows,
     )
 
+    swap_effects = [effects[reform] for reform in SWAP_REFORMS]
+    check(
+        max(swap_effects) < 0 and max(swap_effects) - min(swap_effects) < 0.05,
+        "responses should cost each Roth swap one amount in 2100",
+    )
+    check(
+        effects["reverse_roth"] > 0, "responses should offset the reverse Roth's loss"
+    )
+    other = max(
+        abs(effect)
+        for reform, effect in effects.items()
+        if reform not in SWAP_REFORMS and reform != "reverse_roth"
+    )
+
     return f"""
-We also score labor-supply responses for {count_word(len(menu_scored))} of the
-{count_word(len(MENU_REFORMS))} reforms (all but {code_list(static_only)}) and
-for the `option6` sensitivity case. For each, we simulate full reform H5 files
-at `{ENDPOINT_YEARS[0]}` and `{ENDPOINT_YEARS[1]}`, plus {interior_text}, and
-derive aggregates from those files with PolicyEngine's MicroSeries operations.
-Between anchors, we interpolate each metric's ratio of behavioral to static
-results linearly and apply it to the static annual row. Where the static result
-changes sign within a segment, we interpolate the behavioral values directly.
-We publish the rows in the public results file under
-`scoring_type = behavioral`, with both the income and substitution channels. We
-treat static scoring as primary and the labor-supply results as
-partial-equilibrium estimates under the age-based elasticity schedule in
-@sec-labor-supply.
+We estimate that in 2100 labor-supply responses cost the Roth swaps another
+{dollars(swap_effects[0])}, offset {dollars(effects["reverse_roth"])} of the
+reverse Roth's loss, and move every other reform's revenue impact by at most
+{dollars(other)}.
 
 For each reform, we report the revenue impact with labor-supply responses at the
 two endpoints and the response effect, which subtracts the static impact.
@@ -603,7 +653,7 @@ def build_household_impacts() -> str:
     return f"""
 We report each reform's change in household net income, by baseline income
 decile, on the [dashboard]({DASHBOARD_URL}). We simulate anchor years from
-`2026` to `2100` and interpolate the years between them.
+2026 to 2100 and interpolate the years between them.
 """
 
 

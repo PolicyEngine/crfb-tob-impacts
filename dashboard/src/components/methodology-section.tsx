@@ -78,7 +78,7 @@ export function MethodologySection() {
       <div className="space-y-4">
         <AccordionItem
           title="Yearly calibration: demographics in weights, economics in values"
-          summary="Each projection year is built independently: light demographic reweighting, then value scaling to official aggregates given those weights, then a final exact calibration."
+          summary="We build each projection year independently: light demographic reweighting, then value scaling to official aggregates given those weights, then a final exact calibration."
           defaultOpen
         >
           <p>
@@ -96,8 +96,7 @@ export function MethodologySection() {
             <li>
               <strong>B. Demographic reweight.</strong> A light positive-entropy
               adjustment shifts household weights to the Trustees single-year
-              age distribution. Weights carry demographics only — they are not
-              asked to fix dollar aggregates.
+              age distribution. Weights carry demographics only.
             </li>
             <li>
               <strong>C. Value calibration, given those weights.</strong>{" "}
@@ -114,9 +113,9 @@ export function MethodologySection() {
             </li>
           </BulletList>
           <p className="mt-4">
-            Separating the channels keeps both honest: reweighting alone would
-            hit aggregates by silently distorting who the population is, while
-            value scaling alone could not shift the age structure. Every record
+            Reweighting alone can match dollar aggregates only by changing the
+            population&apos;s makeup, and value scaling alone cannot shift the
+            age structure, so we use each for its own channel. Every record
             in every projected dataset comes from a real survey household, and
             every anchor year clears the publication gates on those records.
           </p>
@@ -204,8 +203,7 @@ export function MethodologySection() {
           </BulletList>
           <p className="mt-4">
             The 2026 Trustees Report incorporates the 2025 reconciliation act
-            (OBBBA), including the senior deduction, directly in current law —
-            no post-legislation bridge is required.
+            (OBBBA), including the senior deduction, in current law.
           </p>
         </AccordionItem>
 
@@ -216,9 +214,8 @@ export function MethodologySection() {
           <p>
             <strong>Static scoring:</strong> we hold taxpayer behavior
             constant, so the estimates show the mechanical effect of each policy
-            change. We compute all fifteen reforms from full reform H5
-            microsimulations at anchor years: 2026, 2028, 2029, 2030, and every
-            fifth year from 2035 to 2100, plus 2062 for the two Roth swaps. The
+            change. We run full microsimulations of all fifteen reforms at
+            anchor years: 2026, 2028, 2029, 2030, and every fifth year from 2035 to 2100, plus 2062 for the two Roth swaps. The
             2028 and 2029 anchors bracket the senior deduction&apos;s 2028
             sunset, so the budget window shows that step instead of smoothing
             across it. We interpolate linearly between anchors to a complete
@@ -228,9 +225,9 @@ export function MethodologySection() {
             of the results file as an exact anchor or an interpolation.
           </p>
           <p className="mt-4">
-            <strong>Supplemental labor-supply response:</strong> we also score
-            labor-supply responses for thirteen of the reforms from full reform
-            H5 files at the 2026 and 2100 endpoints, plus 2062 for the two Roth
+            <strong>Supplemental labor-supply response:</strong> we also run full
+            microsimulations with labor-supply responses for thirteen of the
+            reforms at the 2026 and 2100 endpoints, plus 2062 for the two Roth
             swaps. The charts show static scores, and we publish the
             labor-supply rows in the results file.
           </p>
@@ -243,29 +240,30 @@ export function MethodologySection() {
           <BulletList>
             <li>
               <strong>
-                Options 1-2 and 8-10, 93% taxation, full MAGI inclusion, and the
-                2005 Tax Panel deduction
+                Full repeal; 85%, 90%, 93%, 95%, and 100% taxation; full MAGI
+                inclusion; and the 2005 Tax Panel deduction
               </strong>
-              : default to baseline-share allocation, with a toggle for
+              : we default to baseline-share allocation, with a toggle for
               current-law allocation.
             </li>
             <li>
-              <strong>Options 3-4 and 11</strong>: use baseline-share allocation
-              under both settings.
+              <strong>85% + deduction, $500 credit, and $700 credit</strong>: we
+              use baseline-share allocation under both settings.
             </li>
             <li>
-              <strong>Options 5 and 12</strong>: credit each trust fund with the
-              income tax on its own employer contribution, net of the
+              <strong>Roth swap and Phased Roth</strong>: we credit each trust
+              fund with the income tax on its own employer contribution, net of the
               benefit-tax revenue it loses.
             </li>
             <li>
-              <strong>Option 7</strong>: total is the full federal income-tax
-              gain; OASDI, HI, and general fund show the accounting split.
+              <strong>No senior deduction</strong>: the total equals the full
+              federal income-tax gain, and the OASDI, HI, and general-fund
+              figures show the accounting split.
             </li>
             <li>
-              <strong>Reverse Roth</strong>: counts the income-tax cost of
-              deducting employee payroll taxes against OASDI and leaves
-              HI&apos;s benefit-tax share as scored.
+              <strong>Reverse Roth</strong>: we count the income-tax cost of
+              deducting employee payroll taxes against OASDI and leave
+              HI&apos;s benefit-tax share as the model scores it.
             </li>
           </BulletList>
           <p className="mt-4">
@@ -276,23 +274,23 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Scoring baselines and present value"
-          summary="Reforms can be scored against scheduled benefits or a Social Security solvency baseline; 75-year totals are reported in present value."
+          summary="We score reforms against scheduled benefits or a Social Security solvency baseline and report 75-year totals in present value."
         >
           <BulletList>
             <li>
-              <strong>Scheduled benefits:</strong> the reform is scored against
+              <strong>Scheduled benefits:</strong> we score the reform against
               the law as it stands, with Social Security paying full scheduled
               benefits, including the Trustees long-run taxation-of-benefits
               thresholds.
             </li>
             <li>
-              <strong>SS solvent:</strong> the reform is scored against a
+              <strong>SS solvent:</strong> we score the reform against a
               baseline that closes Social Security&apos;s long-run shortfall
               through roughly equal benefit reductions and payroll-rate
-              increases (a balanced &ldquo;traditional fix&rdquo;), so its
-              effect is measured on top of an already-solvent system. Available
-              for repeal, 85%, 100%, and the Phased Roth; the solvent baseline
-              applies from 2035, with 2026-2034 scored against scheduled
+              increases (a balanced &ldquo;traditional fix&rdquo;), so we
+              measure its effect on top of an already-solvent system. We offer
+              this baseline for repeal, 85%, 100%, and the Phased Roth; it
+              applies from 2035, and we score 2026-2034 against scheduled
               benefits. A reform whose structure differs from current law can
               step at 2035 where the baseline switches &mdash; clearest for the
               Phased Roth &mdash; which the dashed marker on the chart flags.
@@ -307,9 +305,9 @@ export function MethodologySection() {
             Trustees Report, and Medicare HI flows at the effective rates in
             Table IV.A4 of the 2026 Medicare Trustees Report, graded to the
             4.7 percent ultimate nominal rate by 2040. General-fund flows and
-            economy-wide denominators use the OASDI series, and the 75-year
-            total is the sum of the discounted components. Ten-year
-            budget-window totals are shown in nominal dollars.
+            economy-wide denominators use the OASDI series, and we sum the
+            discounted components into the 75-year total. We show ten-year
+            budget-window totals in nominal dollars.
           </p>
         </AccordionItem>
       </div>

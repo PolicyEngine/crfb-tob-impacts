@@ -8,7 +8,7 @@
 
 {{< include exhibits/results-overview.md >}}
 
-## Milestone years
+## Static revenue impacts in milestone years
 
 {{< include exhibits/full-h5-results-summary.md >}}
 

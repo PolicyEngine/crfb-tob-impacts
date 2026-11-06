@@ -3,7 +3,7 @@
 ## Estimand and unit of analysis
 
 We estimate each reform's annual effects on federal revenue and the trust funds
-from `2026` through `2100`. Let $i$ index households, $y$ index calendar years,
+from 2026 through 2100. Let $i$ index households, $y$ index calendar years,
 $w_{iy}$ denote the calibrated household weight for year $y$, and $P_0$ and
 $P_s$ denote current law and reform scenario $s$. We report the static revenue
 effect of scenario $s$ in year $y$ as
@@ -43,8 +43,7 @@ Participation, the CPS Outgoing Rotation Group, the Medical Expenditure Panel
 Survey, and the American Community Survey. It traces every imputed layer to its
 source [@peusdata]. We then apply PolicyEngine's federal income-tax,
 payroll-tax, Social Security benefit-taxation, and benefit-program rules to each
-record. On the calibrated baseline, federal income tax runs at about 8 to 10
-percent of GDP across the projection, in line with historical experience.
+record.
 
 The projection stores its weights on household records, so the projection and
 scoring code aggregates by household. Benefit taxation depends on each tax
@@ -59,9 +58,9 @@ cross-section, in four stages. Demographics enter through the household weights,
 and economics enter through the record values.
 
 **Stage A: grow incomes to the target year.** We uprate each income category
-from `2024` to year $y$. Through `2034`, we follow the long-term projections of
+from 2024 to year $y$. Through 2034, we follow the long-term projections of
 the Congressional Budget Office (CBO) in PolicyEngine's parameters. After
-`2034`, we cap any category whose cumulative growth would outrun the Trustees'
+2034, we cap any category whose cumulative growth would outrun the Trustees'
 nominal-GDP path at that path, so no income source grows faster than the
 projected economy. We index tax parameters as statute does, with the threshold
 treatment we describe below.
@@ -99,13 +98,13 @@ We follow two parts of the Trustees' treatment of tax parameters. First, we keep
 the Social Security benefit-tax combined-income thresholds fixed in nominal
 dollars, as the law sets them and as the Trustees' taxation-of-benefits method
 holds them. Second, we index income-tax parameters as current law does through
-`2034`. From `2035`, the Trustees assume that income-tax brackets rise with
+2034. From 2035, the Trustees assume that income-tax brackets rise with
 average wages rather than chained CPI-U, to avoid indefinite bracket compression
 relative to income levels [@ssa2026trustees]. The Trustees Report names
 income-tax brackets. In May 2026, the Office of the Chief Actuary (OACT) at the
 Social Security Administration (SSA) confirmed to PolicyEngine that the same
 long-range assumption applies to federal income-tax thresholds such as standard
-deductions.[^oact-threshold-email] From `2035`, we therefore index the core
+deductions.[^oact-threshold-email] From 2035, we therefore index the core
 federal income-tax thresholds to wages: ordinary income-tax brackets, standard
 deductions, the additional standard deduction for aged and blind filers,
 capital-gains thresholds, and alternative minimum tax (AMT) thresholds. We keep
@@ -113,18 +112,18 @@ other federal income-tax parameters, such as credit amounts and refundability
 limits, on current-law indexing unless a reform changes them directly.
 
 For reform parameters outside current law, we follow CRFB's specification on
-indexing. For example, we hold the `option11` credit's phase-out thresholds at
-`$150,000` for joint filers and `$75,000` for other filers. As a nonrefundable
+indexing. For example, we hold the $700 credit's phase-out thresholds at
+$150,000 for joint filers and $75,000 for other filers. As a nonrefundable
 credit, it reduces no revenue from tax units that owe no income tax before
 credits.
 
 | Assumption area | Trustees Report | OACT correspondence | Our implementation |
 |---|---|---|---|
 | Social Security benefit-tax combined-income thresholds | The Trustees' taxation-of-benefits method holds the statutory thresholds fixed in nominal dollars. | We stated this understanding to OACT, and OACT's reply does not contradict it. | We hold them fixed in nominal dollars, as current law does. |
-| Ordinary income-tax brackets | After the tenth projection year, brackets rise with average wages rather than chained CPI-U. | OACT confirmed brackets as part of the long-range assumption. | We index them to wages from `2035`. |
-| Standard deduction and related deduction thresholds | The public paragraph does not name them. | OACT confirmed that the long-range assumption covers federal income-tax thresholds, including standard deductions. | We index standard deduction amounts and the aged and blind additions to wages from `2035`. |
-| Capital-gains and AMT thresholds | The public paragraph does not name them. | We treat them as threshold-like federal income-tax parameters under OACT's clarification. | We index the capital-gains thresholds and the AMT brackets, exemptions, phase-out thresholds, and separate-filing thresholds to wages from `2035`. |
-| Credit amounts, refundability limits, and other non-threshold parameters | The taxation-of-benefits paragraph does not specify them. | OACT's reply does not address them. | We keep them on current-law indexing unless a reform changes them directly. |
+| Ordinary income-tax brackets | After the tenth projection year, brackets rise with average wages rather than chained CPI-U. | OACT confirmed brackets as part of the long-range assumption. | We index them to wages from 2035. |
+| Standard deduction and related deduction thresholds | The report's paragraph on this assumption does not name them. | OACT confirmed that the long-range assumption covers federal income-tax thresholds, including standard deductions. | We index standard deduction amounts and the aged and blind additions to wages from 2035. |
+| Capital-gains and AMT thresholds | The report's paragraph on this assumption does not name them. | We treat them as threshold-like federal income-tax parameters under OACT's clarification. | We index the capital-gains thresholds and the AMT brackets, exemptions, phase-out thresholds, and separate-filing thresholds to wages from 2035. |
+| Credit amounts, refundability limits, and other non-threshold parameters | The report's taxation-of-benefits paragraph does not specify them. | OACT's reply does not address them. | We keep them on current-law indexing unless a reform changes them directly. |
 
 [^oact-threshold-email]: Email from SSA Office of the Chief Actuary Actuarial
     Services to PolicyEngine, May 5, 2026, replying to "Clarification on
@@ -132,13 +131,10 @@ credits.
     long-range assumption applies to income-tax rate brackets and federal
     income-tax thresholds, with standard deductions as an example.
 
-The projection script calculates every calibration variable at the household
-level before it builds a year's dataset. Each year's H5 file holds that year's
-household weights and input variables. Before writing the H5, the script drops
-pseudo-input variables that aggregate calculated components, so later rescoring
-cannot pick up stale aggregates. It also writes a metadata file alongside each
-dataset with the base dataset, calibration profile, target source, calibration
-audit, and validation status.
+We store each projected year in an H5 file (HDF5, a common format for large
+datasets), which holds that year's household weights and input variables. The
+projection script writes a metadata file alongside it with the base dataset,
+calibration profile, target source, calibration audit, and validation status.
 
 ## Calibration targets
 
@@ -146,7 +142,7 @@ We calibrate household weights to five families of official demographic and
 fiscal targets.
 
 **Age distribution.** The household age-composition matrix has 86 columns:
-single-year ages `0` through `84` and a top-coded `85+` category. We take the
+single-year ages 0 through 84 and a top-coded 85+ category. We take the
 single-year age shape from SSA's 2024 population projections for the Social
 Security area [@ssa2024population]. We rescale it within three groups (under
 20, 20 to 64, and 65 and over) so that the group totals match Table V.A3 of the
@@ -172,38 +168,40 @@ share of baseline benefit-tax revenue.
 **HI taxation-of-benefits revenue.** We calibrate the household-level
 `tob_revenue_medicare_hi` variable to the HI taxation-of-benefits target in the
 expanded tables of the 2026 Medicare Trustees Report, which give annual values
-through `2100` [@medicare2026trustees]. This target sets the Medicare trust
+through 2100 [@medicare2026trustees]. This target sets the Medicare trust
 fund's share of baseline benefit-tax revenue.
 
 Every projected dataset hits all of its calibration targets. The projection
 script stops on any year whose final calibration misses a target by more than
-0.01 percent. The scoring worker stops when a baseline's H5 or metadata file
-differs from the hash in the run's baseline manifest, and every run behind the
-results file used that check.
+0.01 percent. A baseline manifest lists the SHA-256 hash, a fingerprint of the file's
+contents, of each baseline H5 and metadata file. The scoring code stops when a
+file differs from its listed hash, and every run behind the results file made
+that check.
 
-## Far-horizon support
+## Far-horizon contributors
 
 A projection that relied on reweighting alone would have to concentrate weight
-on a few contributors to match far-horizon taxation-of-benefits aggregates,
-forcing a choice between thin support and synthetic records. Because economic
+on a few households that owe tax on benefits (contributors) to match far-horizon
+taxation-of-benefits aggregates, forcing a choice between resting the estimates
+on a few records and adding synthetic ones. Because economic
 growth enters through record values rather than weights, the population of
-taxation-of-benefits contributors stays broad even in `2100`, and every record
+taxation-of-benefits contributors stays broad even in 2100, and every record
 in every projected dataset comes from a real survey household.
 
 We built the datasets under publication gates, and the projection script stops
 on any year that fails one. The gates bound the household weights in every year
-and, from `2075`, the contributors behind each policy target. For OASDI and HI
-taxation-of-benefits contributors, they require at least `1,000` positive
-contributors, an effective sample size of at least `50`, a top-10 contribution
-share of at most `50%`, a top-100 share of at most `95%`, and a largest
-single-contributor share of at most `15%`. Every projected dataset meets those
-limits, including the years before `2075`, and we report the figures in
+and, from 2075, the contributors behind each policy target. For OASDI and HI
+taxation-of-benefits contributors, they require at least 1,000 positive
+contributors, an effective sample size of at least 50, a top-10 contribution
+share of at most 50%, a top-100 share of at most 95%, and a largest
+single-contributor share of at most 15%. Every projected dataset meets those
+limits, including the years before 2075, and we report the figures in
 @sec-validation.
 
 We also track the Trustees' covered-worker and beneficiary counts as
 diagnostics, but we do not calibrate to them, or to GDP, average wages, or CPI.
 The model does not compute GDP, and these series enter only as projection
-inputs, including the growth ceiling after `2034`.
+inputs, including the growth ceiling after 2034.
 
 ## Calibration estimator
 
@@ -242,11 +240,12 @@ parameterization keeps every weight positive. When exact positive calibration ha
 no solution on the available survey records, the projection script stops with an
 error.
 
-## Policy simulation and trust-fund accounting
+## Policy simulation and trust-fund accounting {#sec-trust-fund-accounting}
 
 For each reform and year, the scoring code loads the calibrated year-$y$
 dataset, runs a baseline PolicyEngine simulation and a reform simulation on the
-same records, and stores both levels and differences. It writes these core
+same records, saves the reform simulation in its own H5 file, and stores both
+levels and differences. It writes these core
 output columns:
 
 | Output | Definition |
@@ -258,25 +257,27 @@ output columns:
 | `oasdi_net_impact` | Net OASDI trust-fund impact after reform-specific gains and losses. |
 | `hi_net_impact` | Net HI trust-fund impact after reform-specific gains and losses. |
 
-How we credit revenue to the trust funds depends on the reform. For direct
-changes to benefit taxation, we use the model's OASDI and HI
-taxation-of-benefits variables. Senior-deduction and credit changes can move
-federal income tax by more than they move the trust funds' revenue. For
-`option7`, which only eliminates the bonus senior deduction, total revenue
-equals the full federal income-tax impact, while OASDI, HI, and
-general-fund columns show the
-accounting split. A reform can therefore raise income-tax revenue while it
-weakens one trust fund, or replace benefit-tax revenue with employer-contribution
-revenue that splits differently between OASDI and HI.
+How we credit revenue to the trust funds depends on the reform and the split.
+For most reforms, the dashboard's default split divides revenue between OASDI
+and HI by each fund's share of baseline benefit-tax revenue, and the headline
+summary (@sec-headline) uses that split. The trust-fund decomposition in
+@sec-results instead uses the model's OASDI and HI taxation-of-benefits
+variables. Senior-deduction and credit changes can move federal income tax by
+more than they move the trust funds' revenue. For the senior-deduction repeal,
+total revenue equals the full federal income-tax impact, while OASDI, HI, and
+general-fund columns show the accounting split. A reform can therefore raise
+income-tax revenue while it weakens one trust fund, or replace benefit-tax
+revenue with employer-contribution revenue that splits differently between OASDI
+and HI.
 
 ### Trust-fund accounting for the Roth swaps {#sec-swap-accounting}
 
-For `option5` and `option12`, we credit each trust fund with the income tax on
+For the Roth swap and the phased Roth swap, we credit each trust fund with the income tax on
 its own employer contribution: the employer Social Security contribution funds
 OASDI, and the employer Medicare contribution funds HI. For each tax unit, we
 compute income tax with both employer contributions in income, compute it again
 with one fund's contribution removed, and credit the difference to that fund,
-with a floor of zero. For the `option6` sensitivity case before `2033`, we pool
+with a floor of zero. For the short phase-in Roth before 2033, we pool
 the two gains. We credit OASDI first, up to its 6.2 of the 7.65 percentage
 points of employer payroll tax, and HI with the rest. We then subtract the
 benefit-tax revenue each fund loses to get its net impact.
@@ -284,9 +285,10 @@ benefit-tax revenue each fund loses to get its net impact.
 We measure each gain as if its own contribution were the last income taxed, so
 the two gains need not add up to the income tax on both contributions together.
 The two funds' net impacts therefore need not sum to the change in federal
-income tax. In our panel the sums exceed that change in every year: over
-`2026`-`2035`, by $12.7 billion for `option5`, $36.2 billion for `option12`, and
-$24.5 billion for `option6`, and by $11.8 billion for each in `2100`. We report
+income tax. In our results the sums exceed that change in every year: over
+2026-2035, by $12.7 billion for the Roth swap, $36.2 billion for the phased Roth
+swap, and $24.5 billion for the short phase-in Roth, and by $11.8 billion for
+each in 2100. We report
 the sum of the two funds' net impacts on the dashboard and in the headline
 summary (@sec-headline), and the change in federal income tax in the revenue
 tables of @sec-results.
@@ -294,8 +296,8 @@ tables of @sec-results.
 ## Anchor years
 
 We run the full microsimulation for every reform in a set of anchor years and
-interpolate linearly between them. The anchors include `2026`, `2030`, and every
-fifth year from `2035` through `2100`, plus the years below where reform
+interpolate linearly between them. The anchors include 2026, 2030, and every
+fifth year from 2035 through 2100, plus the years below where reform
 schedules bend. Each row of the public results file records whether it comes
 from an anchor-year simulation (an exact anchor) or from interpolation, and we
 sum the complete annual series for the long-run and present-value totals.
@@ -303,52 +305,34 @@ sum the complete annual series for the long-run and present-value totals.
 Linear interpolation tracks a reform's annual impact where that impact changes
 smoothly, but it misses a sharp change between anchors. In the 2025
 reconciliation act, Congress created several temporary deductions that apply
-through `2028`, among them the bonus senior deduction and deductions for tips,
+through 2028, among them the bonus senior deduction and deductions for tips,
 overtime pay, and auto-loan interest. It also raised the cap on the
-state-and-local-tax deduction through `2029`. The impact of a reform that
+state-and-local-tax deduction through 2029. The impact of a reform that
 interacts with those provisions jumps within the budget window, and a straight
-line from `2026` to `2030` cannot follow the jump. For example, `option7`
-repeals only the bonus senior deduction, which expires after `2028` under
-current law, so the reform's impact falls to zero in `2029`. A straight line
-between the `2026` and `2030` anchors would understate its `2028` impact by
+line from 2026 to 2030 cannot follow the jump. For example, the senior-deduction repeal
+changes only the bonus senior deduction, which expires after 2028 under
+current law, so the reform's impact falls to zero in 2029. A straight line
+between the 2026 and 2030 anchors would understate its 2028 impact by
 $9.9 billion.
 
 We add exact anchors where the schedules bend. We scanned every model parameter
-that changes discretely between `2027` and `2034` and found no other federal
-discontinuity that matters for these reforms. Exact anchors in `2028` and
-`2029`, for every reform, bracket both changes. `option6` raises the taxable
-share of employer payroll tax each year until it reaches 100 percent in `2033`,
-so we add exact anchors in `2032` and `2033` at that corner. `option12` phases
-benefit taxation out in a straight line that ends in `2062`, between the `2060`
-and `2065` anchors, so we add an exact anchor in `2062`. Once its phase-out
-ends, `option12` reaches `option5`'s settings, so we also score `option5` in
-`2062`, and the two exact scores agree to the dollar. Straight lines between
-the `2060` and `2065` anchors would put them $19.5 billion apart. `option5` and
-`reverse_roth` take full effect at once and need no further anchors.
-
-### Version consistency
-
-The results file records the run that produced each exact anchor. For most
-reforms, a separate run produced the `2028` and `2029` anchors on the same package
-versions as the `2026` and `2030` anchors. All four anchor years use the populace
-`9f1260b` base (`populace-us-2024-9f1260b-20260611`), `policyengine-us` `1.700.2`
-under `policyengine.py` `4.5.1`, and baselines we built at commit `3de8abb6` of
-the
-[crfb-tob-impacts repository](https://github.com/PolicyEngine/crfb-tob-impacts).
-A difference in base, model version, or code would leave a break, or seam, where
-those anchors meet their neighbors. Two checks rule out a seam. First, the `2030`
-baseline we rebuilt alongside those runs has the same SHA-256 hash as the
-published one, so it reproduces the published `2030` federal income tax of
-`$3,231.9` billion. Second, reform cells rescored on the rebuilt baseline
-reproduce their published impacts to the dollar: in `2030`, full repeal,
-senior-deduction repeal, and 100 percent inclusion reproduce `-$159.4`, `$0.0`,
-and `$93.7` billion.
+that changes discretely between 2027 and 2034 and found no other federal
+discontinuity that matters for these reforms. Exact anchors in 2028 and
+2029, for every reform, bracket both changes. The short phase-in Roth raises the taxable
+share of employer payroll tax each year until it reaches 100 percent in 2033,
+so we add exact anchors in 2032 and 2033 at that corner. The phased Roth swap
+phases benefit taxation out in a straight line that ends in 2062, between the
+2060 and 2065 anchors, so we add an exact anchor in 2062. Once its phase-out
+ends, the phased Roth swap reaches the Roth swap's settings, so we also score the
+Roth swap in 2062, and the two exact scores agree to the dollar. Straight lines
+between the 2060 and 2065 anchors would put them $19.5 billion apart. The Roth
+swap and the reverse Roth take full effect at once and need no further anchors.
 
 ## Solvency-baseline scoring
 
 We also score four reforms against a Social Security solvency baseline: full
 repeal, 85 percent taxation, 100 percent taxation, and the phased Roth swap. In
-each scored year from `2035`, we bring the program into annual balance on that
+each scored year from 2035, we bring the program into annual balance on that
 year's calibrated dataset with a balanced "traditional fix" in two stages, then
 apply the reform:
 
@@ -361,51 +345,58 @@ apply the reform:
    runs a surplus.
 
 Before scoring any reform, the code checks that both trust-fund gaps close
-within tolerance and that the current-law leg reproduces the published
+within tolerance and that the current-law simulation reproduces the published
 current-law row for the same year. We then score each reform as a change from
 the solvent system, split its revenue by baseline trust-fund shares, and assign
-any residual to the general fund. For every row, the code asserts that the
-components sum to the total.
+any residual to the general fund. The components of every row sum to the total.
 
-We simulate the solvency baseline in `2035`, `2050`, `2065`, `2075`, and `2100`.
-In `2065`, the phased Roth swap's trust-fund split differs materially from what
-interpolation between `2050` and `2075` would give. Between anchors, we
+We simulate the solvency baseline in 2035, 2050, 2065, 2075, and 2100.
+In 2065, the phased Roth swap's OASDI and HI impacts run $32.7 billion and
+$41.1 billion below a straight line between 2050 and 2075. Between anchors, we
 interpolate the rows themselves linearly rather than the ratio of solvent to
 current-law results, which diverges where current-law totals cross zero, as the
-phased Roth swap's do. Before `2035`, the solvency fix leaves current law
+phased Roth swap's do. Before 2035, the solvency fix leaves current law
 unchanged, so we score those years against scheduled benefits and the series
-runs from `2026` to `2100`.
+runs from 2026 to 2100.
 
 ## Present-value convention {#sec-present-value}
 
-We discount each year's flow to the start of `2026` at each trust fund's
+We discount each year's flow to the start of 2026 at each trust fund's
 effective interest rates under the Trustees' intermediate assumptions. For OASDI
 flows, we use the annual effective yields that the compound effective trust-fund
 interest factors in Table VI.G1 of the 2026 OASDI Trustees Report imply
 [@ssa2026trustees]. SSA uses the reciprocals of those factors as discount
 factors for summarized rates and balances. For HI flows, we use the effective
-rates in Table IV.A4 of the 2026 Medicare Trustees Report through `2035`
+rates in Table IV.A4 of the 2026 Medicare Trustees Report through 2035
 [@medicare2026trustees]. As that table does, we then grade them linearly to the
-`4.7` percent ultimate nominal rate by `2040` and hold them constant after that.
+4.7 percent ultimate nominal rate by 2040 and hold them constant after that.
 We discount general-fund flows and economy-wide denominators (taxable payroll
 and GDP) with the OASDI series and sum the discounted components into the
 75-year total, so headline figures add up across trust funds. For ten-year
-totals, we sum nominal flows over `2026`-`2035`.
+totals, we sum nominal flows over 2026-2035.
 
 ## Supplemental labor-supply response scoring {#sec-labor-supply}
 
 We show static estimates on the dashboard and report labor-supply response rows
 in the public results file as a secondary estimand. We simulate them on the same
-projected datasets as the static rows, save each reform's full H5 file, and
-aggregate from those files. For each labor-supply run, we combine the reform's
-statutory parameters with our age-based elasticity schedule:
+projected datasets as the static rows, save each reform's H5 file, and aggregate
+from those files. We score labor-supply responses for thirteen of the fifteen
+reforms, all but full MAGI inclusion and the 2005 Tax Panel deduction, and for
+the short phase-in Roth. For each, we simulate 2026 and 2100, plus 2062 for the
+Roth swap and the phased Roth swap and 2033 for the short phase-in Roth. Between
+these anchors, we interpolate each metric's ratio of labor-supply to static
+results linearly and apply it to the static annual row. Where the static result
+changes sign within a segment, we interpolate the labor-supply values directly.
 
-- income elasticity base: `-0.05`
-- income elasticity multiplier above the model's older-worker threshold: `2.0`
-- primary-earner substitution elasticities by decile: `0.31`, `0.28`, `0.27`,
-  `0.27`, `0.25`, `0.25`, `0.22`, `0.22`, `0.22`, and `0.22`
-- secondary-earner substitution elasticity: `0.27`
-- substitution elasticity multiplier above the older-worker threshold: `2.0`
+For each labor-supply run, we combine the reform's statutory parameters with our
+age-based elasticity schedule:
+
+- income elasticity base: -0.05
+- income elasticity multiplier above the model's older-worker threshold: 2.0
+- primary-earner substitution elasticities by decile: 0.31, 0.28, 0.27,
+  0.27, 0.25, 0.25, 0.22, 0.22, 0.22, and 0.22
+- secondary-earner substitution elasticity: 0.27
+- substitution elasticity multiplier above the older-worker threshold: 2.0
 
 We double the older-worker elasticities because the studies we review below find
 that near-retirement and retirement-age workers respond more on the labor-supply
@@ -417,8 +408,8 @@ under that schedule, without macroeconomic feedback.
 We apply the age adjustment as one multiplier on both elasticities at age 65
 and over, rather than as a full age-by-decile schedule. Studies find higher
 responsiveness at older ages but offer no breakdown by age and income decile,
-and one multiplier stays easy to vary in sensitivity analysis. CBO's
-working-paper reviews anchor the values under 65: substitution (Frisch)
+and one multiplier stays easy to vary in sensitivity analysis. We base the values
+under 65 on CBO's working-paper reviews: substitution (Frisch)
 elasticities of 0.27--0.53 with a 0.40 central value [@reichlingwhalen2012] and
 income elasticities of $-0.02$ to $-0.05$ [@mcclellandmok2012]. @keane2011
 surveys the wider range.

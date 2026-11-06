@@ -38,8 +38,8 @@ The rescore ran in the certified worktree `~/PolicyEngine/crfb-cert`
 Patch artifact:
 [`patches/policyengine-core-3.26.1-delete-arrays.patch`](patches/policyengine-core-3.26.1-delete-arrays.patch),
 a copy of `crfb-cert/tmp/lsr_fix/core-3.26.1-delete-arrays-visibility-chain.patch`
-(with `simulation.py.orig` alongside the original). Disk-side changes from #521 were not
-needed: `memory_config` is `None` in these runs, so no `OnDiskStorage` is ever
+(with `simulation.py.orig` alongside the original). The fix did not need the disk-side changes from
+#521: `memory_config` is `None` in these runs, so no `OnDiskStorage` is ever
 constructed and the memory-side chain purge is the complete fix. The venv
 patch survives until the next `uv sync` in that worktree; re-apply the patch
 artifact if the environment is ever re-synced.
