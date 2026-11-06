@@ -2,21 +2,24 @@
 
 ## Internal validation
 
-### Far-horizon calibration
+### Calibration
 
-All six far-horizon anchor years (`2075`-`2100`) hit every calibration target on
-real populace records and pass the contributor support gates. Effective sample
-sizes among taxation-of-benefits contributors run `132`-`156` for OASDI and
-`107`-`127` for HI, against a floor of `50` that we apply in every projection
-year. In `2100`, they reach `153` for OASDI and `127` for HI, and the ten
-largest household weights hold `3.4%` of the total weight.
+All `21` anchor years hit every calibration target on real populace records and
+meet every publication gate, with no constraint off by more than `0.000001%`.
+Effective sample sizes among taxation-of-benefits contributors never fall below
+`132` for OASDI and `86` for HI, against a floor of `50`. In the six far-horizon
+anchor years (`2075`-`2100`), they run `132`-`156` for OASDI and `107`-`127` for
+HI. In `2100`, they reach `153` for OASDI and `127` for HI, and the ten largest
+household weights hold `3.4%` of the total weight.
 
 ### Reform scoring
 
-In every anchor year, full repeal reduces federal income tax by the full baseline
-revenue from taxing benefits, and taxing all benefits raises revenue in every
-year. The exact `2062` anchors for `option5` and `option12`, which we score
-separately, agree to the dollar in both the static and the labor-supply panels.
+The metadata files of all `323` exact rows record the baseline manifest check,
+and their reform H5 hashes match the results file. In every anchor year, full
+repeal reduces federal income tax by the full baseline revenue from taxing
+benefits, and taxing all benefits raises revenue in every year. The exact `2062`
+anchors for `option5` and `option12`, which we score separately, agree to the
+dollar in both the static and the labor-supply panels.
 
 ### Budget-window anchors
 

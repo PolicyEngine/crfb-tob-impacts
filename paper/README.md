@@ -49,12 +49,15 @@ the paper, builds the dashboard, and copies the rendered paper to
 `tests/test_paper_text.py` checks that the committed fragments match both
 generators, that the paper's reform count matches the dashboard menu, that the
 figures written into the prose match `results.csv` and the projected datasets'
-metadata, and that the manuscript carries no drafting notes.
+metadata, that `docs/current/run-provenance.json` covers every exact row, and
+that the manuscript carries no drafting notes.
 
 ## Updating results
 
 1. Publish the new panel to `dashboard/public/data/results.csv`.
 2. Run both generators.
-3. Run `tests/test_paper_text.py`, `tests/test_headline_summary.py`, and
+3. Run `scripts/build_run_provenance.py --metadata-dir DIR`, which reads each
+   exact row's metadata from `DIR` or fetches it from R2.
+4. Run `tests/test_paper_text.py`, `tests/test_headline_summary.py`, and
    `tests/test_release_artifacts.py`, and update any prose figure a test flags.
-4. Render the paper and read every changed section.
+5. Render the paper and read every changed section.

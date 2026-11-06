@@ -4,7 +4,19 @@ The paper's generated exhibits must match what the generators produce from the
 committed results panel; the reform count the paper and dashboard state must
 match the reforms the dashboard menu offers; included fragments must nest under
 the heading that includes them; the manuscript must carry no drafting notes;
-and every figure written by hand into the prose must match the results panel.
+every figure written by hand into the prose must match the results panel; and
+each claim about how a run or baseline was produced must match the record that
+scripts/build_run_provenance.py writes from the runs' own metadata files.
+
+Invariants over the published panel and the run record:
+
+- Every exact row belongs to one run, and the record's digest of each run's rows
+  matches the results file.
+- Every run shares the package versions the paper states and checked its
+  baseline against a manifest on every row.
+- Every baseline H5 appears in a committed manifest, calibrates exactly, and
+  clears every publication gate in every year.
+- Every interpolated row's anchors are the nearest exact years on either side.
 """
 
 from __future__ import annotations
@@ -12,11 +24,13 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
 
 from scripts import build_headline_summary as headline
+from scripts import build_run_provenance as provenance
 from scripts import generate_paper_static_exhibits as exhibits
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -31,10 +45,47 @@ DASHBOARD_METHODOLOGY = (
 EXHIBIT_DIRS = (PAPER / "exhibits", SECTIONS / "exhibits")
 DATASET_METADATA = REPO_ROOT / "projected_datasets_v2pop"
 ECONOMIC_PROJECTIONS = REPO_ROOT / "data" / "ssa_economic_projections.csv"
+MANIFESTS = REPO_ROOT / "docs" / "current" / "manifests"
 FAR_HORIZON_YEARS = range(2075, 2101, 5)
 SUPPORT_FLOOR = 50
 INCLUDE = re.compile(r"\{\{< include (\S+) >\}\}")
 HEADING = re.compile(r"^(#{1,6}) \S")
+REPO_FILE_LINK = re.compile(r"crfb-tob-impacts/blob/main/([^)\s]+)\)")
+
+# The limits at the commits that built the published baselines (3de8abb6 and
+# c5e4f1a6). They differ from src/projection.py at head; see
+# docs/current/late-year-support-gates.md.
+WEIGHT_GATES = {
+    "positive_weight_count": ("min", 1_000),
+    "effective_sample_size": ("min", 300.0),
+    "top_10_weight_share_pct": ("max", 15.0),
+    "top_100_weight_share_pct": ("max", 45.0),
+}
+TOB_CONTRIBUTOR_GATES = {
+    "positive_contributor_count": ("min", 1_000),
+    "contributor_effective_sample_size": ("min", 50.0),
+    "top_10_contribution_share_pct": ("max", 50.0),
+    "top_100_contribution_share_pct": ("max", 95.0),
+    "max_contribution_share_pct": ("max", 15.0),
+}
+CONTRIBUTOR_GATES = {
+    "ss_total": {
+        "positive_contributor_count": ("min", 1_000),
+        "contributor_effective_sample_size": ("min", 25.0),
+        "top_10_contribution_share_pct": ("max", 60.0),
+        "top_100_contribution_share_pct": ("max", 95.0),
+        "max_contribution_share_pct": ("max", 15.0),
+    },
+    "payroll_total": {
+        "positive_contributor_count": ("min", 1_000),
+        "contributor_effective_sample_size": ("min", 200.0),
+        "top_10_contribution_share_pct": ("max", 20.0),
+        "top_100_contribution_share_pct": ("max", 50.0),
+        "max_contribution_share_pct": ("max", 5.0),
+    },
+    "oasdi_tob": TOB_CONTRIBUTOR_GATES,
+    "hi_tob": TOB_CONTRIBUTOR_GATES,
+}
 
 # Phrases that mark draft apparatus, revision history, or internal process
 # rather than finished text a reader can use.
@@ -64,6 +115,17 @@ DRAFTING_PHRASES = (
     "todo",
     "updated manuscript",
     "wired to",
+)
+
+# Terms from claims the code does not support: the v1 calibration profile's name,
+# a calibration fallback no code path has, and run machinery only some runs used.
+UNSUPPORTED_CLAIM_PHRASES = (
+    "iterative proportional",
+    "modal",
+    "reproducibility bundle",
+    "runtime",
+    "smoke-test",
+    "ss-payroll-tob",
 )
 
 
@@ -185,6 +247,25 @@ def test_paper_carries_no_drafting_notes() -> None:
             assert not re.search(rf"\b{re.escape(phrase)}\b", lowered), (
                 f"{name} contains drafting phrase {phrase!r}"
             )
+
+
+def test_paper_drops_claims_the_code_does_not_support() -> None:
+    for name, text in paper_texts().items():
+        lowered = flat(text).lower()
+        for phrase in UNSUPPORTED_CLAIM_PHRASES:
+            assert not re.search(rf"\b{re.escape(phrase)}\b", lowered), (
+                f"{name} contains {phrase!r}"
+            )
+
+
+def test_dashboard_methodology_shows_no_internal_tracking() -> None:
+    section, diagram = (
+        path.read_text(encoding="utf-8") for path in DASHBOARD_METHODOLOGY
+    )
+    for term in ("Internal", "LiveModelingProgress", "ReproducibilityRoadmap"):
+        assert term not in section, term
+    assert "Modal" not in diagram
+    assert "Options 5-6" not in section
 
 
 def test_included_fragment_headings_nest_under_the_including_heading() -> None:
@@ -361,3 +442,384 @@ def test_far_horizon_support_figures_match_dataset_metadata() -> None:
     assert f"floor of `{SUPPORT_FLOOR}`" in validation
     top_10 = audits[2100]["calibration_audit"]["top_10_weight_share_pct"]
     assert f"`{top_10:.1f}%` of the total weight" in validation
+
+
+def run_record() -> dict:
+    return json.loads(provenance.OUTPUT.read_text(encoding="utf-8"))
+
+
+def results_contract() -> dict:
+    return json.loads(provenance.RESULTS_CONTRACT.read_text(encoding="utf-8"))
+
+
+def manifests() -> dict[str, dict]:
+    return {
+        path.name: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(MANIFESTS.glob("*.json"))
+    }
+
+
+def manifest_hash(manifest: dict, year: int) -> str:
+    records = [item for item in manifest["datasets"] if item["year"] == year]
+    assert len(records) == 1, year
+    return records[0]["h5_sha256"]
+
+
+def gate_failures(metrics: dict, gates: dict) -> list[str]:
+    failures = []
+    for metric, (direction, bound) in gates.items():
+        value = metrics[metric]
+        if (direction == "min" and value < bound) or (
+            direction == "max" and value > bound
+        ):
+            failures.append(f"{metric}={value} against {direction} {bound}")
+    return failures
+
+
+def test_run_record_covers_every_exact_row() -> None:
+    record = run_record()
+    results = pd.read_csv(exhibits.RESULTS_CSV)
+    summary = provenance.results_summary(results)
+
+    assert record["schema"] == provenance.SCHEMA
+    assert {run["run_prefix"] for run in record["runs"]} == set(summary)
+    for run in record["runs"]:
+        for field, value in summary[run["run_prefix"]].items():
+            assert run[field] == value, (run["run_prefix"], field)
+    assert record["exact_rows"] == len(provenance.exact_rows(results))
+    assert record["exact_rows"] == sum(run["exact_rows"] for run in record["runs"])
+
+
+def test_every_run_used_the_stated_versions_and_checked_its_baseline() -> None:
+    for run in run_record()["runs"]:
+        packages = run["packages"]
+        assert packages["policyengine-us"] == "1.700.2", run["run_prefix"]
+        assert packages["policyengine"] == "4.5.1", run["run_prefix"]
+        assert packages["policyengine-core"] == "3.26.1", run["run_prefix"]
+        assert run["baseline_manifest_checked_rows"] == run["exact_rows"]
+        assert run["worker_entrypoint"].endswith("run_reform_full_h5_cell")
+        assert run["tax_assumption"] == "trustees-2025-core-thresholds-v1"
+
+
+def test_data_and_code_section_matches_the_run_record() -> None:
+    text = (SECTIONS / "06-data-and-code.qmd").read_text(encoding="utf-8")
+    section = flat(text)
+    record = run_record()
+    runs = record["runs"]
+    labor_supply = [run for run in runs if run["scoring_type"] == "behavioral"]
+
+    assert f"Each of the `{record['exact_rows']}` exact rows" in section
+    assert len(runs) == 10 and "in ten runs" in section
+    assert len(labor_supply) == 2 and "The two labor-supply runs" in section
+    assert "`policyengine-us` `1.700.2`" in section
+    assert "`policyengine.py` `4.5.1`" in section
+    assert "`policyengine-core` `3.26.1`" in section
+
+    linked = REPO_FILE_LINK.findall(text)
+    assert {
+        "docs/current/run-provenance.json",
+        "docs/current/patches/policyengine-core-3.26.1-delete-arrays.patch",
+    } <= set(linked)
+    for path in linked:
+        assert (REPO_ROOT / path).is_file(), path
+    patch = (
+        REPO_ROOT / "docs/current/patches/policyengine-core-3.26.1-delete-arrays.patch"
+    ).read_text(encoding="utf-8")
+    assert "policyengine_core/simulations/simulation.py" in patch
+    assert "holder.delete_arrays(period, _branch_name)" in patch
+
+
+def test_every_baseline_calibrates_exactly_and_clears_every_gate() -> None:
+    baselines = run_record()["baselines"]
+    years = {item["year"] for item in baselines}
+    assert len(years) == 21
+
+    for item in baselines:
+        label = (item["year"], item["h5_sha256"][:8])
+        assert item["calibration_quality"] == "exact", label
+        assert item["validation_passed"] is True, label
+        assert item["gates_passed"] is True, label
+        assert item["donor_clone_households"] == 0, label
+        assert not gate_failures(item, WEIGHT_GATES), label
+        for name, gates in CONTRIBUTOR_GATES.items():
+            assert not gate_failures(item["contributors"][name], gates), (label, name)
+
+    largest_error_pct = 100 * max(
+        item["max_constraint_error_fraction"] for item in baselines
+    )
+    assert largest_error_pct <= 0.000001
+
+    validation = flat((SECTIONS / "05-validation.qmd").read_text(encoding="utf-8"))
+    assert f"All `{len(years)}` anchor years" in validation
+    assert "by more than `0.000001%`" in validation
+
+    def lowest(name: str) -> int:
+        return round(
+            min(
+                item["contributors"][name]["contributor_effective_sample_size"]
+                for item in baselines
+            )
+        )
+
+    assert (
+        f"never fall below `{lowest('oasdi_tob')}` for OASDI "
+        f"and `{lowest('hi_tob')}` for HI"
+    ) in validation
+
+
+def test_methods_state_the_gates_that_built_the_baselines() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    limits = {metric: bound for metric, (_, bound) in TOB_CONTRIBUTOR_GATES.items()}
+
+    for phrase in (
+        f"at least `{limits['positive_contributor_count']:,}` positive contributors",
+        "effective sample size of at least "
+        f"`{limits['contributor_effective_sample_size']:.0f}`",
+        f"top-10 contribution share of at most "
+        f"`{limits['top_10_contribution_share_pct']:.0f}%`",
+        f"top-100 share of at most `{limits['top_100_contribution_share_pct']:.0f}%`",
+        "largest single-contributor share of at most "
+        f"`{limits['max_contribution_share_pct']:.0f}%`",
+        "from `2075`",
+    ):
+        assert phrase in methods, phrase
+
+
+def test_reform_scoring_claims_count_the_exact_rows() -> None:
+    validation = flat((SECTIONS / "05-validation.qmd").read_text(encoding="utf-8"))
+    assert f"all `{run_record()['exact_rows']}` exact rows" in validation
+
+
+def test_results_contract_traces_every_row() -> None:
+    contract = results_contract()["results"]
+    results = pd.read_csv(exhibits.RESULTS_CSV)
+    assert len(contract) == len(results)
+
+    published = {
+        (row.reform_name, row.scoring_type, int(row.year)): row
+        for row in provenance.exact_rows(results).itertuples()
+    }
+    baselines = {item["h5_sha256"]: item["year"] for item in run_record()["baselines"]}
+    exact_years: dict[tuple[str, str], list[int]] = {}
+    for reform, scoring_type, year in published:
+        exact_years.setdefault((reform, scoring_type), []).append(year)
+
+    exact_seen = 0
+    for item in contract:
+        lineage = item["lineage"]
+        key = (item["reform"], item["scoring_type"], int(item["year"]))
+        if item["result_type"] in provenance.EXACT_RESULT_TYPES:
+            exact_seen += 1
+            row = published[key]
+            assert lineage["scenario_h5_sha256"] == row.output_h5_sha256, key
+            assert lineage["run_prefix"] == row.run_prefix, key
+            assert baselines[lineage["baseline_year_h5_sha256"]] == key[2], key
+            assert lineage["interpolated_between"] is None, key
+        else:
+            low, high = lineage["interpolated_between"]
+            years = exact_years[key[:2]]
+            assert low == max(year for year in years if year < key[2]), key
+            assert high == min(year for year in years if year > key[2]), key
+    assert exact_seen == len(published)
+
+
+def test_every_baseline_appears_in_a_committed_manifest() -> None:
+    committed = {
+        (item["year"], item["h5_sha256"])
+        for manifest in manifests().values()
+        for item in manifest["datasets"]
+    }
+    for item in run_record()["baselines"]:
+        assert (item["year"], item["h5_sha256"]) in committed, item["year"]
+
+
+def test_seam_checks_match_the_manifests() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    published = manifests()["baseline-dataset-manifest-v2pop.json"]
+    infill = manifests()["baseline-dataset-manifest-9f1260b-certinfill.json"]
+
+    assert "commit `3de8abb6`" in methods
+    assert "has the same SHA-256 hash as the published one" in methods
+    for manifest in (published, infill):
+        assert manifest["source_sha"].startswith("3de8abb6")
+    assert manifest_hash(infill, 2030) == manifest_hash(published, 2030)
+
+    baseline_hashes = {
+        item["year"]: item["h5_sha256"]
+        for item in run_record()["baselines"]
+        if item["year"] in (2026, 2028, 2029, 2030)
+    }
+    assert baseline_hashes[2026] == manifest_hash(published, 2026)
+    assert baseline_hashes[2030] == manifest_hash(published, 2030)
+    assert baseline_hashes[2028] == manifest_hash(infill, 2028)
+    assert baseline_hashes[2029] == manifest_hash(infill, 2029)
+
+
+def provenance_fixture() -> tuple[SimpleNamespace, dict, dict]:
+    """One exact row with the metadata and contract entry that agree with it."""
+    row = SimpleNamespace(
+        run_prefix="run",
+        year=2030,
+        reform_name="option1",
+        scoring_type="static",
+        output_h5_sha256="reform-hash",
+    )
+    audit = {
+        "calibration_audit": {
+            "calibration_quality": "exact",
+            "validation_passed": True,
+            "max_constraint_pct_error": 1e-9,
+            "positive_weight_count": 5_000,
+            "effective_sample_size": 1_500.0,
+            "top_10_weight_share_pct": 3.0,
+            "top_100_weight_share_pct": 16.0,
+            "contributors": {},
+        },
+        "sentinel": {"gates_passed": True, "donor_clone_household_count": 0},
+    }
+    metadata = {
+        "run_prefix": "run",
+        "year": 2030,
+        "reform_id": "option1",
+        "scoring_type": "static",
+        "output_h5_sha256": "reform-hash",
+        "dataset_h5_sha256": "baseline-hash",
+        "full_reform_output_h5_saved": True,
+        "manual_weight_aggregation_used": False,
+        "baseline_dataset_validation": {
+            "validated": True,
+            "dataset_sha256": "baseline-hash",
+            "metadata_validation": {"metadata": audit},
+        },
+    }
+    contract_row = {
+        "lineage": {
+            "scenario_h5_sha256": "reform-hash",
+            "baseline_year_h5_sha256": "baseline-hash",
+        }
+    }
+    return row, metadata, contract_row
+
+
+def test_row_check_passes_when_the_records_agree() -> None:
+    assert provenance.row_disagreements(*provenance_fixture()) == []
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "named"),
+    [
+        ("run_prefix", "other", ["run prefix"]),
+        ("year", 2031, ["year"]),
+        ("reform_id", "option2", ["reform"]),
+        ("scoring_type", "behavioral", ["scoring type"]),
+        (
+            "output_h5_sha256",
+            "other",
+            ["reform H5 hash in results", "reform H5 hash in contract"],
+        ),
+        (
+            "dataset_h5_sha256",
+            "other",
+            ["baseline H5 hash in contract", "baseline manifest check"],
+        ),
+        ("full_reform_output_h5_saved", False, ["saved reform H5"]),
+        ("manual_weight_aggregation_used", True, ["weighted aggregation"]),
+    ],
+)
+def test_row_check_names_each_disagreement(
+    field: str, value: object, named: list[str]
+) -> None:
+    row, metadata, contract_row = provenance_fixture()
+    metadata[field] = value
+    assert provenance.row_disagreements(row, metadata, contract_row) == named
+
+
+def test_row_check_catches_a_failed_manifest_check() -> None:
+    row, metadata, contract_row = provenance_fixture()
+    metadata["baseline_dataset_validation"]["validated"] = False
+    assert provenance.row_disagreements(row, metadata, contract_row) == [
+        "baseline manifest check"
+    ]
+
+
+def test_run_summary_refuses_two_values_for_one_run() -> None:
+    assert provenance.one_value(["1.700.2", "1.700.2"], "version", "run") == "1.700.2"
+    with pytest.raises(ValueError, match="expected one version"):
+        provenance.one_value(["1.700.2", "1.701.0"], "version", "run")
+
+
+def test_baseline_figures_allow_only_last_digit_noise() -> None:
+    figures = {"gates_passed": True, "ess": 135.29197715148172, "nested": {"top": 2.5}}
+    noisy = {"gates_passed": True, "ess": 135.2919771514817, "nested": {"top": 2.5}}
+    assert provenance.figures_agree(figures, noisy)
+    assert not provenance.figures_agree(figures, {**figures, "gates_passed": False})
+    assert not provenance.figures_agree(figures, {**figures, "ess": 135.4})
+    assert not provenance.figures_agree(figures, {**figures, "nested": {"top": 2.6}})
+    assert not provenance.figures_agree(figures, {"gates_passed": True})
+
+
+def complete_fixture() -> tuple[pd.DataFrame, dict, dict]:
+    """A one-row results file, contract, and metadata file that `build` accepts."""
+    row, metadata, contract_row = provenance_fixture()
+    results = pd.DataFrame(
+        [
+            {
+                "run_prefix": row.run_prefix,
+                "year": row.year,
+                "reform_name": row.reform_name,
+                "scoring_type": row.scoring_type,
+                "output_h5_sha256": row.output_h5_sha256,
+                "full_h5_result_type": "exact_full_h5",
+            }
+        ]
+    )
+    contract_row["lineage"]["run_prefix"] = row.run_prefix
+    contract = {
+        "results": [
+            {
+                "year": row.year,
+                "reform": row.reform_name,
+                "scoring_type": row.scoring_type,
+                "result_type": "exact_full_h5",
+                **contract_row,
+            }
+        ]
+    }
+    metadata.update(
+        created_at="2026-07-23T00:00:00Z",
+        worker_entrypoint="src.reform_full_h5_worker.run_reform_full_h5_cell",
+        tax_assumption={"name": "trustees-2025-core-thresholds-v1"},
+        expected_schema_validation=None,
+        runtime_provenance={
+            "submitter_runtime_fingerprint": None,
+            "python": {"version": "3.13.9 (main)"},
+            "packages": {"policyengine-us": "1.700.2"},
+            "pip_freeze": {"available": False},
+        },
+    )
+    return results, contract, metadata
+
+
+def test_build_writes_one_run_and_one_baseline() -> None:
+    results, contract, metadata = complete_fixture()
+    record = provenance.build(results, contract, lambda row: metadata)
+
+    assert record["exact_rows"] == 1
+    assert [run["run_prefix"] for run in record["runs"]] == ["run"]
+    run = record["runs"][0]
+    assert run["environment"] == "local"
+    assert run["python"] == "3.13.9"
+    assert run["baseline_manifest_checked_rows"] == 1
+    assert run["expected_schema_checked_rows"] == 0
+    assert [item["h5_sha256"] for item in record["baselines"]] == ["baseline-hash"]
+
+
+def test_build_stops_on_a_metadata_disagreement() -> None:
+    results, contract, metadata = complete_fixture()
+    metadata["output_h5_sha256"] = "other"
+    with pytest.raises(ValueError, match="reform H5 hash in results"):
+        provenance.build(results, contract, lambda row: metadata)
+
+
+def test_committed_run_record_carries_no_local_paths() -> None:
+    assert "/Users/" not in provenance.OUTPUT.read_text(encoding="utf-8")

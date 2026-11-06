@@ -95,8 +95,8 @@ export function MethodologyDiagram() {
           How each projection year is built
         </text>
         <text x="380" y="44" textAnchor="middle" fontSize="10.5" fill={palette.subtext}>
-          Demographics enter through weights; economics enter through values. Every year from 2026
-          to 2100 is calibrated independently.
+          Demographics enter through weights; economics enter through values. We calibrate each
+          projection year independently.
         </text>
 
         {/* Inputs row */}
@@ -230,9 +230,9 @@ export function MethodologyDiagram() {
           y={520}
           w={340}
           h={56}
-          title="Calibrated year datasets, 2026–2100"
-          caption="We run 15 reforms and a sensitivity case on each dataset"
-          caption2="on Modal, with audit artifacts behind every number"
+          title="Calibrated anchor-year datasets, 2026–2100"
+          caption="We score 15 reforms and a sensitivity case at the anchor"
+          caption2="years and interpolate between them"
           accent
         />
 
@@ -241,7 +241,7 @@ export function MethodologyDiagram() {
           Failing any gate blocks publication
         </text>
         <text x={615} y={473} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-          for that year; diagnostics for every
+          for that year; diagnostics for major
         </text>
         <text x={615} y={486} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
           series appear in the baseline section.

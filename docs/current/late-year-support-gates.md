@@ -48,3 +48,12 @@ The max-share gate is intentionally less restrictive than the top-10 and
 top-100 checks: it catches single-record domination without rejecting exact
 late-year artifacts where a broad contributor pool is stable but the largest
 taxable-benefits contributor is still just over `10%`.
+
+## Published baselines
+
+The commits that built the published baselines (`3de8abb6` and `c5e4f1a6`, which
+each manifest's `source_sha` names) applied the limits above, with contributor
+gates from `2075`. `src/projection.py` at head applies contributor gates in every
+year, with a floor of `35` on the two taxation-of-benefits effective sample sizes.
+All 21 published anchor years clear the limits above in every year, and
+`tests/test_paper_text.py` checks that against `run-provenance.json`.

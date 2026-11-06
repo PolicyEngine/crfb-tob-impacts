@@ -1,0 +1,1368 @@
+{
+  "schema": "crfb_run_provenance/v1",
+  "exact_rows": 323,
+  "runs": [
+    {
+      "run_prefix": "v2pop_tr2026_20260611",
+      "scoring_type": "static",
+      "exact_rows": 139,
+      "reforms": [
+        "option1",
+        "option10",
+        "option11",
+        "option12",
+        "option2",
+        "option3",
+        "option4",
+        "option5",
+        "option6",
+        "option7",
+        "option8",
+        "option9",
+        "reverse_roth",
+        "tax93"
+      ],
+      "years": [
+        2026,
+        2030,
+        2035,
+        2040,
+        2045,
+        2050,
+        2055,
+        2060,
+        2065,
+        2070
+      ],
+      "exact_rows_sha256": "0bc99df0353d72c9c7fa217c63952ab57147c19fb4278ba0be30c1715b89af67",
+      "created": [
+        "2026-06-12"
+      ],
+      "environment": "modal",
+      "python": "3.11.12",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 139,
+      "expected_schema_checked_rows": 139,
+      "pip_freeze_recorded_rows": 139
+    },
+    {
+      "run_prefix": "v2pop_tr2026_noclone_20260612",
+      "scoring_type": "static",
+      "exact_rows": 84,
+      "reforms": [
+        "option1",
+        "option10",
+        "option11",
+        "option12",
+        "option2",
+        "option3",
+        "option4",
+        "option5",
+        "option6",
+        "option7",
+        "option8",
+        "option9",
+        "reverse_roth",
+        "tax93"
+      ],
+      "years": [
+        2075,
+        2080,
+        2085,
+        2090,
+        2095,
+        2100
+      ],
+      "exact_rows_sha256": "6c8023e1e37b4e7a689d8b5fdd8a99c5d5dacf8d2381124b36de5beb87e939de",
+      "created": [
+        "2026-06-13"
+      ],
+      "environment": "modal",
+      "python": "3.11.12",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 84,
+      "expected_schema_checked_rows": 84,
+      "pip_freeze_recorded_rows": 84
+    },
+    {
+      "run_prefix": "certinfill_9f1260b_20260625",
+      "scoring_type": "static",
+      "exact_rows": 27,
+      "reforms": [
+        "option1",
+        "option10",
+        "option11",
+        "option12",
+        "option2",
+        "option3",
+        "option4",
+        "option5",
+        "option6",
+        "option7",
+        "option8",
+        "option9",
+        "reverse_roth",
+        "tax93"
+      ],
+      "years": [
+        2028,
+        2029
+      ],
+      "exact_rows_sha256": "42441d301228456d4745d78c79c5dfb4e01564257aeb040b4a7f1702b05a5d34",
+      "created": [
+        "2026-06-25"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 27,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "magi100_certrepro_20260706",
+      "scoring_type": "static",
+      "exact_rows": 12,
+      "reforms": [
+        "magi100"
+      ],
+      "years": [
+        2026,
+        2028,
+        2029,
+        2030,
+        2035,
+        2040,
+        2045,
+        2050,
+        2055,
+        2060,
+        2065,
+        2070
+      ],
+      "exact_rows_sha256": "b5ff09b8eda47dcb213bed9c0098b00f35e22f9fe840c903e40f78873e7ab41c",
+      "created": [
+        "2026-07-06"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 12,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "tax_panel_2005_certrepro_20260717",
+      "scoring_type": "static",
+      "exact_rows": 12,
+      "reforms": [
+        "tax_panel_2005"
+      ],
+      "years": [
+        2026,
+        2028,
+        2029,
+        2030,
+        2035,
+        2040,
+        2045,
+        2050,
+        2055,
+        2060,
+        2065,
+        2070
+      ],
+      "exact_rows_sha256": "7052b2bbddaa71e581f578d315ea2b89c9a8cce50abddf60eb1c398fd49e9f4c",
+      "created": [
+        "2026-07-17"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 12,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "lsrfix_behavioral_20260719",
+      "scoring_type": "behavioral",
+      "exact_rows": 28,
+      "reforms": [
+        "option1",
+        "option10",
+        "option11",
+        "option12",
+        "option2",
+        "option3",
+        "option4",
+        "option5",
+        "option6",
+        "option7",
+        "option8",
+        "option9",
+        "reverse_roth",
+        "tax93"
+      ],
+      "years": [
+        2026,
+        2100
+      ],
+      "exact_rows_sha256": "3f6c53e24da35b30daa3d8aee78b0e0376a9263c9519a20a20ecc56cd8678a6c",
+      "created": [
+        "2026-07-19",
+        "2026-07-20"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 28,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "noclone_farfix_20260722",
+      "scoring_type": "static",
+      "exact_rows": 12,
+      "reforms": [
+        "magi100",
+        "tax_panel_2005"
+      ],
+      "years": [
+        2075,
+        2080,
+        2085,
+        2090,
+        2095,
+        2100
+      ],
+      "exact_rows_sha256": "83ada75e0c8b099abc3b9d4b5426922a2c3f30cd0f16a5bb58c9a3d78ca82579",
+      "created": [
+        "2026-07-22"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 12,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "anchor2062_20260723",
+      "scoring_type": "static",
+      "exact_rows": 2,
+      "reforms": [
+        "option12",
+        "option5"
+      ],
+      "years": [
+        2062
+      ],
+      "exact_rows_sha256": "d7c1a469e47db37df62ba8b88c61c5249542488b1242ba40f8f65be879a14d99",
+      "created": [
+        "2026-07-23"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 2,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "anchor_behavioral_20260723",
+      "scoring_type": "behavioral",
+      "exact_rows": 3,
+      "reforms": [
+        "option12",
+        "option5",
+        "option6"
+      ],
+      "years": [
+        2033,
+        2062
+      ],
+      "exact_rows_sha256": "3b97475db3a8ee2b46f3d512bda10c4579a06b43651fe50a229b707c245dd0bb",
+      "created": [
+        "2026-07-23"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 3,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    },
+    {
+      "run_prefix": "option6_bracketfix_20260723",
+      "scoring_type": "static",
+      "exact_rows": 4,
+      "reforms": [
+        "option6"
+      ],
+      "years": [
+        2029,
+        2030,
+        2032,
+        2033
+      ],
+      "exact_rows_sha256": "23225b45282f0618cc1c9f2f984b4cac8572314d9a17985f184388cbfc3f21f8",
+      "created": [
+        "2026-07-23"
+      ],
+      "environment": "local",
+      "python": "3.13.9",
+      "packages": {
+        "policyengine": "4.5.1",
+        "policyengine-core": "3.26.1",
+        "policyengine-us": "1.700.2",
+        "numpy": "2.1.3",
+        "pandas": "2.3.2",
+        "h5py": "3.14.0",
+        "tables": "3.11.1"
+      },
+      "worker_entrypoint": "src.reform_full_h5_worker.run_reform_full_h5_cell",
+      "tax_assumption": "trustees-2025-core-thresholds-v1",
+      "baseline_manifest_checked_rows": 4,
+      "expected_schema_checked_rows": 0,
+      "pip_freeze_recorded_rows": 0
+    }
+  ],
+  "baselines": [
+    {
+      "year": 2026,
+      "h5_sha256": "cec09e5f96e7af39df48c2eeb97b0bf179551867b985fd7a36c82db596193785",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 6.2426e-14,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1772.89,
+      "top_10_weight_share_pct": 1.85634,
+      "top_100_weight_share_pct": 13.2028,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 95.1448,
+          "max_contribution_share_pct": 5.13921,
+          "positive_contributor_count": 12109,
+          "top_100_contribution_share_pct": 71.0861,
+          "top_10_contribution_share_pct": 23.3677
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 147.372,
+          "max_contribution_share_pct": 3.02471,
+          "positive_contributor_count": 13490,
+          "top_100_contribution_share_pct": 65.477,
+          "top_10_contribution_share_pct": 17.1591
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 936.564,
+          "max_contribution_share_pct": 0.518545,
+          "positive_contributor_count": 60654,
+          "top_100_contribution_share_pct": 23.6258,
+          "top_10_contribution_share_pct": 4.30129
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 396.227,
+          "max_contribution_share_pct": 1.78957,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 36.9163,
+          "top_10_contribution_share_pct": 8.83943
+        }
+      }
+    },
+    {
+      "year": 2028,
+      "h5_sha256": "d38966cf8d649c5c9f1cc224f1ce233cbd5dccfafaa4ab0eb28840405b124e42",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 2.18569e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1763.27,
+      "top_10_weight_share_pct": 1.90154,
+      "top_100_weight_share_pct": 13.3048,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 100.65,
+          "max_contribution_share_pct": 4.82771,
+          "positive_contributor_count": 12517,
+          "top_100_contribution_share_pct": 70.2555,
+          "top_10_contribution_share_pct": 22.4873
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 146.706,
+          "max_contribution_share_pct": 3.0561,
+          "positive_contributor_count": 13853,
+          "top_100_contribution_share_pct": 65.0279,
+          "top_10_contribution_share_pct": 17.6147
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 945.673,
+          "max_contribution_share_pct": 0.494451,
+          "positive_contributor_count": 60669,
+          "top_100_contribution_share_pct": 23.4994,
+          "top_10_contribution_share_pct": 4.1979
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 397.873,
+          "max_contribution_share_pct": 1.67967,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 36.81,
+          "top_10_contribution_share_pct": 8.81029
+        }
+      }
+    },
+    {
+      "year": 2029,
+      "h5_sha256": "518ead722f74b157c95233a44c2a209a31dbf3e7320c801d98e32ef8decf95d7",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.90835e-10,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1758.17,
+      "top_10_weight_share_pct": 1.92237,
+      "top_100_weight_share_pct": 13.3563,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 85.7464,
+          "max_contribution_share_pct": 6.69918,
+          "positive_contributor_count": 12810,
+          "top_100_contribution_share_pct": 70.0817,
+          "top_10_contribution_share_pct": 24.7545
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 151.058,
+          "max_contribution_share_pct": 3.52354,
+          "positive_contributor_count": 14625,
+          "top_100_contribution_share_pct": 61.8041,
+          "top_10_contribution_share_pct": 17.7051
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 936.976,
+          "max_contribution_share_pct": 0.599122,
+          "positive_contributor_count": 60689,
+          "top_100_contribution_share_pct": 23.609,
+          "top_10_contribution_share_pct": 4.29055
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 411.46,
+          "max_contribution_share_pct": 1.50697,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 36.7303,
+          "top_10_contribution_share_pct": 8.82932
+        }
+      }
+    },
+    {
+      "year": 2030,
+      "h5_sha256": "30d92a713cd1ca0aaca870245a1f6d9a8f2904f58a692ea2ecbcfb68c22a7eb0",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 4.41486e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1743.77,
+      "top_10_weight_share_pct": 1.97888,
+      "top_100_weight_share_pct": 13.5389,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 96.4988,
+          "max_contribution_share_pct": 4.27842,
+          "positive_contributor_count": 12915,
+          "top_100_contribution_share_pct": 70.1434,
+          "top_10_contribution_share_pct": 24.7835
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 135.292,
+          "max_contribution_share_pct": 3.62472,
+          "positive_contributor_count": 14712,
+          "top_100_contribution_share_pct": 62.4933,
+          "top_10_contribution_share_pct": 19.5832
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 949.872,
+          "max_contribution_share_pct": 0.49493,
+          "positive_contributor_count": 60692,
+          "top_100_contribution_share_pct": 23.4752,
+          "top_10_contribution_share_pct": 4.08938
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 389.686,
+          "max_contribution_share_pct": 1.49853,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 37.2384,
+          "top_10_contribution_share_pct": 9.4913
+        }
+      }
+    },
+    {
+      "year": 2032,
+      "h5_sha256": "fd518c8311ab6eee04e7e156dd9fcc5ad018459a10bb37a794037e626bba5545",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 2.82609e-13,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1715.26,
+      "top_10_weight_share_pct": 2.14127,
+      "top_100_weight_share_pct": 13.8226,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 101.457,
+          "max_contribution_share_pct": 4.00167,
+          "positive_contributor_count": 13203,
+          "top_100_contribution_share_pct": 69.4508,
+          "top_10_contribution_share_pct": 24.139
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 142.604,
+          "max_contribution_share_pct": 3.08729,
+          "positive_contributor_count": 14927,
+          "top_100_contribution_share_pct": 62.0845,
+          "top_10_contribution_share_pct": 19.6038
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 957.558,
+          "max_contribution_share_pct": 0.50683,
+          "positive_contributor_count": 60702,
+          "top_100_contribution_share_pct": 23.2639,
+          "top_10_contribution_share_pct": 4.0285
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 355.756,
+          "max_contribution_share_pct": 1.75905,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 38.4356,
+          "top_10_contribution_share_pct": 10.1822
+        }
+      }
+    },
+    {
+      "year": 2033,
+      "h5_sha256": "95f940e4abd5920e39447abb0657ebc21af36d4a2b08db2d9dd8789e3d4523cc",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 2.50858e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1714.16,
+      "top_10_weight_share_pct": 2.10347,
+      "top_100_weight_share_pct": 13.8549,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 114.102,
+          "max_contribution_share_pct": 3.37299,
+          "positive_contributor_count": 13348,
+          "top_100_contribution_share_pct": 68.7734,
+          "top_10_contribution_share_pct": 22.294
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 160.698,
+          "max_contribution_share_pct": 2.59644,
+          "positive_contributor_count": 15043,
+          "top_100_contribution_share_pct": 60.8216,
+          "top_10_contribution_share_pct": 18.0718
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 959.516,
+          "max_contribution_share_pct": 0.505376,
+          "positive_contributor_count": 60709,
+          "top_100_contribution_share_pct": 23.1843,
+          "top_10_contribution_share_pct": 4.04785
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 352.093,
+          "max_contribution_share_pct": 1.77587,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 38.9278,
+          "top_10_contribution_share_pct": 10.502
+        }
+      }
+    },
+    {
+      "year": 2035,
+      "h5_sha256": "088c1f27329bdbad94035bf26bcc347f79f56413dfa1ef67cab74f84b8939c9e",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 5.93189e-12,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1676.98,
+      "top_10_weight_share_pct": 2.26787,
+      "top_100_weight_share_pct": 14.1348,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 107.294,
+          "max_contribution_share_pct": 4.19506,
+          "positive_contributor_count": 13685,
+          "top_100_contribution_share_pct": 68.4079,
+          "top_10_contribution_share_pct": 23.164
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 154.113,
+          "max_contribution_share_pct": 2.91064,
+          "positive_contributor_count": 15237,
+          "top_100_contribution_share_pct": 61.0524,
+          "top_10_contribution_share_pct": 18.355
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 954.806,
+          "max_contribution_share_pct": 0.4877,
+          "positive_contributor_count": 60712,
+          "top_100_contribution_share_pct": 23.2965,
+          "top_10_contribution_share_pct": 4.07258
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 317.705,
+          "max_contribution_share_pct": 2.39938,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 39.8249,
+          "top_10_contribution_share_pct": 11.4565
+        }
+      }
+    },
+    {
+      "year": 2035,
+      "h5_sha256": "f4d5549dadbbc92ad096823ee67b4b7218f972dbff591545a83bdcc1b7f71b05",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 5.93166e-12,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1676.98,
+      "top_10_weight_share_pct": 2.26787,
+      "top_100_weight_share_pct": 14.1348,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 107.294,
+          "max_contribution_share_pct": 4.19506,
+          "positive_contributor_count": 13685,
+          "top_100_contribution_share_pct": 68.4079,
+          "top_10_contribution_share_pct": 23.164
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 154.113,
+          "max_contribution_share_pct": 2.91064,
+          "positive_contributor_count": 15237,
+          "top_100_contribution_share_pct": 61.0524,
+          "top_10_contribution_share_pct": 18.355
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 954.806,
+          "max_contribution_share_pct": 0.4877,
+          "positive_contributor_count": 60712,
+          "top_100_contribution_share_pct": 23.2965,
+          "top_10_contribution_share_pct": 4.07258
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 317.705,
+          "max_contribution_share_pct": 2.39938,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 39.8249,
+          "top_10_contribution_share_pct": 11.4565
+        }
+      }
+    },
+    {
+      "year": 2040,
+      "h5_sha256": "7784a1bd83b03405bd8edba9037dcb1c140a491b49cf57c1a58e365809b51f85",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.81882e-10,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1611.83,
+      "top_10_weight_share_pct": 2.51655,
+      "top_100_weight_share_pct": 14.8294,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 92.9714,
+          "max_contribution_share_pct": 4.45122,
+          "positive_contributor_count": 14286,
+          "top_100_contribution_share_pct": 67.6064,
+          "top_10_contribution_share_pct": 26.2327
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 140.962,
+          "max_contribution_share_pct": 3.2511,
+          "positive_contributor_count": 15555,
+          "top_100_contribution_share_pct": 60.6267,
+          "top_10_contribution_share_pct": 20.1587
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 946.903,
+          "max_contribution_share_pct": 0.472053,
+          "positive_contributor_count": 60723,
+          "top_100_contribution_share_pct": 23.3692,
+          "top_10_contribution_share_pct": 4.07035
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 252.551,
+          "max_contribution_share_pct": 2.70925,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 42.543,
+          "top_10_contribution_share_pct": 14.182
+        }
+      }
+    },
+    {
+      "year": 2045,
+      "h5_sha256": "84e516db97f53ff4663e87d20575c796590f983a0b4e53ea9496a1a21f20e4b6",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 5.17646e-12,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1606.86,
+      "top_10_weight_share_pct": 2.57521,
+      "top_100_weight_share_pct": 14.9761,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 85.9859,
+          "max_contribution_share_pct": 7.15767,
+          "positive_contributor_count": 14744,
+          "top_100_contribution_share_pct": 65.0435,
+          "top_10_contribution_share_pct": 25.6941
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 150.844,
+          "max_contribution_share_pct": 4.17108,
+          "positive_contributor_count": 15786,
+          "top_100_contribution_share_pct": 58.2315,
+          "top_10_contribution_share_pct": 18.6526
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 944.771,
+          "max_contribution_share_pct": 0.472634,
+          "positive_contributor_count": 60731,
+          "top_100_contribution_share_pct": 23.4084,
+          "top_10_contribution_share_pct": 4.02917
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 245.977,
+          "max_contribution_share_pct": 3.52415,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 42.6325,
+          "top_10_contribution_share_pct": 13.4234
+        }
+      }
+    },
+    {
+      "year": 2050,
+      "h5_sha256": "7515b14b61e885803e27c2424efd39e1aa674b5219d8fb4f2c7ff5fc2de239e7",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.20312e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1598.5,
+      "top_10_weight_share_pct": 2.63861,
+      "top_100_weight_share_pct": 15.0033,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 88.8119,
+          "max_contribution_share_pct": 7.42459,
+          "positive_contributor_count": 15189,
+          "top_100_contribution_share_pct": 63.4769,
+          "top_10_contribution_share_pct": 23.8856
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 152.525,
+          "max_contribution_share_pct": 4.4415,
+          "positive_contributor_count": 15974,
+          "top_100_contribution_share_pct": 57.4664,
+          "top_10_contribution_share_pct": 17.9581
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 942.454,
+          "max_contribution_share_pct": 0.509111,
+          "positive_contributor_count": 60738,
+          "top_100_contribution_share_pct": 23.3154,
+          "top_10_contribution_share_pct": 4.0826
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 248.217,
+          "max_contribution_share_pct": 3.57145,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 42.9374,
+          "top_10_contribution_share_pct": 12.8702
+        }
+      }
+    },
+    {
+      "year": 2055,
+      "h5_sha256": "e6b4c3ea5317aea5271ad484d3bcf5ab45b71357f27c0c4d35436b59770a9377",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.01483e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1554.05,
+      "top_10_weight_share_pct": 2.92287,
+      "top_100_weight_share_pct": 15.4969,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 89.9713,
+          "max_contribution_share_pct": 7.02869,
+          "positive_contributor_count": 15577,
+          "top_100_contribution_share_pct": 62.6756,
+          "top_10_contribution_share_pct": 24.2652
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 139.317,
+          "max_contribution_share_pct": 4.81006,
+          "positive_contributor_count": 16145,
+          "top_100_contribution_share_pct": 57.511,
+          "top_10_contribution_share_pct": 19.3288
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 952.964,
+          "max_contribution_share_pct": 0.534008,
+          "positive_contributor_count": 60746,
+          "top_100_contribution_share_pct": 23.1927,
+          "top_10_contribution_share_pct": 3.90661
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 225.584,
+          "max_contribution_share_pct": 3.65308,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 44.1869,
+          "top_10_contribution_share_pct": 14.5148
+        }
+      }
+    },
+    {
+      "year": 2060,
+      "h5_sha256": "811feb2cd04b393f4ed31b6bbbb6d032d4685c04292467f3ac8ecc51dfb28de0",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 4.21486e-09,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1558.95,
+      "top_10_weight_share_pct": 2.88502,
+      "top_100_weight_share_pct": 15.4258,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 111.752,
+          "max_contribution_share_pct": 5.07817,
+          "positive_contributor_count": 15844,
+          "top_100_contribution_share_pct": 61.0595,
+          "top_10_contribution_share_pct": 22.9979
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 159.887,
+          "max_contribution_share_pct": 3.61269,
+          "positive_contributor_count": 16275,
+          "top_100_contribution_share_pct": 56.6388,
+          "top_10_contribution_share_pct": 18.4001
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 952.183,
+          "max_contribution_share_pct": 0.520816,
+          "positive_contributor_count": 60753,
+          "top_100_contribution_share_pct": 23.1869,
+          "top_10_contribution_share_pct": 3.94309
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 258.039,
+          "max_contribution_share_pct": 2.70527,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.4955,
+          "top_10_contribution_share_pct": 13.6659
+        }
+      }
+    },
+    {
+      "year": 2062,
+      "h5_sha256": "f9bdc8e15e478a5dcdd327e297247e856e12d6fbc6cebd2fd37f5f2372c5bdbc",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.1639e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1546.4,
+      "top_10_weight_share_pct": 2.89619,
+      "top_100_weight_share_pct": 15.5788,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 110.665,
+          "max_contribution_share_pct": 5.04111,
+          "positive_contributor_count": 15943,
+          "top_100_contribution_share_pct": 60.6113,
+          "top_10_contribution_share_pct": 23.3386
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 158.117,
+          "max_contribution_share_pct": 3.65395,
+          "positive_contributor_count": 16316,
+          "top_100_contribution_share_pct": 56.2622,
+          "top_10_contribution_share_pct": 18.6731
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 950.973,
+          "max_contribution_share_pct": 0.508647,
+          "positive_contributor_count": 60754,
+          "top_100_contribution_share_pct": 23.2744,
+          "top_10_contribution_share_pct": 3.97744
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 254.155,
+          "max_contribution_share_pct": 2.70563,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.6846,
+          "top_10_contribution_share_pct": 13.7763
+        }
+      }
+    },
+    {
+      "year": 2065,
+      "h5_sha256": "66f8d7a044e03bfcfedb5dc08f5834a7512b912a01ebfce58bb5560b78f76344",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 6.43322e-09,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1531.95,
+      "top_10_weight_share_pct": 2.94821,
+      "top_100_weight_share_pct": 15.6952,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 113.367,
+          "max_contribution_share_pct": 4.8159,
+          "positive_contributor_count": 16068,
+          "top_100_contribution_share_pct": 59.99,
+          "top_10_contribution_share_pct": 22.9525
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 159.245,
+          "max_contribution_share_pct": 3.53284,
+          "positive_contributor_count": 16386,
+          "top_100_contribution_share_pct": 55.9283,
+          "top_10_contribution_share_pct": 18.6112
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 950.945,
+          "max_contribution_share_pct": 0.48225,
+          "positive_contributor_count": 60759,
+          "top_100_contribution_share_pct": 23.2861,
+          "top_10_contribution_share_pct": 4.00428
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 252.759,
+          "max_contribution_share_pct": 2.61198,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.9079,
+          "top_10_contribution_share_pct": 13.6677
+        }
+      }
+    },
+    {
+      "year": 2070,
+      "h5_sha256": "b62e3967dde80dca8a9439fb240df24f26f77efbd17d913dd88c845953e4e194",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.78663e-13,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1530.0,
+      "top_10_weight_share_pct": 2.96971,
+      "top_100_weight_share_pct": 15.645,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 128.955,
+          "max_contribution_share_pct": 4.3921,
+          "positive_contributor_count": 16267,
+          "top_100_contribution_share_pct": 58.269,
+          "top_10_contribution_share_pct": 20.6019
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 177.696,
+          "max_contribution_share_pct": 3.14368,
+          "positive_contributor_count": 16508,
+          "top_100_contribution_share_pct": 54.6396,
+          "top_10_contribution_share_pct": 16.8856
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 958.875,
+          "max_contribution_share_pct": 0.448277,
+          "positive_contributor_count": 60763,
+          "top_100_contribution_share_pct": 23.1273,
+          "top_10_contribution_share_pct": 3.96569
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 270.639,
+          "max_contribution_share_pct": 2.56363,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.2562,
+          "top_10_contribution_share_pct": 12.2711
+        }
+      }
+    },
+    {
+      "year": 2075,
+      "h5_sha256": "90fba724e4040a169df3d3e2bd53aabdf5ca5afb2bb425e9cab64ec82223a06b",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 9.33869e-14,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1512.63,
+      "top_10_weight_share_pct": 3.04513,
+      "top_100_weight_share_pct": 15.7776,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 112.161,
+          "max_contribution_share_pct": 6.08931,
+          "positive_contributor_count": 16292,
+          "top_100_contribution_share_pct": 59.0934,
+          "top_10_contribution_share_pct": 21.1799
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 155.537,
+          "max_contribution_share_pct": 3.84484,
+          "positive_contributor_count": 16503,
+          "top_100_contribution_share_pct": 55.7766,
+          "top_10_contribution_share_pct": 17.8843
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 967.987,
+          "max_contribution_share_pct": 0.447995,
+          "positive_contributor_count": 60758,
+          "top_100_contribution_share_pct": 22.9329,
+          "top_10_contribution_share_pct": 3.93294
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 255.104,
+          "max_contribution_share_pct": 3.35575,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.7114,
+          "top_10_contribution_share_pct": 12.728
+        }
+      }
+    },
+    {
+      "year": 2080,
+      "h5_sha256": "f132f414c7288d4f34af8e83ec82e55fdb06ec891efa594cbbe4502abdd5bf5f",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.09238e-10,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1486.1,
+      "top_10_weight_share_pct": 3.22288,
+      "top_100_weight_share_pct": 15.9962,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 108.134,
+          "max_contribution_share_pct": 5.84183,
+          "positive_contributor_count": 16379,
+          "top_100_contribution_share_pct": 59.7355,
+          "top_10_contribution_share_pct": 21.8312
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 143.24,
+          "max_contribution_share_pct": 4.15532,
+          "positive_contributor_count": 16586,
+          "top_100_contribution_share_pct": 56.15,
+          "top_10_contribution_share_pct": 18.7181
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 967.214,
+          "max_contribution_share_pct": 0.483785,
+          "positive_contributor_count": 60763,
+          "top_100_contribution_share_pct": 22.8978,
+          "top_10_contribution_share_pct": 3.90161
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 248.084,
+          "max_contribution_share_pct": 3.27896,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 44.2792,
+          "top_10_contribution_share_pct": 13.3276
+        }
+      }
+    },
+    {
+      "year": 2085,
+      "h5_sha256": "c8307f5d31f83fbfcc576e23da70f00119d7fa0f95cf297cac9855f3a4019cee",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.82714e-10,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1471.79,
+      "top_10_weight_share_pct": 3.32263,
+      "top_100_weight_share_pct": 16.1256,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 106.679,
+          "max_contribution_share_pct": 5.34996,
+          "positive_contributor_count": 16498,
+          "top_100_contribution_share_pct": 59.3691,
+          "top_10_contribution_share_pct": 22.0013
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 132.64,
+          "max_contribution_share_pct": 5.19176,
+          "positive_contributor_count": 16704,
+          "top_100_contribution_share_pct": 56.3075,
+          "top_10_contribution_share_pct": 19.1656
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 955.42,
+          "max_contribution_share_pct": 0.50284,
+          "positive_contributor_count": 60763,
+          "top_100_contribution_share_pct": 23.1112,
+          "top_10_contribution_share_pct": 3.98569
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 249.48,
+          "max_contribution_share_pct": 2.99471,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 44.495,
+          "top_10_contribution_share_pct": 13.3077
+        }
+      }
+    },
+    {
+      "year": 2090,
+      "h5_sha256": "5caab11aacd64c1745eed008850ea4b9d17af7ccb378a70ed768aa7829f767a1",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 9.40086e-13,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1459.14,
+      "top_10_weight_share_pct": 3.40126,
+      "top_100_weight_share_pct": 16.1948,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 107.473,
+          "max_contribution_share_pct": 5.31196,
+          "positive_contributor_count": 16629,
+          "top_100_contribution_share_pct": 59.0155,
+          "top_10_contribution_share_pct": 21.7872
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 132.314,
+          "max_contribution_share_pct": 5.3718,
+          "positive_contributor_count": 16856,
+          "top_100_contribution_share_pct": 55.9249,
+          "top_10_contribution_share_pct": 18.9052
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 950.924,
+          "max_contribution_share_pct": 0.500243,
+          "positive_contributor_count": 60771,
+          "top_100_contribution_share_pct": 23.2353,
+          "top_10_contribution_share_pct": 4.01512
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 250.175,
+          "max_contribution_share_pct": 2.9537,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 44.4863,
+          "top_10_contribution_share_pct": 13.162
+        }
+      }
+    },
+    {
+      "year": 2095,
+      "h5_sha256": "ef01a75cdff9ed33b7dd0918a54930446a5807a04b063f5ad5e117ad7945fbbf",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 6.50563e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1475.78,
+      "top_10_weight_share_pct": 3.34491,
+      "top_100_weight_share_pct": 15.9948,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 126.075,
+          "max_contribution_share_pct": 4.83853,
+          "positive_contributor_count": 16739,
+          "top_100_contribution_share_pct": 57.662,
+          "top_10_contribution_share_pct": 21.0226
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 149.348,
+          "max_contribution_share_pct": 5.23235,
+          "positive_contributor_count": 16996,
+          "top_100_contribution_share_pct": 54.6109,
+          "top_10_contribution_share_pct": 17.3698
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 955.657,
+          "max_contribution_share_pct": 0.483863,
+          "positive_contributor_count": 60771,
+          "top_100_contribution_share_pct": 23.2213,
+          "top_10_contribution_share_pct": 3.98445
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 288.081,
+          "max_contribution_share_pct": 2.28349,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.1986,
+          "top_10_contribution_share_pct": 12.0826
+        }
+      }
+    },
+    {
+      "year": 2100,
+      "h5_sha256": "b5b5182f8ce75de6bc23b5591e3d61bad6e6d68ffadcc5985c26b4a07d2f926e",
+      "calibration_quality": "exact",
+      "validation_passed": true,
+      "max_constraint_error_fraction": 1.85193e-11,
+      "gates_passed": true,
+      "donor_clone_households": 0,
+      "positive_weight_count": 75112,
+      "effective_sample_size": 1476.42,
+      "top_10_weight_share_pct": 3.40397,
+      "top_100_weight_share_pct": 15.8979,
+      "contributors": {
+        "hi_tob": {
+          "contributor_effective_sample_size": 126.904,
+          "max_contribution_share_pct": 4.66026,
+          "positive_contributor_count": 16810,
+          "top_100_contribution_share_pct": 57.2085,
+          "top_10_contribution_share_pct": 21.2093
+        },
+        "oasdi_tob": {
+          "contributor_effective_sample_size": 152.503,
+          "max_contribution_share_pct": 5.03662,
+          "positive_contributor_count": 17170,
+          "top_100_contribution_share_pct": 54.1845,
+          "top_10_contribution_share_pct": 17.2568
+        },
+        "payroll_total": {
+          "contributor_effective_sample_size": 960.608,
+          "max_contribution_share_pct": 0.464517,
+          "positive_contributor_count": 60774,
+          "top_100_contribution_share_pct": 23.1664,
+          "top_10_contribution_share_pct": 3.91755
+        },
+        "ss_total": {
+          "contributor_effective_sample_size": 285.951,
+          "max_contribution_share_pct": 2.19894,
+          "positive_contributor_count": 20330,
+          "top_100_contribution_share_pct": 43.0327,
+          "top_10_contribution_share_pct": 12.2671
+        }
+      }
+    }
+  ]
+}

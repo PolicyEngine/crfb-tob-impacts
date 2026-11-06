@@ -54,6 +54,11 @@ remain exact for every delivered year.
 - [scripts/aggregate_reform_full_h5_results.py](../../scripts/aggregate_reform_full_h5_results.py)
   - post-H5 aggregation path; production aggregates must come from saved full
     reform H5 artifacts, not non-contract sample panels
+- [scripts/build_run_provenance.py](../../scripts/build_run_provenance.py)
+  - reads the saved metadata of every exact row, stops if it disagrees with the
+    published results, and writes each run's versions and each baseline's
+    calibration and support figures to
+    [run-provenance.json](run-provenance.json)
 - [scripts/build_dashboard_payroll_denominators.py](../../scripts/build_dashboard_payroll_denominators.py)
   - refreshes dashboard OASDI/GDP and HI taxable-payroll denominators used by
     percent-payroll views

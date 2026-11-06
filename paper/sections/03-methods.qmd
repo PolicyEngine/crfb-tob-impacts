@@ -142,8 +142,8 @@ audit, and validation status.
 
 ## Calibration targets
 
-Under the long-run calibration profile, `ss-payroll-tob`, we calibrate household
-weights to five families of official demographic and fiscal targets.
+We calibrate household weights to five families of official demographic and
+fiscal targets.
 
 **Age distribution.** The household age-composition matrix has 86 columns:
 single-year ages `0` through `84` and a top-coded `85+` category. We take the
@@ -175,11 +175,11 @@ expanded tables of the 2026 Medicare Trustees Report, which give annual values
 through `2100` [@medicare2026trustees]. This target sets the Medicare trust
 fund's share of baseline benefit-tax revenue.
 
-Every published year hits all of its calibration targets. The runtime rejects
-aggregate-quality calibration and any fallback to iterative proportional
-fitting, checks that each dataset's metadata names the required target source
-and profile, and requires every published file to come from a validated
-year-level H5 file.
+Every projected dataset hits all of its calibration targets. The projection
+script stops on any year whose final calibration misses a target by more than
+0.01 percent. The scoring worker stops when a baseline's H5 or metadata file
+differs from the hash in the run's baseline manifest, and every run behind the
+results file used that check.
 
 ## Far-horizon support
 
@@ -188,15 +188,17 @@ on a few contributors to match far-horizon taxation-of-benefits aggregates,
 forcing a choice between thin support and synthetic records. Because economic
 growth enters through record values rather than weights, the population of
 taxation-of-benefits contributors stays broad even in `2100`, and every record
-in every published year comes from a real survey household.
+in every projected dataset comes from a real survey household.
 
-The runtime applies publication gates to the household weights and to the
-contributors behind each policy target. For OASDI and HI taxation-of-benefits
-contributors, the gates require at least `1,000` positive contributors, an
-effective sample size of at least `50`, a top-10 contribution share of at most
-`50%`, a top-100 share of at most `95%`, and a largest single-contributor share
-of at most `15%`. We report how the far-horizon years fare against these gates
-in @sec-validation.
+We built the datasets under publication gates, and the projection script stops
+on any year that fails one. The gates bound the household weights in every year
+and, from `2075`, the contributors behind each policy target. For OASDI and HI
+taxation-of-benefits contributors, they require at least `1,000` positive
+contributors, an effective sample size of at least `50`, a top-10 contribution
+share of at most `50%`, a top-100 share of at most `95%`, and a largest
+single-contributor share of at most `15%`. Every projected dataset meets those
+limits, including the years before `2075`, and we report the figures in
+@sec-validation.
 
 We also track the Trustees' covered-worker and beneficiary counts as
 diagnostics, but we do not calibrate to them, or to GDP, average wages, or CPI.
@@ -205,7 +207,7 @@ inputs, including the growth ceiling after `2034`.
 
 ## Calibration estimator
 
-Under the `ss-payroll-tob` profile, we use positive entropy calibration. Let
+We use positive entropy calibration. Let
 $w_i^0$ be the initial household weight, $a_i$ be the vector of calibration
 variables for household $i$, and $t_y$ be the target vector for year $y$. The
 estimator chooses strictly positive weights $w_i$ that solve
@@ -233,12 +235,12 @@ $$
 \sum_i w_i(\lambda) a_i^* = t_y^*.
 $$
 
-For each year we record the achieved target errors, the maximum age-bin error,
-the maximum fiscal-constraint error, the negative-weight share, the effective
-sample size, and the top-weight concentration. The entropy parameterization
-keeps every weight positive. When exact positive calibration has no solution on
-the available survey records, the data pipeline can diagnose approximate
-feasibility, but the runtime refuses to publish an inexact dataset.
+For each year we record the target and achieved value of each fiscal constraint,
+the largest error on any constraint including the age bins, the share of positive
+weights, the effective sample size, and the top-weight concentration. The entropy
+parameterization keeps every weight positive. When exact positive calibration has
+no solution on the available survey records, the projection script stops with an
+error.
 
 ## Policy simulation and trust-fund accounting
 
@@ -327,19 +329,20 @@ the `2060` and `2065` anchors would put them $19.5 billion apart. `option5` and
 ### Version consistency
 
 The results file records the run that produced each exact anchor. For most
-reforms, the `2028` and `2029` anchors come from a separate run that we pinned
-to the production commit and locked environment of the `2026` and `2030`
-anchors. All four anchor years use the populace `9f1260b` base
-(`populace-us-2024-9f1260b-20260611`), `policyengine-us` `1.700.2` under
-`policyengine.py` `4.5.1`, and the
-[crfb-tob-impacts repository](https://github.com/PolicyEngine/crfb-tob-impacts)
-at commit `3de8abb6`. A difference in base, model version, or code would leave a
-break, or seam, where those anchors meet their neighbors. Two checks rule out a
-seam. First, the rebuilt `2030` baseline reproduces the published `2030` federal
-income tax of `$3,231.9` billion to within rounding. Second, reform cells
-rescored on the rebuilt baseline reproduce their published impacts to the
-dollar: in `2030`, full repeal, senior-deduction repeal, and 100 percent
-inclusion reproduce `-$159.4`, `$0.0`, and `$93.7` billion.
+reforms, a separate run produced the `2028` and `2029` anchors on the same package
+versions as the `2026` and `2030` anchors. All four anchor years use the populace
+`9f1260b` base (`populace-us-2024-9f1260b-20260611`), `policyengine-us` `1.700.2`
+under `policyengine.py` `4.5.1`, and baselines we built at commit `3de8abb6` of
+the
+[crfb-tob-impacts repository](https://github.com/PolicyEngine/crfb-tob-impacts).
+A difference in base, model version, or code would leave a break, or seam, where
+those anchors meet their neighbors. Two checks rule out a seam. First, the `2030`
+baseline we rebuilt alongside those runs has the same SHA-256 hash as the
+published one, so it reproduces the published `2030` federal income tax of
+`$3,231.9` billion. Second, reform cells rescored on the rebuilt baseline
+reproduce their published impacts to the dollar: in `2030`, full repeal,
+senior-deduction repeal, and 100 percent inclusion reproduce `-$159.4`, `$0.0`,
+and `$93.7` billion.
 
 ## Solvency-baseline scoring
 
@@ -440,34 +443,6 @@ earnings. Older cohorts in far-horizon years may also differ from the
 estimation samples in assets, defined-benefit pension coverage, and health, so
 the multiplier reflects today's evidence rather than a forecast for future
 cohorts.
-
-## Reproducibility and validation
-
-We publish a run only if its results trace to:
-
-- a locked Python environment from `uv.lock`
-- explicit local `policyengine-us` and `policyengine-us-data` worktrees
-- a calibrated projected-dataset snapshot
-- a machine-readable baseline-dataset manifest and year-level metadata sidecars,
-  each recording its H5 SHA-256
-- the populace base release identifier and, when recorded, the resolved blob
-  hash
-- git SHAs and dirty-state records for the crfb-tob-impacts,
-  `policyengine-us`, and `policyengine-us-data` repositories
-- patch artifacts for any dirty local overrides that affected the run
-
-The Modal launch wrapper writes a run-level reproducibility bundle before it
-submits work. The runtime then requires the expected calibration profile, target
-source, tax assumption, and minimum calibration quality, so a detached batch run
-fails rather than mixing lineages.
-
-We validate at three levels and report the results in @sec-validation:
-
-- Each projected H5 must pass the metadata and calibration-audit checks.
-- We smoke-test reform scoring in early, middle, and late years before scoring
-  the full panel.
-- Scripts generate the dashboard data, the comparison spreadsheet, and the
-  results tables in @sec-results from the same result files.
 
 ## Limitations
 

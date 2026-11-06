@@ -3,8 +3,6 @@
 import { useState } from "react";
 
 import { MethodologyDiagram } from "@/components/methodology-diagram";
-import { LiveModelingProgress } from "@/components/live-modeling-progress";
-import { ReproducibilityRoadmap } from "@/components/reproducibility-roadmap";
 import { sitePath } from "@/lib/site-path";
 
 function AccordionItem({
@@ -84,8 +82,8 @@ export function MethodologySection() {
           defaultOpen
         >
           <p>
-            Every year from 2026 to 2100 is constructed from the same 2024
-            microdata in four stages:
+            We build each projection year from the same 2024 microdata in four
+            stages:
           </p>
           <BulletList>
             <li>
@@ -119,16 +117,14 @@ export function MethodologySection() {
             Separating the channels keeps both honest: reweighting alone would
             hit aggregates by silently distorting who the population is, while
             value scaling alone could not shift the age structure. Every record
-            in every published year is a real survey household — no synthetic
-            rows. A clone-free build of 2100, the hardest year, passes every
-            publication gate with a comfortable margin, so the populace base
-            supports the full horizon bare.
+            in every projected dataset comes from a real survey household, and
+            every anchor year clears the publication gates on those records.
           </p>
         </AccordionItem>
 
         <AccordionItem
           title="Calibration targets and publication gates"
-          summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every published year."
+          summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every projected dataset."
         >
           <p>
             <strong>Positive-entropy calibration</strong> matches every target
@@ -164,9 +160,10 @@ export function MethodologySection() {
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
             <p>
-              <strong>Gates:</strong> a year publishes only if it passes
-              effective sample size, weight concentration, and
-              taxation-of-benefits contributor support checks. The baseline tab
+              <strong>Gates:</strong> the projection script stops on any year
+              that fails its effective sample size or weight concentration
+              checks or, from 2075, its taxation-of-benefits contributor support
+              checks. Every anchor year clears all of them. The baseline tab
               charts every major series — including uncalibrated by-products
               like income tax and AGI — against external references through
               2100.
@@ -245,27 +242,36 @@ export function MethodologySection() {
         >
           <BulletList>
             <li>
-              <strong>Options 1-2 and 8-10</strong>: default to baseline-share
-              allocation, with toggles for current-law, all-OASDI, and all-HI
-              allocation.
+              <strong>
+                Options 1-2 and 8-10, 93% taxation, full MAGI inclusion, and the
+                2005 Tax Panel deduction
+              </strong>
+              : default to baseline-share allocation, with a toggle for
+              current-law allocation.
             </li>
             <li>
-              <strong>Options 3-4 and 11</strong>: use baseline-share
-              allocation.
+              <strong>Options 3-4 and 11</strong>: use baseline-share allocation
+              under both settings.
             </li>
             <li>
-              <strong>Options 5-6</strong>: employer-contribution taxes directed
-              to their trust funds.
+              <strong>Options 5 and 12</strong>: credit each trust fund with the
+              income tax on its own employer contribution, net of the
+              benefit-tax revenue it loses.
             </li>
             <li>
               <strong>Option 7</strong>: total is the full federal income-tax
               gain; OASDI, HI, and general fund show the accounting split.
             </li>
             <li>
-              <strong>Option 12</strong>: handled through direct branching for
-              the structural swap.
+              <strong>Reverse Roth</strong>: counts the income-tax cost of
+              deducting employee payroll taxes against OASDI and leaves
+              HI&apos;s benefit-tax share as scored.
             </li>
           </BulletList>
+          <p className="mt-4">
+            Under the scheduled-benefits baseline, the all-OASDI and all-HI
+            toggles assign any reform&apos;s whole impact to one trust fund.
+          </p>
         </AccordionItem>
 
         <AccordionItem
@@ -364,45 +370,6 @@ export function MethodologySection() {
             </a>
           </li>
         </ul>
-      </div>
-
-      <div className="grid gap-4 border-t border-[var(--pe-color-border-light)] pt-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-normal text-[var(--pe-color-text-tertiary)]">
-            Appendix
-          </p>
-          <p className="mt-1 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            Internal production tracking
-          </p>
-        </div>
-        <div className="space-y-4">
-          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-            <summary className="cursor-pointer px-5 py-4 text-left">
-              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-                Internal reproducibility roadmap
-              </span>
-              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                Gates, logs, and artifact targets for the CRFB rebuild workflow.
-              </span>
-            </summary>
-            <div className="border-t border-[var(--pe-color-border-light)]">
-              <ReproducibilityRoadmap embedded />
-            </div>
-          </details>
-          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-            <summary className="cursor-pointer px-5 py-4 text-left">
-              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-                Live modeling status
-              </span>
-              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                Baseline readiness and full-H5 reform artifact progress.
-              </span>
-            </summary>
-            <div className="border-t border-[var(--pe-color-border-light)]">
-              <LiveModelingProgress />
-            </div>
-          </details>
-        </div>
       </div>
     </section>
   );

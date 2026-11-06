@@ -102,6 +102,17 @@ identical full-H5 lineage artifacts, while also avoiding the Modal spend.
   `$3,231.9B` — `0.00%` deviation.
 - **Scoring sentinel @2030.** `option1` `−159.411B`, `option7` `0.000B`,
   `option8` `93.725B` — each equal to the published value to the dollar.
+- **Checkable record (added 2026-11-05).** The rebuilt 2030 H5 in
+  `baseline-dataset-manifest-9f1260b-certinfill.json` has the same SHA-256
+  (`30d92a713cd1…`) as the published 2030 H5 in
+  `baseline-dataset-manifest-v2pop.json`, and `tests/test_paper_text.py` checks
+  that. We found no saved output from the June sentinel, but the July 17 rescore
+  of the same three cells survives
+  (`crfb-cert/tmp/sentinel_tp2005/sentinel_tp2005_20260717/`, H5 hashes
+  `c4769398be1f…`, `849a779ab105…`, `d384d3bcabe1…`). Summing
+  `income_tax × tax_unit_weight` from those H5s in double precision and
+  subtracting the published baseline gives impacts within `$1.02` of the
+  published rows.
 
 Both gates passing certifies that base, build code, model version, and scoring
 code all match the published panel, so the four budget-window anchors sit exactly
