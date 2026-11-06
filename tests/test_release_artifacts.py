@@ -884,8 +884,7 @@ def test_option7_dashboard_accounting_preserves_federal_total_and_residual():
         )
         < 1e-9
     )
-    assert "general-fund columns show the" in methods
-    assert "accounting split" in methods
+    assert "assign the rest to the general fund" in " ".join(methods.split())
 
 
 def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhibit():

@@ -1,10 +1,11 @@
 We estimate that in 2100 labor-supply responses cost the Roth swaps another
 $124.8 billion, offset $103.4 billion of the
-reverse Roth's loss, and move every other reform's revenue impact by at most
-$14.4 billion.
+reverse Roth's loss, and move the revenue impact of every other reform we score
+by at most $14.4 billion.
 
-For each reform, we report the revenue impact with labor-supply responses at the
-two endpoints and the response effect, which subtracts the static impact.
+For each reform we score (@sec-labor-supply), we report the revenue impact with
+labor-supply responses in 2026 and 2100 and the response effect, that impact minus
+the static impact.
 
 | Reform | 2026 revenue impact (\$B) | 2026 response effect (\$B) | 2100 revenue impact (\$B) | 2100 response effect (\$B) |
 | --- | --- | --- | --- | --- |

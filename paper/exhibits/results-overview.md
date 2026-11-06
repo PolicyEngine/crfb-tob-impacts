@@ -39,16 +39,16 @@ $547.8 billion.
 | --- | --- | --- |
 | Full repeal | -3,319.1 | -3,319.1 |
 | Reverse Roth | -1,045.8 | +988.4 |
-| Phased Roth | -547.8 | -3,319.1 |
 | Roth swap | -547.8 | -3,319.1 |
 | Short phase-in Roth (sensitivity) | -547.8 | -3,319.1 |
+| Phased Roth | -547.8 | -3,319.1 |
 | 2005 Tax Panel deduction | -141.1 | -141.1 |
 | No senior deduction | +0.0 | +0.0 |
 | \$500 credit | +187.1 | +187.1 |
 | Full MAGI inclusion | +217.4 | +217.4 |
 | 85% + deduction | +231.3 | +231.3 |
-| \$700 credit | +231.3 | +231.3 |
 | 85% taxation | +231.3 | +231.3 |
+| \$700 credit | +231.3 | +231.3 |
 | 90% taxation | +493.3 | +493.3 |
 | 93% taxation | +652.5 | +652.5 |
 | 95% taxation | +759.1 | +759.1 |

@@ -48,4 +48,4 @@ Over 2026-2035 those sums exceed the change in federal income tax by
 $12.7 billion, $36.2 billion, and $24.5 billion, because we measure each
 fund's gain from taxing employer contributions separately
 (@sec-swap-accounting). We report the federal income-tax change in the
-revenue tables of @sec-results.
+revenue tables that follow.

@@ -1,8 +1,8 @@
 We estimate that the revenue loss from full repeal grows at each
-milestone year. The Roth swap and the phased Roth swap raise revenue in
-2035 and 2050 but lose it by 2075, when the benefit-tax revenue they repeal
-exceeds the income tax on employer contributions. The revenue gain from every
-reform that taxes more of benefits grows at each milestone year.
+milestone year. The Roth swaps raise revenue in 2035 and 2050 but lose it by
+2075, when the benefit-tax revenue they repeal exceeds the income tax on employer
+contributions. Every other reform that raises revenue in 2035 raises more at each
+later milestone year.
 
 | Reform | 2035 (\$B) | 2050 (\$B) | 2075 (\$B) | 2100 (\$B) |
 | --- | --- | --- | --- | --- |

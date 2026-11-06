@@ -87,37 +87,38 @@ export function MethodologySection() {
           </p>
           <BulletList>
             <li>
-              <strong>A. Grow incomes to the target year.</strong> Each income
-              category follows its own uprating path — CBO-vintage growth
-              through 2034, capped at the Trustees nominal GDP path beyond so no
-              source outruns the projected economy. Tax parameters follow
-              statutory indexing.
+              <strong>A. Grow incomes to the target year.</strong> We uprate each
+              income category with its own index, built on CBO revenue
+              projections. After 2034, when a category&apos;s index outgrows the
+              Trustees nominal GDP path, we scale that category down on every
+              record. We index tax parameters as statute does through 2034 and to
+              PolicyEngine&apos;s wage index after that.
             </li>
             <li>
-              <strong>B. Demographic reweight.</strong> A light positive-entropy
-              adjustment shifts household weights to the Trustees single-year
-              age distribution. Weights carry demographics only.
+              <strong>B. Demographic reweight.</strong> We shift household weights
+              to the Trustees population in five-year age groups with a light
+              positive-entropy adjustment. Weights carry demographics only.
             </li>
             <li>
               <strong>C. Value calibration, given those weights.</strong>{" "}
-              Scalars solved against the reweighted population align earnings
-              with SSA taxable payroll (accounting for the taxable maximum),
-              benefits with OASDI cost, and beneficiary non-benefit income with
-              taxation-of-benefits revenue.
+              Holding the reweighted population fixed, we scale earnings to SSA
+              taxable payroll (accounting for the taxable maximum), benefits to
+              OASDI cost, and most of beneficiary households&apos; other income
+              toward taxation-of-benefits revenue.
             </li>
             <li>
-              <strong>D. Final entropy calibration.</strong> A last weight
-              adjustment hits the age distribution and all fiscal targets
-              exactly, with guard constraints holding investment and other
-              income to their growth paths.
+              <strong>D. Final entropy calibration.</strong> We adjust the weights
+              a last time to hit the age distribution and all fiscal targets
+              exactly, with guard constraints holding investment and other income
+              at their totals entering this stage.
             </li>
           </BulletList>
           <p className="mt-4">
             Reweighting alone can match dollar aggregates only by changing the
             population&apos;s makeup, and value scaling alone cannot shift the
-            age structure, so we use each for its own channel. Every record
-            in every projected dataset comes from a real survey household, and
-            every anchor year clears the publication gates on those records.
+            age structure, so we use each for its own channel. The projection adds no records:
+            every record in every projected dataset comes from the populace
+            database, and every anchor year clears the publication gates.
           </p>
         </AccordionItem>
 
@@ -127,14 +128,14 @@ export function MethodologySection() {
         >
           <p>
             <strong>Positive-entropy calibration</strong> matches every target
-            exactly while minimizing divergence from the base survey weights and
-            keeping all weights positive. Targets come from the 2026 Trustees
+            exactly while minimizing divergence from the demographically
+            reweighted weights and keeping all weights positive. Targets come from the 2026 Trustees
             Report intermediate assumptions:
           </p>
           <BulletList>
             <li>
-              <strong>Age distribution</strong> — single-year SSA population
-              projections.
+              <strong>Age distribution</strong> — SSA population projections, in
+              five-year age groups.
             </li>
             <li>
               <strong>Social Security benefits</strong> — total OASDI program
@@ -154,7 +155,7 @@ export function MethodologySection() {
             </li>
             <li>
               <strong>Income guards</strong> — investment and other non-payroll
-              income held to their uprated paths.
+              income held at their totals entering the final calibration.
             </li>
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
@@ -164,28 +165,29 @@ export function MethodologySection() {
               checks or, from 2075, its taxation-of-benefits contributor support
               checks. Every anchor year clears all of them. The baseline tab
               charts every major series — including uncalibrated by-products
-              like income tax and AGI — against external references through
-              2100.
+              like income tax and AGI — through 2100, against external references
+              where they exist.
             </p>
           </div>
         </AccordionItem>
 
         <AccordionItem
           title="Data sources"
-          summary="populace microdata calibrated to SSA, CMS, and CBO projections."
+          summary="populace microdata calibrated to SSA and CMS projections, with CBO income growth."
         >
           <p>
             <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace
-            2024 database, built entirely from primary sources (CPS ASEC, IRS
-            PUF, SCF, SIPP, CPS ORG, MEPS, ACS) with every layer traceable to
-            its origin.
+            2024 database, built from primary sources (CPS ASEC, IRS PUF, SCF,
+            SIPP, CPS ORG, MEPS, ACS). It flags about half of its weight as IRS
+            PUF clones, which keep survey demographics and take their tax detail
+            from the PUF or come from its highest-income returns.
           </p>
           <p className="mt-4">
-            <strong>Projection targets:</strong>
+            <strong>Projection targets and inputs:</strong>
           </p>
           <BulletList>
             <li>
-              Demographics, payroll, benefits, GDP, and AWI from the 2026 Social
+              Demographics, payroll, benefits, and GDP from the 2026 Social
               Security Trustees Report intermediate assumptions.
             </li>
             <li>
@@ -197,8 +199,15 @@ export function MethodologySection() {
               Trustees expanded tables, annual through 2100.
             </li>
             <li>
-              Per-category income growth from the CBO long-term forecast through
-              2034, capped at Trustees GDP growth thereafter.
+              Per-category income growth from CBO revenue projections through
+              2036 and their last growth rates after that, with a per-record cap
+              at Trustees GDP growth after 2034.
+            </li>
+            <li>
+              Wage indexing from PolicyEngine&apos;s National Average Wage Index
+              parameter, which grows more slowly than the Trustees average wage
+              index and reaches about 9.1 times its 2033 level by 2099, against
+              about 10.2 times for the Trustees.
             </li>
           </BulletList>
           <p className="mt-4">
@@ -209,7 +218,7 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Scoring approach"
-          summary="Static scoring is primary; behavioral labor-response results are supplemental."
+          summary="We show static scores on the charts and publish labor-supply results in the results file."
         >
           <p>
             <strong>Static scoring:</strong> we hold taxpayer behavior
@@ -221,7 +230,7 @@ export function MethodologySection() {
             across it. We interpolate linearly between anchors to a complete
             annual series, which the revenue-over-time chart traces and which we
             sum for the 75-year and present-value totals. We interpolate the
-            distributional charts between the same anchor years and tag each row
+            distributional charts between anchor years and tag each row
             of the results file as an exact anchor or an interpolation.
           </p>
           <p className="mt-4">
@@ -257,8 +266,9 @@ export function MethodologySection() {
             </li>
             <li>
               <strong>No senior deduction</strong>: the total equals the full
-              federal income-tax gain, and the OASDI, HI, and general-fund
-              figures show the accounting split.
+              federal income-tax gain. We credit each fund with its
+              taxation-of-benefits change and assign the rest to the general
+              fund.
             </li>
             <li>
               <strong>Reverse Roth</strong>: we count the income-tax cost of
@@ -280,8 +290,8 @@ export function MethodologySection() {
             <li>
               <strong>Scheduled benefits:</strong> we score the reform against
               the law as it stands, with Social Security paying full scheduled
-              benefits, including the Trustees long-run taxation-of-benefits
-              thresholds.
+              benefits, and with the long-run tax-parameter treatment we describe
+              in the paper.
             </li>
             <li>
               <strong>SS solvent:</strong> we score the reform against a
@@ -297,7 +307,7 @@ export function MethodologySection() {
             </li>
           </BulletList>
           <p className="mt-4">
-            <strong>Present value:</strong> 75-year totals discount each
+            <strong>Present value:</strong> for 75-year totals, we discount each
             year&apos;s flow to 2026 at each trust fund&apos;s effective
             interest rates under the Trustees&apos; intermediate assumptions:
             OASDI flows at the rates implied by the compound effective

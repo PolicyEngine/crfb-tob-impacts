@@ -808,7 +808,7 @@ export function BaselineAssumptionsSection() {
         <AssumptionMetric
           label="Indexed parameters"
           value={String(data.indexedParameters.length)}
-          caption="Core tax thresholds in the baseline path"
+          caption="Selected tax parameters in the baseline path"
         />
         <AssumptionMetric
           label="Calibration targets"
@@ -903,8 +903,8 @@ export function BaselineAssumptionsSection() {
               </h4>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--pe-color-text-secondary)]">
                 Single-filer thresholds used by the baseline path. The vertical
-                marker is the shift from default IRS uprating to Trustees wage
-                indexing.
+                marker is the shift from default IRS uprating to PolicyEngine&apos;s
+                wage index.
               </p>
             </div>
             <div className="rounded-full bg-[var(--pe-color-bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--pe-color-text-secondary)]">
@@ -1088,8 +1088,9 @@ export function BaselineAssumptionsSection() {
             </h4>
           </div>
           <p className="mt-2 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            Core tax thresholds follow default IRS uprating through 2034 and
-            Trustees average-wage growth from 2035 forward.
+            IRS-uprated tax parameters, including credit amounts, follow default
+            IRS uprating through 2034 and PolicyEngine&apos;s National Average
+            Wage Index from 2035 forward.
           </p>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-sm">

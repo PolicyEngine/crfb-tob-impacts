@@ -87,7 +87,7 @@ export function MethodologyDiagram() {
         width="760"
         height="600"
         role="img"
-        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO targets feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of real survey households, on which we score the reforms"
+        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO inputs feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of populace records, on which we score the reforms"
         className="mx-auto h-auto max-w-full"
       >
         <rect x="0" y="0" width="760" height="600" fill="#f9fafb" rx="8" />
@@ -116,7 +116,7 @@ export function MethodologyDiagram() {
           h={56}
           title="2026 Trustees Report"
           caption="Age distribution, payroll,"
-          caption2="OASDI cost, benefit tax, GDP, AWI"
+          caption2="OASDI cost, benefit tax, GDP"
         />
         <Box
           x={390}
@@ -132,7 +132,7 @@ export function MethodologyDiagram() {
           y={62}
           w={165}
           h={56}
-          title="CBO long-run forecast"
+          title="CBO projections"
           caption="Per-category income growth"
           caption2="through 2034"
         />
@@ -172,8 +172,8 @@ export function MethodologyDiagram() {
           w={340}
           h={58}
           title="A. Grow incomes to the target year"
-          caption="Model uprating by category, CBO-vintage through 2034; capped at"
-          caption2="Trustees nominal GDP growth beyond so no source outruns the economy"
+          caption="We uprate each category on CBO projections; after 2034, we scale"
+          caption2="down categories whose index outgrows Trustees nominal GDP"
         />
         <Down x={290} y1={198} y2={214} />
 
@@ -184,7 +184,7 @@ export function MethodologyDiagram() {
           w={340}
           h={50}
           title="B. Demographic reweight (light entropy)"
-          caption="Shift household weights to the Trustees single-year age distribution"
+          caption="Shift household weights to Trustees population by five-year age group"
         />
         <Down x={290} y1={268} y2={284} />
 
@@ -208,7 +208,7 @@ export function MethodologyDiagram() {
           h={58}
           title="D. Final entropy calibration"
           caption="Exact targets: age, benefits, payroll, OASDI and HI benefit tax,"
-          caption2="plus guards holding investment and other income to their growth paths"
+          caption2="plus guards holding investment and other income at incoming totals"
         />
         <Down x={290} y1={436} y2={452} />
 
@@ -231,7 +231,7 @@ export function MethodologyDiagram() {
           w={340}
           h={56}
           title="Calibrated anchor-year datasets, 2026–2100"
-          caption="We score 15 reforms and a sensitivity case at the anchor"
+          caption="We score the 15 reforms at the anchor"
           caption2="years and interpolate between them"
           accent
         />

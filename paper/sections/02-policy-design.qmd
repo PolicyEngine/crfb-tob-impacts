@@ -2,7 +2,8 @@
 
 The fifteen reforms fall into four families: direct changes to benefit
 taxation, senior-deduction and credit redesigns, employer-payroll-tax swaps, and
-a reverse-Roth restructuring.
+a reverse-Roth restructuring. After each name, we give the label that identifies
+the reform in the results file.
 
 ## Direct taxability changes
 
@@ -25,8 +26,8 @@ a reverse-Roth restructuring.
 - **2005 Tax Panel deduction** (`tax_panel_2005`): the simple deduction that the
   President's Advisory Panel on Federal Tax Reform recommended [@taxpanel2005].
   Taxable benefits equal half of income above $22,000 ($44,000 for joint
-  filers), where income counts 85 percent of benefits, up to a cap of 85 percent
-  of benefits. At CRFB's request, we leave the thresholds unindexed, so they stay
+  filers), where income counts 85 percent of benefits, and cannot exceed 85
+  percent of benefits. At CRFB's request, we leave the thresholds unindexed, so they stay
   fixed in nominal dollars through 2100.
 
 ## Senior-deduction and credit redesigns
@@ -64,8 +65,7 @@ shift income tax from retirees toward workers. We credit the income tax on
 employer contributions to the OASDI and HI trust funds by the rules in
 @sec-swap-accounting.
 
-We also score a shorter phase-in variant, the short phase-in Roth (`option6`), as
-a sensitivity case. It phases the taxable share of employer contributions in from
+We also score the short phase-in Roth (`option6`) as a sensitivity case. It phases the taxable share of employer contributions in from
 13 percent in 2026 to 100 percent in 2033 and phases benefit taxation out over
 2029-2044. The dashboard offers the phased Roth swap as its phased option and
 leaves the short phase-in Roth off its menu.

@@ -7,7 +7,7 @@ This page describes how the current outputs are supposed to be built.
 1. Generate exact yearly H5 datasets in the pinned `policyengine-us-data`
    worktree using the Trustees current-law target source and
    `trustees-2025-core-thresholds-v1`. Every year, including `2075+`, calibrates
-   real populace survey households with no synthetic support.
+   records of the populace base with no added support records.
 2. Validate dataset metadata and exact coverage before any scoring run is
    submitted.
 3. Freeze a run-level reproducibility bundle that captures code SHAs, dirty
@@ -26,15 +26,16 @@ This page describes how the current outputs are supposed to be built.
 9. Build the release package and checksum manifest.
 
 `trustees-2025-core-thresholds-v1` means fixed nominal Social Security benefit-tax
-thresholds, plus Trustees/OACT long-run income-tax indexing: federal
-income-tax brackets and related thresholds use current-law C-CPI-U indexing
-through `2034`, then average-wage indexing from `2035` onward. SSA/OACT
-confirmed by email to PolicyEngine on May 5, 2026 that the long-range
-assumption applies both to income-tax rate brackets and to federal income-tax
-thresholds such as standard deductions.
+thresholds, plus Trustees/OACT long-run income-tax indexing: every `gov.irs`
+parameter that names `gov.irs.uprating`, credit amounts included, uses current-law
+C-CPI-U indexing through `2034`, then the `gov.ssa.nawi` path from `2035` onward.
+SSA/OACT told PolicyEngine by email on May 5, 2026 that the long-range assumption
+applies both to income-tax rate brackets and to federal income-tax thresholds such
+as standard deductions, and on May 6, 2026 that moving all inflation-indexed
+federal income-tax parameters to wages fits its projections best.
 
 The current pipeline uses no synthetic support at any horizon. Every delivered
-year — including `2075`–`2100` — calibrates real survey households only and
+year — including `2075`–`2100` — calibrates records of the populace base only and
 clears the publication gates with margin (far-horizon taxation-of-benefits
 contributor effective sample sizes of `107`–`156`). The final calibration must
 remain exact for every delivered year.

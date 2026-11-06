@@ -20,11 +20,15 @@ Invariants over the published panel and the run record:
 - Every interpolated row's anchors are the nearest exact years on either side.
 - Every reform code appears once in the paper, in the section that defines it.
 - No exhibit holds a dollar sign that Pandoc could read as closing math.
+- The age groups, growth cap, scaled income, indexed parameters, wage path, and
+  trust-fund splits the methods state match each dataset's metadata, the results
+  files, and the code that splits revenue.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -51,6 +55,14 @@ SOLVENCY_RESULTS = (
     REPO_ROOT / "dashboard" / "public" / "data" / "balanced_fix_results.csv"
 )
 ECONOMIC_PROJECTIONS = REPO_ROOT / "data" / "ssa_economic_projections.csv"
+TRUSTEES_AUX = REPO_ROOT / "data" / "social_security_aux_tr2026.csv"
+DASHBOARD_DATA = REPO_ROOT / "dashboard" / "public" / "data"
+BASELINE_ASSUMPTIONS = DASHBOARD_DATA / "baseline_assumptions_metadata.json"
+INDEXED_PARAMETERS = DASHBOARD_DATA / "baseline_indexed_parameters.csv"
+INDEXING_GROWTH = DASHBOARD_DATA / "baseline_indexing_growth.csv"
+DIAGNOSTICS = DASHBOARD_DATA / "v2_baseline_diagnostics.csv"
+BASELINE_TAB = DASHBOARD_COMPONENTS / "baseline-assumptions-section.tsx"
+
 MANIFESTS = REPO_ROOT / "docs" / "current" / "manifests"
 FAR_HORIZON_YEARS = range(2075, 2101, 5)
 SUPPORT_FLOOR = 50
@@ -128,14 +140,22 @@ DRAFTING_PHRASES = (
 )
 
 # Terms from claims the code does not support: the v1 calibration profile's name,
-# a calibration fallback no code path has, and run machinery only some runs used.
+# a calibration fallback no code path has, run machinery only some runs used, and
+# wrong descriptions of the records, age groups, growth cap, income guards, indexed
+# parameters, and parameter review.
 UNSUPPORTED_CLAIM_PHRASES = (
+    "86 columns",
+    "core federal income-tax thresholds",
     "iterative proportional",
     "modal",
+    "no income source grows faster",
+    "real survey",
     "reproducibility bundle",
     "runtime",
+    "scanned every model parameter",
     "smoke-test",
     "ss-payroll-tob",
+    "stage a growth paths",
 )
 
 
@@ -279,6 +299,26 @@ def test_dashboard_methodology_shows_no_internal_tracking() -> None:
     assert "Options 5-6" not in section
 
 
+def test_dashboard_methodology_drops_claims_the_code_does_not_support() -> None:
+    for path in DASHBOARD_METHODOLOGY:
+        text = flat(path.read_text(encoding="utf-8")).lower()
+        for phrase in ("awi", "cbo-vintage", "growth paths", "outruns", "real survey"):
+            assert not re.search(rf"\b{re.escape(phrase)}\b", text), (path.name, phrase)
+
+
+def test_baseline_tab_names_the_wage_path_it_uses() -> None:
+    tab = flat(BASELINE_TAB.read_text(encoding="utf-8"))
+    for phrase in (
+        "Core tax thresholds",
+        "Trustees average-wage growth",
+        "Trustees wage indexing",
+    ):
+        assert phrase not in tab, phrase
+    growth = INDEXING_GROWTH.read_text(encoding="utf-8")
+    assert "Trustees average-wage growth" not in growth
+    assert "PolicyEngine National Average Wage Index growth" in growth
+
+
 def test_dashboard_methodology_uses_reader_names() -> None:
     for path in DASHBOARD_METHODOLOGY:
         text = path.read_text(encoding="utf-8")
@@ -364,13 +404,29 @@ def test_abstract_figures_match_results(static: pd.DataFrame) -> None:
     assert ten_year["option1"] < 0 and pv["option1"] < 0
     assert f"${ten_year['option8']:,.0f} billion" in abstract
 
-    for reform, name in (("option5", "immediate"), ("option12", "phased")):
-        series = static[static["reform_name"] == reform].set_index("year")
-        revenue = series["revenue_impact"].sort_index()
-        first_loss = int(revenue[revenue < 0].index.min())
-        assert (revenue.loc[: first_loss - 1] > 0).all()
-        assert (revenue.loc[first_loss:] < 0).all()
-        assert f"from {first_loss} for the {name}" in abstract, reform
+    def first_loss(series: pd.Series) -> int:
+        """The year a series turns negative, after gains in every earlier year."""
+        series = series.sort_index()
+        year = int(series[series < 0].index.min())
+        assert (series.loc[: year - 1] > 0).all()
+        assert (series.loc[year:] < 0).all()
+        return year
+
+    def first_losses(reform: str) -> set[int]:
+        """The first loss by each measure: the income-tax change and the fund sum."""
+        rows = static[static["reform_name"] == reform].set_index("year")
+        return {
+            first_loss(rows["revenue_impact"]),
+            first_loss(rows["oasdi_net_impact"] + rows["hi_net_impact"]),
+        }
+
+    assert first_losses("option5") <= set(range(2053, 2057))
+    assert "from the mid-2050s for the immediate" in abstract
+    assert first_losses("option12") == {2060}
+    assert "from 2060 for the phased" in abstract
+
+    anchor_years = {item["year"] for item in run_record()["baselines"]}
+    assert f"project to {len(anchor_years)} anchor years" in abstract
 
 
 def test_methods_figures_match_results(
@@ -440,6 +496,93 @@ def test_solvency_figures_match_results() -> None:
     ) in methods
 
 
+def test_solvency_rows_split_revenue_as_the_methods_state() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    solvent = pd.read_csv(SOLVENCY_RESULTS)
+    exact = solvent[solvent["balanced_fix_result_type"].str.startswith("exact")]
+
+    for reform in ("option1", "option2", "option8"):
+        rows = exact[exact["reform_name"] == reform]
+        assert len(rows) == 5, reform
+        share = rows["baseline_tob_oasdi"] / (
+            rows["baseline_tob_oasdi"] + rows["baseline_tob_medicare_hi"]
+        )
+        assert (
+            rows["solvent_oasdi_impact"] - rows["revenue_impact"] * share
+        ).abs().max() < 1e-6
+        assert rows["solvent_general_fund_impact"].abs().max() < 1e-6
+
+    phased = exact[exact["reform_name"] == "option12"]
+    assert len(phased) == 5
+    assert (
+        phased["solvent_oasdi_impact"] - phased["oasdi_net_impact"]
+    ).abs().max() < 1e-6
+    assert (
+        phased["solvent_medicare_hi_impact"] - phased["hi_net_impact"]
+    ).abs().max() < 1e-6
+    assert phased["solvent_general_fund_impact"].abs().max() > 1
+
+    components = solvent[
+        [
+            "solvent_oasdi_impact",
+            "solvent_medicare_hi_impact",
+            "solvent_general_fund_impact",
+        ]
+    ].sum(axis=1)
+    assert (components - solvent["revenue_impact"]).abs().max() < 1e-6
+
+    for phrase in (
+        "For full repeal, 85 percent taxation, and 100 percent taxation, we split "
+        "revenue by baseline trust-fund shares.",
+        "For the phased Roth swap, we credit each fund under the rules in "
+        "@sec-swap-accounting and assign the rest of the revenue impact to the "
+        "general fund.",
+        "The components of every row sum to the total.",
+    ):
+        assert phrase in methods, phrase
+
+
+def test_methods_state_the_default_split_for_each_reform() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    rules = headline.load_allocation_rules()
+    net_impact = {*rules["directBranchingOptions"], *rules["netImpactOptions"]}
+    shares = {*rules["baselineShareOptions"], *rules["allocationEligibleOptions"]}
+    assert net_impact == set(exhibits.SWAP_REFORMS)
+    assert shares == (
+        set(exhibits.STANDARD_REFORMS) - net_impact - {"option7", "reverse_roth"}
+    )
+
+    row = {
+        "revenue_impact": "10",
+        "oasdi_net_impact": "7",
+        "hi_net_impact": "4",
+        "baseline_tob_oasdi": "3",
+        "baseline_tob_medicare_hi": "1",
+        "tob_oasdi_impact": "2",
+        "tob_medicare_hi_impact": "1",
+    }
+
+    def split(reform: str) -> tuple[float, float, float, float]:
+        return headline.default_split({**row, "reform_name": reform})
+
+    assert split("option2") == (10, 7.5, 2.5, 0)
+    assert split("option5") == (11, 7, 4, 0)
+    assert split("option12") == (11, 7, 4, 0)
+    assert split("option7") == (10, 2, 1, 7)
+    assert split("reverse_roth") == (10, 9, 1, 0)
+
+    for phrase in (
+        "we divide revenue between OASDI and HI by each fund's share of baseline "
+        "benefit-tax revenue",
+        "so we add the two funds' net impacts",
+        "we credit each fund with its taxation-of-benefits change and assign the "
+        "rest to the general fund",
+        "we credit HI with its benefit-tax change as the model scores it and charge "
+        "OASDI with the rest of the revenue impact",
+    ):
+        assert phrase in methods, phrase
+
+
 def test_labor_supply_methods_match_the_scored_reforms_and_anchors(
     behavioral: pd.DataFrame,
 ) -> None:
@@ -503,10 +646,119 @@ def dataset_audits() -> dict[int, dict]:
     return audits
 
 
-def test_published_datasets_calibrate_exactly_on_real_records() -> None:
+def test_published_datasets_calibrate_exactly_and_add_no_records() -> None:
     for year, metadata in dataset_audits().items():
         assert metadata["calibration_audit"]["calibration_quality"] == "exact", year
         assert metadata["sentinel"]["donor_clone_household_count"] == 0, year
+
+
+def test_methods_state_the_age_groups_the_projection_used() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    for year, metadata in dataset_audits().items():
+        assert metadata["profile"]["age_bucket_size"] == 5, year
+    columns = 85 // 5 + 1
+    assert (
+        f"has {columns} columns: five-year groups from 0-4 through 80-84 and a "
+        "top-coded 85+ group"
+    ) in methods
+
+
+def test_methods_state_what_the_growth_cap_reached() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    capped: set[str] = set()
+    for year, metadata in dataset_audits().items():
+        factors = metadata.get("longrun_growth_caps") or {}
+        assert all(0 < factor <= 1 for factor in factors.values()), year
+        if year <= 2034:
+            assert not factors, year
+        capped |= set(factors)
+    assert capped == {
+        "non_qualified_dividend_income",
+        "partnership_s_corp_income",
+        "qualified_bdc_income",
+        "qualified_dividend_income",
+        "qualified_reit_and_ptp_income",
+    }
+    assert (
+        "That cap reaches dividends, the investment income that shares their index, "
+        "and partnership and S-corporation income."
+    ) in methods
+
+    diagnostics = pd.read_csv(DIAGNOSTICS).set_index("year")
+
+    def growth(column: str) -> float:
+        return float(diagnostics.loc[2100, column] / diagnostics.loc[2035, column])
+
+    assert (
+        f"from 2035 to 2100, GDP grows {growth('gdp'):.1f}-fold and partnership and "
+        f"S-corporation income grows {growth('partnership_s_corp_income'):.1f}-fold"
+    ) in methods
+
+
+def test_methods_state_the_income_the_value_scalar_moves() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    gains = "short-term and non-Schedule-D capital gains"
+    retirement = "pension and IRA income"
+    rents = "rental and farm-rent income"
+    named = {
+        "taxable_interest_income": "interest",
+        "tax_exempt_interest_income": "interest",
+        "qualified_dividend_income": "dividends",
+        "non_qualified_dividend_income": "dividends",
+        "short_term_capital_gains": gains,
+        "non_sch_d_capital_gains": gains,
+        "taxable_ira_distributions": retirement,
+        "taxable_pension_income": retirement,
+        "tax_exempt_pension_income": retirement,
+        "rental_income": rents,
+        "farm_rent_income": rents,
+        "estate_income": "estate income",
+        "partnership_s_corp_income": "partnership and S-corporation income",
+        "miscellaneous_income": "miscellaneous income",
+    }
+    for year, metadata in dataset_audits().items():
+        columns = metadata["value_scaling"]["other_income_columns"]
+        assert {column.removesuffix(f"__{year}") for column in columns} == set(named)
+    for phrase in set(named.values()):
+        assert phrase in methods, phrase
+
+
+def test_methods_state_the_parameters_the_baseline_indexes_to_wages() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    assumption = json.loads(BASELINE_ASSUMPTIONS.read_text(encoding="utf-8"))[
+        "tax_assumption"
+    ]
+    assert assumption["parameter_groups"] == ["all_gov_irs_uprating_parameters"]
+    assert assumption["uprating_parameter"] == "gov.irs.uprating"
+    assert assumption["wage_index"] == "gov.ssa.nawi"
+    assert assumption["start_year"] == 2035
+    assert "May 6, 2026" in assumption["source"]
+    for year, metadata in dataset_audits().items():
+        assert metadata["tax_assumption"]["start_year"] == 2035, year
+
+    assert "From 2035, we therefore index to wages every federal income-tax" in methods
+    assert "credit amounts such as the child tax credit" in methods
+    assert "May 5 and May 6, 2026" in methods
+
+
+def test_methods_state_the_wage_path_behind_the_indexed_parameters() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    parameters = pd.read_csv(INDEXED_PARAMETERS)
+    bracket = parameters[
+        parameters["parameter_name"] == "gov.irs.income.bracket.thresholds.1.JOINT"
+    ].set_index("year")["value"]
+    wages = pd.read_csv(TRUSTEES_AUX).set_index("year")["average_wage_index"]
+
+    # A parameter for year y follows the wage index for year y - 1.
+    model_growth = bracket[2100] / bracket[2034]
+    trustees_growth = wages[2099] / wages[2033]
+    implied = bracket[2034] * trustees_growth
+
+    assert f"about {model_growth:.1f}-fold from 2033 to 2099" in methods
+    assert f"against about {trustees_growth:.1f}-fold" in methods
+    assert f"${bracket[2100]:,.0f} in 2100" in methods
+    assert f"${round(implied, -2):,.0f} that Trustees wage growth implies" in methods
+    assert f"about {100 * (1 - bracket[2100] / implied):.0f} percent below" in methods
 
 
 def test_far_horizon_support_figures_match_dataset_metadata() -> None:
@@ -637,7 +889,7 @@ def test_every_baseline_calibrates_exactly_and_clears_every_gate() -> None:
     assert "by more than 0.000001%" in validation
 
     def lowest(name: str) -> int:
-        return round(
+        return math.floor(
             min(
                 item["contributors"][name]["contributor_effective_sample_size"]
                 for item in baselines

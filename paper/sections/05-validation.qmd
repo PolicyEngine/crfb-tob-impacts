@@ -6,7 +6,7 @@
 
 All 21 anchor years hit every calibration target and meet every publication
 gate, with no constraint off by more than 0.000001%. Effective sample sizes
-among taxation-of-benefits contributors never fall below 132 for OASDI and 86
+among taxation-of-benefits contributors never fall below 132 for OASDI and 85
 for HI, against a floor of 50. In the six far-horizon anchor years (2075-2100),
 they run 132-156 for OASDI and 107-127 for HI. In 2100, they reach 153 for OASDI
 and 127 for HI, and the ten largest household weights hold 3.4% of the total

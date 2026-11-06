@@ -204,9 +204,7 @@ export function BaselineDiagnosticsSection() {
         Report targets or references. Panels marked “calibrated” are matched
         exactly during dataset construction; “diagnostic” panels are
         unconstrained by-products shown so divergences are visible rather
-        than hidden — including federal income tax, whose level runs above
-        administrative collections (a known enhanced-CPS property) while its
-        growth path should stay smooth.
+        than hidden, including federal income tax.
       </p>
       {rows === null ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

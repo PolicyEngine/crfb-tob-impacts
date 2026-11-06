@@ -30,7 +30,7 @@ labor between weights and values created three structural problems:
 
 For each projection year Y, `scripts/build_v2_projected_datasets.py`:
 
-- **Stage A — materialize.** Simulate the latest published enhanced CPS at
+- **Stage A — materialize.** Simulate the populace base at
   year Y in a fresh simulation and export every true input variable at its
   year-Y (uprated) value. Derived variables are never stored, so formulas
   (including labor-supply responses) always recompute downstream.
@@ -53,7 +53,8 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
     becomes nearly inelastic to other income, so `gamma` is bounded and
     the final calibration closes the remainder.
 - **No synthetic support stage.** Every record in every published year is
-  a real survey household. The populace base stays broad enough at the far
+  a record of the populace base, which flags 42,706 of its 75,112 households
+  (50.8 percent of its weight) as PUF clones. The populace base stays broad enough at the far
   horizon that 2100 — the hardest year, with the most extreme age shift —
   passes every publication gate with margin (taxation-of-benefits
   contributor effective sample sizes of 152 OASDI and 127 HI against the
@@ -124,8 +125,11 @@ that earlier drafts of this work carried.
 ## Wage-path vintage
 
 The model law's long-run wage indexing (`gov.ssa.nawi` and the payroll
-cap inside policyengine-us 1.700.2) follows the TR2025 intermediate
-path; TR2026's average wage index runs about 18% higher by 2100. The
+cap inside policyengine-us 1.700.2) derives from CBO's payroll-tax-cap
+forecast through 2033, then grows about 3.4 percent a year. It rises 9.09-fold
+from 2033 to 2099, against 10.08-fold on the TR2025 path and 10.18-fold on the
+TR2026 path, and TR2026's average wage index runs about 18% higher in level by
+2100. The
 value-scaling stages pin taxable payroll, benefits, and TOB to TR2026
 aggregates regardless, so this affects only the within-model bracket
 positions of individual records. Updating the packaged NAWI path to

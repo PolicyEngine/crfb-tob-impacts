@@ -285,7 +285,7 @@ def _swap_note() -> list[str]:
         f"{amounts[0]}, {amounts[1]}, and {amounts[2]}, because we measure each",
         "fund's gain from taxing employer contributions separately",
         "(@sec-swap-accounting). We report the federal income-tax change in the",
-        "revenue tables of @sec-results.",
+        "revenue tables that follow.",
     ]
 
 

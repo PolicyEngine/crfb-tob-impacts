@@ -101,17 +101,17 @@ const REFORM_DEFINITIONS: ReformMeta[] = [
   },
   {
     id: "option6",
-    name: "Legacy Short Phase-In Roth Swap",
+    name: "Short Phase-In Roth Swap",
     shortName: "Short phase-in Roth",
     description:
-      "Legacy short phase-in variant retained in raw artifacts but omitted from the CRFB-facing dashboard menu.",
+      "Short phase-in variant scored as a sensitivity case and left off the dashboard menu.",
     category: "Employer payroll-tax swap",
     mechanism:
-      "Phases in taxation of employer payroll-tax contributions while phasing out benefit taxation over a shorter transition than the publication-facing phased Roth option.",
+      "Phases in taxation of employer payroll-tax contributions while phasing out benefit taxation over a shorter transition than the phased Roth swap.",
     baseline:
       "Scored against current law, with transition years comparing a partial payroll-tax inclusion against remaining benefit taxation.",
     interpretation:
-      "Use as a raw-data sensitivity rather than a primary publication-facing policy option.",
+      "Read as a sensitivity case for the phased Roth swap.",
     scoringNote:
       "Static and supplemental behavioral results are available. Trust-fund allocation follows the explicit OASDI/HI net-impact logic.",
   },

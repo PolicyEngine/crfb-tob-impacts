@@ -144,6 +144,19 @@ def load_behavioral() -> pd.DataFrame:
     return behavioral.sort_values(["year", "reform_name"]).reset_index(drop=True)
 
 
+def by_value(values: pd.Series) -> list[str]:
+    """List reforms from lowest value to highest, ties in reform order.
+
+    Several reforms share one 2100 value, and `sort_values` orders ties
+    differently across pandas versions.
+    """
+    position = {reform: index for index, reform in enumerate(STANDARD_REFORMS)}
+    return sorted(
+        values.index,
+        key=lambda reform: (round(float(values[reform]), 6), position[reform]),
+    )
+
+
 def ordered(reforms: Iterable[str]) -> list[str]:
     present = set(reforms)
     return [r for r in REFORM_LABELS if r in present]
@@ -163,20 +176,17 @@ def build_results_overview(df: pd.DataFrame) -> str:
 
     ten_year_table = markdown_table(
         ["Reform", "2026-2035 revenue impact ($B)"],
-        [
-            [label(reform), fmt_b(value)]
-            for reform, value in ten_year.sort_values().items()
-        ],
+        [[label(reform), fmt_b(ten_year[reform])] for reform in by_value(ten_year)],
     )
     terminal_table = markdown_table(
         ["Reform", "2100 revenue impact ($B)", "2100 benefit-tax revenue impact ($B)"],
         [
             [
                 label(reform),
-                fmt_b(row.revenue_impact),
-                fmt_b(row.tob_total_impact),
+                fmt_b(terminal.loc[reform, "revenue_impact"]),
+                fmt_b(terminal.loc[reform, "tob_total_impact"]),
             ]
-            for reform, row in terminal.sort_values("revenue_impact").iterrows()
+            for reform in by_value(terminal["revenue_impact"])
         ],
     )
 
@@ -252,7 +262,7 @@ def build_milestones(df: pd.DataFrame) -> str:
         bool((milestones.loc["option1"] < 0).all()) and falling("option1"),
         "option1 should lose more revenue at each milestone",
     )
-    for reform in ("option5", "option12"):
+    for reform in SWAP_REFORMS:
         values = milestones.loc[reform]
         check(
             values[2035] > 0 and values[2050] > 0,
@@ -268,17 +278,11 @@ def build_milestones(df: pd.DataFrame) -> str:
             -row.tob_total_impact > employer_tax,
             f"{reform}'s 2075 benefit-tax loss should exceed its employer tax",
         )
-    gainers = (
-        "option2",
-        "option3",
-        "option4",
-        "option8",
-        "option9",
-        "option10",
-        "option11",
-        "tax93",
-        "magi100",
-    )
+    gainers = [
+        reform
+        for reform in milestones.index
+        if reform not in SWAP_REFORMS and milestones.loc[reform, 2035] >= 0.05
+    ]
     for reform in gainers:
         check(
             bool((milestones.loc[reform] > 0).all()) and rising(reform),
@@ -296,10 +300,10 @@ def build_milestones(df: pd.DataFrame) -> str:
 
     return f"""
 We estimate that the revenue loss from {prose("option1")} grows at each
-milestone year. {opening("option5")} and {prose("option12")} raise revenue in
-2035 and 2050 but lose it by 2075, when the benefit-tax revenue they repeal
-exceeds the income tax on employer contributions. The revenue gain from every
-reform that taxes more of benefits grows at each milestone year.
+milestone year. The Roth swaps raise revenue in 2035 and 2050 but lose it by
+2075, when the benefit-tax revenue they repeal exceeds the income tax on employer
+contributions. Every other reform that raises revenue in 2035 raises more at each
+later milestone year.
 
 {milestone_table}
 """
@@ -355,22 +359,23 @@ def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
     table = markdown_table(
         [
             "Reform",
-            "2100 revenue ($B)",
-            "2100 benefit-tax revenue ($B)",
+            "2100 revenue impact ($B)",
+            "2100 benefit-tax revenue impact ($B)",
             "2100 OASDI net ($B)",
             "2100 HI net ($B)",
         ],
         rows,
     )
     return f"""
-This table credits each trust fund with the revenue the model attributes to it,
-not the default split in @sec-headline, and applies the rules in
-@sec-swap-accounting to {prose("option12")}. We estimate that in 2100
-{prose("option1")} costs OASDI {dollars(net("option1", "oasdi"))} and HI
-{dollars(net("option1", "hi"))}. Under 85 or 100 percent taxation, OASDI gains
-{dollars(net("option2", "oasdi"))} and HI gains the rest. {opening("option12")}
-gains OASDI {dollars(net("option12", "oasdi"))} and costs HI
-{dollars(net("option12", "hi"))}.
+We estimate that in 2100 {prose("option1")} costs OASDI
+{dollars(net("option1", "oasdi"))} and HI {dollars(net("option1", "hi"))}. Under
+85 or 100 percent taxation, OASDI gains {dollars(net("option2", "oasdi"))}, because
+the model credits it with tax on at most half of benefits, and HI gains the rest.
+{opening("option12")} gains OASDI {dollars(net("option12", "oasdi"))} and costs HI
+{dollars(net("option12", "hi"))}. For this decomposition, we credit each trust
+fund with the revenue the model attributes to it rather than using the default
+split in @sec-headline, and we apply the rules in @sec-swap-accounting to
+{prose("option12")}.
 
 {table}
 """
@@ -464,28 +469,28 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
                 fmt_b(float(ten_year["option1"])),
             ],
             [
-                "CBO [@cbo2024options]",
+                "CBO [-@cbo2024options]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,600.0",
             ],
             [
-                "SSA Trustees [@ssa2024trustees]",
+                "SSA Trustees [-@ssa2024trustees]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,800.0",
             ],
             [
-                "Tax Foundation [@taxfoundation2024trump]",
+                "Tax Foundation [-@taxfoundation2024trump]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,400.0",
             ],
             [
-                "Tax Foundation [@taxfoundation2024trump]",
+                "Tax Foundation [-@taxfoundation2024trump]",
                 "Full repeal",
                 "Macroeconomic",
                 "2025-2034",
@@ -512,14 +517,14 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
                 fmt_b(float(ten_year["option8"])),
             ],
             [
-                "JCT [@jct2024expenditures]",
-                "Current SS tax expenditure",
+                "JCT [-@jct2024expenditures]",
+                "Current Social Security tax expenditure",
                 "Conventional",
                 "2024-2028",
                 "+318.4",
             ],
             [
-                "CBO [@cbo2024pension]",
+                "CBO [-@cbo2024pension]",
                 "Pension-style basis recovery",
                 "Conventional",
                 "2021-2030",
@@ -534,7 +539,7 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
             "Policy",
             "Scoring",
             "Window",
-            "Federal revenue ($B)",
+            "Revenue impact ($B)",
             "Benefit-tax revenue impact ($B)",
         ],
         [
@@ -547,7 +552,7 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
                 fmt_b(float(ten_year_tob["option7"])),
             ],
             [
-                "JCT [@jct2025bonus]",
+                "JCT [-@jct2025bonus]",
                 "Bonus senior deduction",
                 "Conventional",
                 "FY2025-FY2034",
@@ -639,11 +644,12 @@ def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame)
     return f"""
 We estimate that in 2100 labor-supply responses cost the Roth swaps another
 {dollars(swap_effects[0])}, offset {dollars(effects["reverse_roth"])} of the
-reverse Roth's loss, and move every other reform's revenue impact by at most
-{dollars(other)}.
+reverse Roth's loss, and move the revenue impact of every other reform we score
+by at most {dollars(other)}.
 
-For each reform, we report the revenue impact with labor-supply responses at the
-two endpoints and the response effect, which subtracts the static impact.
+For each reform we score (@sec-labor-supply), we report the revenue impact with
+labor-supply responses in 2026 and 2100 and the response effect, that impact minus
+the static impact.
 
 {table}
 """

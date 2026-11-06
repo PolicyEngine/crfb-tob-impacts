@@ -623,7 +623,7 @@ def build_indexed_parameter_tables(
             growth_multiplier = float(nawi(f"{year - 1}-01-01")) / float(
                 nawi(f"{year - 2}-01-01")
             )
-            source = "SSA Trustees average-wage growth"
+            source = "PolicyEngine National Average Wage Index growth"
         growth_rows.append(
             {
                 "year": year,
