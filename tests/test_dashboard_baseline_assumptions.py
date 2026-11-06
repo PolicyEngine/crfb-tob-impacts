@@ -14,12 +14,13 @@ import pandas as pd
 from src import cli
 from src.dashboard_baseline_assumptions import build_calibration_targets
 
-# PyPI no longer serves policyengine-us 1.729.0, the release that
+# PyPI no longer lists policyengine-us 1.729.0, the release that
 # policyengine[us]==4.17.5 pins, so CI installs it from an archive of its
-# version-bump commit. Such an archive is immutable; a local or editable
-# checkout, or an archive of a branch or tag, is not.
-POLICYENGINE_US_COMMIT_ARCHIVE = re.compile(
-    r"https://github\.com/PolicyEngine/policyengine-us/archive/[0-9a-f]{40}\.tar\.gz"
+# version-bump commit. The guard accepts that one archive by its exact URL:
+# other commits carry the same version label with different code.
+POLICYENGINE_US_RELEASE_ARCHIVE = (
+    "https://github.com/PolicyEngine/policyengine-us/archive/"
+    "180410fe35209fb8201378c1b32dadd38051c342.tar.gz"
 )
 
 
@@ -28,10 +29,36 @@ def _direct_url(package_name: str) -> dict | None:
     return json.loads(text) if text else None
 
 
-def _is_policyengine_us_commit_archive(direct_url: dict) -> bool:
-    return "archive_info" in direct_url and bool(
-        POLICYENGINE_US_COMMIT_ARCHIVE.fullmatch(direct_url.get("url", ""))
+def _is_policyengine_us_release_archive(direct_url: dict) -> bool:
+    return (
+        "archive_info" in direct_url
+        and direct_url.get("url") == POLICYENGINE_US_RELEASE_ARCHIVE
     )
+
+
+def test_runtime_guard_accepts_only_the_release_archive():
+    assert _is_policyengine_us_release_archive(
+        {"url": POLICYENGINE_US_RELEASE_ARCHIVE, "archive_info": {}}
+    )
+    # A commit that carries the same version label with different code.
+    other_commit = POLICYENGINE_US_RELEASE_ARCHIVE.replace(
+        "180410fe35209fb8201378c1b32dadd38051c342",
+        "91eb36576e" + "0" * 30,
+    )
+    assert not _is_policyengine_us_release_archive(
+        {"url": other_commit, "archive_info": {}}
+    )
+    assert not _is_policyengine_us_release_archive(
+        {"url": POLICYENGINE_US_RELEASE_ARCHIVE, "vcs_info": {}}
+    )
+    assert not _is_policyengine_us_release_archive(
+        {"url": "file:///tmp/policyengine-us", "dir_info": {"editable": True}}
+    )
+
+
+def test_ci_installs_the_archive_the_guard_accepts():
+    workflow = Path(".github/workflows/validate.yml").read_text(encoding="utf-8")
+    assert f"policyengine-us @ {POLICYENGINE_US_RELEASE_ARCHIVE}" in workflow
 
 
 def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
@@ -61,7 +88,7 @@ def test_package_runtime_uses_policyengine_py_with_trustees_assumption():
         assert (policyengine_direct_url.get("dir_info") or {}).get("editable") is True
     policyengine_us_direct_url = _direct_url("policyengine-us")
     if policyengine_us_direct_url is not None:
-        assert _is_policyengine_us_commit_archive(policyengine_us_direct_url)
+        assert _is_policyengine_us_release_archive(policyengine_us_direct_url)
     assert _direct_url("policyengine-core") is None
 
     distribution = metadata.distribution("policyengine-us")

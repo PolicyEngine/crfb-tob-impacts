@@ -34,7 +34,7 @@ jobs:
         run: |
           # Install the versions uv.lock pins, so new releases of ruff,
           # pandas or spm-calculator cannot break the guards. PyPI no longer
-          # serves policyengine-us 1.729.0, which policyengine[us]==4.17.5
+          # lists policyengine-us 1.729.0, which policyengine[us]==4.17.5
           # pins exactly, so skip that one package here and install the same
           # release from its version-bump commit on GitHub. The lock already
           # installs its dependencies at their locked versions.
