@@ -173,10 +173,10 @@ fund's share of baseline benefit-tax revenue.
 
 Every projected dataset hits all of its calibration targets. The projection
 script stops on any year whose final calibration misses a target by more than
-0.01 percent. A baseline manifest lists the SHA-256 hash, a fingerprint of the file's
-contents, of each baseline H5 and metadata file. The scoring code stops when a
-file differs from its listed hash, and every run behind the results file made
-that check.
+0.01 percent. A baseline manifest lists the SHA-256 hash, a fingerprint of the
+file's contents, of each baseline H5 and metadata file. The scoring code stops
+when a file differs from its listed hash, and every run behind the results file
+made that check.
 
 ## Far-horizon contributors
 
@@ -205,10 +205,10 @@ inputs, including the growth ceiling after 2034.
 
 ## Calibration estimator
 
-We use positive entropy calibration. Let
-$w_i^0$ be the initial household weight, $a_i$ be the vector of calibration
-variables for household $i$, and $t_y$ be the target vector for year $y$. The
-estimator chooses strictly positive weights $w_i$ that solve
+We use positive entropy calibration. Let $w_i^0$ be the initial household
+weight, $a_i$ be the vector of calibration variables for household $i$, and
+$t_y$ be the target vector for year $y$. The estimator chooses strictly positive
+weights $w_i$ that solve
 
 $$
 \min_{w_i>0}
@@ -245,8 +245,7 @@ error.
 For each reform and year, the scoring code loads the calibrated year-$y$
 dataset, runs a baseline PolicyEngine simulation and a reform simulation on the
 same records, saves the reform simulation in its own H5 file, and stores both
-levels and differences. It writes these core
-output columns:
+levels and differences. It writes these core output columns:
 
 | Output | Definition |
 |---|---|
@@ -272,13 +271,13 @@ and HI.
 
 ### Trust-fund accounting for the Roth swaps {#sec-swap-accounting}
 
-For the Roth swap and the phased Roth swap, we credit each trust fund with the income tax on
-its own employer contribution: the employer Social Security contribution funds
-OASDI, and the employer Medicare contribution funds HI. For each tax unit, we
-compute income tax with both employer contributions in income, compute it again
-with one fund's contribution removed, and credit the difference to that fund,
-with a floor of zero. For the short phase-in Roth before 2033, we pool
-the two gains. We credit OASDI first, up to its 6.2 of the 7.65 percentage
+For the Roth swap and the phased Roth swap, we credit each trust fund with the
+income tax on its own employer contribution: the employer Social Security
+contribution funds OASDI, and the employer Medicare contribution funds HI. For
+each tax unit, we compute income tax with both employer contributions in income,
+compute it again with one fund's contribution removed, and credit the difference
+to that fund, with a floor of zero. For the short phase-in Roth before 2033, we
+pool the two gains. We credit OASDI first, up to its 6.2 of the 7.65 percentage
 points of employer payroll tax, and HI with the rest. We then subtract the
 benefit-tax revenue each fund loses to get its net impact.
 
@@ -288,10 +287,9 @@ The two funds' net impacts therefore need not sum to the change in federal
 income tax. In our results the sums exceed that change in every year: over
 2026-2035, by $12.7 billion for the Roth swap, $36.2 billion for the phased Roth
 swap, and $24.5 billion for the short phase-in Roth, and by $11.8 billion for
-each in 2100. We report
-the sum of the two funds' net impacts on the dashboard and in the headline
-summary (@sec-headline), and the change in federal income tax in the revenue
-tables of @sec-results.
+each in 2100. We report the sum of the two funds' net impacts on the dashboard
+and in the headline summary (@sec-headline), and the change in federal income
+tax in the revenue tables of @sec-results.
 
 ## Anchor years
 
@@ -309,24 +307,25 @@ through 2028, among them the bonus senior deduction and deductions for tips,
 overtime pay, and auto-loan interest. It also raised the cap on the
 state-and-local-tax deduction through 2029. The impact of a reform that
 interacts with those provisions jumps within the budget window, and a straight
-line from 2026 to 2030 cannot follow the jump. For example, the senior-deduction repeal
-changes only the bonus senior deduction, which expires after 2028 under
+line from 2026 to 2030 cannot follow the jump. For example, the senior-deduction
+repeal changes only the bonus senior deduction, which expires after 2028 under
 current law, so the reform's impact falls to zero in 2029. A straight line
-between the 2026 and 2030 anchors would understate its 2028 impact by
-$9.9 billion.
+between the 2026 and 2030 anchors would understate its 2028 impact by $9.9
+billion.
 
 We add exact anchors where the schedules bend. We scanned every model parameter
 that changes discretely between 2027 and 2034 and found no other federal
-discontinuity that matters for these reforms. Exact anchors in 2028 and
-2029, for every reform, bracket both changes. The short phase-in Roth raises the taxable
-share of employer payroll tax each year until it reaches 100 percent in 2033,
-so we add exact anchors in 2032 and 2033 at that corner. The phased Roth swap
-phases benefit taxation out in a straight line that ends in 2062, between the
-2060 and 2065 anchors, so we add an exact anchor in 2062. Once its phase-out
-ends, the phased Roth swap reaches the Roth swap's settings, so we also score the
-Roth swap in 2062, and the two exact scores agree to the dollar. Straight lines
-between the 2060 and 2065 anchors would put them $19.5 billion apart. The Roth
-swap and the reverse Roth take full effect at once and need no further anchors.
+discontinuity that matters for these reforms. Exact anchors in 2028 and 2029,
+for every reform, bracket both changes. The short phase-in Roth raises the
+taxable share of employer payroll tax each year until it reaches 100 percent in
+2033, so we add exact anchors in 2032 and 2033 at that corner. The phased Roth
+swap phases benefit taxation out in a straight line that ends in 2062, between
+the 2060 and 2065 anchors, so we add an exact anchor in 2062. Once its phase-out
+ends, the phased Roth swap reaches the Roth swap's settings, so we also score
+the Roth swap in 2062, and the two exact scores agree to the dollar. Straight
+lines between the 2060 and 2065 anchors would put them $19.5 billion apart. The
+Roth swap and the reverse Roth take full effect at once and need no further
+anchors.
 
 ## Solvency-baseline scoring
 

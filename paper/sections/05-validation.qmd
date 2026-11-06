@@ -4,22 +4,23 @@
 
 ### Calibration
 
-All 21 anchor years hit every calibration target and meet every publication gate, with no constraint off by more than 0.000001%.
-Effective sample sizes among taxation-of-benefits contributors never fall below
-132 for OASDI and 86 for HI, against a floor of 50. In the six far-horizon
-anchor years (2075-2100), they run 132-156 for OASDI and 107-127 for
-HI. In 2100, they reach 153 for OASDI and 127 for HI, and the ten largest
-household weights hold 3.4% of the total weight. We project federal income tax at about 8 to 10
-percent of GDP across the horizon, in line with historical experience.
+All 21 anchor years hit every calibration target and meet every publication
+gate, with no constraint off by more than 0.000001%. Effective sample sizes
+among taxation-of-benefits contributors never fall below 132 for OASDI and 86
+for HI, against a floor of 50. In the six far-horizon anchor years (2075-2100),
+they run 132-156 for OASDI and 107-127 for HI. In 2100, they reach 153 for OASDI
+and 127 for HI, and the ten largest household weights hold 3.4% of the total
+weight. We project federal income tax at about 8 to 10 percent of GDP across the
+horizon, in line with historical experience.
 
 ### Reform scoring
 
 The metadata file of each of the 323 exact rows records that its run made the
-manifest check, and each reform H5 hash matches the results file. In every anchor year, full
-repeal reduces federal income tax by the full baseline revenue from taxing
-benefits, and taxing all benefits raises revenue in every year. The exact 2062
-anchors for the Roth swap and the phased Roth swap, which we score separately,
-agree to the dollar in both the static and the labor-supply results.
+manifest check, and each reform H5 hash matches the results file. In every
+anchor year, full repeal reduces federal income tax by the full baseline revenue
+from taxing benefits, and taxing all benefits raises revenue in every year. The
+exact 2062 anchors for the Roth swap and the phased Roth swap, which we score
+separately, agree to the dollar in both the static and the labor-supply results.
 
 ### Budget-window anchors
 

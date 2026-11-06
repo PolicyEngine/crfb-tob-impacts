@@ -25,8 +25,7 @@ funds and the Medicare Hospital Insurance (HI) trust fund [@ssa2026trustees;
 We score every reform against current law under the 2026 Trustees Reports'
 intermediate assumptions. The Trustees built the 2025 reconciliation act (the
 One Big Beautiful Bill Act) into those assumptions, including the temporary
-bonus senior deduction and its scheduled expiration after 2028
-[@jct2025bonus]. PolicyEngine models the same law, so our simulations and our
-calibration targets describe one current law. Several reforms extend, repeal,
-or replace the bonus senior deduction, so its scheduled expiration shapes their
-effects.
+bonus senior deduction and its scheduled expiration after 2028 [@jct2025bonus].
+PolicyEngine models the same law, so our simulations and our calibration targets
+describe one current law. Several reforms extend, repeal, or replace the bonus
+senior deduction, so its scheduled expiration shapes their effects.
