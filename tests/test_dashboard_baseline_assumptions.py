@@ -43,7 +43,7 @@ def test_runtime_guard_accepts_only_the_release_archive():
     # A commit that carries the same version label with different code.
     other_commit = POLICYENGINE_US_RELEASE_ARCHIVE.replace(
         "180410fe35209fb8201378c1b32dadd38051c342",
-        "91eb36576e" + "0" * 30,
+        "91eb36576e364074ccd891a8e3096b587ba643a0",
     )
     assert not _is_policyengine_us_release_archive(
         {"url": other_commit, "archive_info": {}}
