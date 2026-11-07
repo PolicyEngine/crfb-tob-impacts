@@ -45,8 +45,12 @@ jobs:
       - name: Ruff
         run: |
           .venv/bin/ruff check \
+            scripts/build_headline_summary.py \
             scripts/build_release_package.py \
+            scripts/build_run_provenance.py \
+            scripts/generate_paper_static_exhibits.py \
             src/reform_full_h5_output_manifest.py \
+            tests/test_paper_text.py \
             tests/test_release_artifacts.py \
             tests/test_release_package.py
 
@@ -59,6 +63,7 @@ jobs:
             tests/test_results_contract.py \
             tests/test_published_data_integrity.py \
             tests/test_headline_summary.py \
+            tests/test_paper_text.py \
             tests/test_behavioral_anchor_interpolation.py \
             tests/test_reforms.py
 

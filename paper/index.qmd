@@ -1,25 +1,33 @@
 ---
-title: "Social Security Taxation Reform"
-subtitle: "Draft manuscript for long-run policy analysis and impact assessment"
+title: "Social Security taxation reform"
+subtitle: "Revenue and trust-fund effects of fifteen reforms, 2026-2100"
 author:
   - "Max Ghenis"
   - "Ben Ogorek"
   - "Pavel Makarchuk"
   - "David Trimmer"
-date: 2026-06-13
+date: 2026-11-06
 lang: en
 abstract: |
-  This draft manuscript is the narrative companion to the interactive Social
-  Security taxation-of-benefits dashboard. It documents the fourteen-reform
-  menu, the long-run microsimulation and calibration strategy, the validation
-  and benchmark framework, and the publication architecture for the current
-  CRFB analysis package. The current build runs on PolicyEngine's
-  primary-source populace microdata and calibrates each `2026`–`2100` year to
-  the 2026 Social Security and Medicare Trustees current-law projections, which
-  already incorporate the 2025 reconciliation act. The dashboard remains the
-  live current-results explorer; this paper is the stable long-form surface
-  intended for citation, SSRN-style circulation, and formal external reference
-  once shared exhibits are frozen.
+  The Committee for a Responsible Federal Budget commissioned PolicyEngine to
+  estimate how fifteen reforms to the taxation of Social Security benefits
+  would change federal revenue and the Social Security and Medicare trust
+  funds through 2100. We simulate each reform on PolicyEngine's populace
+  microdata, which we project to 21 years from 2026 to 2100 and calibrate to the 2026
+  Trustees Reports' projections of current law, including the 2025
+  reconciliation act.
+  Before labor-supply responses, we estimate that repealing the tax on benefits
+  would reduce federal revenue by $1.66 trillion over 2026-2035 and by $10.9
+  trillion in present value over 75 years. Taxing all benefits would raise $896
+  billion over the first
+  decade. Two Roth-style swaps would end the tax on benefits, one at once and
+  one in phases, and tax workers on their employers' payroll contributions
+  instead. They would raise revenue at first and lose it from the mid-2050s for
+  the immediate swap and from 2060 for the phased one. From then on, the
+  benefit-tax revenue they give up exceeds the income tax on employer
+  contributions. We report every reform, year, and trust-fund split on the
+  [interactive
+  dashboard](https://policyengine.org/us/taxation-of-benefits-reforms).
 keywords:
   - Social Security
   - Taxation of benefits
@@ -35,13 +43,13 @@ keywords:
 
 {{< include sections/03-methods.qmd >}}
 
-{{< include sections/04-results-and-validation.qmd >}}
+{{< include sections/04-results.qmd >}}
 
-{{< include sections/05-results-framework.qmd >}}
+{{< include sections/05-validation.qmd >}}
 
-{{< include sections/06-publication-boundary.qmd >}}
+{{< include sections/06-data-and-code.qmd >}}
 
-# References
+# References {.unnumbered}
 
 ::: {#refs}
 :::

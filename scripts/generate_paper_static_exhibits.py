@@ -1,224 +1,447 @@
+"""Generate the Markdown exhibits that the paper includes from the results panel.
+
+Every exhibit reads the published dashboard panel
+(``dashboard/public/data/results.csv``) and writes the same text to
+``paper/exhibits/`` and ``paper/sections/exhibits/``. The prose inside each
+exhibit states rankings and comparisons computed from that panel; ``check``
+raises if a regenerated panel would make a sentence false, so a data change
+cannot silently leave stale prose behind.
+"""
+
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
+import sys
 
 import pandas as pd
 
 
 REPO = Path(__file__).resolve().parents[1]
-RESULTS = REPO / "results"
+sys.path.insert(0, str(REPO))
+
+from scripts.build_headline_summary import REFORM_LABELS  # noqa: E402
+
 EXHIBITS = REPO / "paper" / "exhibits"
 SECTION_EXHIBITS = REPO / "paper" / "sections" / "exhibits"
+RESULTS_CSV = REPO / "dashboard" / "public" / "data" / "results.csv"
 STANDARD_REFORMS = tuple(f"option{i}" for i in range(1, 13)) + (
     "reverse_roth",
     "tax93",
     "magi100",
     "tax_panel_2005",
 )
+# option6, the short phase-in Roth swap, stays in the scored panel as a
+# sensitivity case. The dashboard menu omits it
+# (dashboard/src/components/dashboard-shell.tsx), so the paper counts the
+# fifteen menu reforms and labels option6 wherever a table includes it.
+SENSITIVITY_REFORMS = ("option6",)
+MENU_REFORMS = tuple(r for r in STANDARD_REFORMS if r not in SENSITIVITY_REFORMS)
+SWAP_REFORMS = ("option5", "option6", "option12")
+# How running text names each reform. Tables use REFORM_LABELS, the dashboard's
+# names, and paper/sections/02-policy-design.qmd ties both to the results file's
+# reform codes.
+PROSE_NAMES = {
+    "option1": "full repeal",
+    "magi100": "full MAGI inclusion",
+    "tax_panel_2005": "the 2005 Tax Panel deduction",
+    "option2": "85 percent taxation",
+    "option3": "85 percent taxation with the extended senior deduction",
+    "option7": "the senior-deduction repeal",
+    "option4": "the $500 credit",
+    "option11": "the $700 credit",
+    "option9": "90 percent taxation",
+    "tax93": "93 percent taxation",
+    "option10": "95 percent taxation",
+    "option8": "100 percent taxation",
+    "option5": "the Roth swap",
+    "option6": "the short phase-in Roth",
+    "option12": "the phased Roth swap",
+    "reverse_roth": "the reverse Roth",
+}
+ENDPOINT_YEARS = (2026, 2100)
+MILESTONE_YEARS = (2035, 2050, 2075, 2100)
+BUDGET_WINDOW_YEARS = (2028, 2029)
+PHASE_IN_CORNER_YEARS = (2032, 2033)
+NUMBER_WORDS = {
+    13: "thirteen",
+    14: "fourteen",
+    15: "fifteen",
+    16: "sixteen",
+}
+DASHBOARD_URL = "https://policyengine.org/us/taxation-of-benefits-reforms"
+RESULTS_CSV_URL = f"{DASHBOARD_URL}/data/results.csv"
+EXACT_STATIC = "exact_full_h5"
+EXACT_BEHAVIORAL = "exact_behavioral_endpoint_full_h5"
+
+# paper/sections/04-results.qmd and 05-validation.qmd
+# include these fragments under level-2 headings, so fragment headings start
+# at level 3 (tests/test_paper_text.py checks the nesting).
+FRAGMENT_HEADING = "###"
+
+
+def check(condition: bool, message: str) -> None:
+    if not condition:
+        raise ValueError(f"exhibit prose no longer matches the panel: {message}")
 
 
 def fmt_b(value: float) -> str:
     return f"{value:+,.1f}"
 
 
+def dollars(value: float) -> str:
+    return f"${abs(value):,.1f} billion"
+
+
+def label(reform: str) -> str:
+    """Name a reform in a table, as the dashboard menu does."""
+    name = REFORM_LABELS[reform]
+    return f"{name} (sensitivity)" if reform in SENSITIVITY_REFORMS else name
+
+
+def prose(reform: str) -> str:
+    return PROSE_NAMES[reform]
+
+
+def opening(reform: str) -> str:
+    """Name a reform at the start of a sentence."""
+    name = PROSE_NAMES[reform]
+    return name[0].upper() + name[1:]
+
+
+def count_word(count: int) -> str:
+    return NUMBER_WORDS[count]
+
+
+def table_row(cells: list[str]) -> str:
+    """Escape dollar signs, since Pandoc reads two in one row as inline math."""
+    return "| " + " | ".join(cell.replace("$", r"\$") for cell in cells) + " |"
+
+
 def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
     lines = [
-        "| " + " | ".join(headers) + " |",
+        table_row(headers),
         "| " + " | ".join(["---"] * len(headers)) + " |",
     ]
-    lines.extend("| " + " | ".join(row) + " |" for row in rows)
+    lines.extend(table_row(row) for row in rows)
     return "\n".join(lines)
 
 
-def load_static() -> pd.DataFrame:
-    # New certified-base panel (dashboard results.csv is the canonical surface).
-    src = REPO / "dashboard" / "public" / "data" / "results.csv"
-    df = pd.read_csv(src)
-    df = df[df["scoring_type"] == "static"].copy()
-    # Provenance columns the rebuilt pipeline does not yet capture per cell
-    # (saved-microdata lineage is a cleanup item) — placeholders so number
-    # exhibits render and lineage exhibits degrade gracefully rather than crash.
-    for col in ("source", "scenario_h5_uri", "baseline_source"):
-        if col not in df.columns:
-            df[col] = ""
-    df = df.sort_values(["year", "reform_name"]).reset_index(drop=True)
+def load_panel() -> pd.DataFrame:
+    df = pd.read_csv(RESULTS_CSV)
     return df[df["reform_name"].isin(STANDARD_REFORMS)].copy()
 
 
-def write(path: Path, text: str) -> None:
-    path.write_text(text.strip() + "\n", encoding="utf-8")
+def load_static() -> pd.DataFrame:
+    df = load_panel()
+    static = df[df["scoring_type"] == "static"]
+    return static.sort_values(["year", "reform_name"]).reset_index(drop=True)
 
 
-def write_exhibit(name: str, text: str) -> None:
-    write(EXHIBITS / name, text)
-    write(SECTION_EXHIBITS / name, text)
+def load_behavioral() -> pd.DataFrame:
+    df = load_panel()
+    behavioral = df[df["scoring_type"] == "behavioral"]
+    return behavioral.sort_values(["year", "reform_name"]).reset_index(drop=True)
+
+
+def by_value(values: pd.Series) -> list[str]:
+    """List reforms from lowest value to highest, ties in reform order.
+
+    Several reforms share one 2100 value, and `sort_values` orders ties
+    differently across pandas versions.
+    """
+    position = {reform: index for index, reform in enumerate(STANDARD_REFORMS)}
+    return sorted(
+        values.index,
+        key=lambda reform: (round(float(values[reform]), 6), position[reform]),
+    )
+
+
+def ordered(reforms: Iterable[str]) -> list[str]:
+    present = set(reforms)
+    return [r for r in REFORM_LABELS if r in present]
 
 
 def build_results_overview(df: pd.DataFrame) -> str:
+    check(
+        set(df["reform_name"]) == set(STANDARD_REFORMS),
+        "the static panel should hold every standard reform",
+    )
     ten_year = (
         df[df["year"].between(2026, 2035)]
-        .groupby("reform_name", as_index=False)["revenue_impact"]
+        .groupby("reform_name")["revenue_impact"]
         .sum()
-        .sort_values("revenue_impact")
     )
-    terminal = df[df["year"] == 2100].sort_values("revenue_impact")
+    terminal = df[df["year"] == 2100].set_index("reform_name")
 
     ten_year_table = markdown_table(
-        ["Reform", "2026-2035 Revenue Impact ($B)"],
-        [[row.reform_name, fmt_b(row.revenue_impact)] for row in ten_year.itertuples()],
+        ["Reform", "2026-2035 revenue impact ($B)"],
+        [[label(reform), fmt_b(ten_year[reform])] for reform in by_value(ten_year)],
     )
     terminal_table = markdown_table(
-        ["Reform", "2100 Revenue Impact ($B)", "2100 TOB Impact ($B)"],
+        ["Reform", "2100 revenue impact ($B)", "2100 benefit-tax revenue impact ($B)"],
         [
-            [row.reform_name, fmt_b(row.revenue_impact), fmt_b(row.tob_total_impact)]
-            for row in terminal.itertuples()
+            [
+                label(reform),
+                fmt_b(terminal.loc[reform, "revenue_impact"]),
+                fmt_b(terminal.loc[reform, "tob_total_impact"]),
+            ]
+            for reform in by_value(terminal["revenue_impact"])
         ],
     )
 
-    top_option12 = fmt_b(
-        float(
-            ten_year.loc[ten_year.reform_name == "option12", "revenue_impact"].iloc[0]
-        )
+    menu_ten_year = ten_year[list(MENU_REFORMS)].sort_values(ascending=False)
+    first, second = menu_ten_year.index[:2]
+    last = menu_ten_year.index[-1]
+    check(menu_ten_year[last] < 0, "the smallest ten-year impact should be a loss")
+
+    menu_terminal = terminal.loc[list(MENU_REFORMS), "revenue_impact"]
+    top, runner_up = menu_terminal.sort_values(ascending=False).index[:2]
+    losses = menu_terminal[menu_terminal < 0].sort_values()
+    worst, next_worst = losses.index[:2]
+    check(
+        worst not in SWAP_REFORMS and next_worst not in SWAP_REFORMS,
+        "the two largest 2100 losses should come from non-swap reforms",
     )
-    top_option8 = fmt_b(
-        float(ten_year.loc[ten_year.reform_name == "option8", "revenue_impact"].iloc[0])
+    swap_terminal = terminal.loc[list(SWAP_REFORMS)]
+    check(
+        swap_terminal["revenue_impact"].max() - swap_terminal["revenue_impact"].min()
+        < 0.01,
+        "the Roth swaps should share one 2100 revenue impact",
     )
-    option1 = fmt_b(
-        float(ten_year.loc[ten_year.reform_name == "option1", "revenue_impact"].iloc[0])
+    check(
+        bool((swap_terminal["reform_tob_total"].abs() < 0.01).all()),
+        "no Roth swap should tax benefits in 2100",
     )
+    swap_loss = float(swap_terminal["revenue_impact"].iloc[0])
+    check(swap_loss < 0, "the Roth swaps should lose revenue in 2100")
 
     return f"""
-The current release surface contains sixteen reforms: `option1` through
-`option12`, the reverse-Roth proposal, the `93%` benchmark, full MAGI
-inclusion (`magi100`), and the 2005 Tax Panel simple deduction
-(`tax_panel_2005`). Every static row is either an exact full-H5
-microsimulation output on the populace baselines or display interpolation
-between those exact anchor-year outputs, as labeled per row in the public
-CSV. Legacy non-contract artifacts are excluded from the dashboard, paper
-exhibits, and release package.
+{FRAGMENT_HEADING} Ten-year static revenue impacts
 
-## Ten-year static revenue impacts
+Over 2026-2035, we estimate that {prose(first)} raises the most revenue of the
+{count_word(len(MENU_REFORMS))} reforms ({dollars(menu_ten_year[first])}) and
+{prose(second)} the next most ({dollars(menu_ten_year[second])}).
+{opening(last)} loses the most ({dollars(menu_ten_year[last])}).
 
 {ten_year_table}
 
-In the ten-year window, the largest revenue raisers are `option12`
-({top_option12} $B) and `option8` ({top_option8} $B). The largest revenue
-reduction is `option1` ({option1} $B).
+{FRAGMENT_HEADING} Terminal-year static impacts
 
-## Terminal-year static impacts
+In 2100, we estimate that {prose(top)} raises the most revenue
+({dollars(menu_terminal[top])}) and {prose(runner_up)} the next most
+({dollars(menu_terminal[runner_up])}). {opening(worst)} loses the most
+({dollars(menu_terminal[worst])}), followed by {prose(next_worst)}
+({dollars(menu_terminal[next_worst])}). By then {prose("option5")},
+{prose("option12")}, and {prose("option6")} reach the same end state, with
+employer contributions taxable and no benefits taxed, and each loses
+{dollars(swap_loss)}.
 
 {terminal_table}
-
-At `2100`, the strongest positive revenue effects come from broader benefit
-taxation options such as `option8` and `option10`. The largest revenue
-reductions are repeal or structural swap options such as `option1`, `option5`,
-and `option12`.
 """
 
 
-def build_revenue_impacts(df: pd.DataFrame) -> str:
-    milestone_years = [2035, 2050, 2075, 2100]
-    milestone_reforms = [
-        "option1",
-        "option2",
-        "option4",
-        "option5",
-        "option8",
-        "option10",
-        "option12",
-    ]
-    milestone = df[
-        df["year"].isin(milestone_years) & df["reform_name"].isin(milestone_reforms)
-    ].copy()
+def build_milestones(df: pd.DataFrame) -> str:
+    """Milestone-year static impacts for every scored reform."""
+    lineage = df[df["full_h5_result_type"] == EXACT_STATIC]
+    check(
+        bool(lineage["run_prefix"].notna().all())
+        and bool(lineage["output_h5_sha256"].notna().all()),
+        "every exact cell should record its run prefix and output hash",
+    )
+    panel = df.pivot(index="reform_name", columns="year", values="revenue_impact")
+    milestones = panel.loc[:, list(MILESTONE_YEARS)]
 
-    revenue_rows: list[list[str]] = []
-    for reform in milestone_reforms:
-        row = [reform]
-        for year in milestone_years:
-            value = float(
-                milestone.loc[
-                    (milestone["reform_name"] == reform) & (milestone["year"] == year),
-                    "revenue_impact",
-                ].iloc[0]
-            )
-            row.append(fmt_b(value))
-        revenue_rows.append(row)
+    def rising(reform: str) -> bool:
+        return bool((milestones.loc[reform].diff().dropna() > 0).all())
 
-    decomposition_reforms = [
-        "option1",
-        "option2",
-        "option4",
-        "option8",
-        "option12",
+    def falling(reform: str) -> bool:
+        return bool((milestones.loc[reform].diff().dropna() < 0).all())
+
+    check(
+        bool((milestones.loc["option1"] < 0).all()) and falling("option1"),
+        "option1 should lose more revenue at each milestone",
+    )
+    for reform in SWAP_REFORMS:
+        values = milestones.loc[reform]
+        check(
+            values[2035] > 0 and values[2050] > 0,
+            f"{reform} should raise revenue in 2035 and 2050",
+        )
+        check(
+            values[2075] < 0 and values[2100] < 0,
+            f"{reform} should lose revenue in 2075 and 2100",
+        )
+        row = df[(df["reform_name"] == reform) & (df["year"] == 2075)].iloc[0]
+        employer_tax = row.employer_ss_tax_revenue + row.employer_medicare_tax_revenue
+        check(
+            -row.tob_total_impact > employer_tax,
+            f"{reform}'s 2075 benefit-tax loss should exceed its employer tax",
+        )
+    gainers = [
+        reform
+        for reform in milestones.index
+        if reform not in SWAP_REFORMS and milestones.loc[reform, 2035] >= 0.05
     ]
-    decomposition = df[
-        (df["year"] == 2100) & (df["reform_name"].isin(decomposition_reforms))
-    ]
-    decomposition_rows = [
+    for reform in gainers:
+        check(
+            bool((milestones.loc[reform] > 0).all()) and rising(reform),
+            f"{reform} should raise more revenue at each milestone",
+        )
+
+    milestone_table = markdown_table(
+        ["Reform"] + [f"{year} ($B)" for year in MILESTONE_YEARS],
         [
-            row.reform_name,
-            fmt_b(row.revenue_impact),
-            fmt_b(row.tob_total_impact),
-            fmt_b(row.oasdi_net_impact),
-            fmt_b(row.hi_net_impact),
+            [label(reform)]
+            + [fmt_b(float(milestones.loc[reform, year])) for year in MILESTONE_YEARS]
+            for reform in ordered(milestones.index)
+        ],
+    )
+
+    return f"""
+We estimate that the revenue loss from {prose("option1")} grows at each
+milestone year. The Roth swaps raise revenue in 2035 and 2050 but lose it by
+2075, when the benefit-tax revenue they repeal exceeds the income tax on employer
+contributions. Every other reform that raises revenue in 2035 raises more at each
+later milestone year.
+
+{milestone_table}
+"""
+
+
+def swap_trust_fund_gap(df: pd.DataFrame, reform: str, year: int) -> float:
+    """OASDI net plus HI net, less the federal income-tax change, in $B."""
+    row = df[(df["reform_name"] == reform) & (df["year"] == year)].iloc[0]
+    return float(row.oasdi_net_impact + row.hi_net_impact - row.revenue_impact)
+
+
+def build_trust_fund_decomposition(df: pd.DataFrame) -> str:
+    decomposition_reforms = ordered(
+        ["option1", "option2", "option4", "option8", "option12"]
+    )
+    terminal = df[df["year"] == 2100].set_index("reform_name")
+    rows = [
+        [
+            label(reform),
+            fmt_b(terminal.loc[reform, "revenue_impact"]),
+            fmt_b(terminal.loc[reform, "tob_total_impact"]),
+            fmt_b(terminal.loc[reform, "oasdi_net_impact"]),
+            fmt_b(terminal.loc[reform, "hi_net_impact"]),
         ]
-        for row in decomposition.itertuples()
+        for reform in decomposition_reforms
     ]
+    benefit_taxation = [r for r in decomposition_reforms if r not in SWAP_REFORMS]
+    for reform in benefit_taxation:
+        check(
+            abs(swap_trust_fund_gap(df, reform, 2100)) < 0.01,
+            f"{reform}'s fund impacts should sum to its revenue impact",
+        )
+    gap = swap_trust_fund_gap(df, "option12", 2100)
+    check(gap > 0, "option12's fund impacts should exceed its revenue impact")
 
+    def net(reform: str, fund: str) -> float:
+        return float(terminal.loc[reform, f"{fund}_net_impact"])
+
+    check(
+        net("option1", "oasdi") < 0 and net("option1", "hi") < 0,
+        "full repeal should cost both funds in 2100",
+    )
+    check(
+        net("option2", "oasdi") > 0
+        and abs(net("option2", "oasdi") - net("option8", "oasdi")) < 0.05,
+        "85 and 100 percent taxation should give OASDI one 2100 gain",
+    )
+    check(
+        net("option12", "oasdi") > 0 and net("option12", "hi") < 0,
+        "the phased Roth swap should gain OASDI and cost HI in 2100",
+    )
+
+    table = markdown_table(
+        [
+            "Reform",
+            "2100 revenue impact ($B)",
+            "2100 benefit-tax revenue impact ($B)",
+            "2100 OASDI net ($B)",
+            "2100 HI net ($B)",
+        ],
+        rows,
+    )
     return f"""
-## Milestone revenue impacts
+We estimate that in 2100 {prose("option1")} costs OASDI
+{dollars(net("option1", "oasdi"))} and HI {dollars(net("option1", "hi"))}. Under
+85 or 100 percent taxation, OASDI gains {dollars(net("option2", "oasdi"))} and HI
+gains the rest, because we credit OASDI with tax on at most half of benefits.
+{opening("option12")} gains OASDI {dollars(net("option12", "oasdi"))} and costs HI
+{dollars(net("option12", "hi"))}. For this decomposition, we credit each trust
+fund with the revenue the model attributes to it rather than using the default
+split in @sec-headline, and we apply the rules in @sec-swap-accounting to
+{prose("option12")}.
 
-{markdown_table(["Reform", "2035", "2050", "2075", "2100"], revenue_rows)}
-
-The rebuilt standard series shows the expected late-horizon split: repeal or
-TOB-reducing options (`option1`, `option5`, `option12`) become increasingly
-costly relative to current law, while broader taxation options (`option2`,
-`option8`, `option10`) continue to raise revenue.
-
-## Terminal-year trust-fund decomposition
-
-{markdown_table(["Reform", "2100 Revenue ($B)", "2100 TOB ($B)", "2100 OASDI Net ($B)", "2100 HI Net ($B)"], decomposition_rows)}
+{table}
 """
 
 
-def build_validation_sentinels(df: pd.DataFrame) -> str:
-    exact = df[df["source"].eq("exact_full_h5")]
-    interpolated = df[df["source"].eq("linear_interpolation_between_full_h5_years")]
-    late_exact = exact[exact["year"].astype(int).ge(2075)]
-    r2_uris = exact["scenario_h5_uri"].astype(str).str.startswith("r2://").mean()
+def straight_line(
+    df: pd.DataFrame, reform: str, year: int, start: int, end: int
+) -> float:
+    """Revenue impact on the straight line between two anchor years, in $B."""
+    values = df[df["reform_name"] == reform].set_index("year")["revenue_impact"]
+    low, high = float(values[start]), float(values[end])
+    return low + (high - low) * (year - start) / (end - start)
 
-    probe_rows = [
-        [
-            "Anchor-year full-H5 coverage",
-            "fourteen reforms",
-            f"{len(exact)} exact full-H5 rows",
-            "Matches the 16 anchor-year panel contract (2026, 2030, 2035-2100 by 5).",
-        ],
-        [
-            "Late-horizon coverage",
-            "2075, 2080, 2085, 2090, 2095, 2100",
-            f"{len(late_exact)} exact late-year rows",
-            "Real (no-synthetic) populace baseline datasets passing all gates.",
-        ],
-        [
-            "Durable artifact links",
-            "exact standard rows",
-            f"{r2_uris:.0%} scenario H5 URIs are R2-backed",
-            "Dashboard rows cite durable reform H5s.",
-        ],
-        [
-            "Display interpolation boundary",
-            "non-selected annual years",
-            f"{len(interpolated)} interpolation rows",
-            "Interpolated rows are display-only and not replacement H5s.",
-        ],
-    ]
 
+def build_budget_window_anchors(df: pd.DataFrame) -> str:
+    """Compare the added exact anchors with straight lines between neighbors."""
+    exact = set(
+        df.loc[
+            df["full_h5_result_type"] == EXACT_STATIC, ["reform_name", "year"]
+        ].itertuples(index=False, name=None)
+    )
+    revenue = df.set_index(["reform_name", "year"])["revenue_impact"]
+
+    rows = []
+    gaps = []
+    for reform in ordered(STANDARD_REFORMS):
+        row = [label(reform)]
+        for year in BUDGET_WINDOW_YEARS:
+            check((reform, year) in exact, f"{reform} {year} should be exact")
+            line = straight_line(df, reform, year, 2026, 2030)
+            value = float(revenue[(reform, year)])
+            gaps.append((abs(value - line), reform, year))
+            row += [fmt_b(line), fmt_b(value)]
+        rows.append(row)
+    largest_gap, gap_reform, gap_year = max(gaps)
+
+    corner = {}
+    for year in PHASE_IN_CORNER_YEARS:
+        check(("option6", year) in exact, f"option6 {year} should be exact")
+        corner[year] = (
+            straight_line(df, "option6", year, 2030, 2035),
+            float(revenue[("option6", year)]),
+        )
+    first, last = PHASE_IN_CORNER_YEARS
+
+    table = markdown_table(
+        [
+            "Reform",
+            "2028 straight line ($B)",
+            "2028 exact ($B)",
+            "2029 straight line ($B)",
+            "2029 exact ($B)",
+        ],
+        rows,
+    )
     return f"""
-The clean static release is validated against the current full-H5 production
-contract. Older non-contract artifacts are not part of the release surface.
+Straight lines between each reform's 2026 and 2030 anchors miss the exact 2028
+and 2029 anchors by as much as {dollars(largest_gap)}, for {prose(gap_reform)} in
+{gap_year}.
 
-{markdown_table(["Check", "Coverage", "Observed values", "Interpretation"], probe_rows)}
+{table}
+
+For {prose("option6")}, the straight line between 2030 and 2035 would give
+{dollars(corner[first][0])} in {first} and {dollars(corner[last][0])} in {last},
+against exact anchors of {dollars(corner[first][1])} and
+{dollars(corner[last][1])}.
 """
 
 
@@ -236,38 +459,38 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     option1_table = markdown_table(
-        ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
+        ["Source", "Policy", "Scoring", "Window", "Revenue impact ($B)"],
         [
             [
                 "PolicyEngine",
-                "option1 full repeal",
+                label("option1"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option1"])),
             ],
             [
-                "CBO [@cbo2024options]",
+                "CBO [-@cbo2024options]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,600.0",
             ],
             [
-                "SSA Trustees [@ssa2024trustees]",
+                "SSA Trustees [-@ssa2024trustees]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,800.0",
             ],
             [
-                "Tax Foundation [@taxfoundation2024trump]",
+                "Tax Foundation [-@taxfoundation2024trump]",
                 "Full repeal",
                 "Conventional",
                 "2025-2034",
                 "-1,400.0",
             ],
             [
-                "Tax Foundation [@taxfoundation2024trump]",
+                "Tax Foundation [-@taxfoundation2024trump]",
                 "Full repeal",
                 "Macroeconomic",
                 "2025-2034",
@@ -277,31 +500,31 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     option2_table = markdown_table(
-        ["Source", "Policy", "Scoring", "Window", "Revenue Impact ($B)"],
+        ["Source", "Policy", "Scoring", "Window", "Revenue impact ($B)"],
         [
             [
                 "PolicyEngine",
-                "option2 tax 85% uniformly",
+                label("option2"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option2"])),
             ],
             [
                 "PolicyEngine",
-                "option8 tax 100% of benefits",
+                label("option8"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option8"])),
             ],
             [
-                "JCT [@jct2024expenditures]",
-                "Current SS tax expenditure",
+                "JCT [-@jct2024expenditures]",
+                "Current Social Security tax expenditure",
                 "Conventional",
                 "2024-2028",
                 "+318.4",
             ],
             [
-                "CBO [@cbo2024pension]",
+                "CBO [-@cbo2024pension]",
                 "Pension-style basis recovery",
                 "Conventional",
                 "2021-2030",
@@ -316,20 +539,20 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
             "Policy",
             "Scoring",
             "Window",
-            "Federal revenue ($B)",
-            "TOB impact ($B)",
+            "Revenue impact ($B)",
+            "Benefit-tax revenue impact ($B)",
         ],
         [
             [
                 "PolicyEngine",
-                "option7 eliminate bonus senior deduction",
+                label("option7"),
                 "Static",
                 "2026-2035",
                 fmt_b(float(ten_year["option7"])),
                 fmt_b(float(ten_year_tob["option7"])),
             ],
             [
-                "JCT [@jct2025bonus]",
+                "JCT [-@jct2025bonus]",
                 "Bonus senior deduction",
                 "Conventional",
                 "FY2025-FY2034",
@@ -340,130 +563,129 @@ def build_external_benchmarks(df: pd.DataFrame) -> str:
     )
 
     return f"""
-The benchmark layer is best treated as orientation rather than a point-estimate
-competition. The current rebuilt static package continues to sit within the
-broad range established by the first report's benchmark set, but windows and
-policy baselines are not identical.
-
-## Option 1: full repeal benchmark
+{FRAGMENT_HEADING} Full repeal
 
 {option1_table}
 
-## Options 2 and 8: broader taxation benchmark
+{FRAGMENT_HEADING} 85 and 100 percent taxation
 
 {option2_table}
 
-## Option 7: bonus senior deduction benchmark
+{FRAGMENT_HEADING} Bonus senior deduction
+
+JCT scores enacting the deduction and we score repealing it, so the signs differ.
 
 {option7_table}
 """
 
 
-def build_response_status() -> str:
-    return """
-Labor-supply response rows are generated under the current full-H5 reform contract
-and published as the dashboard's supplemental scoring surface. Each
-endpoint cell saves a durable reform H5 first, computed at `2026` and `2100`
-for the fourteen contract-standard reforms; aggregates are then derived from those H5s using
-PolicyEngine/MicroSeries operations, and intermediate annual rows are
-interpolated from the endpoint ratios. The rows appear in `results.csv` under
-`scoring_type = behavioral` and carry both the income and substitution
-channels. Static scoring remains the primary surface;
-labor-supply response results are partial-equilibrium estimates under the
-project's age-based elasticity schedule and are not official CBO or JCT scores.
-Earlier non-contract response artifacts were removed from the release surface.
+def build_labor_supply_responses(static: pd.DataFrame, behavioral: pd.DataFrame) -> str:
+    scored = set(behavioral["reform_name"])
+    check(
+        [r for r in MENU_REFORMS if r not in scored] == ["magi100", "tax_panel_2005"],
+        "every menu reform but two should carry labor-supply responses",
+    )
+    check(
+        set(SENSITIVITY_REFORMS) <= scored,
+        "the sensitivity case should carry labor-supply responses",
+    )
+
+    exact = behavioral[behavioral["full_h5_result_type"] == EXACT_BEHAVIORAL]
+    anchors = {
+        reform: sorted(int(year) for year in group["year"])
+        for reform, group in exact.groupby("reform_name")
+    }
+    check(set(anchors) == scored, "every scored reform should have exact anchors")
+    for reform, years in anchors.items():
+        check(
+            all(year in years for year in ENDPOINT_YEARS),
+            f"{reform} should have exact 2026 and 2100 anchors",
+        )
+
+    rows = []
+    effects = {}
+    for reform in ordered(scored):
+        with_responses = behavioral[behavioral["reform_name"] == reform].set_index(
+            "year"
+        )
+        without = static[static["reform_name"] == reform].set_index("year")
+        cells = [label(reform)]
+        for year in ENDPOINT_YEARS:
+            response = float(with_responses.loc[year, "revenue_impact"])
+            effect = response - float(without.loc[year, "revenue_impact"])
+            cells += [fmt_b(response), fmt_b(effect)]
+            effects[reform] = effect
+        rows.append(cells)
+    table = markdown_table(
+        [
+            "Reform",
+            "2026 revenue impact ($B)",
+            "2026 response effect ($B)",
+            "2100 revenue impact ($B)",
+            "2100 response effect ($B)",
+        ],
+        rows,
+    )
+
+    swap_effects = [effects[reform] for reform in SWAP_REFORMS]
+    check(
+        max(swap_effects) < 0 and max(swap_effects) - min(swap_effects) < 0.05,
+        "responses should cost each Roth swap one amount in 2100",
+    )
+    check(
+        effects["reverse_roth"] > 0, "responses should offset the reverse Roth's loss"
+    )
+    other = max(
+        abs(effect)
+        for reform, effect in effects.items()
+        if reform not in SWAP_REFORMS and reform != "reverse_roth"
+    )
+
+    return f"""
+We estimate that in 2100 labor-supply responses cost the Roth swaps another
+{dollars(swap_effects[0])}, offset {dollars(effects["reverse_roth"])} of the
+reverse Roth's loss, and move the revenue impact of every other reform we score
+by at most {dollars(other)}.
+
+For each reform we score (@sec-labor-supply), we report the revenue impact with
+labor-supply responses in 2026 and 2100 and the response effect, that impact minus
+the static impact.
+
+{table}
 """
 
 
 def build_household_impacts() -> str:
-    return """
-The cleaned static rebuild finalized the aggregate reform package before the
-distributional refresh. The manuscript therefore does not cite legacy
-household-burden or distributional point estimates as current results.
-
-Distributional exhibits should be regenerated only after a current-contract
-household aggregation pass is complete.
-"""
-
-
-def build_full_h5_summary(static_df: pd.DataFrame) -> str:
-    """Current-release replacement for the retired May run-status exhibit."""
-    src = REPO / "dashboard" / "public" / "data" / "results.csv"
-    full = pd.read_csv(src)
-    behavioral = full[full["scoring_type"] == "behavioral"].copy()
-
-    exact = static_df[static_df["full_h5_result_type"] == "exact_full_h5"]
-    n_exact = len(exact)
-    n_reforms = static_df["reform_name"].nunique()
-
-    milestone_years = [2035, 2050, 2075, 2100]
-    milestone_rows = []
-    for reform in sorted(static_df["reform_name"].unique()):
-        sub = static_df[static_df["reform_name"] == reform].set_index("year")
-        milestone_rows.append(
-            [reform]
-            + [
-                fmt_b(float(sub.loc[year, "revenue_impact"]))
-                for year in milestone_years
-            ]
-        )
-    milestone_table = markdown_table(
-        ["Reform"] + [str(year) for year in milestone_years], milestone_rows
-    )
-
-    endpoint_rows = []
-    for reform in sorted(behavioral["reform_name"].unique()):
-        b = behavioral[behavioral["reform_name"] == reform].set_index("year")
-        st = static_df[static_df["reform_name"] == reform].set_index("year")
-        cells = [reform]
-        for year in (2026, 2100):
-            b_val = float(b.loc[year, "revenue_impact"])
-            s_val = float(st.loc[year, "revenue_impact"])
-            cells.append(f"{fmt_b(b_val)} ({fmt_b(b_val - s_val)})")
-        endpoint_rows.append(cells)
-    endpoint_table = markdown_table(
-        [
-            "Reform",
-            "2026 behavioral, (minus static) ($B)",
-            "2100 behavioral, (minus static) ($B)",
-        ],
-        endpoint_rows,
-    )
-
     return f"""
-The static panel covers `{n_reforms}` reforms with `{n_exact}` exact full-H5
-anchor cells; every non-anchor annual row is display interpolation between
-those exact outputs, labeled per row in the public CSV. Labor-supply response
-scoring is supplemental: exact endpoint cells at `2026` and `2100` for the
-fourteen contract-standard reforms, with intermediate years interpolated from
-endpoint ratios. All exact cells carry durable artifact lineage
-(`run_prefix`, output-H5 SHA-256) recorded per row.
-
-### Milestone static revenue impacts
-
-{milestone_table}
-
-### Behavioral endpoints versus static
-
-{endpoint_table}
-
-Labor-supply response results carry both the income and substitution
-channels and are partial-equilibrium estimates under the project's age-based
-elasticity schedule, not official CBO or JCT scores.
+We report each reform's change in household net income, by baseline income
+decile, on the [dashboard]({DASHBOARD_URL}). We simulate anchor years from
+2026 to 2100 and interpolate the years between them.
 """
+
+
+def render_all() -> dict[str, str]:
+    static = load_static()
+    behavioral = load_behavioral()
+    exhibits = {
+        "results-overview.md": build_results_overview(static),
+        "full-h5-results-summary.md": build_milestones(static),
+        "revenue-impacts.md": build_trust_fund_decomposition(static),
+        "budget-window-anchors.md": build_budget_window_anchors(static),
+        "external-benchmarks.md": build_external_benchmarks(static),
+        "labor-supply-response-status.md": build_labor_supply_responses(
+            static, behavioral
+        ),
+        "household-impacts.md": build_household_impacts(),
+    }
+    return {name: text.strip() + "\n" for name, text in exhibits.items()}
 
 
 def main() -> None:
     EXHIBITS.mkdir(parents=True, exist_ok=True)
     SECTION_EXHIBITS.mkdir(parents=True, exist_ok=True)
-    df = load_static()
-
-    write_exhibit("results-overview.md", build_results_overview(df))
-    write_exhibit("full-h5-results-summary.md", build_full_h5_summary(df))
-    write_exhibit("revenue-impacts.md", build_revenue_impacts(df))
-    write_exhibit("external-benchmarks.md", build_external_benchmarks(df))
-    write_exhibit("labor-supply-response-status.md", build_response_status())
-    write_exhibit("household-impacts.md", build_household_impacts())
+    for name, text in render_all().items():
+        for directory in (EXHIBITS, SECTION_EXHIBITS):
+            (directory / name).write_text(text, encoding="utf-8")
 
     print("Wrote paper exhibits:")
     for path in sorted(EXHIBITS.glob("*.md")):

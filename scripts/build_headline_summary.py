@@ -58,6 +58,12 @@ REFORM_LABELS: dict[str, str] = {
     "reverse_roth": "Reverse Roth",
 }
 SOLVENCY_REFORMS = ("option1", "option2", "option8", "option12")
+# The dashboard menu omits option6; the paper reports it as a sensitivity case.
+SENSITIVITY_REFORMS = ("option6",)
+# For these reforms the default split adds the OASDI and HI net impacts, which
+# measure each fund's employer-contribution gain separately, so the headline
+# total differs from the federal income-tax change in the revenue tables.
+SWAP_REFORMS = ("option5", "option12", "option6")
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -209,7 +215,114 @@ def _fmt(value: float) -> str:
     return f"{value:+,.0f}"
 
 
-def write_exhibit(records: list[dict[str, object]]) -> None:
+def _label(reform: str) -> str:
+    if reform in SENSITIVITY_REFORMS:
+        return f"{REFORM_LABELS[reform]} (sensitivity)"
+    return REFORM_LABELS[reform]
+
+
+def swap_ten_year_gaps() -> dict[str, float]:
+    """Ten-year default-split total less the federal income-tax change, in $B."""
+    gaps = {reform: 0.0 for reform in SWAP_REFORMS}
+    for row in _rows(DATA / "results.csv"):
+        if row.get("scoring_type") != "static" or row["reform_name"] not in gaps:
+            continue
+        if int(row["year"]) > TEN_YEAR_END:
+            continue
+        total, *_ = default_split(row)
+        gaps[row["reform_name"]] += total - float(row["revenue_impact"])
+    return gaps
+
+
+SCENARIO_NAMES = {
+    "scheduled_benefits": "scheduled benefits",
+    "ss_solvent": "the solvency baseline",
+}
+COUNT_WORDS = {1: "one row", 2: "two rows", 3: "three rows"}
+
+
+def _general_fund_note(records: list[dict[str, object]]) -> list[str]:
+    """Name the rows whose totals include general-fund flows, which the tables
+    do not show as a separate column."""
+    rows = [
+        (
+            _label(str(record["reform"])),
+            SCENARIO_NAMES[str(record["baseline_scenario"])],
+            float(record["pv75_general_fund_billions"]),
+        )
+        for record in records
+        if abs(float(record["pv75_general_fund_billions"])) >= 0.5
+    ]
+    if not rows:
+        return ["No row includes general-fund flows."]
+    entries = [
+        f'"{label}" under {scenario} ({"-" if value < 0 else ""}${abs(value):,.0f}'
+        " billion in present value)"
+        for label, scenario, value in rows
+    ]
+    if len(entries) == 1:
+        parts = entries[0]
+    elif len(entries) == 2:
+        parts = " and ".join(entries)
+    else:
+        parts = ", ".join(entries[:-1]) + ", and " + entries[-1]
+    return [
+        "We fold general-fund flows into the totals, where they enter",
+        f"{COUNT_WORDS[len(rows)]}: {parts}.",
+    ]
+
+
+def _swap_note() -> list[str]:
+    gaps = swap_ten_year_gaps()
+    if not all(gap > 0 for gap in gaps.values()):
+        raise ValueError("expected each swap's fund total to exceed its revenue change")
+    amounts = [f"${gaps[reform]:,.1f} billion" for reform in SWAP_REFORMS]
+    return [
+        "For the Roth swap, the phased Roth swap, and the short phase-in Roth",
+        "sensitivity case, we add the two funds' net impacts under the default",
+        "split.",
+        "Over 2026-2035 those sums exceed the change in federal income tax by",
+        f"{amounts[0]}, {amounts[1]}, and {amounts[2]}, because we measure each",
+        "fund's gain from taxing employer contributions separately",
+        "(@sec-swap-accounting). We report the federal income-tax change in the",
+        "revenue tables that follow.",
+    ]
+
+
+def _headline_finding(records: list[dict[str, object]]) -> list[str]:
+    """State the largest loss and largest gain in the first table."""
+    scheduled = {
+        record["reform"]: record
+        for record in records
+        if record["baseline_scenario"] == "scheduled_benefits"
+    }
+
+    def amounts(reform: str) -> tuple[float, float]:
+        record = scheduled[reform]
+        return (
+            float(record["ten_year_nominal_billions"]),
+            float(record["pv75_total_billions"]),
+        )
+
+    repeal_ten, repeal_pv = amounts("option1")
+    full_ten, full_pv = amounts("option8")
+    if not (repeal_ten < 0 and repeal_pv < 0 and full_ten > 0 and full_pv > 0):
+        raise ValueError("expected repeal to lose revenue and full taxation to gain it")
+    return [
+        f"We estimate that full repeal reduces revenue by ${abs(repeal_ten):,.0f}",
+        f"billion over 2026-2035 and ${abs(repeal_pv):,.0f} billion in present value",
+        f"over 75 years, and that 100 percent taxation raises ${full_ten:,.0f}",
+        f"billion and ${full_pv:,.0f} billion.",
+    ]
+
+
+def render_exhibit(records: list[dict[str, object]]) -> str:
+    """Return the headline-summary Markdown fragment the paper includes."""
+
+    def row(cells: list[str]) -> str:
+        # Pandoc reads two dollar signs in one row as inline math.
+        return "| " + " | ".join(cell.replace("$", r"\$") for cell in cells) + " |"
+
     def table(scenario: str) -> str:
         headers = [
             "Reform",
@@ -219,50 +332,52 @@ def write_exhibit(records: list[dict[str, object]]) -> None:
             "Medicare HI PV ($B)",
         ]
         lines = [
-            "| " + " | ".join(headers) + " |",
+            row(headers),
             "| " + " | ".join(["---"] * len(headers)) + " |",
         ]
         for record in records:
             if record["baseline_scenario"] != scenario:
                 continue
             lines.append(
-                "| "
-                + " | ".join(
+                row(
                     [
-                        REFORM_LABELS[str(record["reform"])],
+                        _label(str(record["reform"])),
                         _fmt(float(record["ten_year_nominal_billions"])),
                         _fmt(float(record["pv75_total_billions"])),
                         _fmt(float(record["pv75_oasdi_billions"])),
                         _fmt(float(record["pv75_medicare_hi_billions"])),
                     ]
                 )
-                + " |"
             )
         return "\n".join(lines)
 
-    fragment = "\n".join(
+    return "\n".join(
         [
-            "Headline revenue effects per reform under the dashboard's default",
-            "trust-fund split. Ten-year figures are nominal 2026-2035 sums;",
-            "75-year figures discount each fund's 2026-2100 flows at its own",
-            "Trustees effective interest rates (OASDI: Table VI.G1 factors;",
-            "Medicare HI: Table IV.A4, graded to the 4.7 percent ultimate rate",
-            "by 2040), with general-fund flows at the OASDI series. Totals sum",
-            "the discounted components; the general-fund component is not",
-            "shown separately and is zero under the default split for every",
-            "option except the no-senior-deduction option.",
+            *_headline_finding(records),
             "",
-            "**Scored against scheduled benefits:**",
+            "**Against scheduled benefits:**",
             "",
             table("scheduled_benefits"),
             "",
-            "**Scored against the Social Security solvency baseline (2026-2034",
-            "against scheduled benefits, solvent baseline from 2035):**",
+            "**Against the Social Security solvency baseline (scheduled",
+            "benefits through 2034, solvent baseline from 2035):**",
             "",
             table("ss_solvent"),
             "",
+            "Both tables use the dashboard's default trust-fund split",
+            "(@sec-trust-fund-accounting), with nominal sums over 2026-2035 and",
+            "present values over 2026-2100 at each fund's own Trustees effective",
+            "interest rates (@sec-present-value).",
+            *_general_fund_note(records),
+            "",
+            *_swap_note(),
+            "",
         ]
     )
+
+
+def write_exhibit(records: list[dict[str, object]]) -> None:
+    fragment = render_exhibit(records)
     for directory in EXHIBIT_DIRS:
         (directory / "headline-summary.md").write_text(fragment, encoding="utf-8")
 

@@ -184,7 +184,7 @@ export const DIAGNOSTICS_PANELS: DiagnosticsPanel[] = [
     series: [
       { key: "income_tax", label: "Modeled", color: "var(--chart-1)" },
     ],
-    note: "Not a calibration target. The level runs above administrative collections — a known enhanced-CPS property — so the growth path, not the level, is the diagnostic.",
+    note: "We do not calibrate to it, so we use it to check the projection.",
   },
   {
     id: "income-tax-share",
@@ -197,7 +197,7 @@ export const DIAGNOSTICS_PANELS: DiagnosticsPanel[] = [
       label: "Modeled / TR2026 GDP",
     },
     series: [],
-    note: "Individual income taxes have averaged 8-10% of GDP historically (CBO); the modeled level sits above that range while its slope should stay gradual.",
+    note: "Individual income taxes have averaged 8-10% of GDP historically (CBO), and we project a share of about 8-10% across the horizon.",
   },
   {
     id: "agi",
@@ -270,7 +270,7 @@ export const DIAGNOSTICS_PANELS: DiagnosticsPanel[] = [
         color: "var(--chart-4)",
       },
     ],
-    note: "Uncalibrated income components; gamma scales beneficiary households' values toward the TOB target while income guards pin totals from 2075.",
+    note: "Uncalibrated income components. We scale beneficiary households' values toward the benefit-tax target with gamma and hold ordinary non-payroll and preferential investment income at their totals in the final calibration.",
   },
 ];
 

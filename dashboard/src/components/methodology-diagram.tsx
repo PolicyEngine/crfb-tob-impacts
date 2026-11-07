@@ -87,16 +87,16 @@ export function MethodologyDiagram() {
         width="760"
         height="600"
         role="img"
-        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO targets feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of real survey households for the reform panel"
+        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO inputs feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of populace records, on which we score the reforms"
         className="mx-auto h-auto max-w-full"
       >
         <rect x="0" y="0" width="760" height="600" fill="#f9fafb" rx="8" />
         <text x="380" y="26" textAnchor="middle" fontSize="16" fontWeight="600" fill={palette.text}>
-          How each projection year is built
+          How we build each projection year
         </text>
         <text x="380" y="44" textAnchor="middle" fontSize="10.5" fill={palette.subtext}>
-          Demographics enter through weights; economics enter through values. Every year from 2026
-          to 2100 is calibrated independently.
+          Demographics enter through weights; economics enter through values. We calibrate each
+          projection year independently.
         </text>
 
         {/* Inputs row */}
@@ -116,7 +116,7 @@ export function MethodologyDiagram() {
           h={56}
           title="2026 Trustees Report"
           caption="Age distribution, payroll,"
-          caption2="OASDI cost, TOB, GDP, AWI"
+          caption2="OASDI cost, benefit tax, GDP"
         />
         <Box
           x={390}
@@ -132,9 +132,9 @@ export function MethodologyDiagram() {
           y={62}
           w={165}
           h={56}
-          title="CBO long-run forecast"
+          title="CBO projections"
           caption="Per-category income growth"
-          caption2="through 2034"
+          caption2="through 2036"
         />
 
         {/* arrows from inputs into the pipeline */}
@@ -172,8 +172,8 @@ export function MethodologyDiagram() {
           w={340}
           h={58}
           title="A. Grow incomes to the target year"
-          caption="Model uprating by category, CBO-vintage through 2034; capped at"
-          caption2="Trustees nominal GDP growth beyond so no source outruns the economy"
+          caption="We grow each category on CBO projections; after 2034, we cap each"
+          caption2="record's dividend, partnership and S-corporation income at GDP growth"
         />
         <Down x={290} y1={198} y2={214} />
 
@@ -184,7 +184,7 @@ export function MethodologyDiagram() {
           w={340}
           h={50}
           title="B. Demographic reweight (light entropy)"
-          caption="Shift household weights to the Trustees single-year age distribution"
+          caption="Shift household weights to Trustees population by five-year age group"
         />
         <Down x={290} y1={268} y2={284} />
 
@@ -196,7 +196,7 @@ export function MethodologyDiagram() {
           h={70}
           title="C. Value calibration, given those weights"
           caption="α scales earnings to SSA taxable payroll (taxable-max aware) · β scales"
-          caption2="benefits to OASDI cost · γ nudges beneficiary other income toward TOB"
+          caption2="benefits to OASDI · γ scales beneficiary other income toward benefit tax"
         />
         <Down x={290} y1={358} y2={374} />
 
@@ -207,8 +207,8 @@ export function MethodologyDiagram() {
           w={340}
           h={58}
           title="D. Final entropy calibration"
-          caption="Exact targets: age distribution, benefits, payroll, OASDI and HI TOB,"
-          caption2="plus guards holding investment and other income to their growth paths"
+          caption="Exact targets: age, benefits, payroll, OASDI and HI benefit tax,"
+          caption2="plus guards holding investment and other income at Stage C totals"
         />
         <Down x={290} y1={436} y2={452} />
 
@@ -219,7 +219,7 @@ export function MethodologyDiagram() {
             Publication gates
           </text>
           <text x={290} y={490} textAnchor="middle" fontSize="9.5" fill={palette.tealWash}>
-            Effective sample size, weight concentration, and TOB contributor support
+            Effective sample size, weight concentration, benefit-tax contributors
           </text>
         </g>
         <Down x={290} y1={500} y2={516} />
@@ -230,21 +230,21 @@ export function MethodologyDiagram() {
           y={520}
           w={340}
           h={56}
-          title="Calibrated year datasets, 2026–2100"
-          caption="Each year feeds the reform panel: 14 options simulated on Modal with"
-          caption2="full-output audit artifacts behind every published number"
+          title="Calibrated anchor-year datasets, 2026–2100"
+          caption="We score the 15 reforms at the anchor"
+          caption2="years and interpolate between them"
           accent
         />
 
         {/* side note: independence */}
         <text x={615} y={460} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-          Failing any gate blocks publication
+          The projection script stops
         </text>
         <text x={615} y={473} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-          for that year; diagnostics for every
+          on any year that fails a gate. The
         </text>
         <text x={615} y={486} textAnchor="middle" fontSize="9.5" fill={palette.subtext}>
-          series appear in the baseline section.
+          baseline tab charts major series.
         </text>
 
         <defs>

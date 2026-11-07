@@ -884,8 +884,7 @@ def test_option7_dashboard_accounting_preserves_federal_total_and_residual():
         )
         < 1e-9
     )
-    assert "general-fund columns show the" in methods
-    assert "accounting split" in methods
+    assert "assign the rest to the general fund" in " ".join(methods.split())
 
 
 def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhibit():
@@ -896,13 +895,18 @@ def test_static_exhibit_generator_does_not_emit_unused_validation_sentinel_exhib
     assert "validation-sentinels.md" not in generator
 
 
-def test_labor_supply_response_exhibit_uses_current_contract():
-    exhibit = (
-        REPO_ROOT / "paper" / "exhibits" / "labor-supply-response-status.md"
-    ).read_text(encoding="utf-8")
+def test_labor_supply_methods_name_static_only_reforms():
+    methods = " ".join(
+        (REPO_ROOT / "paper" / "sections" / "03-methods.qmd")
+        .read_text(encoding="utf-8")
+        .split()
+    )
+    static = load_dashboard_results("static")
+    behavioral = load_dashboard_results("behavioral")
+    static_only = sorted(set(static["reform_name"]) - set(behavioral["reform_name"]))
 
-    assert "Labor-supply response rows are generated" in exhibit
-    assert "current full-H5 reform contract" in exhibit
+    assert static_only == ["magi100", "tax_panel_2005"]
+    assert "all but full MAGI inclusion and the 2005 Tax Panel deduction" in methods
 
 
 def test_public_dashboard_data_cover_full_2026_2100_horizon():

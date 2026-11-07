@@ -1,0 +1,25 @@
+--- tmp/lsr_fix/simulation.py.orig	2026-07-19 11:52:53
++++ .venv/lib/python3.13/site-packages/policyengine_core/simulations/simulation.py	2026-07-19 11:53:01
+@@ -1247,7 +1247,21 @@
+         >>> simulation.get_array('age', '2018-05') is None
+         True
+         """
+-        self.get_holder(variable).delete_arrays(period)
++        # LSR-fix backport of policyengine-core#521 (visibility-chain purge):
++        # delete the calling branch, each ancestor branch, and "default" from
++        # this simulation's own private storage so purge-then-perturb branches
++        # recompute inherited formula values. Disk storage is never constructed
++        # in these runs (memory_config is None), so the memory-side chain purge
++        # is the complete fix here.
++        holder = self.get_holder(variable)
++        _branch_names = [getattr(self, "branch_name", "default")]
++        _parent = getattr(self, "parent_branch", None)
++        while _parent is not None:
++            _branch_names.append(_parent.branch_name)
++            _parent = getattr(_parent, "parent_branch", None)
++        _branch_names.append("default")
++        for _branch_name in dict.fromkeys(_branch_names):
++            holder.delete_arrays(period, _branch_name)
+         _fast_cache = getattr(self, "_fast_cache", None)
+         if period is None:
+             if _fast_cache is not None:

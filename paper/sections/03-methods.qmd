@@ -2,27 +2,26 @@
 
 ## Estimand and unit of analysis
 
-The analysis estimates annual federal revenue and trust-fund effects of each
-reform from `2026` through `2100`. Let $i$ index households, $y$ index
-calendar years, $w_{iy}$ denote the calibrated household weight for year
-$y$, and $P_0$ and $P_s$ denote current law and reform scenario $s$.
-The static revenue effect reported for scenario $s$ in year $y$ is
+We estimate each reform's annual effects on federal revenue and the trust funds
+from 2026 through 2100. Let $i$ index households, $y$ index calendar years,
+$w_{iy}$ denote the calibrated household weight for year $y$, and $P_0$ and
+$P_s$ denote current law and reform scenario $s$. We report the static revenue
+effect of scenario $s$ in year $y$ as
 
 $$
 \Delta^{static}_{sy}
 = \sum_i w_{iy} R_i(P_s, D_{iy}) - \sum_i w_{iy} R_i(P_0, D_{iy}),
 $$
 
-where $D_{iy}$ is the projected household record and $R_i(\cdot)$ is the
-PolicyEngine federal income-tax liability calculation. Trust-fund effects are
-computed analogously for the OASDI and Hospital Insurance (HI) revenue
-components described below. The static estimand therefore holds the projected
-population, income, and benefit distribution fixed within a year and varies
-only the policy parameters.
+where $D_{iy}$ denotes the projected household record and $R_i(\cdot)$ the
+PolicyEngine federal income-tax liability calculation. We compute trust-fund
+effects the same way for the OASDI and HI revenue components below. In the
+static estimand, we hold the projected population, income, and benefit
+distribution fixed within a year and vary only the policy parameters.
 
-The labor-supply response estimand uses the same projected data and baseline
-contract but lets the policy reform trigger PolicyEngine labor-supply response
-variables before revenue is measured:
+For the labor-supply response estimand, we use the same projected data and
+baseline but let each reform move labor supply through PolicyEngine's
+labor-supply response variables before we measure revenue:
 
 $$
 \Delta^{LSR}_{sy}
@@ -30,217 +29,219 @@ $$
 - \sum_i w_{iy} R_i(P_0, D_{iy}, L_i(P_0)).
 $$
 
-The behavioral component $L_i(\cdot)$ is limited to the labor-supply response
-layer. The model does not endogenously reproject population, wage growth,
-interest rates, benefit claiming, mortality, or the Social Security trust-fund
-balance in response to a reform.
+The behavioral component $L_i(\cdot)$ covers labor supply alone. We do not
+reproject population, wage growth, interest rates, benefit claiming, mortality,
+or the Social Security trust-fund balance in response to a reform.
 
 ## Base microdata
 
-The microdata foundation is PolicyEngine's **populace** 2024 database
-(`populace-us-2024-9f1260b-20260611`), a primary-source-built household file
-that supersedes the Enhanced CPS used in the original report. populace assembles
-its layers from the CPS Annual Social and Economic Supplement
+We build on PolicyEngine's populace 2024 household database
+(`populace-us-2024-9f1260b-20260611`) [@populace2024]. PolicyEngine assembles
+populace from the CPS Annual Social and Economic Supplement
 [@census2024cpsasec], the IRS Public Use File, the Survey of Consumer Finances,
 the Survey of Income and Program Participation, the CPS Outgoing Rotation Group,
-the Medical Expenditure Panel Survey, and the American Community Survey, with
-every imputed layer traceable to its source [@peusdata]. PolicyEngine then
-applies the federal income-tax, payroll-tax, Social Security benefit-taxation,
-and benefit-program rules needed for this analysis. Relative to the Enhanced
-CPS, populace produces a more realistic income-tax baseline: federal income tax
-on the calibrated populace baseline sits near 8–11 percent of GDP across the
-projection, in line with historical experience, whereas the earlier
-reweighting-heavy construction pushed it well above 20 percent at the far
-horizon.
+the Medical Expenditure Panel Survey, and the American Community Survey.
+PolicyEngine flags 42,706 of the database's 75,112 households, which hold 50.8
+percent of its weight, as Public Use File clones. Each of those records either
+keeps survey demographics and takes its tax detail from the Public Use File or
+comes from that file's highest-income returns. We then apply PolicyEngine's
+federal income-tax, payroll-tax, Social Security benefit-taxation, and
+benefit-program rules to each record.
 
-The projection and scoring stack uses households as the aggregation unit. For
-variables originally defined at person or tax-unit level, PolicyEngine maps
-values to households before calibration or national aggregation. This
-household-level contract matters because the taxation of Social Security
-benefits depends on tax-unit filing status, combined income, Social Security
-benefits, and other income sources, while the projection weights are stored on
-household records.
+The projection stores its weights on household records, so the projection and
+scoring code aggregates by household. Benefit taxation depends on each tax
+unit's filing status, combined income, Social Security benefits, and other
+income, and PolicyEngine maps person- and tax-unit-level variables like these to
+households before calibration or national aggregation.
 
 ## Long-run projection
 
-Each projection year is built independently from the same 2024 populace
-cross-section, following one organizing principle: **demographics enter through
-the household weights, and economics enter through the record values.** The
-construction has four stages.
+We build each projection year independently from the same 2024 populace
+cross-section, in four stages. Demographics enter through the household weights,
+and economics enter through the record values.
 
-**Stage A — grow incomes to the target year.** Each income category is uprated
-from `2024` to year $y$. Through `2034` the uprating follows the Congressional
-Budget Office long-term vintage carried in PolicyEngine's parameter system;
-beyond `2034`, any category whose cumulative growth would outrun the Trustees
-nominal-GDP path is capped at that path, so no income source grows faster than
-the projected economy. Tax parameters follow statutory indexing, with the
-threshold treatment described below.
+**Stage A: grow incomes to the target year.** We grow each income category from
+2024 to year $y$ with PolicyEngine's income indexes. Those indexes follow the
+revenue projections of the Congressional Budget Office (CBO) through 2036 and
+hold each category's last growth rate after that. After 2034, we cap the index
+growth of these categories at the Trustees' nominal-GDP growth: interest,
+dividends and the investment income that shares their index, short-term and
+non-Schedule-D capital gains, taxable IRA distributions, rental and farm-rent
+income, estate income, partnership and S-corporation income, and miscellaneous
+income. When the index of one of those categories has grown faster than GDP
+since 2034, we scale that category down on every record by the ratio of the two.
+In our projections, we scale down only dividends, the investment income that
+shares their index, and partnership and S-corporation income. We cap values on
+each record, not a category's weighted total: from 2035 to 2100, we project
+partnership and S-corporation income to grow 13.0-fold, against 11.1-fold for
+the Trustees' GDP path. We leave earnings out of the cap; in Stage C, we scale
+them to match the Trustees' taxable payroll. We index tax parameters as statute
+does through 2034, and from 2035 we switch those on the IRS inflation index to
+wages.
 
-**Stage B — demographic reweight.** A light positive-entropy adjustment shifts
-household weights to the 2026 Trustees single-year age distribution. The weights
-carry population level and age structure only; they are not asked to repair
-dollar aggregates.
+**Stage B: reweight to the projected age distribution.** We shift household
+weights to the projected population in five-year age groups with a light
+positive-entropy adjustment. At this stage the weights carry population level
+and age structure only.
 
-**Stage C — value calibration, given those weights.** Holding the reweighted
-population fixed, three scalars align the economic aggregates with the Trustees
-targets: $\alpha$ rescales earnings inputs so SSA taxable payroll (wages capped
-at the taxable maximum plus taxable self-employment income in remaining cap
-room) matches the Trustees taxable-payroll target; $\beta$ rescales Social
-Security benefit inputs so total benefits match Trustees OASDI cost; and
-$\gamma$ rescales beneficiary households' non-earnings, non-benefit income
-toward the Trustees taxation-of-benefits target. Because the 85 percent
-inclusion cap saturates at the far horizon, total taxation of benefits becomes
-nearly inelastic to other income; $\gamma$ is therefore bounded and the final
-calibration closes any remainder.
+**Stage C: calibrate values, given those weights.** Holding the reweighted
+population fixed, we align the economic aggregates with the Trustees' targets
+through three scalars. We scale earnings by $\alpha$ so that taxable payroll,
+the wages and self-employment income under the Social Security payroll-tax cap,
+matches the Trustees' projection. We scale Social Security benefits by $\beta$
+so that they match Trustees OASDI cost. We scale beneficiary households'
+interest, dividends, short-term and non-Schedule-D capital gains, pension and
+IRA income, rental and farm-rent income, estate income, partnership and
+S-corporation income, and miscellaneous income by $\gamma$ toward the Trustees'
+taxation-of-benefits target. Because the 85 percent inclusion cap saturates at
+the far horizon, total taxation of benefits barely responds to other income
+there. We therefore bound $\gamma$ and let the final calibration close any
+remainder.
 
-**Stage D — final entropy calibration.** A last weight adjustment hits the age
-distribution and every fiscal target exactly, with guard constraints holding
-investment and other non-payroll income to their Stage-A growth paths so the
-reweighting cannot inflate income to reach a revenue target.
+**Stage D: final entropy calibration.** We adjust the weights a final time so
+that they hit the age distribution and every fiscal target. We also hold
+ordinary non-payroll income and preferential investment income at their totals
+entering this stage, so the reweighting cannot inflate that income to reach a
+revenue target.
 
-Separating the two channels keeps both honest. Reweighting alone — the original
-report's approach — can match aggregates only by distorting who the population
-is, which is what pushed the Enhanced CPS income-tax baseline far above
-realistic levels; value scaling alone cannot shift the age structure. The named
-target source is the 2026 Social Security Trustees current-law projections
-[@ssa2026trustees], with Medicare HI context from the 2026 Medicare Trustees
-Report [@medicare2026trustees].
+Reweighting alone can match dollar aggregates only by changing the population's
+makeup, and value scaling alone cannot shift the age structure, so we use each
+for its own channel. We take the fiscal targets from the 2026 Social Security
+Trustees' current-law projections [@ssa2026trustees] and the HI
+taxation-of-benefits target from the 2026 Medicare Trustees Report
+[@medicare2026trustees].
 
-The tax-parameter assumption preserves two distinct parts of the Trustees
-treatment. First, the Social Security benefit-tax combined-income thresholds
-remain fixed in nominal dollars, consistent with the Internal Revenue Code
-thresholds used in the Trustees taxation-of-benefits method. Second, the first
-ten projection years use current-law income-tax parameter indexing through
-`2034`; beginning in `2035`, the Trustees assume income-tax brackets rise with
-average wages rather than chained CPI-U to avoid indefinite bracket compression
-relative to income levels [@ssa2026trustees]. The public Trustees Report text
-names income-tax brackets. SSA/OACT separately clarified to PolicyEngine in May
-2026 that the same long-range assumption applies to both income-tax rate
-brackets and federal income-tax thresholds such as standard
-deductions.[^oact-threshold-email] We therefore implement the threshold bundle
-as fixed benefit-tax thresholds plus wage-indexed core federal income-tax
-thresholds beginning in `2035`, covering ordinary income-tax brackets, standard
-deductions, aged/blind standard deduction additions, capital-gains thresholds,
-and AMT thresholds. Federal income-tax parameters outside this core threshold
-bundle, such as credit amounts and refundability limits, remain on current-law
-indexing unless they are directly changed by a modeled reform.
-For contributed CRFB reform parameters that are not part of current law, the
-policy specification controls indexing. In particular, the option11 Social
-Security credit phase-out thresholds remain fixed at `$150,000` for joint filers
-and `$75,000` for other filers. Because the credit is nonrefundable, any gross
-credit calculated for tax units with zero pre-credit income-tax liability is
-recorded as unavailable rather than reducing federal revenue.
+We follow two parts of the Trustees' treatment of tax parameters. First, we keep
+the Social Security benefit-tax combined-income thresholds fixed in nominal
+dollars, as the law sets them and as the Trustees' taxation-of-benefits method
+holds them. Second, we index income-tax parameters as current law does through
+2034. After the tenth projection year, the Trustees assume that income-tax
+brackets rise with average wages rather than chained CPI-U, to avoid indefinite
+bracket compression relative to income levels [@ssa2026trustees]. In May 2026,
+the Office of the Chief Actuary (OACT) at the Social Security Administration
+(SSA) told PolicyEngine that the assumption covers federal income-tax thresholds
+such as standard deductions, not only brackets. In a second reply, OACT added
+that its projections implicitly apply wage growth to all income-tax parameters,
+although it does not explicitly model credit parameters.[^oact-threshold-email]
 
-| Assumption area | Public Trustees source | OACT correspondence | Implementation in this analysis |
+From 2035, we therefore index to wages every federal income-tax parameter that
+PolicyEngine otherwise adjusts with the IRS inflation index, unless a reform
+changes it directly. These parameters include ordinary income-tax brackets,
+standard deductions, the additional standard deduction for aged and blind
+filers, capital-gains thresholds, alternative minimum tax (AMT) thresholds, and
+credit amounts such as the child tax credit and the earned income tax credit. We
+start this indexing in 2035, following the 2025 Trustees Report, the report we
+asked OACT about. The 2026 report reaches its tenth projection year in 2035, so
+the same assumption starts a year later there.
+
+For the wage index, we use PolicyEngine's own National Average Wage Index
+series, not the Trustees' projection. From 2025 through 2033, our series follows
+CBO's forecast of the Social Security payroll-tax cap, which the law ties to
+average wages; after that, the series grows about 3.4 percent a year. It rises
+about 9.1-fold from 2033 to 2099, against about 10.2-fold for the average wage
+index in the 2026 Trustees Report. The first bracket threshold for joint filers
+therefore reaches $265,800 in 2100, about 11 percent below the $297,700 that
+Trustees wage growth implies.
+
+For reform parameters outside current law, we follow CRFB's specification on
+indexing. For example, we hold the $700 credit's phase-out thresholds at
+$150,000 for joint filers and $75,000 for other filers. As a nonrefundable
+credit, it reduces no revenue from tax units that owe no income tax before
+credits.
+
+| Assumption area | Trustees Report | OACT correspondence | Our implementation |
 |---|---|---|---|
-| Social Security benefit-tax combined-income thresholds | The Trustees taxation-of-benefits method treats the statutory benefit-tax thresholds as fixed in nominal dollars. | Our question to OACT stated this understanding; OACT's reply did not contradict it. | Kept fixed in nominal dollars under current law. |
-| Ordinary income-tax brackets | The Trustees Report states that, after the tenth projection year, income-tax brackets rise with average wages rather than chained CPI-U. | Confirmed as part of the long-range assumption. | Wage-indexed beginning in `2035`. |
-| Standard deduction and related deduction thresholds | Not named separately in the public Trustees paragraph. | OACT clarified that the long-range assumption applies to federal income-tax thresholds, including standard deductions. | Standard deduction amounts and aged/blind additions are wage-indexed beginning in `2035`. |
-| Capital-gains and AMT thresholds | Not named separately in the public Trustees paragraph. | Treated as threshold-like federal income-tax parameters under the OACT clarification. | Capital-gains thresholds and AMT bracket, exemption, phaseout, and separate-filing thresholds are wage-indexed beginning in `2035`. |
-| Credit amounts, refundability limits, and other non-threshold parameters | Not specified in the Trustees taxation-of-benefits paragraph. | We asked OACT a narrower follow-up on credits; no public or email clarification is incorporated in the current release contract. | Left on current-law indexing unless a reform changes them directly. |
+| Social Security benefit-tax combined-income thresholds | The Trustees' taxation-of-benefits method holds the statutory thresholds fixed in nominal dollars. | We stated this understanding to OACT, and OACT's replies do not contradict it. | We hold them fixed in nominal dollars, as current law does. |
+| Ordinary income-tax brackets | After the tenth projection year, brackets rise with average wages rather than chained CPI-U. | OACT confirmed brackets as part of the long-range assumption. | We index them to wages from 2035. |
+| Standard deduction and related deduction thresholds | The report's paragraph on this assumption does not name them. | OACT confirmed that the long-range assumption covers federal income-tax thresholds, including standard deductions. | We index standard deduction amounts and the aged and blind additions to wages from 2035. |
+| Capital-gains and AMT thresholds | The report's paragraph on this assumption does not name them. | OACT's second reply covers all income-tax parameters. | We index the capital-gains thresholds and the AMT brackets, exemptions, phase-out thresholds, and separate-filing thresholds to wages from 2035. |
+| Credit amounts, refundability limits, and other indexed parameters | The report's paragraph on this assumption does not name them. | OACT's second reply says its projections implicitly apply wage growth to all income-tax parameters, although it does not explicitly model credit parameters. | We index those that PolicyEngine otherwise adjusts with the IRS inflation index to wages from 2035 unless a reform changes them directly. |
 
-[^oact-threshold-email]: Email from SSA Office of the Chief Actuary Actuarial
-    Services to PolicyEngine, May 5, 2026, replying to "Clarification on
-    Trustees long-run income-tax threshold assumption." OACT wrote that the
-    long-range assumption applies to income-tax rate brackets and federal
-    income-tax thresholds, with standard deductions given as an example.
+[^oact-threshold-email]: Emails from SSA Office of the Chief Actuary Actuarial
+    Services to PolicyEngine, May 5 and May 6, 2026, replying to "Clarification
+    on Trustees long-run income-tax threshold assumption." We asked about the
+    2025 Trustees Report. The first reply said the long-range assumption applies
+    to income-tax rate brackets and federal income-tax thresholds, with standard
+    deductions as an example. We then asked whether to move all
+    inflation-indexed federal income-tax parameters to wages, only
+    threshold-like ones, or a narrower set. The second reply called moving all
+    of them the most consistent with the Trustees' projections.
 
-The projection script builds a year-specific dataset only after it has
-calculated all calibration variables at household level. The saved H5 sidecar
-contains the year-$y$ household weights and year-$y$ input variables.
-Pseudo-input variables that are actually aggregates of calculated components
-are excluded before writing the H5, avoiding stale aggregate values in later
-rescoring. Each delivered dataset is accompanied by metadata recording the base
-dataset, calibration profile, target source, calibration audit, and validation
-status.
+We store each projected year in an H5 file (HDF5, a common format for large
+datasets), which holds that year's household weights and input variables. The
+projection script writes a metadata file alongside it with the base dataset,
+calibration profile, target source, calibration audit, and validation status.
 
 ## Calibration targets
 
-The current long-run profile is `ss-payroll-tob`. It calibrates household
-weights to official demographic and fiscal targets while preserving the
-household-level tax calculation. The profile includes five target families.
+We calibrate household weights to five families of official demographic and
+fiscal targets.
 
-**Age distribution.** The household age-composition matrix has 86 columns:
-single-year ages `0` through `84` and a top-coded `85+` category. Targets come
-from SSA single-year age population projections for the Social Security area
-[@ssa2024population]. This keeps the projected microdata aligned to official
-aging assumptions.
+**Age distribution.** The household age-composition matrix has 18 columns:
+five-year groups from 0-4 through 80-84 and a top-coded 85+ group. We build those
+groups from the single-year age shape in SSA's 2024 population projections for
+the Social Security area [@ssa2024population]. We rescale that shape within three
+broader groups (under 20, 20 to 64, and 65 and over) so that their totals match
+Table V.A3 of the 2026 Trustees Report [@ssa2026trustees].
 
-**OASDI benefits.** The model aggregates the household-level `social_security`
-variable and calibrates the weighted total to the 2026 Social Security Trustees
-OASDI cost projection [@ssa2026trustees]. This controls the benefit base
-affected by taxation reforms and benefit cuts.
+**OASDI benefits.** We calibrate the weighted total of the household-level
+`social_security` variable to the 2026 Trustees' OASDI cost projection
+[@ssa2026trustees]. This target fixes the benefit base that the reforms tax and
+that the solvency baseline cuts.
 
-**OASDI taxable payroll.** The model combines household-level taxable wages and
-taxable self-employment income subject to the Social Security payroll-tax base
-and calibrates the weighted total to the Trustees taxable-payroll projection
-[@ssa2026trustees]. This controls the wage base for payroll-tax and solvency
+**OASDI taxable payroll.** We combine household-level taxable wages and taxable
+self-employment income under the Social Security payroll-tax cap and calibrate
+the weighted total to the Trustees' taxable-payroll projection
+[@ssa2026trustees]. This target sets the wage base for payroll-tax and solvency
 comparisons.
 
-**OASDI taxation-of-benefits revenue.** The household-level `tob_revenue_oasdi`
-variable is calibrated to the 2026 Trustees current-law taxation-of-benefits
-target, derived as the IV.B2 income-rate share of the VI.G1 taxable payroll.
-This controls the Social Security trust-fund component of baseline benefit
-taxation.
+**OASDI taxation-of-benefits revenue.** We calibrate the household-level
+`tob_revenue_oasdi` variable to the 2026 Trustees' current-law
+taxation-of-benefits target, which we derive as the Table IV.B2 income-rate share
+of Table VI.G1 taxable payroll. This target sets the Social Security trust funds'
+share of baseline benefit-tax revenue.
 
-**HI taxation-of-benefits revenue.** The household-level
-`tob_revenue_medicare_hi` variable is calibrated to the CMS 2026 Medicare
-Trustees expanded-table HI taxation-of-benefits target, available annually
-through `2100` [@medicare2026trustees]. This controls the Medicare trust-fund
-component of baseline benefit taxation.
+**HI taxation-of-benefits revenue.** We calibrate the household-level
+`tob_revenue_medicare_hi` variable to the HI taxation-of-benefits target in the
+expanded tables of the 2026 Medicare Trustees Report, which give annual values
+through 2100 [@medicare2026trustees]. This target sets the Medicare trust
+fund's share of baseline benefit-tax revenue.
 
-The production delivery path is exact-calibration only for delivered years. The
-runtime rejects aggregate-quality calibration, rejects IPF fallback, checks that
-the dataset metadata matches the required target source and profile, and
-requires all published files to come from validated year-level H5 artifacts.
+Every projected dataset hits all of its calibration targets. The projection
+script stops on any year whose final calibration misses a target by more than
+0.01 percent.
 
-## Far-horizon support: no synthetic records
+## Far-horizon contributors
 
-A reweighting-heavy construction on the Enhanced CPS can match the far-horizon
-taxation-of-benefits aggregates only by concentrating weight on a small number
-of contributors, which would force a choice between thin support and synthetic
-augmentation. The populace base plus value scaling removes that dilemma. Because
-the economics enter through record values rather than weights, the
-taxation-of-benefits-contributing population stays broad even at `2100`, and
-**every record in every published year is a real survey household — no synthetic
-rows.**
+A projection that relied on reweighting alone would have to concentrate weight
+on a few households that owe tax on benefits (contributors) to match far-horizon
+taxation-of-benefits aggregates, forcing a choice between resting the estimates
+on a few records and adding synthetic ones. Because economic growth enters
+through record values rather than weights, the population of
+taxation-of-benefits contributors stays broad even in 2100. We add no records to
+the populace database in any projected dataset.
 
-We verified this directly by building the hardest year, `2100`. It passes every
-publication gate with margin: taxation-of-benefits contributor effective sample
-sizes of `153` (OASDI) and `127` (HI) against the `50` floor, and a top-10
-weight share of `3.4%`. All six far-horizon years (`2075`–`2100`) pass with
-contributor effective sample sizes of `107`–`156`.
+We built the datasets under publication gates, and the projection script stops
+on any year that fails one. The gates bound the household weights in every year
+and, from 2075, the contributors behind each policy target. For OASDI and HI
+taxation-of-benefits contributors, they require at least 1,000 positive
+contributors, an effective sample size of at least 50, a top-10 contribution
+share of at most 50%, a top-100 share of at most 95%, and a largest
+single-contributor share of at most 15%. Every projected dataset meets those
+limits, including the years before 2075, and we report the figures in
+@sec-validation.
 
-The CRFB runtime still applies publication gates to both aggregate household
-weights and policy-target contributors. For OASDI and HI taxation-of-benefits
-contributors, the gates require at least `1,000` positive contributors,
-contributor effective sample size of at least `50`, top-10 contribution share
-of at most `50%`, top-100 contribution share of at most `95%`, and max
-single-contributor share of at most `15%`. The final year-level entropy
-calibration solves against the real rows and must hit Social Security benefits,
-taxable payroll, OASDI taxation-of-benefits revenue, and HI
-taxation-of-benefits revenue exactly. Ordinary nonpayroll-income and
-preferential-investment-income guard targets pin those income components to
-their projected growth paths so the reweighting cannot define its own
-income-tax target.
-
-The data pipeline also carries Trustees covered-worker counts and beneficiary
-counts as diagnostic references rather than hard calibration targets. We do not
-treat GDP, AWI, or CPI as calibration targets in this microdata step: GDP is
-outside the microsimulation model, and AWI/CPI enter as exogenous projection
-inputs and as the post-`2034` growth ceiling described above.
+We also track the Trustees' covered-worker and beneficiary counts as
+diagnostics, but we do not calibrate to them, or to GDP, average wages, or CPI.
+The model does not compute GDP, and the Trustees' GDP path enters the
+projection only as the growth cap after 2034.
 
 ## Calibration estimator
 
-The current named profile uses positive entropy calibration, not the legacy
-GREG calibration path. Earlier internal notes used "GREG" as shorthand for the
-second-stage reweighting process, but the delivered `ss-payroll-tob` profile is
-implemented as positive entropy calibration. GREG remains in the data repo only
-as an explicit legacy option for flag-based runs.
-
-Let $w_i^0$ be the initial household weight, $a_i$ be the vector of
-calibration variables for household $i$, and $t_y$ be the target vector for
-year $y$. The estimator chooses strictly positive weights $w_i$ that solve
+We use positive entropy calibration. Let $w_i^0$ be the initial household
+weight, $a_i$ be the vector of calibration variables for household $i$, and
+$t_y$ be the target vector for year $y$. The estimator chooses strictly positive
+weights $w_i$ that solve
 
 $$
 \min_{w_i>0}
@@ -251,35 +252,36 @@ w_i \log\left(\frac{w_i}{w_i^0}\right) - w_i + w_i^0
 \sum_i w_i a_i = t_y .
 $$
 
-This is the entropy-balancing analogue of survey calibration
-[@deville1992calibration; @hainmueller2012entropy]. The implementation solves
-the dual problem. With scaled constraints $a_i^*$ and targets $t_y^*$, the
-dual implies
+This estimator applies entropy balancing to survey calibration
+[@deville1992calibration; @hainmueller2012entropy], and we solve its dual problem
+by Newton's method with a line search. With scaled constraints $a_i^*$ and
+targets $t_y^*$, the dual implies
 
 $$
-w_i(\beta) = w_i^0 \exp(a_i^{*\prime}\beta),
+w_i(\lambda) = w_i^0 \exp(a_i^{*\prime}\lambda),
 $$
 
-and the solver finds $\beta$ such that
+and the solver finds $\lambda$ such that
 $$
-\sum_i w_i(\beta) a_i^* = t_y^*.
+\sum_i w_i(\lambda) a_i^* = t_y^*.
 $$
 
-The implementation uses a Newton/root solve with line search, records the
-achieved target errors, and reports the maximum age-bin error, maximum fiscal
-constraint error, negative-weight share, effective sample size, and top-weight
-concentration. Because the entropy parameterization is strictly positive, the
-publication target is a zero negative-weight share. If exact positive
-calibration is infeasible under the available survey support, the data pipeline
-can diagnose approximate feasibility, but the CRFB runtime is configured to
-reject non-exact publication artifacts.
+For each year we record the target and achieved value of each fiscal constraint,
+the largest error on any constraint including the age bins, the share of positive
+weights, the effective sample size, and the top-weight concentration. The entropy
+parameterization keeps every weight positive. When exact positive calibration has
+no solution on the available records, the projection script stops with an
+error.
 
-## Policy simulation and trust-fund accounting
+## Policy simulation and trust-fund accounting {#sec-trust-fund-accounting}
 
-For each standard scenario and year, the scoring code loads the calibrated
-year-$y$ dataset, runs a baseline PolicyEngine simulation, runs the reform
-simulation on the same calibrated records, and stores both levels and
-differences. The core output columns are:
+For each reform and year, the scoring code loads the calibrated year-$y$
+dataset, runs a baseline PolicyEngine simulation and a reform simulation on the
+same records, saves the reform simulation in its own H5 file, and stores both
+levels and differences. A baseline manifest lists the SHA-256 hash (a fingerprint
+of a file's contents) of each baseline H5 and metadata file. The scoring code
+stops when a file differs from its listed hash, and every run behind the results
+file made that check. The code writes these core output columns:
 
 | Output | Definition |
 |---|---|
@@ -290,256 +292,200 @@ differences. The core output columns are:
 | `oasdi_net_impact` | Net OASDI trust-fund impact after reform-specific gains and losses. |
 | `hi_net_impact` | Net HI trust-fund impact after reform-specific gains and losses. |
 
-The trust-fund allocation depends on reform design. Direct benefit-taxation
-components use the model's OASDI and HI taxation-of-benefits variables. Senior
-deduction or credit components can change federal income-tax liability without
-crediting all of that change to the trust funds. For `option7`, which only
-eliminates the temporary senior deduction, total revenue remains the full
-federal income-tax impact, while OASDI, HI, and general-fund columns show the
-accounting split. Employer-payroll-tax swap
-options add the modeled income-tax revenue from taxing employer OASDI and Medicare
-contributions, then subtract lost baseline taxation-of-benefits revenue. The
-legacy `option6` short phase-in allocation assigns early employer-contribution
-gains to OASDI first until the OASDI share of the payroll-tax rate is filled,
-then to HI.
+The dashboard's default split, which we also use in the headline summary
+(@sec-headline), varies by reform. For most reforms, we divide revenue between
+OASDI and HI by each fund's share of baseline benefit-tax revenue. The Roth
+swaps replace benefit-tax revenue with employer-contribution revenue that splits
+differently between the funds, so we add the two funds' net impacts
+(@sec-swap-accounting). For the senior-deduction repeal, the total equals the
+full federal income-tax impact: we credit each fund with its
+taxation-of-benefits change and assign the rest to the general fund. For the
+reverse Roth, we credit HI with its benefit-tax change as the model scores it.
+We charge OASDI with the rest of the revenue impact, including the income-tax
+cost of deducting the employee share of Social Security payroll taxes.
 
-This allocation convention is why total federal revenue and trust-fund revenue
-do not always move one-for-one. A reform can raise individual income-tax
-revenue while weakening one trust fund, or it can replace taxation-of-benefits
-revenue with employer-contribution revenue allocated differently across OASDI
-and HI.
+For the trust-fund decomposition in @sec-results, we instead use the model's
+OASDI and HI taxation-of-benefits variables and apply the rules in
+@sec-swap-accounting to the phased Roth swap. We credit OASDI with the income
+tax on taxable benefits up to 50 percent of benefits and HI with the tax on any
+taxable benefits above that. Senior-deduction and credit changes can move
+federal income tax by more than they move the trust funds' revenue, so a reform
+can raise income-tax revenue while it weakens one trust fund.
 
-## Scoring-year anchors and the budget-window infill
+### Trust-fund accounting for the Roth swaps {#sec-swap-accounting}
 
-Reforms are scored exactly at a set of anchor years — `2026`, `2030`, and every
-fifth year from `2035` through `2100` — and intermediate years are filled by
-linear interpolation between adjacent anchors. Each delivered row records whether
-it is an exact anchor or an interpolated fill, and the long-run and
-present-value totals aggregate the complete annual series.
+For the Roth swap and the phased Roth swap, we credit each trust fund with the
+income tax on its own employer contribution: the employer Social Security
+contribution funds OASDI, and the employer Medicare contribution funds HI. For
+each tax unit, we compute income tax with both employer contributions in income,
+compute it again with one fund's contribution removed, and credit the difference
+to that fund, with a floor of zero. For the short phase-in Roth before 2033, we
+pool the two gains. We credit OASDI first, up to its 6.2 of the 7.65 percentage
+points of employer payroll tax, and HI with the rest. We then subtract the
+benefit-tax revenue each fund loses to get its net impact.
 
-Linear interpolation is accurate where a reform's annual impact is smooth, but it
-misrepresents a sharp within-window change. The 2025 reconciliation act created
-several temporary federal deductions — the enhanced senior deduction and the tip,
-overtime, and auto-loan-interest exclusions — that apply through `2028` and lapse
-in `2029`, alongside a state-and-local-tax cap that reverts after `2029`. A reform
-whose impact depends on those provisions therefore has a step in the budget window
-that a straight line from the `2026` anchor to the `2030` anchor cannot capture.
-The clearest case is `option7`, which only repeals the senior deduction: because
-the deduction is already absent from current law from `2029` onward, the reform's
-true impact falls to approximately zero starting in `2029`, yet interpolation
-between the `2026` and `2030` anchors shows it declining smoothly across the whole
-window, misstating the budget-window years by as much as `$11` billion.
+We measure each gain as if its own contribution were the last income taxed, so
+the two gains need not add up to the income tax on both contributions together.
+The two funds' net impacts therefore need not sum to the change in federal
+income tax. In our static current-law results, the sums exceed that change in
+every year: over 2026-2035, by $12.7 billion for the Roth swap, $36.2 billion
+for the phased Roth swap, and $24.5 billion for the short phase-in Roth, and by
+$11.8 billion for each in 2100. We report the sum of the two funds' net impacts
+on the dashboard and in the headline summary (@sec-headline), and the change in
+federal income tax in the revenue tables of @sec-results.
 
-We correct this by adding exact anchors where the schedule actually bends, rather
-than by scoring every year. Querying the model for every parameter that changes
-discretely between `2027` and `2034` identifies two federal discontinuities
-relevant to these reforms: the temporary-deduction sunset at the end of `2028`
-and the state-and-local-tax reversion at the end of `2029`. Exact anchors at
-`2028` and `2029` bracket both. A third reform, `option6`, phases its
-employer-payroll-tax inclusion in annually and caps it at `2033`; exact anchors at
-`2032` and `2033` capture that corner. A fourth, `option12`, follows a
-straight-line phase-out — linear between anchors along the ramp — but the ramp
-meets the flat when the phase-out completes in `2062`, between the `2060` and
-`2065` grid anchors. An exact anchor at `2062` captures that completion corner;
-`option5`, whose operative settings `option12` reaches at completion, is scored
-at the same year as a convergence check, and the two exact `2062` scores agree
-to the dollar. (This anchor was added in the 2026-07 audit: interpolating
-straight across the corner had displayed a $19.5B gap between the two reforms
-in `2062` that closed only at the `2065` anchor.) The remaining phased reforms
-are immediate (`option5`, `reverse_roth`) and need no additional anchors. The
-infill therefore adds these completion and budget-window years for the affected
-reforms rather than the full annual panel.
+## Anchor years
 
-### Version-consistency requirement
+We run the full microsimulation for every reform in a set of anchor years and
+interpolate linearly between them. The anchors include 2026, 2030, and every
+fifth year from 2035 through 2100, plus the years we add below. Each row of the
+public results file records whether it comes from an anchor-year simulation (an
+exact anchor) or from interpolation, and we sum the complete annual series for
+the long-run and present-value totals.
 
-Infill anchors must be built and scored with the identical microdata base, model
-version, and projection and scoring code as the rest of the panel. If any of those
-differs, the rebuilt years carry a calibration or code difference relative to their
-neighbors, producing a discontinuity — a seam — exactly where the new anchors meet
-the published ones, which would defeat the correction. The published panel was
-produced with the populace `9f1260b` base
-(`populace-us-2024-9f1260b-20260611`), `policyengine-us` `1.700.2` under
-`policyengine.py` `4.5.1`, and this repository at commit `3de8abb6`. The infill
-years were therefore reproduced from a git worktree pinned to that commit and its
-locked environment (`uv sync` against the committed `uv.lock`), not from the
-current development head. The head of the repository carries a later,
-income-tax-calibrated revision of the projection that deliberately shifts the
-baseline income-tax level by roughly twelve percent; building the infill years
-there would not match the published anchors. The infill is a targeted interpolation
-correction on the existing panel, not a rebuild, so it adopts the panel's own
-production version.
+Linear interpolation tracks a reform's annual impact where that impact changes
+smoothly, but it misses a sharp change between anchors. In the 2025
+reconciliation act, Congress created several temporary deductions that apply
+through 2028, among them the bonus senior deduction and deductions for tips,
+overtime pay, and auto-loan interest. It also raised the cap on the
+state-and-local-tax deduction through 2029. The impact of a reform that
+interacts with those provisions jumps within the budget window, and a straight
+line from 2026 to 2030 cannot follow the jump. For example, the senior-deduction
+repeal changes only the bonus senior deduction, which expires after 2028 under
+current law, so the reform's impact falls to zero in 2029. A straight line
+between the 2026 and 2030 anchors would understate its 2028 impact by $9.9
+billion.
 
-### Seam validation
-
-The reproduction is accepted only after two exact checks. First, a build gate: the
-rebuilt `2030` baseline must reproduce the published `2030` federal income tax —
-`$3,231.9` billion — to within rounding; the observed deviation is `0.00` percent.
-Second, a scoring sentinel: published-year reform cells re-scored on the rebuilt
-baseline must reproduce their published impacts to the dollar. At `2030` the
-full-repeal, senior-deduction-repeal, and 100-percent-inclusion reforms reproduce
-`−$159.4`, `$0.0`, and `$93.7` billion exactly. The sentinel is the comprehensive
-test, since a difference in base, build code, model version, or scoring code would
-all surface as a published cell that no longer reproduces. Only after both gates
-match are the four budget-window anchors scored and merged. The scoring code at the
-production commit differs from the current head only in cosmetic relabeling and
-guard logic for all but one of the then-current fourteen reforms, with one substantive change to
-the `reverse_roth` payroll-deduction definition; the infill cells are therefore
-produced from the pinned worktree end to end, which removes that single open
-question rather than certifying it.
+For every reform, we add exact anchors in 2028 and 2029, which bracket both
+expirations with the 2030 anchor. The short phase-in Roth raises the taxable
+share of employer payroll tax each year until it reaches 100 percent in 2033, so
+we add exact anchors in 2032 and 2033 at that corner. The phased Roth swap
+phases benefit taxation out in a straight line that ends in 2062, between the
+2060 and 2065 anchors, so we add an exact anchor in 2062. Once its phase-out
+ends, the phased Roth swap reaches the Roth swap's settings, so we also score
+the Roth swap in 2062, and the two exact scores agree to the dollar. Straight
+lines between the 2060 and 2065 anchors would put them $19.5 billion apart. The
+Roth swap and the reverse Roth take full effect at once and need no further
+anchors.
 
 ## Solvency-baseline scoring
 
-Four options (full repeal, 85%, 100%, and the phased Roth-style swap) are also
-scored against a Social Security solvency baseline — a balanced "traditional
-fix" in which the program is brought into annual balance from `2035` onward
-before the reform applies. For each scored year, the solvent baseline is
-constructed on that year's calibrated dataset in two stages:
+We also score four reforms against a Social Security solvency baseline: full
+repeal, 85 percent taxation, 100 percent taxation, and the phased Roth swap. In
+each scored year from 2035, we bring the program into annual balance on that
+year's calibrated dataset with a balanced "traditional fix" in two stages, then
+apply the reform:
 
-1. **Benefit reduction.** Every benefit is reduced proportionally by half of
-   that year's OASDI shortfall (income minus scheduled benefits), applied as a
-   uniform benefit multiplier.
-2. **Payroll-rate increase.** The remaining OASDI gap is closed by equal
-   employee and employer OASDI rate increases, and the Medicare HI gap by
-   equal employee and employer HI rate adjustments (signed, so an HI surplus
-   lowers rates).
+1. **Benefit reduction.** We cut every benefit by a uniform multiplier, enough
+   to close half of the gap between that year's OASDI income and scheduled
+   benefits.
+2. **Payroll-rate increase.** We close the remaining OASDI gap with equal
+   employee and employer OASDI rate increases. We close the HI gap with equal
+   employee and employer HI rate changes, cutting both rates in years when HI
+   runs a surplus.
 
-The construction validates that both trust-fund gaps close within tolerance
-and that the current-law leg of the computation reproduces the published
-current-law row for the same year before any reform is scored. Reforms are
-then scored as deltas against the solvent system, with revenue split by
-baseline trust-fund shares and any residual assigned to the general fund; the
-split identity (components summing to the total) is asserted for every row.
+Before scoring any reform, the code checks that both trust-fund gaps close
+within tolerance and that the current-law simulation reproduces the published
+current-law row for the same year. We then score each reform as a change from
+the solvent system. For full repeal, 85 percent taxation, and 100 percent
+taxation, we split revenue by baseline trust-fund shares. For the phased Roth
+swap, we credit each fund under the rules in @sec-swap-accounting and assign the
+rest of the revenue impact to the general fund. The components of every row sum
+to the total.
 
-Solvent scoring is exact in `2035`, `2050`, `2065`, `2075`, and `2100`
-(`2065` was promoted from a validation spot-check because the phased
-Roth-style swap's split materially differed from a four-anchor
-interpolation). Intermediate years are direct linear interpolations of the
-anchor rows. An earlier scheme interpolated the solvent/current-law ratio and
-scaled the live current-law row; it was replaced because the ratio diverges
-where current-law totals cross zero, which produced artifacts for the phased
-Roth-style swap. Years before `2035` are scored against scheduled benefits —
-the solvency fix coincides with current law until then — so the displayed
-series runs `2026`-`2100`.
+We simulate the solvency baseline in 2035, 2050, 2065, 2075, and 2100.
+In 2065, the phased Roth swap's OASDI and HI impacts run $32.7 billion and
+$41.1 billion below a straight line between 2050 and 2075. Between anchors, we
+interpolate the rows themselves linearly rather than the ratio of solvent to
+current-law results, which diverges where current-law totals cross zero, as the
+phased Roth swap's do. Before 2035, the solvency fix leaves current law
+unchanged, so we score those years against scheduled benefits and the series
+runs from 2026 to 2100.
 
-## Present-value convention
+## Present-value convention {#sec-present-value}
 
-Seventy-five-year totals discount each year's flow to the start of `2026` at
-each trust fund's effective interest rates under the Trustees' intermediate
-assumptions. OASDI flows use the annual effective yields implied by the
-compound effective trust-fund interest factors in Table VI.G1 of the 2026
-OASDI Trustees Report [@ssa2026trustees], whose reciprocals are the
-discount factors SSA itself uses for summarized rates and balances. Medicare
-HI flows use the effective rates reported in Table IV.A4 of the 2026 Medicare
-Trustees Report [@medicare2026trustees] through `2035`, graded linearly to
-the `4.7` percent ultimate nominal rate by `2040` per that table's
-convention, and held constant thereafter. General-fund flows and economy-wide
-denominators (taxable payroll and GDP) use the OASDI series, and the 75-year
-total is the sum of the discounted components, so headline figures remain
-additive across trust funds. Ten-year budget-window totals are nominal sums
-over `2026`-`2035`. The headline figures the manuscript cites are generated
-server-side by `scripts/build_headline_summary.py` and regression-tested
-against the dashboard's rendered values.
+We discount each year's flow to the start of 2026 at each trust fund's
+effective interest rates under the Trustees' intermediate assumptions. For OASDI
+flows, we use the annual effective yields that the compound effective trust-fund
+interest factors in Table VI.G1 of the 2026 OASDI Trustees Report imply
+[@ssa2026trustees]. SSA uses the reciprocals of those factors as discount
+factors for summarized rates and balances. For HI flows, we use the effective
+rates in Table IV.A4 of the 2026 Medicare Trustees Report through 2035
+[@medicare2026trustees]. As that table does, we then grade them linearly to the
+4.7 percent ultimate nominal rate by 2040 and hold them constant after that.
+We discount general-fund flows and economy-wide denominators (taxable payroll
+and GDP) with the OASDI series and sum the discounted components into the
+75-year total, so headline figures add up across trust funds. For ten-year
+totals, we sum nominal flows over 2026-2035.
 
-## Supplemental labor-supply response scoring
+## Supplemental labor-supply response scoring {#sec-labor-supply}
 
-Static estimates are the scoring surface displayed on the CRFB dashboard.
-Supplemental labor-supply response rows are reported in the published results
-data as a secondary estimand. They are generated from the same current-contract
-full-H5 reform lineage as the static rows, then aggregated from those durable
-H5 artifacts. Labor-supply response reform dictionaries merge the statutory
-reform parameters with the project's age-based elasticity schedule:
+We show static estimates on the dashboard and report labor-supply response rows
+in the public results file as a secondary estimand. We simulate them on the same
+projected datasets as the static rows, save each reform's H5 file, and aggregate
+from those files. We score labor-supply responses for thirteen of the fifteen
+reforms, all but full MAGI inclusion and the 2005 Tax Panel deduction, and for
+the short phase-in Roth. For each, we simulate 2026 and 2100, plus 2062 for the
+Roth swap and the phased Roth swap and 2033 for the short phase-in Roth. Between
+these anchors, we interpolate each metric's ratio of labor-supply to static
+results linearly and apply it to the static annual row. Where the static result
+changes sign within a segment, we interpolate the labor-supply values directly.
 
-- income elasticity base: `-0.05`
-- income elasticity multiplier above the model's older-worker threshold: `2.0`
-- primary-earner substitution elasticities by decile: `0.31`, `0.28`, `0.27`,
-  `0.27`, `0.25`, `0.25`, `0.22`, `0.22`, `0.22`, and `0.22`
-- secondary-earner substitution elasticity: `0.27`
-- substitution elasticity multiplier above the older-worker threshold: `2.0`
+For each labor-supply run, we combine the reform's statutory parameters with our
+age-based elasticity schedule:
 
-The doubled older-worker elasticity reflects the empirical literature on
-elderly labor supply, reviewed below: near-retirement and retirement-age
-workers are more responsive on the labor-supply margin than prime-age
-workers. Labor-supply
-response results therefore should be interpreted as partial-equilibrium revenue
-estimates under that specific elasticity schedule, not as macroeconomic
-forecasts. They are not official CBO or JCT scores.
+- income elasticity base: -0.05
+- income elasticity multiplier above the model's older-worker threshold: 2.0
+- primary-earner substitution elasticities by decile: 0.31, 0.28, 0.27,
+  0.27, 0.25, 0.25, 0.22, 0.22, 0.22, and 0.22
+- secondary-earner substitution elasticity: 0.27
+- substitution elasticity multiplier above the older-worker threshold: 2.0
+
+We double the older-worker elasticities because the studies we review below find
+that near-retirement and retirement-age workers respond more on the labor-supply
+margin than prime-age workers. We estimate partial-equilibrium revenue effects
+under that schedule, without macroeconomic feedback.
 
 ### Empirical basis for the older-worker multiplier
 
-The model applies the age adjustment as a single multiplier on both
-elasticities at age 65 and over, rather than a full age-by-decile schedule.
-The literature supports higher responsiveness at older ages but offers no
-age-by-income-decile breakdown, and a single multiplier keeps the adjustment
-transparent and easy to vary in sensitivity analysis. CBO's working-paper
-reviews anchor the under-65 values: substitution (Frisch) elasticities of
-0.27--0.53 with a 0.40 central value [@reichlingwhalen2012] and income
-elasticities of $-0.02$ to $-0.05$ [@mcclellandmok2012]; @keane2011 surveys
-the wider range.
+We apply the age adjustment as one multiplier on both elasticities at age 65
+and over, rather than as a full age-by-decile schedule. Studies find higher
+responsiveness at older ages but offer no breakdown by age and income decile,
+and one multiplier stays easy to vary in sensitivity analysis. We base the values
+under 65 on CBO's working-paper reviews: substitution (Frisch)
+elasticities of 0.27--0.53 with a 0.40 central value [@reichlingwhalen2012] and
+income elasticities of $-0.02$ to $-0.05$ [@mcclellandmok2012]. @keane2011
+surveys the wider range.
 
 For older workers, structural and reduced-form estimates imply substitution
 elasticities two to three times the prime-age values. @french2005 estimates
 elasticities rising from 0.2--0.4 at age 40 to 1.0--1.3 by age 60 in a
-life-cycle model (roughly $3\times$); @blaushvydko2011 find extensive-margin
+life-cycle model (roughly $3\times$). @blaushvydko2011 find extensive-margin
 elasticities of 0.5--0.8 at ages 62--69 against intensive-margin values of
-0.05--0.2 (roughly $2$--$3\times$); @coilegruber2007 estimate 0.4--0.7 at
-ages 62--64 from Social Security entitlement variation (roughly $2\times$);
-and @gustmansteinmeier2009 estimate 0.45--0.8 at ages 65--69 from
-pension--Social Security interactions ($2$--$2.5\times$). On the income side,
-@french2005 and @gustmansteinmeier2009 imply elasticities of $-0.06$ to
-$-0.10$ for workers 60 and over against the $-0.04$ prime-age central value
-($1.5$--$2\times$), with life-cycle calibration in @rogersonwallenius2009
-supporting a similar ratio. The model's default multiplier of 2.0 for both
-elasticities sits at the conservative end of these ranges; a 1.5--3.0
-sensitivity range spans the estimates. Most of the elderly evidence
-identifies the extensive margin, while the model applies aggregate earnings
-elasticities; the multiplier carries that participation responsiveness into
-total-earnings terms. Older cohorts in far-horizon years may also differ
-from the estimation samples --- in assets, defined-benefit pension coverage,
-and health --- so the multiplier is a present-calibrated judgment rather
-than a cohort forecast.
-
-The public dashboard labels these rows as behavioral; its charts and tables
-display static scores only. Earlier response files
-were removed because they were not generated from the current full-H5 production
-lineage; they are not part of the public release.
-
-## Reproducibility and validation
-
-The publication workflow treats reproducibility as part of the method rather
-than as a post hoc implementation detail. A run is publishable only if the
-result artifacts can be traced to:
-
-- a locked Python environment from `uv.lock`
-- explicit local `policyengine-us` and `policyengine-us-data` worktrees
-- a calibrated projected-dataset snapshot
-- a machine-readable baseline-dataset manifest and year-level metadata sidecars,
-  each recording its H5 SHA-256
-- the populace base release identifier and, when recorded, the resolved blob
-  hash
-- git SHAs and dirty-state records for this repo and both sibling repos
-- patch artifacts for any dirty local overrides that affected the run
-
-The Modal launch wrapper writes a run-level reproducibility bundle before
-submitting work. The runtime environment then requires the expected calibration
-profile, target source, tax assumption, and minimum calibration quality. That
-fail-closed design prevents a detached batch run from silently mixing lineages.
-
-Validation occurs at three levels. First, each projected H5 must satisfy the
-metadata and calibration-audit contract. Second, reform rescoring is smoke
-tested in representative early, middle, and late years before full-panel
-publication. Third, the assembled dashboard, spreadsheet, and manuscript
-exhibits are generated from shared result artifacts rather than hand-maintained
-tables. The validation chapter reports the current status of those checks.
+0.05--0.2 (roughly $2$--$3\times$). @coilegruber2007 estimate 0.4--0.7 at ages
+62--64 from Social Security entitlement variation (roughly $2\times$), and
+@gustmansteinmeier2009 estimate 0.45--0.8 at ages 65--69 from pension--Social
+Security interactions ($2$--$2.5\times$). On the income side, @french2005 and
+@gustmansteinmeier2009 imply elasticities of $-0.06$ to $-0.10$ for workers 60
+and over against the $-0.04$ prime-age central value ($1.5$--$2\times$). The
+life-cycle calibration in @rogersonwallenius2009 supports a similar ratio. Our
+multiplier of 2.0 for both elasticities sits at the low end of these ranges, and
+a range of 1.5 to 3.0 spans the estimates. Most of the evidence on older workers
+identifies the extensive margin, while PolicyEngine applies elasticities to
+total earnings, so the multiplier carries participation responses into
+earnings. Older cohorts in far-horizon years may also differ from the
+estimation samples in assets, defined-benefit pension coverage, and health, so
+the multiplier reflects today's evidence rather than a forecast for future
+cohorts.
 
 ## Limitations
 
-Several limitations remain even after the clean rerun. The base microdata are
-survey-derived and therefore carry sampling error, item nonresponse, and
-imputation error. Calibration matches selected aggregate margins, not the full
-joint distribution of age, earnings, Social Security benefits, filing status,
-health spending, and assets. Long-run HI expenditures enter the dashboard as an
-external Trustees-derived denominator rather than as a micro-simulated spending
-model. Labor-supply response estimates are sensitive to the chosen
-labor-supply elasticities and do not include macro feedback, portfolio
-responses, claiming responses, mortality changes, or political feedback from
-trust-fund exhaustion.
+The base microdata come from surveys and tax records and carry sampling error,
+item nonresponse, and imputation error. We calibrate to selected aggregate
+margins, not to the full joint distribution of age, earnings, Social Security
+benefits, filing status, health spending, and assets. We take long-run HI
+expenditures from the Trustees as an external denominator on the dashboard
+rather than microsimulating HI spending. The labor-supply estimates depend on
+our elasticity choices and omit macroeconomic feedback, portfolio responses,
+claiming responses, mortality changes, and political responses to trust-fund
+exhaustion.

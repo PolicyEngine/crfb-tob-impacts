@@ -1,6 +1,3 @@
-The cleaned static rebuild finalized the aggregate reform package before the
-distributional refresh. The manuscript therefore does not cite legacy
-household-burden or distributional point estimates as current results.
-
-Distributional exhibits should be regenerated only after a current-contract
-household aggregation pass is complete.
+We report each reform's change in household net income, by baseline income
+decile, on the [dashboard](https://policyengine.org/us/taxation-of-benefits-reforms). We simulate anchor years from
+2026 to 2100 and interpolate the years between them.

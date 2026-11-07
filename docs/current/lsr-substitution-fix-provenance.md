@@ -35,9 +35,11 @@ purge did clear).
 The rescore ran in the certified worktree `~/PolicyEngine/crfb-cert`
 (policyengine-us 1.700.2 + policyengine-core 3.26.1) with the
 `Simulation.delete_arrays` hunk of #521 backported onto the venv's core.
-Patch artifact: `crfb-cert/tmp/lsr_fix/core-3.26.1-delete-arrays-visibility-chain.patch`
-(plus `simulation.py.orig` alongside). Disk-side changes from #521 were not
-needed: `memory_config` is `None` in these runs, so no `OnDiskStorage` is ever
+Patch artifact:
+[`patches/policyengine-core-3.26.1-delete-arrays.patch`](patches/policyengine-core-3.26.1-delete-arrays.patch),
+a copy of `crfb-cert/tmp/lsr_fix/core-3.26.1-delete-arrays-visibility-chain.patch`
+(with `simulation.py.orig` alongside the original). The fix did not need the disk-side changes from
+#521: `memory_config` is `None` in these runs, so no `OnDiskStorage` is ever
 constructed and the memory-side chain purge is the complete fix. The venv
 patch survives until the next `uv sync` in that worktree; re-apply the patch
 artifact if the environment is ever re-synced.
@@ -126,8 +128,7 @@ reverse_roth families (their MTR reductions now add work):
 
 Dashboard charts and tables display static scores only, so no displayed
 figure changed; the correction affects the downloadable behavioral rows and
-the paper's methods description (see the correction note in
-`paper/sections/03-methods.qmd`).
+the paper's methods description.
 
 ## Dashboard exposure (2026-07-21 → 2026-07-22)
 

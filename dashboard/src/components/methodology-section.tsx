@@ -3,8 +3,6 @@
 import { useState } from "react";
 
 import { MethodologyDiagram } from "@/components/methodology-diagram";
-import { LiveModelingProgress } from "@/components/live-modeling-progress";
-import { ReproducibilityRoadmap } from "@/components/reproducibility-roadmap";
 import { sitePath } from "@/lib/site-path";
 
 function AccordionItem({
@@ -80,66 +78,67 @@ export function MethodologySection() {
       <div className="space-y-4">
         <AccordionItem
           title="Yearly calibration: demographics in weights, economics in values"
-          summary="Each projection year is built independently: light demographic reweighting, then value scaling to official aggregates given those weights, then a final exact calibration."
+          summary="We build each projection year independently: light demographic reweighting, then value scaling to official aggregates given those weights, then a final exact calibration."
           defaultOpen
         >
           <p>
-            Every year from 2026 to 2100 is constructed from the same 2024
-            microdata in four stages:
+            We build each projection year from the same 2024 microdata in four
+            stages:
           </p>
           <BulletList>
             <li>
-              <strong>A. Grow incomes to the target year.</strong> Each income
-              category follows its own uprating path — CBO-vintage growth
-              through 2034, capped at the Trustees nominal GDP path beyond so no
-              source outruns the projected economy. Tax parameters follow
-              statutory indexing.
+              <strong>A. Grow incomes to the target year.</strong> We grow each
+              income category with its own index, built on CBO revenue
+              projections. After 2034, we cap the growth of dividend,
+              partnership and S-corporation income at Trustees nominal GDP
+              growth by scaling those incomes down on every record. We leave
+              earnings out of the cap and scale them to SSA taxable payroll in
+              Stage C. We index tax parameters as statute does through 2034, and
+              from 2035 we switch those on the IRS inflation index to
+              PolicyEngine&apos;s wage index.
             </li>
             <li>
-              <strong>B. Demographic reweight.</strong> A light positive-entropy
-              adjustment shifts household weights to the Trustees single-year
-              age distribution. Weights carry demographics only — they are not
-              asked to fix dollar aggregates.
+              <strong>B. Demographic reweight.</strong> We shift household weights
+              to the Trustees population in five-year age groups with a light
+              positive-entropy adjustment. Weights carry demographics only.
             </li>
             <li>
               <strong>C. Value calibration, given those weights.</strong>{" "}
-              Scalars solved against the reweighted population align earnings
-              with SSA taxable payroll (accounting for the taxable maximum),
-              benefits with OASDI cost, and beneficiary non-benefit income with
-              taxation-of-benefits revenue.
+              Holding the reweighted population fixed, we scale earnings to SSA
+              taxable payroll (accounting for the taxable maximum), benefits to
+              OASDI cost, and most of beneficiary households&apos; other income
+              toward taxation-of-benefits revenue.
             </li>
             <li>
-              <strong>D. Final entropy calibration.</strong> A last weight
-              adjustment hits the age distribution and all fiscal targets
-              exactly, with guard constraints holding investment and other
-              income to their growth paths.
+              <strong>D. Final entropy calibration.</strong> We adjust the weights
+              a last time to hit the age distribution and all fiscal targets
+              exactly, with guard constraints holding investment and other income
+              at their totals entering this stage.
             </li>
           </BulletList>
           <p className="mt-4">
-            Separating the channels keeps both honest: reweighting alone would
-            hit aggregates by silently distorting who the population is, while
-            value scaling alone could not shift the age structure. Every record
-            in every published year is a real survey household — no synthetic
-            rows. A clone-free build of 2100, the hardest year, passes every
-            publication gate with a comfortable margin, so the populace base
-            supports the full horizon bare.
+            Reweighting alone can match dollar aggregates only by changing the
+            population&apos;s makeup, and value scaling alone cannot shift the
+            age structure, so we use each for its own channel. We add no records to the
+            populace database in any projected dataset.
           </p>
         </AccordionItem>
 
         <AccordionItem
           title="Calibration targets and publication gates"
-          summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every published year."
+          summary="Exact targets for demographics, benefits, payroll, and trust-fund revenues, with sample-quality gates on every projected dataset."
         >
           <p>
-            <strong>Positive-entropy calibration</strong> matches every target
-            exactly while minimizing divergence from the base survey weights and
-            keeping all weights positive. Targets come from the 2026 Trustees
-            Report intermediate assumptions:
+            We match every target exactly with <strong>positive-entropy
+            calibration</strong>, which keeps all weights positive and minimizes
+            divergence from the Stage B weights. The age, benefit, payroll, and
+            revenue targets follow the 2026 Trustees Reports&apos; intermediate
+            assumptions:
           </p>
           <BulletList>
             <li>
-              <strong>Age distribution</strong> — single-year SSA population
-              projections.
+              <strong>Age distribution</strong> — SSA population projections, in
+              five-year age groups.
             </li>
             <li>
               <strong>Social Security benefits</strong> — total OASDI program
@@ -158,38 +157,41 @@ export function MethodologySection() {
               benefits revenue to Medicare.
             </li>
             <li>
-              <strong>Income guards</strong> — investment and other non-payroll
-              income held to their uprated paths.
+              <strong>Income guards</strong> — we hold investment and other
+              non-payroll income at their totals entering the final calibration.
             </li>
           </BulletList>
           <div className="mt-4 rounded-[var(--pe-radius-container)] border border-[var(--pe-color-primary-200)] bg-[var(--pe-color-primary-50)] px-4 py-3">
             <p>
-              <strong>Gates:</strong> a year publishes only if it passes
-              effective sample size, weight concentration, and
-              taxation-of-benefits contributor support checks. The baseline tab
+              <strong>Gates:</strong> the projection script stops on any year
+              that fails its effective sample size or weight concentration
+              checks or, from 2075, its taxation-of-benefits contributor support
+              checks. Every anchor year clears all of them. The baseline tab
               charts every major series — including uncalibrated by-products
-              like income tax and AGI — against external references through
-              2100.
+              like income tax and AGI — through 2100, against external references
+              where they exist.
             </p>
           </div>
         </AccordionItem>
 
         <AccordionItem
           title="Data sources"
-          summary="populace microdata calibrated to SSA, CMS, and CBO projections."
+          summary="We calibrate PolicyEngine's populace microdata to SSA and CMS projections, with income growth from CBO."
         >
           <p>
             <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace
-            2024 database, built entirely from primary sources (CPS ASEC, IRS
-            PUF, SCF, SIPP, CPS ORG, MEPS, ACS) with every layer traceable to
-            its origin.
+            2024 database, built from primary sources (CPS ASEC, IRS PUF, SCF,
+            SIPP, CPS ORG, MEPS, ACS). PolicyEngine flags households that hold
+            about half of the database&apos;s weight as IRS PUF clones. Each clone
+            either keeps survey demographics and takes its tax detail from the PUF
+            or comes from the PUF&apos;s highest-income returns.
           </p>
           <p className="mt-4">
-            <strong>Projection targets:</strong>
+            <strong>Projection targets and inputs:</strong>
           </p>
           <BulletList>
             <li>
-              Demographics, payroll, benefits, GDP, and AWI from the 2026 Social
+              Demographics, payroll, benefits, and GDP from the 2026 Social
               Security Trustees Report intermediate assumptions.
             </li>
             <li>
@@ -201,41 +203,47 @@ export function MethodologySection() {
               Trustees expanded tables, annual through 2100.
             </li>
             <li>
-              Per-category income growth from the CBO long-term forecast through
-              2034, capped at Trustees GDP growth thereafter.
+              Per-category income growth from CBO revenue projections through
+              2036 and their last growth rates after that, with a cap at
+              Trustees GDP growth after 2034 on each record&apos;s dividend,
+              partnership and S-corporation income.
+            </li>
+            <li>
+              Wage indexing from PolicyEngine&apos;s own National Average Wage
+              Index series, which reaches about 9.1 times its 2033 level by
+              2099, against about 10.2 times for the Trustees&apos; average wage
+              index.
             </li>
           </BulletList>
           <p className="mt-4">
             The 2026 Trustees Report incorporates the 2025 reconciliation act
-            (OBBBA), including the senior deduction, directly in current law —
-            no post-legislation bridge is required.
+            (OBBBA), including the senior deduction, in current law.
           </p>
         </AccordionItem>
 
         <AccordionItem
           title="Scoring approach"
-          summary="Static scoring is primary; behavioral labor-response results are supplemental."
+          summary="We show static scores on the charts and publish labor-supply results in the results file."
         >
           <p>
-            <strong>Static scoring:</strong> holds taxpayer behavior constant
-            and isolates the mechanical effect of policy changes. This is the
-            dashboard&apos;s default scoring surface. All fourteen reforms are
-            computed from full reform H5 microsimulation at anchor years — 2026,
-            2028, 2029, 2030, and every fifth year from 2035 to 2100, with 2032
-            and 2033 added for the employer-payroll Roth option. The 2028 and
-            2029 anchors bracket the senior deduction&apos;s 2028 sunset so the
-            budget window reflects that step rather than smoothing across it.
-            Intermediate years are linearly interpolated to a complete annual
-            series, which is what the revenue-over-time chart traces and what
-            the 75-year and present-value totals aggregate; the distributional
-            charts interpolate between the same anchor years. Each row is tagged
-            as an exact anchor or an interpolated fill, and the exact
-            anchor-year H5 rows are preserved in the production results.
+            <strong>Static scoring:</strong> we hold taxpayer behavior
+            constant, so the estimates show the mechanical effect of each policy
+            change. We run full microsimulations of all fifteen reforms at
+            anchor years: 2026, 2028, 2029, 2030, and every fifth year from 2035 to 2100, plus 2062 for the two Roth swaps. The
+            2028 and 2029 anchors bracket the senior deduction&apos;s 2028
+            sunset, so the budget window shows that step instead of smoothing
+            across it. We interpolate linearly between anchors to a complete
+            annual series, which the revenue-over-time chart traces and which we
+            sum for the 75-year and present-value totals. We interpolate the
+            distributional charts between anchor years and tag each row
+            of the results file as an exact anchor or an interpolation.
           </p>
           <p className="mt-4">
-            <strong>Supplemental labor-supply response:</strong> uses the same
-            full reform H5 lineage at the 2026 and 2100 endpoints and is
-            available from the Scoring control.
+            <strong>Supplemental labor-supply response:</strong> we also run full
+            microsimulations with labor-supply responses for thirteen of the
+            reforms at the 2026 and 2100 endpoints, plus 2062 for the two Roth
+            swaps. The charts show static scores, and we publish the
+            labor-supply rows in the results file.
           </p>
         </AccordionItem>
 
@@ -245,55 +253,66 @@ export function MethodologySection() {
         >
           <BulletList>
             <li>
-              <strong>Options 1-2 and 8-10</strong>: default to baseline-share
-              allocation, with toggles for current-law, all-OASDI, and all-HI
-              allocation.
+              <strong>
+                Full repeal; 85%, 90%, 93%, 95%, and 100% taxation; full MAGI
+                inclusion; and the 2005 Tax Panel deduction
+              </strong>
+              : we default to baseline-share allocation, with a toggle for
+              current-law allocation.
             </li>
             <li>
-              <strong>Options 3-4 and 11</strong>: use baseline-share
-              allocation.
+              <strong>85% + deduction, $500 credit, and $700 credit</strong>: we
+              use baseline-share allocation under both settings.
             </li>
             <li>
-              <strong>Options 5-6</strong>: employer-contribution taxes directed
-              to their trust funds.
+              <strong>Roth swap and Phased Roth</strong>: we credit each trust
+              fund with the income tax on its own employer contribution, net of the
+              benefit-tax revenue it loses.
             </li>
             <li>
-              <strong>Option 7</strong>: total is the full federal income-tax
-              gain; OASDI, HI, and general fund show the accounting split.
+              <strong>No senior deduction</strong>: the total equals the full
+              federal income-tax gain. We credit each fund with its
+              taxation-of-benefits change and assign the rest to the general
+              fund.
             </li>
             <li>
-              <strong>Option 12</strong>: handled through direct branching for
-              the structural swap.
+              <strong>Reverse Roth</strong>: we count the income-tax cost of
+              deducting employee payroll taxes against OASDI and leave
+              HI&apos;s benefit-tax share as the model scores it.
             </li>
           </BulletList>
+          <p className="mt-4">
+            Under the scheduled-benefits baseline, the all-OASDI and all-HI
+            toggles assign any reform&apos;s whole impact to one trust fund.
+          </p>
         </AccordionItem>
 
         <AccordionItem
           title="Scoring baselines and present value"
-          summary="Reforms can be scored against scheduled benefits or a Social Security solvency baseline; 75-year totals are reported in present value."
+          summary="We score reforms against scheduled benefits or a Social Security solvency baseline and report 75-year totals in present value."
         >
           <BulletList>
             <li>
-              <strong>Scheduled benefits:</strong> the reform is scored against
+              <strong>Scheduled benefits:</strong> we score the reform against
               the law as it stands, with Social Security paying full scheduled
-              benefits, including the Trustees long-run taxation-of-benefits
-              thresholds.
+              benefits and with inflation-indexed income-tax parameters following
+              PolicyEngine&apos;s wage index from 2035.
             </li>
             <li>
-              <strong>SS solvent:</strong> the reform is scored against a
+              <strong>SS solvent:</strong> we score the reform against a
               baseline that closes Social Security&apos;s long-run shortfall
               through roughly equal benefit reductions and payroll-rate
-              increases (a balanced &ldquo;traditional fix&rdquo;), so its
-              effect is measured on top of an already-solvent system. Available
-              for repeal, 85%, 100%, and the Phased Roth; the solvent baseline
-              applies from 2035, with 2026-2034 scored against scheduled
+              increases (a balanced &ldquo;traditional fix&rdquo;), so we
+              measure its effect on top of an already-solvent system. We offer
+              this baseline for repeal, 85%, 100%, and the Phased Roth; it
+              applies from 2035, and we score 2026-2034 against scheduled
               benefits. A reform whose structure differs from current law can
               step at 2035 where the baseline switches &mdash; clearest for the
               Phased Roth &mdash; which the dashed marker on the chart flags.
             </li>
           </BulletList>
           <p className="mt-4">
-            <strong>Present value:</strong> 75-year totals discount each
+            <strong>Present value:</strong> for 75-year totals, we discount each
             year&apos;s flow to 2026 at each trust fund&apos;s effective
             interest rates under the Trustees&apos; intermediate assumptions:
             OASDI flows at the rates implied by the compound effective
@@ -301,9 +320,9 @@ export function MethodologySection() {
             Trustees Report, and Medicare HI flows at the effective rates in
             Table IV.A4 of the 2026 Medicare Trustees Report, graded to the
             4.7 percent ultimate nominal rate by 2040. General-fund flows and
-            economy-wide denominators use the OASDI series, and the 75-year
-            total is the sum of the discounted components. Ten-year
-            budget-window totals are shown in nominal dollars.
+            economy-wide denominators use the OASDI series, and we sum the
+            discounted components into the 75-year total. We show ten-year
+            budget-window totals in nominal dollars.
           </p>
         </AccordionItem>
       </div>
@@ -364,45 +383,6 @@ export function MethodologySection() {
             </a>
           </li>
         </ul>
-      </div>
-
-      <div className="grid gap-4 border-t border-[var(--pe-color-border-light)] pt-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-normal text-[var(--pe-color-text-tertiary)]">
-            Appendix
-          </p>
-          <p className="mt-1 text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-            Internal production tracking
-          </p>
-        </div>
-        <div className="space-y-4">
-          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-            <summary className="cursor-pointer px-5 py-4 text-left">
-              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-                Internal reproducibility roadmap
-              </span>
-              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                Gates, logs, and artifact targets for the CRFB rebuild workflow.
-              </span>
-            </summary>
-            <div className="border-t border-[var(--pe-color-border-light)]">
-              <ReproducibilityRoadmap embedded />
-            </div>
-          </details>
-          <details className="rounded-[var(--pe-radius-feature)] border border-[var(--pe-color-border-light)] bg-white">
-            <summary className="cursor-pointer px-5 py-4 text-left">
-              <span className="block text-base font-semibold text-[var(--pe-color-text-title)]">
-                Live modeling status
-              </span>
-              <span className="mt-1 block text-sm leading-6 text-[var(--pe-color-text-secondary)]">
-                Baseline readiness and full-H5 reform artifact progress.
-              </span>
-            </summary>
-            <div className="border-t border-[var(--pe-color-border-light)]">
-              <LiveModelingProgress />
-            </div>
-          </details>
-        </div>
       </div>
     </section>
   );
