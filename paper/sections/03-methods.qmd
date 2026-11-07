@@ -63,16 +63,20 @@ and economics enter through the record values.
 **Stage A: grow incomes to the target year.** We grow each income category from
 2024 to year $y$ with PolicyEngine's income indexes. Those indexes follow the
 revenue projections of the Congressional Budget Office (CBO) through 2036 and
-hold each category's last growth rate after that. After 2034, we cap each
-category's index growth at the Trustees' nominal-GDP growth. When a category's
-index has grown faster than GDP since 2034, we scale that category down on every
-record by the ratio of the two. In our projections, we scale down only
-dividends, the investment income that shares their index, and partnership and
-S-corporation income. We cap values on each record, not a category's weighted
-total: from 2035 to 2100, we project partnership and S-corporation income to
-grow 13.0-fold, against 11.1-fold for the Trustees' GDP path. We index tax
-parameters as statute does through 2034, and from 2035 we switch those on the
-IRS inflation index to wages.
+hold each category's last growth rate after that. After 2034, we cap the index
+growth of these categories at the Trustees' nominal-GDP growth: interest,
+dividends and the investment income that shares their index, short-term and
+non-Schedule-D capital gains, taxable IRA distributions, rental and farm-rent
+income, estate income, partnership and S-corporation income, and miscellaneous
+income. When one of those indexes has grown faster than GDP since 2034, we scale
+its category down on every record by the ratio of the two. In our projections,
+we scale down only dividends, the investment income that shares their index, and
+partnership and S-corporation income. We cap values on each record, not a
+category's weighted total: from 2035 to 2100, we project partnership and
+S-corporation income to grow 13.0-fold, against 11.1-fold for the Trustees' GDP
+path. We leave earnings out of the cap; in Stage C, we scale them to match the
+Trustees' taxable payroll. We index tax parameters as statute does through 2034,
+and from 2035 we switch those on the IRS inflation index to wages.
 
 **Stage B: reweight to the projected age distribution.** We shift household
 weights to the projected population in five-year age groups with a light
@@ -289,22 +293,23 @@ file made that check. The code writes these core output columns:
 
 The dashboard's default split, which we also use in the headline summary
 (@sec-headline), varies by reform. For most reforms, we divide revenue between
-OASDI and HI by each fund's share of baseline benefit-tax revenue. The Roth swaps
-replace benefit-tax revenue with employer-contribution revenue that splits
+OASDI and HI by each fund's share of baseline benefit-tax revenue. The Roth
+swaps replace benefit-tax revenue with employer-contribution revenue that splits
 differently between the funds, so we add the two funds' net impacts
 (@sec-swap-accounting). For the senior-deduction repeal, the total equals the
-full federal income-tax impact: we credit each fund with its taxation-of-benefits
-change and assign the rest to the general fund. For the reverse Roth, we credit
-HI with its benefit-tax change as the model scores it and charge OASDI with the
-rest of the revenue impact, including the income-tax cost of deducting employee
-payroll taxes.
+full federal income-tax impact: we credit each fund with its
+taxation-of-benefits change and assign the rest to the general fund. For the
+reverse Roth, we credit HI with its benefit-tax change as the model scores it
+and charge OASDI with the rest of the revenue impact, including the income-tax
+cost of deducting the employee share of Social Security payroll taxes.
 
-The trust-fund decomposition in @sec-results instead uses the model's OASDI and
-HI taxation-of-benefits variables. We credit OASDI with the income tax on
-taxable benefits up to 50 percent of benefits and HI with the tax on any taxable
-benefits above that. Senior-deduction and credit changes can move federal income
-tax by more than they move the trust funds' revenue, so a reform can raise
-income-tax revenue while it weakens one trust fund.
+For the trust-fund decomposition in @sec-results, we instead use the model's
+OASDI and HI taxation-of-benefits variables, and the rules in
+@sec-swap-accounting for the phased Roth swap. We credit OASDI with the income
+tax on taxable benefits up to 50 percent of benefits and HI with the tax on any
+taxable benefits above that. Senior-deduction and credit changes can move
+federal income tax by more than they move the trust funds' revenue, so a reform
+can raise income-tax revenue while it weakens one trust fund.
 
 ### Trust-fund accounting for the Roth swaps {#sec-swap-accounting}
 
@@ -321,12 +326,12 @@ benefit-tax revenue each fund loses to get its net impact.
 We measure each gain as if its own contribution were the last income taxed, so
 the two gains need not add up to the income tax on both contributions together.
 The two funds' net impacts therefore need not sum to the change in federal
-income tax. In our results the sums exceed that change in every year: over
-2026-2035, by $12.7 billion for the Roth swap, $36.2 billion for the phased Roth
-swap, and $24.5 billion for the short phase-in Roth, and by $11.8 billion for
-each in 2100. We report the sum of the two funds' net impacts on the dashboard
-and in the headline summary (@sec-headline), and the change in federal income
-tax in the revenue tables of @sec-results.
+income tax. In our static current-law results, the sums exceed that change in
+every year: over 2026-2035, by $12.7 billion for the Roth swap, $36.2 billion
+for the phased Roth swap, and $24.5 billion for the short phase-in Roth, and by
+$11.8 billion for each in 2100. We report the sum of the two funds' net impacts
+on the dashboard and in the headline summary (@sec-headline), and the change in
+federal income tax in the revenue tables of @sec-results.
 
 ## Anchor years
 
@@ -350,17 +355,16 @@ current law, so the reform's impact falls to zero in 2029. A straight line
 between the 2026 and 2030 anchors would understate its 2028 impact by $9.9
 billion.
 
-We add exact anchors where the schedules bend. Exact anchors in 2028 and 2029,
-for every reform, bracket both changes with the 2030 anchor. The short phase-in
-Roth raises the taxable share of employer payroll tax each year until it reaches
-100 percent in 2033, so we add exact anchors in 2032 and 2033 at that corner. The phased Roth
-swap phases benefit taxation out in a straight line that ends in 2062, between
-the 2060 and 2065 anchors, so we add an exact anchor in 2062. Once its phase-out
-ends, the phased Roth swap reaches the Roth swap's settings, so we also score
-the Roth swap in 2062, and the two exact scores agree to the dollar. Straight
-lines between the 2060 and 2065 anchors would put them $19.5 billion apart. The
-Roth swap and the reverse Roth take full effect at once and need no further
-anchors.
+For every reform, we add exact anchors in 2028 and 2029, which bracket both
+changes with the 2030 anchor. The short phase-in Roth raises the taxable share
+of employer payroll tax each year until it reaches 100 percent in 2033, so we
+add exact anchors in 2032 and 2033 at that corner. The phased Roth swap phases
+benefit taxation out in a straight line that ends in 2062, between the 2060 and
+2065 anchors, so we add an exact anchor in 2062. Once its phase-out ends, the
+phased Roth swap reaches the Roth swap's settings, so we also score the Roth
+swap in 2062, and the two exact scores agree to the dollar. Straight lines
+between the 2060 and 2065 anchors would put them $19.5 billion apart. The Roth
+swap and the reverse Roth take full effect at once and need no further anchors.
 
 ## Solvency-baseline scoring
 

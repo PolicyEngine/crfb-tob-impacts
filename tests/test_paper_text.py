@@ -27,6 +27,7 @@ Invariants over the published panel and the run record:
 
 from __future__ import annotations
 
+import ast
 import json
 import math
 import re
@@ -145,6 +146,7 @@ DRAFTING_PHRASES = (
 # parameters, and parameter review.
 UNSUPPORTED_CLAIM_PHRASES = (
     "86 columns",
+    "cap each category",
     "core federal income-tax thresholds",
     "iterative proportional",
     "modal",
@@ -156,6 +158,7 @@ UNSUPPORTED_CLAIM_PHRASES = (
     "smoke-test",
     "ss-payroll-tob",
     "stage a growth paths",
+    "where the schedules bend",
 )
 
 
@@ -302,7 +305,15 @@ def test_dashboard_methodology_shows_no_internal_tracking() -> None:
 def test_dashboard_methodology_drops_claims_the_code_does_not_support() -> None:
     for path in DASHBOARD_METHODOLOGY:
         text = flat(path.read_text(encoding="utf-8")).lower()
-        for phrase in ("awi", "cbo-vintage", "growth paths", "outruns", "real survey"):
+        for phrase in (
+            "awi",
+            "cbo-vintage",
+            "growth paths",
+            "outgrows",
+            "outruns",
+            "per-record cap",
+            "real survey",
+        ):
             assert not re.search(rf"\b{re.escape(phrase)}\b", text), (path.name, phrase)
 
 
@@ -391,6 +402,8 @@ def test_included_fragment_headings_nest_under_the_including_heading() -> None:
 
 def test_abstract_figures_match_results(static: pd.DataFrame) -> None:
     abstract = flat((PAPER / "index.qmd").read_text(encoding="utf-8"))
+    # Every figure below comes from the static rows.
+    assert "Before labor-supply responses, we estimate that repealing" in abstract
     first_decade = static[static["year"].between(2026, 2035)]
     ten_year = first_decade.groupby("reform_name")["revenue_impact"].sum()
     pv = {
@@ -450,6 +463,9 @@ def test_methods_figures_match_results(
     ten_year_gaps = [
         gap(r, slice(2026, 2035)) for r in ("option5", "option12", "option6")
     ]
+    assert (
+        "In our static current-law results, the sums exceed that change in every year"
+    ) in methods
     assert (
         f"by ${ten_year_gaps[0]:.1f} billion for the Roth swap, "
         f"${ten_year_gaps[1]:.1f} billion for the phased Roth swap, and "
@@ -686,6 +702,16 @@ def test_methods_state_what_the_growth_cap_reached() -> None:
         "In our projections, we scale down only dividends, the investment income "
         "that shares their index, and partnership and S-corporation income."
     ) in methods
+    # The dashboard names the same reach in shorter words: dividends and the
+    # BDC and REIT dividends on their index, and partnership (PTP included) and
+    # S-corporation income.
+    section, diagram = (
+        flat(path.read_text(encoding="utf-8")) for path in DASHBOARD_METHODOLOGY
+    )
+    reached = "dividend, partnership and S-corporation income"
+    assert f"we cap the growth of {reached} at Trustees nominal GDP growth" in section
+    assert f"with a cap at Trustees GDP growth after 2034 on {reached}." in section
+    assert f'caption2="{reached} at Trustees GDP growth"' in diagram
 
     diagnostics = pd.read_csv(DIAGNOSTICS).set_index("year")
 
@@ -696,6 +722,71 @@ def test_methods_state_what_the_growth_cap_reached() -> None:
         "from 2035 to 2100, we project partnership and S-corporation income to grow "
         f"{growth('partnership_s_corp_income'):.1f}-fold, against "
         f"{growth('gdp'):.1f}-fold for the Trustees' GDP path"
+    ) in methods
+
+
+def growth_cap_variables() -> tuple[str, ...]:
+    """GROWTH_CAP_VARIABLES as src/pipeline.py defines it."""
+    tree = ast.parse((REPO_ROOT / "src" / "pipeline.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "GROWTH_CAP_VARIABLES"
+            for target in node.targets
+        ):
+            return tuple(ast.literal_eval(node.value))
+    raise AssertionError("GROWTH_CAP_VARIABLES not found in src/pipeline.py")
+
+
+# Names in GROWTH_CAP_VARIABLES that the cap never reaches.
+# cap_longrun_income_growth skips a name whose variable has no uprating parameter
+# or whose column the year frame lacks. All three are adds aggregates, and
+# PolicyEngine-US gives a default uprating parameter only to input variables;
+# the year frame stores long_term_capital_gains_before_response, not its total.
+GROWTH_CAP_SKIPS = frozenset(
+    {"long_term_capital_gains", "taxable_pension_income", "tax_exempt_pension_income"}
+)
+
+
+def test_methods_name_the_income_the_growth_cap_covers() -> None:
+    methods = flat((SECTIONS / "03-methods.qmd").read_text(encoding="utf-8"))
+    dividends = "dividends and the investment income that shares their index"
+    gains = "short-term and non-Schedule-D capital gains"
+    rents = "rental and farm-rent income"
+    named = {
+        "taxable_interest_income": "interest",
+        "tax_exempt_interest_income": "interest",
+        "qualified_dividend_income": dividends,
+        "non_qualified_dividend_income": dividends,
+        "qualified_bdc_income": dividends,
+        "qualified_reit_and_ptp_income": dividends,
+        "short_term_capital_gains": gains,
+        "non_sch_d_capital_gains": gains,
+        "taxable_ira_distributions": "taxable IRA distributions",
+        "rental_income": rents,
+        "farm_rent_income": rents,
+        "estate_income": "estate income",
+        "partnership_s_corp_income": "partnership and S-corporation income",
+        "miscellaneous_income": "miscellaneous income",
+    }
+    capped = set(growth_cap_variables())
+    assert capped == set(named) | GROWTH_CAP_SKIPS
+    phrases = list(dict.fromkeys(named.values()))
+    assert (
+        "After 2034, we cap the index growth of these categories at the Trustees' "
+        f"nominal-GDP growth: {', '.join(phrases[:-1])}, and {phrases[-1]}."
+    ) in methods
+
+    for year, metadata in dataset_audits().items():
+        reached = set(metadata.get("longrun_growth_caps") or {})
+        assert reached <= set(named), year
+        earnings = {
+            column.removesuffix(f"__{year}")
+            for column in metadata["value_scaling"]["earnings_columns"]
+        }
+        assert earnings and not earnings & capped, year
+    assert (
+        "We leave earnings out of the cap; in Stage C, we scale them to match the "
+        "Trustees' taxable payroll."
     ) in methods
 
 

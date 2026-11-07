@@ -16,9 +16,10 @@ abstract: |
   microdata, which we project to 21 years from 2026 to 2100 and calibrate to the 2026
   Trustees Reports' projections of current law, including the 2025
   reconciliation act.
-  We estimate that repealing the tax on benefits would reduce federal revenue
-  by $1.66 trillion over 2026-2035 and by $10.9 trillion in present value over
-  75 years. Taxing all benefits would raise $896 billion over the first
+  Before labor-supply responses, we estimate that repealing the tax on benefits
+  would reduce federal revenue by $1.66 trillion over 2026-2035 and by $10.9
+  trillion in present value over 75 years. Taxing all benefits would raise $896
+  billion over the first
   decade. Two Roth-style swaps would end the tax on benefits, one at once and
   one in phases, and tax workers on their employers' payroll contributions
   instead. They would raise revenue at first and lose it from the mid-2050s for

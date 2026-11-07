@@ -172,8 +172,8 @@ export function MethodologyDiagram() {
           w={340}
           h={58}
           title="A. Grow incomes to the target year"
-          caption="We grow each category on CBO projections; after 2034, we scale"
-          caption2="down categories whose index outgrows Trustees nominal GDP"
+          caption="We grow each category on CBO projections; after 2034, we cap"
+          caption2="dividend, partnership and S-corporation income at Trustees GDP growth"
         />
         <Down x={290} y1={198} y2={214} />
 

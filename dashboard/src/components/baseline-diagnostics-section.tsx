@@ -203,8 +203,8 @@ export function BaselineDiagnosticsSection() {
         year. Solid lines show model output, and dashed lines show 2026
         Trustees Report targets or references. We match the series in panels
         marked “calibrated” exactly during dataset construction. Panels marked
-        “diagnostic”, including federal income tax, show by-products we leave
-        unconstrained.
+        “diagnostic”, including federal income tax, show by-products we do not
+        calibrate to an outside target.
       </p>
       {rows === null ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
