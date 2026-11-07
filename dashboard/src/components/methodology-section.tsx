@@ -91,11 +91,11 @@ export function MethodologySection() {
               income category with its own index, built on CBO revenue
               projections. After 2034, we cap the growth of dividend,
               partnership and S-corporation income at Trustees nominal GDP
-              growth, scaling it down on every record. We leave earnings out of
-              the cap and scale them to SSA taxable payroll in Stage C. We index
-              tax parameters as statute does through 2034, and from 2035 we
-              switch those on the IRS inflation index to PolicyEngine&apos;s
-              wage index.
+              growth by scaling those incomes down on every record. We leave
+              earnings out of the cap and scale them to SSA taxable payroll in
+              Stage C. We index tax parameters as statute does through 2034, and
+              from 2035 we switch those on the IRS inflation index to
+              PolicyEngine&apos;s wage index.
             </li>
             <li>
               <strong>B. Demographic reweight.</strong> We shift household weights
@@ -205,8 +205,8 @@ export function MethodologySection() {
             <li>
               Per-category income growth from CBO revenue projections through
               2036 and their last growth rates after that, with a cap at
-              Trustees GDP growth after 2034 on dividend, partnership and
-              S-corporation income.
+              Trustees GDP growth after 2034 on each record&apos;s dividend,
+              partnership and S-corporation income.
             </li>
             <li>
               Wage indexing from PolicyEngine&apos;s own National Average Wage

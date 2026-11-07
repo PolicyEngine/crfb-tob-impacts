@@ -158,6 +158,7 @@ UNSUPPORTED_CLAIM_PHRASES = (
     "smoke-test",
     "ss-payroll-tob",
     "stage a growth paths",
+    "where reform schedules bend",
     "where the schedules bend",
 )
 
@@ -596,7 +597,7 @@ def test_methods_state_the_default_split_for_each_reform() -> None:
         "so we add the two funds' net impacts",
         "we credit each fund with its taxation-of-benefits change and assign the "
         "rest to the general fund",
-        "we credit HI with its benefit-tax change as the model scores it and charge "
+        "we credit HI with its benefit-tax change as the model scores it. We charge "
         "OASDI with the rest of the revenue impact",
     ):
         assert phrase in methods, phrase
@@ -709,9 +710,17 @@ def test_methods_state_what_the_growth_cap_reached() -> None:
         flat(path.read_text(encoding="utf-8")) for path in DASHBOARD_METHODOLOGY
     )
     reached = "dividend, partnership and S-corporation income"
-    assert f"we cap the growth of {reached} at Trustees nominal GDP growth" in section
-    assert f"with a cap at Trustees GDP growth after 2034 on {reached}." in section
-    assert f'caption2="{reached} at Trustees GDP growth"' in diagram
+    assert (
+        f"we cap the growth of {reached} at Trustees nominal GDP growth by "
+        "scaling those incomes down on every record."
+    ) in section
+    assert (
+        f"with a cap at Trustees GDP growth after 2034 on each record&apos;s {reached}."
+    ) in section
+    assert (
+        'caption="We grow each category on CBO projections; after 2034, we cap each"'
+    ) in diagram
+    assert f'caption2="record\'s {reached} at GDP growth"' in diagram
 
     diagnostics = pd.read_csv(DIAGNOSTICS).set_index("year")
 
