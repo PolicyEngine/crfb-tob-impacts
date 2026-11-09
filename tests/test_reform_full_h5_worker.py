@@ -114,6 +114,84 @@ def test_save_complete_microsimulation_h5_writes_entity_tables(tmp_path: Path):
     assert manifest["entities"]["household"]["required_weight_column_present"] is True
 
 
+class _TobSimulation(_Simulation):
+    """Serves the engine's TOB arrays only through an unweighted calculation."""
+
+    TOB = {
+        "tob_revenue_oasdi": np.array([-12.5, 40.0]),
+        "tob_revenue_medicare_hi": np.array([3.0, -0.25]),
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.populations["tax_unit"] = _Population("tax_unit", 2)
+        for name in self.TOB:
+            self.tax_benefit_system.variables[name] = _Variable("tax_unit")
+        self.values[("tax_unit_id", "tax_unit")] = np.array([1, 2])
+        self.tob_calls: list[tuple[str, object, object]] = []
+
+    def calculate(self, variable_name, period, map_to=None, use_weights=None):
+        if variable_name in self.TOB:
+            self.tob_calls.append((variable_name, map_to, use_weights))
+            if use_weights is not False or map_to is not None:
+                raise AssertionError("TOB must be read unweighted at its own entity")
+            return self.TOB[variable_name]
+        return super().calculate(variable_name, period, map_to)
+
+
+def test_save_complete_stores_engine_tob_arrays_unchanged(tmp_path: Path):
+    import pandas as pd
+
+    sim = _TobSimulation()
+    output = tmp_path / "scenario.h5"
+
+    metadata = save_complete_microsimulation_h5(
+        sim,
+        output,
+        year=2075,
+        fail_on_empty_entity=False,
+        variables_by_entity={
+            "tax_unit": ["tax_unit_id", "tob_revenue_oasdi", "tob_revenue_medicare_hi"]
+        },
+    )
+    stored = pd.read_hdf(output, "tax_unit")
+
+    for name, expected in _TobSimulation.TOB.items():
+        # Signed engine values, negatives included, with no floor or cap.
+        np.testing.assert_array_equal(stored[name].to_numpy(), expected)
+    assert [call[0] for call in sim.tob_calls] == [
+        "tob_revenue_oasdi",
+        "tob_revenue_medicare_hi",
+    ]
+    assert metadata["tob_materialization"] == {
+        "materialized": ["tob_revenue_medicare_hi", "tob_revenue_oasdi"],
+        "method": "engine_formulas",
+        "source": "policyengine-us tob_revenue_* variables",
+        "post_processing": "none",
+        "weighted_aggregation_used": False,
+    }
+
+
+def test_save_complete_records_no_tob_materialization_without_tob(tmp_path: Path):
+    metadata = save_complete_microsimulation_h5(
+        _Simulation(),
+        tmp_path / "scenario.h5",
+        year=2075,
+        fail_on_empty_entity=False,
+        variables_by_entity=_TEST_VARIABLES_BY_ENTITY,
+    )
+    assert metadata["tob_materialization"] is None
+
+
+def test_worker_no_longer_derives_the_trust_fund_split():
+    import src.reform_full_h5_worker as worker
+
+    source = Path("src/reform_full_h5_worker.py").read_text(encoding="utf-8")
+    assert not hasattr(worker, "materialize_tob_revenue_pair")
+    assert "oasdi_share_of_gross_ss" not in source
+    assert "neutralize_variable" not in source
+
+
 def test_behavioral_scoring_uses_behavioral_reform(monkeypatch):
     marker = object()
 
@@ -145,6 +223,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     baseline_reform = object()
     baseline_system = SimpleNamespace(simulation=None)
     fallback_system = SimpleNamespace(simulation=None)
+    bound = []
 
     monkeypatch.setattr(
         "policyengine_us.Microsimulation.default_tax_benefit_system",
@@ -155,7 +234,11 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
 
     class _ManagedSimulation:
         def __init__(self):
-            self.baseline = SimpleNamespace()
+            self.baseline = SimpleNamespace(
+                _bind_to_tax_benefit_system=lambda: bound.append(
+                    self.baseline.tax_benefit_system
+                )
+            )
 
         @staticmethod
         def default_tax_benefit_system(*, reform):
@@ -173,6 +256,7 @@ def test_behavioral_baseline_installation_uses_current_law_reform(monkeypatch):
     assert sim.baseline.tax_benefit_system is not fallback_system
     assert baseline_system.simulation is sim.baseline
     assert sim.baseline.reform is baseline_reform
+    assert bound == [baseline_system]
 
 
 def test_save_complete_microsimulation_h5_fails_on_unapproved_skipped_variable(

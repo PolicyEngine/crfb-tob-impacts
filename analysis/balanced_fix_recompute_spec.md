@@ -36,19 +36,26 @@ Marc's words -> option ids: "Phased Roth" = **option12**, "repeal" = **option1**
 - option12's dict (src/reforms.py ~622-712) changes SS *taxability*, NOT payroll rates or
   benefit levels, so it does not collide with the balanced fix's rate/benefit changes — good.
 
-## [B1] Build EVERY sim with the Trustees current-law reform stacked
-The new certified base stores INPUT data only; the Trustees long-run tax assumption is applied
-at calibration time, not baked into the H5. Both new-base scoring paths stack it explicitly:
-`src.reform_full_h5_worker.materialize_tob_revenue_pair` uses
-`current_law = _tax_assumption_reform(year)` (returns **None before 2035**;
-`TAX_ASSUMPTION_START_YEAR = 2035` in src/pipeline.py).
+## [B1] Build EVERY sim with the dataset's scoring assumptions stacked
+The new certified base stores INPUT data only; the Trustees long-run tax assumption (and, for a
+dataset built with one, the economic assumption reform) is applied at calibration time, not
+baked into the H5. The scorers stack them explicitly from the dataset's metadata (its
+`{year}.h5.metadata.json`, or on approved full-H5 runs the metadata file the baseline
+manifest names): `load_scoring_assumption_reform_for_dataset(dataset, year)` in
+`src/tax_assumption_loader.py`, or its `_for_metadata` twin, returns the economic assumption
+reform first, then the tax assumption reform (`None` when the dataset records neither; the
+tax assumption is inactive before 2035). It refuses an economic assumption whose module no
+longer hashes to the `module_sha256` the build recorded. `src/balanced_fix.py` and
+`src/year_runner.py` call the `_for_dataset` form; the full-H5 worker calls whichever matches
+its metadata source.
 - Historical option13 scripts built `Microsimulation(dataset=...)` with NO reform.
   **Do not copy that.** On the new base it yields literal current-law SS
   thresholds, not the Trustees wage-indexed path the base was calibrated against, so every gap,
   TOB, multiplier, and rate would be silently wrong while still "closing to ~0".
 - REQUIRED: build the baseline as
-  `dataset_microsimulation({year}.h5, reform=_tax_assumption_reform(year))`
-  and stack everything else on top of that current-law reform.
+  `dataset_microsimulation({year}.h5, reform=current_law_reform)` with
+  `current_law_reform = load_scoring_assumption_reform_for_dataset({year}.h5, year)`,
+  and stack everything else on top of that reform.
 
 ## [B2] Gap-closing as a hand-built sim sequence (the benefit cut is a set_input)
 The Stage-1 benefit cut is NOT a parameter reform. It is
@@ -62,10 +69,10 @@ The exact mechanics are inlined here. Do not depend on any archived Option
 13/14 runner; those entry points are fail-closed and not part of the current
 pipeline.
 
-1. `base = dataset_microsimulation({year}.h5, reform=_tax_assumption_reform(year))`.
+1. `base = dataset_microsimulation({year}.h5, reform=current_law_reform)`.
 2. From `base`, read `ss = base.calculate("social_security", year)` and compute the gaps
-   (direct `.calculate(...).sum()` on `base` — these variables self-branch natively, so do NOT
-   wrap them in materialize_tob_revenue_pair for the GAP math):
+   (direct `.calculate(...).sum()` on `base`; `tob_revenue_oasdi` and
+   `tob_revenue_medicare_hi` are the engine's own variables, summed as computed):
    - SS income = employee_social_security_tax + employer_social_security_tax
      + self_employment_social_security_tax + tob_revenue_oasdi
    - SS gap = SS income - ss_benefits
@@ -86,7 +93,7 @@ pipeline.
    ```
    stage1 = dataset_microsimulation(
        {year}.h5,
-       reform=_tax_assumption_reform(year),
+       reform=current_law_reform,
        start_instant=f"{year}-01-01",
    )
    stage1.set_input("social_security", year, reduced_ss)
@@ -104,11 +111,10 @@ pipeline.
 6. Define one helper used for ALL solvent sims:
    ```
    def solvent_sim(year, extra_reform=None):
-       reforms = [_tax_assumption_reform(year), rate_reform_object]
-       if extra_reform is not None: reforms.append(extra_reform)
        sim = dataset_microsimulation(
            {year}.h5,
-           reform=tuple(r for r in reforms if r),
+           # economic assumption, tax assumption, rates, then the policy
+           reform=compose_reforms(current_law_reform, rate_reform_object, extra_reform),
            start_instant=f"{year}-01-01",
        )
        sim.set_input("social_security", year, reduced_ss)   # SAME reduced_ss for every sim
@@ -148,9 +154,10 @@ vintage mix on the single most important HI input.
   `v2pop_tr2026_20260611` through 2070 and
   `v2pop_tr2026_noclone_20260612` for 2075+, so the balanced-fix recompute must
   map those run prefixes back to the matching baseline manifests before scoring.
-  Load via `src.engine.dataset_microsimulation`. Decompose OASDI/HI for the
-  OUTPUT rows via `src.reform_full_h5_worker.materialize_tob_revenue_pair`
-  (consistent with the live panel); general_fund = revenue - oasdi - hi.
+  Load via `src.engine.dataset_microsimulation`. Split OASDI/HI for the OUTPUT
+  rows with `src.trust_fund_allocation.split_revenue_impacts(row,
+  allocation_mode="baselineShares")` (option12 uses its employer-revenue net
+  impacts); general_fund = revenue - oasdi - hi.
 - Runtime: score under the same certified runtime recorded by the baseline H5
   metadata and live full-H5 cells (`policyengine==4.5.1`,
   `policyengine-us==1.700.2`, `policyengine-core==3.26.1`). Do not "upgrade"
@@ -209,7 +216,8 @@ fan out 2050/2075/2100. Static only (no behavioral) unless the user asks.
   count + Modal cost, gates passed/failed, and a short draft reply to Marc for #1/#2.
 
 ## Constraints
-- Reuse existing functions (dataset_microsimulation, _tax_assumption_reform,
-  materialize_tob_revenue_pair) and the self-contained 50/50 mechanics above —
-  the rebuild's costly mistakes came from reinventing.
+- Reuse existing functions (dataset_microsimulation,
+  load_scoring_assumption_reform_for_dataset, split_revenue_impacts) and the
+  self-contained 50/50 mechanics above — the rebuild's costly mistakes came from
+  reinventing.
 - Commit in logical chunks; do not push (user controls push).

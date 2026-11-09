@@ -10,7 +10,6 @@ from policyengine_core.periods import period as get_period
 from policyengine_core.reforms import Reform
 
 from .hi_expenditures import hi_expenditures_for_year
-from .reform_full_h5_worker import materialize_tob_revenue_pair
 from .reforms import (
     get_option1_reform,
     get_option2_reform,
@@ -18,9 +17,11 @@ from .reforms import (
     get_option12_reform,
 )
 from .tax_assumption_loader import (
+    EconomicAssumptionContract,
     TaxAssumptionContract,
-    load_tax_assumption_reform_for_dataset,
-    tax_assumption_contract_for_dataset,
+    economic_assumption_output_metadata,
+    load_scoring_assumption_reform_for_dataset,
+    scoring_assumptions_for_dataset,
 )
 from .trust_fund_allocation import split_revenue_impacts
 
@@ -284,6 +285,9 @@ class SolventBaselineState:
     rate_reform: Any
     reduced_social_security: np.ndarray
     current_law_aggregate: ScenarioAggregate
+    economic_assumption_contract: EconomicAssumptionContract = (
+        EconomicAssumptionContract(active=False)
+    )
 
     def metadata_dict(self) -> dict[str, Any]:
         return {
@@ -291,6 +295,9 @@ class SolventBaselineState:
             "dataset_path": self.dataset_path,
             "tax_assumption_name": self.tax_assumption_contract.name,
             "tax_assumption_active": self.tax_assumption_contract.active,
+            "economic_assumption": economic_assumption_output_metadata(
+                self.economic_assumption_contract
+            ),
             "hi_expenditures": float(self.hi_expenditures),
             "gap_before": self.gap_before.to_dict(),
             "gap_after_stage1": self.gap_after_stage1.to_dict(),
@@ -398,13 +405,16 @@ def compute_trust_fund_gap(
     *,
     year: int,
     hi_expenditures: float,
-    materialize_tob: bool = True,
     progress: Callable[[str], None] | None = None,
 ) -> TrustFundGap:
-    """Compute SS and HI gaps with MicroSeries sums only."""
+    """Compute SS and HI gaps with MicroSeries sums only.
 
-    if materialize_tob:
-        materialize_tob_revenue_pair(sim, year=year, progress=progress)
+    The trust-fund income sums take tob_revenue_oasdi and
+    tob_revenue_medicare_hi straight from the engine's formulas.
+    """
+
+    if progress is not None:
+        progress("summing trust-fund income and benefits")
     ss_income = sum(
         _calculate_sum(sim, name, year=year) for name in SS_INCOME_VARIABLES
     )
@@ -472,9 +482,14 @@ def compute_scenario_aggregate_from_sim(
     year: int,
     progress: Callable[[str], None] | None = None,
 ) -> ScenarioAggregate:
-    """Aggregate a prepared sim, including sims with set_input benefit cuts."""
+    """Aggregate a prepared sim, including sims with set_input benefit cuts.
 
-    materialize_tob_revenue_pair(sim, year=year, progress=progress)
+    The taxation-of-benefits totals sum the engine's tob_revenue_oasdi and
+    tob_revenue_medicare_hi.
+    """
+
+    if progress is not None:
+        progress("summing taxation-of-benefits revenue from the engine")
     tob_medicare_hi = _calculate_sum(
         sim,
         "tob_revenue_medicare_hi",
@@ -538,8 +553,12 @@ def build_solvent_baseline_state(
 
     dataset_path = str(dataset_path)
     emit("resolving tax-assumption contract")
-    tax_assumption_contract = tax_assumption_contract_for_dataset(dataset_path, year)
-    current_law_reform = load_tax_assumption_reform_for_dataset(dataset_path, year)
+    # Every simulation below applies the dataset's economic assumption reform,
+    # then its tax assumption reform, ahead of the solvency rates and the
+    # policy, so the solvent baseline and each reform share both assumptions.
+    assumptions = scoring_assumptions_for_dataset(dataset_path, year)
+    tax_assumption_contract = assumptions.tax_assumption
+    current_law_reform = load_scoring_assumption_reform_for_dataset(dataset_path, year)
     hi_data = hi_expenditures_for_year(year)
     hi_expenditures_value = (
         float(hi_expenditures)
@@ -564,7 +583,6 @@ def build_solvent_baseline_state(
         base,
         year=year,
         hi_expenditures=hi_expenditures_value,
-        materialize_tob=False,
     )
     emit("reading current-law Social Security vector")
     social_security = base.calculate("social_security", period=year)
@@ -668,6 +686,7 @@ def build_solvent_baseline_state(
         rate_reform=rate_reform,
         reduced_social_security=reduced_social_security,
         current_law_aggregate=current_law_aggregate,
+        economic_assumption_contract=assumptions.economic_assumption,
     )
 
 

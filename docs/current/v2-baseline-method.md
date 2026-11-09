@@ -63,8 +63,8 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
 - **Stage D — final light calibration.** Entropy-balance from the
   demographic weights to hit all target families exactly: age
   distribution, Social Security benefits, taxable payroll, and the
-  TR2026 current-law OASDI and HI taxation-of-benefits series. From 2075
-  the calibration also pins two self-referential income guards (ordinary
+  TR2026 current-law OASDI and HI taxation-of-benefits series. In every
+  year the calibration also pins two self-referential income guards (ordinary
   non-payroll income and preferential investment income, as in v1) so
   weight tilts cannot inflate other income to reach the TOB target.
   Because values already carry the economics, the early-year pass needs

@@ -229,13 +229,14 @@ def calibrate_entropy_constraints(
     A = np.asarray(A, dtype=float)
     targets = np.asarray(targets, dtype=float)
     baseline_weights = np.asarray(baseline_weights, dtype=float)
-    if (targets <= 0).any():
+    usable = np.isfinite(targets) & (targets > 0)
+    if not usable.all():
         # All constraint columns in this pipeline are nonnegative
         # (member counts, benefits, payroll, TOB revenue), so a
         # nonpositive target can never be met with positive weights.
         raise RuntimeError(
-            "Entropy calibration requires strictly positive targets; got "
-            f"{targets[targets <= 0]}."
+            "Entropy calibration requires strictly positive finite targets; "
+            f"got {targets[~usable]}."
         )
 
     scales = np.maximum(
@@ -258,6 +259,15 @@ def calibrate_entropy_constraints(
     except np.linalg.LinAlgError:
         beta = np.zeros(A.shape[1])
 
+    def dual_objective(beta_vec: np.ndarray) -> float:
+        return float(weights_for(beta_vec).sum() - targets_scaled @ beta_vec)
+
+    # The warm start assumes small adjustments. Far from the baseline it can
+    # overflow the exponential and strand the line search, so keep it only if
+    # it beats the baseline on the convex dual.
+    if not dual_objective(beta) < dual_objective(np.zeros(A.shape[1])):
+        beta = np.zeros(A.shape[1])
+
     gradient_norm = np.inf
     for _ in range(max_iters):
         w = weights_for(beta)
@@ -271,15 +281,25 @@ def calibrate_entropy_constraints(
             step = np.linalg.solve(hessian, gradient)
         except np.linalg.LinAlgError:
             step = np.linalg.lstsq(hessian, gradient, rcond=None)[0]
-        # Backtracking line search on the dual objective.
-        objective = float(w.sum() - targets_scaled @ beta)
+        # Backtracking line search on the dual objective. Close to the optimum
+        # the objective stops resolving before the gradient does, so a step
+        # within the objective's rounding error counts if it shrinks the
+        # gradient.
+        objective = dual_objective(beta)
+        objective_rounding = (
+            4 * np.finfo(float).eps * (w.sum() + abs(targets_scaled @ beta))
+        )
         step_size = 1.0
         improved = False
         for _ in range(80):
             candidate = beta - step_size * step
             w_candidate = weights_for(candidate)
             candidate_objective = float(w_candidate.sum() - targets_scaled @ candidate)
-            if candidate_objective < objective:
+            candidate_gradient = A_scaled.T @ w_candidate - targets_scaled
+            if candidate_objective < objective or (
+                candidate_objective <= objective + objective_rounding
+                and np.max(np.abs(candidate_gradient)) < gradient_norm
+            ):
                 beta = candidate
                 improved = True
                 break
@@ -292,10 +312,12 @@ def calibrate_entropy_constraints(
 
     w = weights_for(beta)
     achieved = A.T @ w
+    gradient_norm = float(np.max(np.abs(A_scaled.T @ w - targets_scaled)))
     with np.errstate(divide="ignore", invalid="ignore"):
         pct_errors = np.abs(achieved - targets) / np.maximum(np.abs(targets), 1e-9)
     max_pct = float(np.max(pct_errors))
-    if gradient_norm > 1e-6 or max_pct > 1e-4:
+    # Written so a NaN diagnostic fails instead of passing both comparisons.
+    if not (gradient_norm <= 1e-6 and max_pct <= 1e-4):
         raise RuntimeError(
             "Entropy calibration did not converge: max constraint error "
             f"{max_pct:.3%}, dual gradient norm {gradient_norm:.2e}."

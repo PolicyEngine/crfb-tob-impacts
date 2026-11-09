@@ -44,8 +44,9 @@ table is accepted. These constraints are part of the production contract:
   annual behavioral rows by interpolating each reform's behavioral/static
   multiplier across display years. Do not fan labor-supply-response scoring out
   per year.
-- OASDI/HI decomposition is an endpoint pass that reuses
-  `materialize_tob_revenue_pair`; do not duplicate trust-fund split formulas.
+- OASDI/HI decomposition reads the engine's `tob_revenue_oasdi` and
+  `tob_revenue_medicare_hi` exactly as computed; do not floor, cap or
+  re-derive the trust-fund split in this repo.
 - Long Modal baseline/scoring cells are nonpreemptible, because preemption lost
   prior far-horizon work before it could commit.
 - The public result surface is `results.csv` plus
@@ -86,3 +87,26 @@ Generated dashboard and paper data should come from the canonical reform
 pipeline above. Historical local scripts and pinned examples may cite older
 PolicyEngine-US versions; do not treat those examples as the active reform
 relaunch contract.
+
+For local projected-year builds, `scripts/build_projected_datasets.py` accepts
+`--economic-assumption-reform MODULE:ATTRIBUTE`. This hook is off by default.
+When enabled, Stage A requires an entity-level single-year base and stores only
+its base year. Each stored year holds a copy of the inputs it changes, so storing
+every year through 2100 would not fit in memory on the full base. Core uprates
+each input from the base year with the simulation's own parameters, so the
+inputs and the income-growth caps stay on the same economic path. A test
+compares this path with a fully stored one on the real engine. A base that
+already contains multiple years is refused because its later inputs may carry a
+different aging path. Builds without the hook also store only the base year of
+an entity-level file.
+
+The year frame keeps the base file's `person_id` in every year. Its formula
+numbers rows past the stored years, and claim-age draws key on it. Group IDs
+have no formula and carry forward unchanged.
+
+The build applies the economic assumption before the tax assumption in every
+simulation. Each year file embeds the economic record in its H5 and repeats
+it in the metadata sidecar, including whether inputs aged under that assumption
+and the extension's end year. Scorers apply the same recorded economic and tax
+assumptions to the baseline and policy simulations. They refuse disagreeing
+records or an H5 that names an economic assumption whose sidecar is missing.

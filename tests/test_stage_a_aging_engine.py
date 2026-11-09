@@ -1,0 +1,171 @@
+"""Real-engine agreement between base-year aging, full storage and category caps."""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from src import pipeline
+from tests.test_stage_a_aging import entity_file, load_engine
+
+# Each uses an uprating path the growth caps do not: dataset extension resolves
+# the Social Security components through its own override map.
+OTHER_UPRATED_INPUTS = (
+    "veterans_benefits",
+    "social_security_retirement",
+    "social_security_disability",
+    "social_security_survivors",
+    "social_security_dependents",
+)
+
+
+@pytest.fixture(scope="module")
+def aged_frames(tmp_path_factory, request):
+    pytest.importorskip("policyengine_us.data.economic_assumptions")
+    from policyengine_core.reforms import Reform
+    from policyengine_us import Microsimulation
+    from policyengine_us.data.dataset_schema import USSingleYearDataset
+    from policyengine_us.data.economic_assumptions import extend_single_year_dataset
+    from policyengine_us.system import CountryTaxBenefitSystem, system
+
+    if not getattr(system, "_per_capita_uprating_built", False):
+        pytest.skip("requires the per-capita dataset extension API")
+    path = entity_file(tmp_path_factory.mktemp("aging") / "base.h5")
+    names = pipeline.GROWTH_CAP_VARIABLES
+    totals = {
+        pipeline.growth_cap_total_parameter(
+            pipeline.growth_cap_uprating_parameter(name, system.variables),
+            system.parameters,
+        )
+        for name in names
+    }
+    total_values = {
+        name: {
+            year: float(system.parameters.get_child(name)(f"{year}-01-01"))
+            for year in range(2035, 2051)
+        }
+        for name in totals
+    }
+
+    class DoubleGrowth(Reform):
+        def apply(self):
+            def modify(parameters):
+                for name, values in total_values.items():
+                    parameter = parameters.get_child(name)
+                    for year, value in values.items():
+                        parameter.update(period=str(year), value=2 * value)
+                return parameters
+
+            self.modify_parameters(modify)
+
+    with pd.HDFStore(path, "a") as store:
+        person = store["person"]
+        for name in (*names, *OTHER_UPRATED_INPUTS):
+            person[name] = np.array([100.0, 200.0, 300.0])
+        store["person"] = person
+    monkeypatch = pytest.MonkeyPatch()
+    request.addfinalizer(monkeypatch.undo)
+    engine = load_engine(monkeypatch)
+    monkeypatch.setattr(engine, "_require_certified_runtime", lambda: None)
+    sim = engine.stage_a_microsimulation(path, reform=DoubleGrowth)
+    default = engine.stage_a_microsimulation(path)
+    fully_stored = extend_single_year_dataset(
+        USSingleYearDataset(file_path=str(path)),
+        end_year=2050,
+        system=CountryTaxBenefitSystem(reform=DoubleGrowth),
+    )
+    manual = Microsimulation(dataset=fully_stored, reform=DoubleGrowth)
+    yield {
+        "sim": sim,
+        "default": default,
+        "manual": manual,
+        "frame": pipeline.materialize_year_frame(sim, 2050),
+        "path": path,
+    }
+
+
+@pytest.mark.parametrize("year", [2030, 2036, 2037, 2050])
+def test_frame_matches_fully_stored_simulation(aged_frames, year):
+    data = aged_frames
+    frame = pipeline.materialize_year_frame(data["sim"], year)
+    pd.testing.assert_frame_equal(
+        frame,
+        pipeline.materialize_year_frame(data["manual"], year),
+        check_exact=False,
+        rtol=1e-6,
+    )
+    for name in pipeline.GROWTH_CAP_VARIABLES:
+        np.testing.assert_allclose(
+            frame[f"{name}__{year}"],
+            data["manual"].calculate(name, period=year).values,
+            rtol=1e-6,
+        )
+    assert frame[f"veterans_benefits__{year}"].iloc[0] > 100
+    np.testing.assert_array_equal(frame[f"person_id__{year}"], [10, 20, 30])
+    assert int(data["sim"].default_calculation_period) == 2024
+    assert list(data["sim"].dataset.years) == [2024]
+    assert data["manual"].dataset.years[-1] == 2050
+
+
+def test_reformed_national_growth_agrees_with_frame_and_cap(aged_frames):
+    from microdf import MicroDataFrame
+
+    sim = aged_frames["sim"]
+    frame = aged_frames["frame"].copy()
+    reference = pipeline.materialize_year_frame(sim, 2034)
+    weighted = MicroDataFrame(frame, weights=frame["household_weight__2050"].to_numpy())
+    reference = MicroDataFrame(
+        reference, weights=reference["household_weight__2034"].to_numpy()
+    )
+    gdp = pipeline._tr2026_gdp_growth(2034, 2050)
+    expected = {}
+    for name in pipeline.GROWTH_CAP_VARIABLES:
+        total = pipeline.growth_cap_total_parameter(
+            pipeline.growth_cap_uprating_parameter(
+                name, sim.tax_benefit_system.variables
+            ),
+            sim.tax_benefit_system.parameters,
+        )
+        parameter = sim.tax_benefit_system.parameters.get_child(total)
+        growth = float(parameter("2050-01-01") / parameter("2034-01-01"))
+        base = float(reference[f"{name}__2034"].sum())
+        assert float(weighted[f"{name}__2050"].sum()) / base == pytest.approx(
+            growth, rel=2e-6
+        )
+        # The fake doubles growth relative to the default total series.
+        default_total = aged_frames["default"].tax_benefit_system.parameters.get_child(
+            total
+        )
+        assert growth == pytest.approx(
+            2 * float(default_total("2050-01-01") / default_total("2034-01-01"))
+        )
+        expected[name] = base * min(growth, gdp)
+    pipeline.cap_longrun_income_growth(frame, sim, 2050)
+    capped = MicroDataFrame(frame, weights=frame["household_weight__2050"].to_numpy())
+    for name, target in expected.items():
+        assert float(capped[f"{name}__2050"].sum()) == pytest.approx(target, rel=2e-6)
+
+
+def test_only_uprated_columns_move_and_all_base_values_are_identical(aged_frames):
+    from policyengine_us.data.dataset_schema import USSingleYearDataset
+
+    sim, default = aged_frames["sim"], aged_frames["default"]
+    original = USSingleYearDataset(file_path=str(aged_frames["path"]))
+    for entity, table in zip(original.table_names, original.tables):
+        pd.testing.assert_frame_equal(
+            getattr(sim.dataset.get_year(2024), entity), table, check_exact=True
+        )
+    pd.testing.assert_frame_equal(
+        pipeline.materialize_year_frame(sim, 2024),
+        pipeline.materialize_year_frame(default, 2024),
+        check_exact=True,
+    )
+    baseline = pipeline.materialize_year_frame(default, 2050)
+    moved = []
+    for column in aged_frames["frame"].columns:
+        if not np.array_equal(aged_frames["frame"][column], baseline[column]):
+            name = column.rsplit("__", 1)[0]
+            assert sim.tax_benefit_system.variables[name].uprating, name
+            moved.append(name)
+    assert set(pipeline.GROWTH_CAP_VARIABLES).issubset(moved)
