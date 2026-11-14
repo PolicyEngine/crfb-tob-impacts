@@ -231,7 +231,19 @@ def _iter_updatable_parameters(root) -> list:
     ]
 
 
-def _module_iter_updatable_parameters(module, root) -> list:
+def _module_iter_updatable_parameters(
+    module, root, *, complete_parameter_names: set[str] | None = None
+) -> list:
+    if complete_parameter_names is not None:
+        candidates = [root]
+        if hasattr(root, "get_descendants"):
+            candidates.extend(root.get_descendants())
+        return [
+            parameter
+            for parameter in candidates
+            if parameter.__class__.__name__ == "Parameter"
+            and parameter.name in complete_parameter_names
+        ]
     if hasattr(module, "iter_updatable_parameters"):
         try:
             return list(
@@ -557,11 +569,19 @@ def build_indexed_parameter_tables(
     parameters=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     parameters = parameters or _build_trustees_parameters()
+    complete_parameter_names = None
+    if hasattr(module, "trustees_core_threshold_parameters"):
+        complete_parameter_names = {
+            parameter.name
+            for parameter in module.trustees_core_threshold_parameters(parameters)
+        }
 
     parameter_rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     for group_id, group_label, root in _group_roots(parameters):
-        for parameter in _module_iter_updatable_parameters(module, root):
+        for parameter in _module_iter_updatable_parameters(
+            module, root, complete_parameter_names=complete_parameter_names
+        ):
             if parameter.name in seen:
                 continue
             seen.add(parameter.name)

@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-import importlib.metadata as metadata
 import ast
+import importlib.metadata as metadata
 import json
-from pathlib import Path
 import re
+from pathlib import Path
+from types import SimpleNamespace
 
+import pandas as pd
+import pytest
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 from packaging.version import Version
-import pandas as pd
 
 from src import cli
+from src import dashboard_baseline_assumptions as assumptions
 from src.dashboard_baseline_assumptions import build_calibration_targets
 
 # PyPI no longer lists policyengine-us 1.729.0, the release that
@@ -248,3 +251,232 @@ def test_calibration_targets_prefer_h5_metadata_and_fill_public_fallbacks(tmp_pa
     assert indexed.loc["payroll_total", "target"] == 11_129.0
     assert indexed.loc["hi_tob", "target"] == 41.19
     assert targets["constraint_name"].value_counts()["oasdi_tob"] == 1
+
+
+# These stand-ins contain MOCK data only. They never import a country model or
+# construct a microsimulation; the numbers do not represent tax amounts.
+class Parameter:
+    def __init__(self, name, uprating, mock_value=1.0):
+        self.name = name
+        self.metadata = {"uprating": uprating}
+        self.mock_value = mock_value
+
+    def __call__(self, instant):
+        return self.mock_value
+
+
+class _MockParameterGroup:
+    def __init__(self, name, descendants=()):
+        self.name = name
+        self.descendants = list(descendants)
+
+    def get_descendants(self):
+        return list(self.descendants)
+
+
+def _mock_indexed_parameter_data(monkeypatch):
+    def forbid_model_construction():
+        raise AssertionError("MOCK table tests must not construct a microsimulation")
+
+    monkeypatch.setattr(
+        assumptions, "_build_trustees_parameters", forbid_model_construction
+    )
+    parameters = SimpleNamespace()
+
+    def set_path(path, value):
+        current = parameters
+        parts = path.split(".")
+        for part in parts[:-1]:
+            if not hasattr(current, part):
+                setattr(current, part, SimpleNamespace())
+            current = getattr(current, part)
+        setattr(current, parts[-1], value)
+
+    group_names = [
+        "gov.irs.income.bracket.thresholds",
+        "gov.irs.deductions.standard.amount",
+        "gov.irs.deductions.standard.aged_or_blind.amount",
+        "gov.irs.capital_gains.thresholds",
+        "gov.irs.income.amt.brackets",
+        "gov.irs.income.amt.exemption.amount",
+        "gov.irs.income.amt.exemption.phase_out.start",
+        "gov.irs.income.amt.exemption.separate_limit",
+    ]
+    groups = {name: _MockParameterGroup(name) for name in group_names}
+    for name, group in groups.items():
+        set_path(name, group)
+
+    standard = "gov.irs.deductions.standard.amount"
+    single = Parameter(f"{standard}.SINGLE", "gov.irs.uprating", 1.0)
+    joint = Parameter(f"{standard}.JOINT", f"{standard}.SINGLE", 2.0)
+    surviving = Parameter(f"{standard}.SURVIVING_SPOUSE", f"{standard}.SINGLE", 2.0)
+    not_selected = Parameter(
+        f"{standard}.MOCK_NOT_IN_REFORM", {"parameter": "gov.irs.uprating"}, 3.0
+    )
+    new_index = Parameter(
+        "gov.irs.income.bracket.thresholds.MOCK_NEW_INDEX",
+        "gov.irs.indexing.c_cpi_u",
+        4.0,
+    )
+    outside_group = Parameter(
+        "gov.irs.deductions.hsa.MOCK_OUTSIDE_GROUP",
+        "gov.irs.indexing.hsa_c_cpi_u",
+        5.0,
+    )
+    prefix_collision = Parameter(
+        "gov.irs.deductions.standard.amount_extra.MOCK_PREFIX_COLLISION",
+        "gov.irs.uprating",
+        6.0,
+    )
+    groups[standard].descendants = [single, joint, surviving, not_selected, single]
+    groups[group_names[0]].descendants = [new_index]
+    # Preserve the selector's scalar-root contract: this selected display root
+    # is a Parameter with no get_descendants method, rather than a group node.
+    leaf = Parameter(group_names[-1], "gov.irs.indexing.c_cpi_u", 7.0)
+    groups[group_names[-1]] = leaf
+    set_path(group_names[-1], leaf)
+    set_path("gov.irs.uprating", Parameter("gov.irs.uprating", None))
+    set_path("gov.ssa.nawi", Parameter("gov.ssa.nawi", None))
+    return SimpleNamespace(
+        parameters=parameters,
+        groups=groups,
+        single=single,
+        joint=joint,
+        surviving=surviving,
+        not_selected=not_selected,
+        new_index=new_index,
+        outside_group=outside_group,
+        prefix_collision=prefix_collision,
+        leaf=leaf,
+    )
+
+
+def _assert_mock_indexed_table_contract(tables, expected_names):
+    long, summary, growth = tables
+    assert list(long.columns) == [
+        "parameter_group",
+        "parameter_group_label",
+        "parameter_name",
+        "parameter_label",
+        "uprating_parameter",
+        "rounding",
+        "year",
+        "value",
+    ]
+    assert long["parameter_name"].drop_duplicates().tolist() == expected_names
+    assert summary["parameter_name"].tolist() == expected_names
+    assert not long.duplicated(["parameter_name", "year"]).any()
+    assert set(long["year"]) == set(range(2026, 2101))
+    assert len(long) == len(expected_names) * 75
+    assert list(growth.columns) == ["year", "indexing_source", "growth_rate_pct"]
+    assert growth["year"].tolist() == list(range(2026, 2101))
+    assert growth["growth_rate_pct"].eq(0.0).all()
+
+
+def test_indexed_tables_prefer_complete_reform_membership(monkeypatch):
+    data = _mock_indexed_parameter_data(monkeypatch)
+    calls = []
+
+    def complete_membership(parameters):
+        assert parameters is data.parameters
+        calls.append(parameters)
+        # Deliberately not display order: membership must not reorder the
+        # existing groups or their parameter-tree order.
+        return [
+            data.surviving,
+            data.outside_group,
+            data.new_index,
+            data.single,
+            data.joint,
+            data.single,
+            data.prefix_collision,
+            data.leaf,
+        ]
+
+    def legacy_selector(*args, **kwargs):
+        raise AssertionError("Complete membership must take precedence")
+
+    module = SimpleNamespace(
+        trustees_core_threshold_parameters=complete_membership,
+        iter_updatable_parameters=legacy_selector,
+        _iter_updatable_parameters=legacy_selector,
+    )
+    tables = assumptions.build_indexed_parameter_tables(module, data.parameters)
+    expected = [
+        data.new_index.name,
+        data.single.name,
+        data.joint.name,
+        data.surviving.name,
+        data.leaf.name,
+    ]
+    _assert_mock_indexed_table_contract(tables, expected)
+    assert calls == [data.parameters]
+    long, _, _ = tables
+    assert long["parameter_group"].drop_duplicates().tolist() == [
+        "ordinary_income_brackets",
+        "standard_deduction",
+        "amt_separate_limit",
+    ]
+    assert (
+        long.loc[long["parameter_name"].eq(data.joint.name), "uprating_parameter"]
+        .eq(data.single.name)
+        .all()
+    )
+
+
+@pytest.mark.parametrize(
+    "helper_name", ["iter_updatable_parameters", "_iter_updatable_parameters"]
+)
+@pytest.mark.parametrize("accepts_keyword", [True, False])
+def test_indexed_tables_keep_legacy_module_selectors(
+    monkeypatch, helper_name, accepts_keyword
+):
+    data = _mock_indexed_parameter_data(monkeypatch)
+    calls = []
+
+    def select(root):
+        calls.append(root.name)
+        if root.name == "gov.irs.deductions.standard.amount":
+            return [data.single, data.not_selected, data.single]
+        return []
+
+    def keyword_selector(root, *, uprating_parameter):
+        assert uprating_parameter == "gov.irs.uprating"
+        return select(root)
+
+    module = SimpleNamespace(
+        **{helper_name: keyword_selector if accepts_keyword else select}
+    )
+    tables = assumptions.build_indexed_parameter_tables(module, data.parameters)
+    _assert_mock_indexed_table_contract(
+        tables, [data.single.name, data.not_selected.name]
+    )
+    assert calls == list(data.groups)
+
+
+def test_indexed_tables_keep_local_legacy_selector(monkeypatch):
+    data = _mock_indexed_parameter_data(monkeypatch)
+    tables = assumptions.build_indexed_parameter_tables(
+        SimpleNamespace(), data.parameters
+    )
+    _assert_mock_indexed_table_contract(
+        tables, [data.single.name, data.not_selected.name]
+    )
+
+
+def test_complete_membership_errors_do_not_fall_back(monkeypatch):
+    data = _mock_indexed_parameter_data(monkeypatch)
+
+    def complete_membership(parameters):
+        assert parameters is data.parameters
+        raise TypeError("MOCK complete membership failed")
+
+    def legacy_selector(root, **kwargs):
+        return [data.single]
+
+    module = SimpleNamespace(
+        trustees_core_threshold_parameters=complete_membership,
+        iter_updatable_parameters=legacy_selector,
+    )
+    with pytest.raises(TypeError, match="MOCK complete membership failed"):
+        assumptions.build_indexed_parameter_tables(module, data.parameters)
