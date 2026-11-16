@@ -230,101 +230,94 @@ def test_rate_reform_dict_applies_half_gap_to_employee_and_employer_rates():
     }
 
 
-def test_trust_fund_gap_materializes_tob_pair_before_microseries_sums(monkeypatch):
+class _WeightedValue:
+    def __init__(self, value: float):
+        self.value = value
+
+    def sum(self) -> float:
+        return self.value
+
+
+class _RecordingSim:
+    """Returns fixed weighted totals and records every calculate call."""
+
+    def __init__(self, values: dict[str, float], *, map_to: str | None):
+        self.values = values
+        self.map_to = map_to
+        self.calls: list[str] = []
+
+    def calculate(self, variable_name: str, *, period: int, map_to: str | None = None):
+        assert period == 2035
+        assert map_to == self.map_to
+        self.calls.append(variable_name)
+        return _WeightedValue(self.values[variable_name])
+
+
+def test_trust_fund_gap_sums_engine_tob_variables():
     import src.balanced_fix as balanced_fix
 
-    calls: list[int] = []
-    monkeypatch.setattr(
-        balanced_fix,
-        "materialize_tob_revenue_pair",
-        lambda sim, *, year, progress=None: calls.append(year),
-    )
-
-    class WeightedValue:
-        def __init__(self, value: float):
-            self.value = value
-
-        def sum(self) -> float:
-            return self.value
-
-    class FakeSim:
-        values = {
+    sim = _RecordingSim(
+        {
             "employee_social_security_tax": 1.0,
             "employer_social_security_tax": 2.0,
             "self_employment_social_security_tax": 3.0,
-            "tob_revenue_oasdi": 4.0,
+            "tob_revenue_oasdi": -4.0,
             "social_security": 11.0,
             "employee_medicare_tax": 5.0,
             "employer_medicare_tax": 6.0,
             "self_employment_medicare_tax": 7.0,
             "additional_medicare_tax": 8.0,
             "tob_revenue_medicare_hi": 9.0,
-        }
-
-        def calculate(
-            self, variable_name: str, *, period: int, map_to: str | None = None
-        ):
-            assert period == 2035
-            assert map_to is None
-            return WeightedValue(self.values[variable_name])
-
-    gap = compute_trust_fund_gap(FakeSim(), year=2035, hi_expenditures=40.0)
-
-    assert calls == [2035]
-    assert gap.ss_income == 10.0
-    assert gap.ss_gap == -1.0
-    assert gap.hi_income == 35.0
-    assert gap.hi_gap == -5.0
-
-
-def test_trust_fund_gap_can_reuse_materialized_tob_pair(monkeypatch):
-    import src.balanced_fix as balanced_fix
-
-    calls: list[int] = []
-    monkeypatch.setattr(
-        balanced_fix,
-        "materialize_tob_revenue_pair",
-        lambda sim, *, year, progress=None: calls.append(year),
+        },
+        map_to=None,
     )
-
-    class WeightedValue:
-        def __init__(self, value: float):
-            self.value = value
-
-        def sum(self) -> float:
-            return self.value
-
-    class FakeSim:
-        values = {
-            "employee_social_security_tax": 1.0,
-            "employer_social_security_tax": 2.0,
-            "self_employment_social_security_tax": 3.0,
-            "tob_revenue_oasdi": 4.0,
-            "social_security": 11.0,
-            "employee_medicare_tax": 5.0,
-            "employer_medicare_tax": 6.0,
-            "self_employment_medicare_tax": 7.0,
-            "additional_medicare_tax": 8.0,
-            "tob_revenue_medicare_hi": 9.0,
-        }
-
-        def calculate(
-            self, variable_name: str, *, period: int, map_to: str | None = None
-        ):
-            assert period == 2035
-            assert map_to is None
-            return WeightedValue(self.values[variable_name])
+    messages: list[str] = []
 
     gap = compute_trust_fund_gap(
-        FakeSim(),
-        year=2035,
-        hi_expenditures=40.0,
-        materialize_tob=False,
+        sim, year=2035, hi_expenditures=40.0, progress=messages.append
     )
 
-    assert calls == []
-    assert gap.ss_income == 10.0
+    # The engine's signed values flow through unchanged: no materializer,
+    # no floor.
+    assert not hasattr(balanced_fix, "materialize_tob_revenue_pair")
+    assert {"tob_revenue_oasdi", "tob_revenue_medicare_hi"} <= set(sim.calls)
+    assert gap.ss_income == 2.0
+    assert gap.ss_gap == -9.0
     assert gap.hi_income == 35.0
+    assert gap.hi_gap == -5.0
+    assert messages
+
+
+def test_trust_fund_gap_no_longer_takes_materialize_tob():
+    import inspect
+
+    parameters = inspect.signature(compute_trust_fund_gap).parameters
+    assert "materialize_tob" not in parameters
+
+
+def test_scenario_aggregate_reads_engine_tob_variables():
+    from src.balanced_fix import compute_scenario_aggregate_from_sim
+
+    sim = _RecordingSim(
+        {
+            "tob_revenue_medicare_hi": 7.0,
+            "tob_revenue_oasdi": -2.0,
+            "taxable_earnings_for_social_security": 100.0,
+            "social_security_taxable_self_employment_income": 10.0,
+            "income_tax": 50.0,
+            "social_security": 30.0,
+            "employer_ss_tax_income_tax_revenue": 3.0,
+            "employer_medicare_tax_income_tax_revenue": 1.0,
+        },
+        map_to="household",
+    )
+
+    aggregate = compute_scenario_aggregate_from_sim(sim, year=2035)
+
+    assert aggregate.tob_oasdi == -2.0
+    assert aggregate.tob_medicare_hi == 7.0
+    assert aggregate.tob_total == 5.0
+    assert aggregate.taxable_payroll == 110.0
 
 
 def test_current_law_cross_check_uses_live_static_baseline_columns(tmp_path):

@@ -7,6 +7,11 @@ Usage:
 
 Year specs accept comma-separated entries; each entry is a year, a range
 ``A-B``, or a stepped range ``A-B:STEP``.
+
+``--economic-assumption-reform MODULE:ATTRIBUTE`` opts into an economic
+assumption reform (a Reform subclass, parameter dict, or tuple of those). It
+applies ahead of the tax assumption in every simulation of the build, and the
+year metadata and build manifest record it.
 """
 
 from __future__ import annotations
@@ -48,6 +53,15 @@ def main() -> int:
     parser.add_argument("--output-dir", default="projected_datasets")
     parser.add_argument("--base-dataset", default=None)
     parser.add_argument(
+        "--economic-assumption-reform",
+        default=None,
+        metavar="MODULE:ATTRIBUTE",
+        help=(
+            "Opt-in economic assumption reform, applied ahead of the tax "
+            "assumption in every simulation (off by default)."
+        ),
+    )
+    parser.add_argument(
         "--keep-going",
         action="store_true",
         help="Continue with remaining years if one year fails.",
@@ -55,9 +69,22 @@ def main() -> int:
     args = parser.parse_args()
 
     from src.engine import certified_base_uri
-    from src.pipeline import build_year
+    from src.pipeline import (
+        build_year,
+        economic_assumption_provenance,
+        load_economic_assumption_reform,
+    )
 
     base_dataset = args.base_dataset or certified_base_uri()
+    economic_reform = None
+    economic_metadata = None
+    if args.economic_assumption_reform:
+        economic_reform = load_economic_assumption_reform(
+            args.economic_assumption_reform
+        )
+        economic_metadata = economic_assumption_provenance(
+            args.economic_assumption_reform
+        )
 
     try:
         from importlib.metadata import version
@@ -71,6 +98,7 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"building {len(years)} years -> {output_dir}")
     print(f"base dataset: {base_dataset}")
+    print(f"economic assumption reform: {args.economic_assumption_reform or 'none'}")
 
     sentinels: list[dict] = []
     failures: dict[int, str] = {}
@@ -82,6 +110,8 @@ def main() -> int:
                 output_dir,
                 base_dataset_label=base_dataset,
                 policyengine_us_version=pe_us_version,
+                economic_assumption_reform=economic_reform,
+                economic_assumption_metadata=economic_metadata,
             )
             sentinels.append(sentinel)
         except Exception as error:
@@ -116,6 +146,7 @@ def main() -> int:
         "years_built": [s["year"] for s in sentinels],
         "failures": failures,
         "policyengine_us_version": pe_us_version,
+        "economic_assumption": economic_metadata,
         "datasets": {},
     }
     for year in [s["year"] for s in sentinels]:

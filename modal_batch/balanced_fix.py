@@ -742,11 +742,14 @@ def check_current_law_baseline_remote(payload: dict[str, Any]) -> dict[str, Any]
         dataset_microsimulation,
     )
     from src.tax_assumption_loader import (  # noqa: PLC0415
-        load_tax_assumption_reform_for_dataset,
+        economic_assumption_output_metadata,
+        load_scoring_assumption_reform_for_dataset,
+        scoring_assumptions_for_dataset,
     )
 
     print(f"[balanced-fix-check] {year}: aggregating current-law baseline", flush=True)
-    reform = load_tax_assumption_reform_for_dataset(dataset_path, year)
+    assumptions = scoring_assumptions_for_dataset(dataset_path, year)
+    reform = load_scoring_assumption_reform_for_dataset(dataset_path, year)
     sim = dataset_microsimulation(
         dataset_path,
         reform=reform,
@@ -770,6 +773,9 @@ def check_current_law_baseline_remote(payload: dict[str, Any]) -> dict[str, Any]
         "dataset_h5_sha256": actual_h5_sha,
         "baseline_runtime_validation": runtime_validation,
         "baseline_record": payload.get("baseline_record"),
+        "economic_assumption": economic_assumption_output_metadata(
+            assumptions.economic_assumption
+        ),
         "current_law_cross_check": cross_check.to_dict(),
     }
 

@@ -58,8 +58,17 @@ def year_aggregates(dataset_path: Path, year: int) -> dict:
     from policyengine_us import Microsimulation
 
     from src.pipeline import _tax_assumption_reform
+    from src.tax_assumption_loader import (
+        compose_reforms,
+        load_economic_assumption_reform_for_dataset,
+    )
 
-    reform = _tax_assumption_reform(year)
+    # The dataset's recorded economic assumption reform (checked against its
+    # module hash) applies ahead of the tax assumption, as in the build.
+    reform = compose_reforms(
+        load_economic_assumption_reform_for_dataset(dataset_path),
+        _tax_assumption_reform(year),
+    )
     sim = Microsimulation(dataset=str(dataset_path), reform=reform)
 
     record: dict = {"year": year}

@@ -7,7 +7,7 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from typing import Any, Callable
+from typing import Any
 import hashlib
 import json
 import os
@@ -36,15 +36,20 @@ from .reform_full_h5_output_manifest import (
     full_h5_output_variable_manifest,
 )
 from .tax_assumption_loader import (
-    load_tax_assumption_reform_for_metadata,
-    load_tax_assumption_reform_for_dataset,
-    tax_assumption_contract_from_metadata,
-    tax_assumption_contract_for_dataset,
+    compose_reforms,
+    economic_assumption_output_metadata,
+    load_scoring_assumption_reform_for_dataset,
+    load_scoring_assumption_reform_for_metadata,
+    scoring_assumptions_for_dataset,
+    scoring_assumptions_from_metadata,
 )
 
 
 WORKER_ENTRYPOINT = "src.reform_full_h5_worker.run_reform_full_h5_cell"
 FULL_H5_DIRNAME = "reform_full_h5"
+# The same count as the rebuild's target vectors: it keeps a full-base cell well
+# below a whole-population simulation's memory.
+WORKER_CHUNKS = 8
 
 
 @dataclass(frozen=True)
@@ -116,16 +121,17 @@ def build_policy_reform(reform_id: str, scoring_type: str) -> Any:
     raise ValueError(f"Unsupported scoring_type: {scoring_type}")
 
 
-def _compose_reforms(first: Any | None, second: Any) -> Any:
-    return (first, second) if first is not None else second
-
-
 def install_behavioral_baseline_tax_system(
     sim: Any,
     *,
     baseline_reform: Any | None,
 ) -> dict[str, Any]:
-    """Make LSR comparisons use the same current-law baseline as static scoring."""
+    """Make LSR comparisons use the same baseline as static scoring.
+
+    ``baseline_reform`` is the dataset's economic assumption reform followed by
+    its tax assumption reform, the same reform the scored simulation applies
+    ahead of the policy, so the response measures the policy alone.
+    """
 
     if baseline_reform is None:
         return {
@@ -154,11 +160,15 @@ def install_behavioral_baseline_tax_system(
     baseline_system.simulation = sim.baseline
     sim.baseline.tax_benefit_system = baseline_system
     sim.baseline.reform = baseline_reform
+    # The branch's populations and holders still hold its first system, so a
+    # reform that changes a variable's definition wouldn't reach them.
+    sim.baseline._bind_to_tax_benefit_system()
     return {
         "installed": True,
         "method": (
             "simulation.baseline tax-benefit system replaced with the same "
-            "Trustees/current-law baseline reform used for static aggregation"
+            "baseline reform (economic assumption, then tax assumption) used "
+            "for static aggregation"
         ),
     }
 
@@ -195,18 +205,6 @@ def _calculate_native_entity(
     return _as_1d_array(values)
 
 
-def _delete_non_input_cached_arrays(branch: Any) -> int:
-    input_variables = set(getattr(branch, "input_variables", []))
-    deleted = 0
-    for population in getattr(branch, "populations", {}).values():
-        for holder in list(getattr(population, "_holders", {}).values()):
-            if holder.variable.name in input_variables:
-                continue
-            holder.delete_arrays()
-            deleted += 1
-    return deleted
-
-
 def _calculate_unweighted(
     sim: Any,
     variable_name: str,
@@ -218,90 +216,6 @@ def _calculate_unweighted(
     except TypeError:
         values = sim.calculate(variable_name, period=year)
     return _as_1d_array(values)
-
-
-def materialize_tob_revenue_pair(
-    sim: Any,
-    *,
-    year: int,
-    progress: Callable[[str], None] | None = None,
-) -> dict[str, Any]:
-    """Materialize TOB revenue variables without duplicate branch formulas.
-
-    This computes raw tax-unit arrays only. It performs no weighted aggregation.
-    """
-
-    from policyengine_core.periods import period as get_period
-
-    def emit(message: str) -> None:
-        if progress is not None:
-            progress(message)
-
-    period = get_period(year)
-    emit("materialize TOB: tax_unit_social_security")
-    gross_ss = _calculate_unweighted(
-        sim,
-        "tax_unit_social_security",
-        year=year,
-    )
-    emit("materialize TOB: tax_unit_taxable_social_security")
-    taxable_ss = _calculate_unweighted(
-        sim,
-        "tax_unit_taxable_social_security",
-        year=year,
-    )
-    emit("materialize TOB: full income_tax")
-    tax_full_ss = _calculate_unweighted(sim, "income_tax", year=year)
-    parameters = sim.tax_benefit_system.parameters(period).gov.ssa.revenue
-    capped_taxable_ss = np.minimum(
-        taxable_ss,
-        parameters.oasdi_share_of_gross_ss * gross_ss,
-    )
-
-    no_ss_branch_name = "crfb_tob_no_taxable_ss"
-    emit("materialize TOB: no-taxable-SS branch")
-    branch_no_ss = sim.get_branch(no_ss_branch_name, clone_system=True)
-    try:
-        branch_no_ss.tax_benefit_system.neutralize_variable(
-            "tax_unit_taxable_social_security"
-        )
-        no_ss_deleted = _delete_non_input_cached_arrays(branch_no_ss)
-        tax_no_ss = _calculate_unweighted(branch_no_ss, "income_tax", year=year)
-    finally:
-        sim.branches.pop(no_ss_branch_name, None)
-
-    capped_branch_name = "crfb_tob_capped_taxable_ss"
-    emit("materialize TOB: capped-taxable-SS branch")
-    branch_capped = sim.get_branch(capped_branch_name, clone_system=True)
-    try:
-        capped_deleted = _delete_non_input_cached_arrays(branch_capped)
-        tax_unit_population = branch_capped.populations["tax_unit"]
-        holder = tax_unit_population.get_holder("tax_unit_taxable_social_security")
-        holder.set_input(period, capped_taxable_ss)
-        tax_capped_ss = _calculate_unweighted(branch_capped, "income_tax", year=year)
-    finally:
-        sim.branches.pop(capped_branch_name, None)
-
-    emit("materialize TOB: cache OASDI/HI arrays")
-    oasdi = np.maximum(tax_capped_ss - tax_no_ss, 0)
-    medicare_hi = np.maximum(tax_full_ss - tax_capped_ss, 0)
-    sim.populations["tax_unit"].get_holder("tob_revenue_oasdi").put_in_cache(
-        oasdi,
-        period,
-        sim.branch_name,
-    )
-    sim.populations["tax_unit"].get_holder("tob_revenue_medicare_hi").put_in_cache(
-        medicare_hi,
-        period,
-        sim.branch_name,
-    )
-    return {
-        "materialized": sorted(TOB_REVENUE_VARIABLES),
-        "method": "single_shared_three_tax_state_pass",
-        "weighted_aggregation_used": False,
-        "no_ss_branch_deleted_cached_arrays": int(no_ss_deleted),
-        "capped_branch_deleted_cached_arrays": int(capped_deleted),
-    }
 
 
 def save_complete_microsimulation_h5(
@@ -317,7 +231,10 @@ def save_complete_microsimulation_h5(
 
     This function is deliberately independent of the legacy aggregate scorer.
     It computes output entity arrays and persists entity tables; aggregate
-    fiscal totals are a downstream post-H5 concern.
+    fiscal totals are a downstream post-H5 concern. The taxation-of-benefits
+    revenue variables hold exactly what the engine's own formulas compute,
+    read unweighted at their native tax-unit level; nothing here floors,
+    caps or re-derives the trust-fund split.
     """
 
     output_path = Path(output_path)
@@ -330,15 +247,7 @@ def save_complete_microsimulation_h5(
         entity: pd.DataFrame(index=np.arange(count)) for entity, count in counts.items()
     }
     variables_by_entity = variables_by_entity or full_h5_output_variable_manifest()
-    requested_tob_variables = {
-        variable_name
-        for variables in variables_by_entity.values()
-        for variable_name in variables
-        if variable_name in TOB_REVENUE_VARIABLES
-    }
-    tob_materialization = None
-    if requested_tob_variables == TOB_REVENUE_VARIABLES:
-        tob_materialization = materialize_tob_revenue_pair(sim, year=year)
+    materialized_tob_variables: list[str] = []
 
     skipped: list[dict[str, Any]] = []
     variables = getattr(getattr(sim, "tax_benefit_system", None), "variables", {})
@@ -356,22 +265,16 @@ def save_complete_microsimulation_h5(
                     }
                 )
                 continue
-            if variable_name in TOB_REVENUE_VARIABLES and tob_materialization is None:
-                skipped.append(
-                    {
-                        "variable": variable_name,
-                        "entity": entity,
-                        "reason": "TOB pair materializer did not run",
-                    }
-                )
-                continue
             try:
-                values = _calculate_native_entity(
-                    sim,
-                    variable_name,
-                    year=year,
-                    entity=entity,
-                )
+                if variable_name in TOB_REVENUE_VARIABLES:
+                    values = _calculate_unweighted(sim, variable_name, year=year)
+                else:
+                    values = _calculate_native_entity(
+                        sim,
+                        variable_name,
+                        year=year,
+                        entity=entity,
+                    )
             except Exception as error:
                 skipped.append(
                     {
@@ -394,6 +297,8 @@ def save_complete_microsimulation_h5(
                 )
                 continue
             entity_frames[entity][variable_name] = values
+            if variable_name in TOB_REVENUE_VARIABLES:
+                materialized_tob_variables.append(variable_name)
 
     empty_entities = [
         entity for entity, dataframe in entity_frames.items() if dataframe.empty
@@ -417,6 +322,30 @@ def save_complete_microsimulation_h5(
             "Full reform H5 generation skipped unapproved variables: " + examples
         )
 
+    return _write_entity_frames(
+        entity_frames,
+        output_path,
+        year=year,
+        variables_by_entity=variables_by_entity,
+        skipped=skipped,
+        materialized_tob_variables=materialized_tob_variables,
+        capture_policy=(
+            "checked full-output variable manifest materialized from the "
+            "reform microsimulation"
+        ),
+    )
+
+
+def _write_entity_frames(
+    entity_frames: dict[str, pd.DataFrame],
+    output_path: Path,
+    *,
+    year: int,
+    variables_by_entity: dict[str, list[str]],
+    skipped: list[dict[str, Any]],
+    materialized_tob_variables: list[str],
+    capture_policy: str,
+) -> dict[str, Any]:
     tmp_path = output_path.with_name(f"{output_path.name}.tmp")
     tmp_path.unlink(missing_ok=True)
     with pd.HDFStore(tmp_path, mode="w") as store:
@@ -448,10 +377,118 @@ def save_complete_microsimulation_h5(
         "variable_count": int(sum(item["column_count"] for item in entities.values())),
         "skipped_variables": skipped[:250],
         "skipped_variable_count": int(len(skipped)),
-        "capture_policy": "checked full-output variable manifest materialized from the reform microsimulation",
+        "capture_policy": capture_policy,
         "output_variable_manifest": variables_by_entity,
-        "tob_materialization": tob_materialization,
+        "tob_materialization": (
+            {
+                "materialized": sorted(materialized_tob_variables),
+                "method": "engine_formulas",
+                "source": "policyengine-us tob_revenue_* variables",
+                "post_processing": "none",
+                "weighted_aggregation_used": False,
+            }
+            if materialized_tob_variables
+            else None
+        ),
     }
+
+
+def _values_on_entity(
+    values: np.ndarray,
+    ids: np.ndarray,
+    *,
+    native: str,
+    target: str,
+    people: pd.DataFrame,
+    target_ids: np.ndarray,
+) -> np.ndarray:
+    """Map a variable's native array to a manifest entity.
+
+    The rule matches ``Simulation.map_result``: people see their group's value,
+    a group's value splits evenly among its people on the way to another group,
+    and a group sums what its people hold in double precision, so a NaN reaches
+    the total.
+    """
+    if native == target:
+        return values
+    if native != "person":
+        memberships = pd.Index(ids).get_indexer(
+            people[f"person_{native}_id"].to_numpy()
+        )
+        if (memberships < 0).any():
+            raise ValueError(f"A person's {native} is missing from its table.")
+        if target == "person":
+            return values[memberships]
+        values = values[memberships] / np.bincount(memberships)[memberships]
+    owners = pd.Index(target_ids).get_indexer(people[f"person_{target}_id"].to_numpy())
+    if (owners < 0).any():
+        raise ValueError(f"A person's {target} is missing from its table.")
+    return np.bincount(owners, weights=values, minlength=len(target_ids))
+
+
+def save_chunked_microsimulation_h5(
+    build_simulation: Any,
+    dataset_path: str | Path,
+    output_path: str | Path,
+    *,
+    year: int,
+    variables_by_entity: dict[str, list[str]] | None = None,
+    n_chunks: int = WORKER_CHUNKS,
+) -> dict[str, Any]:
+    """Write the manifest's entity tables a household chunk at a time.
+
+    ``build_simulation(dataset)`` returns the cell's simulation on one chunk.
+    Only one chunk simulation lives at once, so memory follows the chunk rather
+    than the population. The tables hold the same arrays, in the same order, as
+    ``save_complete_microsimulation_h5`` writes from a whole-file simulation. A
+    variable that can't be calculated stops the cell.
+    """
+    from policyengine_us.system import system
+
+    from .engine import chunked_entity_tables
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    variables_by_entity = variables_by_entity or full_h5_output_variable_manifest()
+    requested = list(
+        dict.fromkeys(name for names in variables_by_entity.values() for name in names)
+    )
+    single, tables = chunked_entity_tables(
+        dataset_path, year, requested, build_simulation, n_chunks=n_chunks
+    )
+
+    entity_frames: dict[str, pd.DataFrame] = {}
+    materialized_tob_variables: list[str] = []
+    for entity, names in variables_by_entity.items():
+        target_ids = getattr(single, entity)[f"{entity}_id"].to_numpy()
+        columns = {}
+        for name in names:
+            native = system.variables[name].entity.key
+            columns[name] = _values_on_entity(
+                tables[native][name].to_numpy(),
+                tables[native][f"{native}_id"].to_numpy(),
+                native=native,
+                target=entity,
+                people=single.person,
+                target_ids=target_ids,
+            )
+            if name in TOB_REVENUE_VARIABLES:
+                materialized_tob_variables.append(name)
+        entity_frames[entity] = pd.DataFrame(columns, index=np.arange(len(target_ids)))
+
+    metadata = _write_entity_frames(
+        entity_frames,
+        output_path,
+        year=year,
+        variables_by_entity=variables_by_entity,
+        skipped=[],
+        materialized_tob_variables=materialized_tob_variables,
+        capture_policy=(
+            "checked full-output variable manifest materialized from reform "
+            "microsimulations on household chunks"
+        ),
+    )
+    return {**metadata, "household_chunks": int(n_chunks)}
 
 
 def object_store_config_from_env(
@@ -957,32 +994,42 @@ def run_reform_full_h5_cell(
         if baseline_dataset_validation
         else None
     )
+    # The baseline reform is the dataset's economic assumption reform, then its
+    # tax assumption reform. The scored simulation applies the policy after it
+    # and the behavioral baseline branch applies it alone, so both carry the
+    # assumptions the dataset was calibrated under.
     if verified_metadata is not None:
-        current_law_reform = load_tax_assumption_reform_for_metadata(
+        assumptions = scoring_assumptions_from_metadata(verified_metadata, year)
+        baseline_reform = load_scoring_assumption_reform_for_metadata(
             verified_metadata,
             year,
         )
-        tax_contract = tax_assumption_contract_from_metadata(verified_metadata, year)
     else:
-        current_law_reform = load_tax_assumption_reform_for_dataset(dataset_path, year)
-        tax_contract = tax_assumption_contract_for_dataset(dataset_path, year)
-    combined_reform = _compose_reforms(current_law_reform, policy_reform)
+        assumptions = scoring_assumptions_for_dataset(dataset_path, year)
+        baseline_reform = load_scoring_assumption_reform_for_dataset(dataset_path, year)
+    tax_contract = assumptions.tax_assumption
+    combined_reform = compose_reforms(baseline_reform, policy_reform)
 
-    from .engine import dataset_microsimulation
+    from .engine import frame_microsimulation
 
-    sim = dataset_microsimulation(dataset_path, reform=combined_reform)
     behavioral_baseline_installation = None
-    if scoring_type == "behavioral":
-        behavioral_baseline_installation = install_behavioral_baseline_tax_system(
-            sim,
-            baseline_reform=current_law_reform,
-        )
-    h5_metadata = save_complete_microsimulation_h5(
-        sim,
+
+    def build_simulation(dataset: Any) -> Any:
+        nonlocal behavioral_baseline_installation
+        sim = frame_microsimulation(dataset, reform=combined_reform)
+        if scoring_type == "behavioral":
+            behavioral_baseline_installation = install_behavioral_baseline_tax_system(
+                sim,
+                baseline_reform=baseline_reform,
+            )
+        return sim
+
+    h5_metadata = save_chunked_microsimulation_h5(
+        build_simulation,
+        dataset_path,
         scenario_path,
         year=year,
     )
-    del sim
 
     schema_validation = None
     if expected_schema_manifest_path is not None:
@@ -1020,6 +1067,9 @@ def run_reform_full_h5_cell(
             "start_year": tax_contract.start_year,
             "end_year": tax_contract.end_year,
         },
+        "economic_assumption": economic_assumption_output_metadata(
+            assumptions.economic_assumption
+        ),
         "behavioral_baseline_installation": behavioral_baseline_installation,
         "runtime_provenance": runtime_provenance,
         "full_reform_output_h5_saved": True,
