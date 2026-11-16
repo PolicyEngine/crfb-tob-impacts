@@ -3,7 +3,7 @@
 Every simulation in this project is built through policyengine.py's certified
 ("managed") release bundle, never by constructing ``policyengine_us``
 simulations directly. The managed path enforces the model<->data version
-pairing recorded in the release manifest: a populace dataset run under a model
+pairing recorded in the release manifest: a Microcosm dataset run under a model
 version it was not calibrated for silently produces wrong aggregates. (Loaded
 through bare ``policyengine_us`` on a mismatched runtime, the certified base's
 income tax landed at 75% of the CBO target; through the managed path on the
@@ -19,7 +19,7 @@ from policyengine.tax_benefit_models.us import managed_microsimulation, us_lates
 
 
 def base_microsimulation(reform: Any = None, **kwargs: Any):
-    """A Microsimulation on the certified populace base.
+    """A Microsimulation on the certified Microcosm base.
 
     The base is the dataset pinned by the bundled release manifest, loaded
     through policyengine.py's managed path so the runtime model version must
@@ -47,12 +47,12 @@ def dataset_microsimulation(dataset: Any, reform: Any = None, **kwargs: Any):
 
 
 def certified_base_uri() -> str:
-    """HF URI (pinned to a revision) of the certified populace base."""
+    """HF URI (pinned to a revision) of the certified Microcosm base."""
     return us_latest.default_dataset_uri
 
 
 def certified_base_build_id() -> str:
-    """Build id of the certified populace base, for provenance records."""
+    """Build id of the certified Microcosm base, for provenance records."""
     return us_latest.data_certification.data_build_id
 
 
@@ -66,7 +66,7 @@ def _require_certified_runtime() -> None:
     have = _metadata.version("policyengine-us")
     if want and have != want:
         raise RuntimeError(
-            f"policyengine-us {have} is installed, but the certified populace "
+            f"policyengine-us {have} is installed, but the certified Microcosm "
             f"base requires {want}. Pin policyengine-us=={want} (via a "
             f"policyengine[us] release whose manifest certifies it). Running "
             f"built datasets under a mismatched model version silently produces "

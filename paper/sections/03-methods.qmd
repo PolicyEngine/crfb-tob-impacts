@@ -35,9 +35,9 @@ or the Social Security trust-fund balance in response to a reform.
 
 ## Base microdata
 
-We build on PolicyEngine's populace 2024 household database
+We build on PolicyEngine's Microcosm 2024 household database
 (`populace-us-2024-9f1260b-20260611`) [@populace2024]. PolicyEngine assembles
-populace from the CPS Annual Social and Economic Supplement
+Microcosm from the CPS Annual Social and Economic Supplement
 [@census2024cpsasec], the IRS Public Use File, the Survey of Consumer Finances,
 the Survey of Income and Program Participation, the CPS Outgoing Rotation Group,
 the Medical Expenditure Panel Survey, and the American Community Survey.
@@ -56,7 +56,7 @@ households before calibration or national aggregation.
 
 ## Long-run projection
 
-We build each projection year independently from the same 2024 populace
+We build each projection year independently from the same 2024 Microcosm
 cross-section, in four stages. Demographics enter through the household weights,
 and economics enter through the record values.
 
@@ -219,7 +219,7 @@ taxation-of-benefits aggregates, forcing a choice between resting the estimates
 on a few records and adding synthetic ones. Because economic growth enters
 through record values rather than weights, the population of
 taxation-of-benefits contributors stays broad even in 2100. We add no records to
-the populace database in any projected dataset.
+the Microcosm database in any projected dataset.
 
 We built the datasets under publication gates, and the projection script stops
 on any year that fails one. The gates bound the household weights in every year

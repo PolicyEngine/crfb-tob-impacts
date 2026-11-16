@@ -1234,7 +1234,7 @@ export function DashboardShell() {
                 PolicyEngine
               </a>
               , commissioned by the Committee for a Responsible Federal Budget.
-              Data: 2026 Social Security Trustees Report and populace microdata.
+              Data: 2026 Social Security Trustees Report and Microcosm microdata.
             </p>
           </footer>
         </main>

@@ -235,7 +235,7 @@ def _pseudo_input_variables(sim) -> set[str]:
     """Stored adds-aggregates that must not ship in the year frame.
 
     An aggregate is dropped when every component can supply its value —
-    either the component is itself a stored input (populace ships
+    either the component is itself a stored input (Microcosm ships
     ``social_security`` alongside its four components) or it is
     formula-backed (the enhanced CPS ships ``employment_income`` whose
     behavioral-response component recomputes). Keeping the aggregate
@@ -341,7 +341,7 @@ def cap_longrun_income_growth(df: pd.DataFrame, sim, year: int) -> dict:
 
 def sanitize_enum_inputs(df: pd.DataFrame, sim, year: int) -> dict:
     """Coerce enum values the model cannot encode to each variable's
-    default (populace stores 'unknown' race codes that the strict
+    default (Microcosm stores 'unknown' race codes that the strict
     ``set_input`` round-trip rejects). Returns {variable: records_coerced}.
     """
     log: dict = {}
@@ -387,7 +387,7 @@ def materialize_year_frame(sim, year: int) -> pd.DataFrame:
     """Person-row input dataframe with every input variable at ``year``."""
     base_period = int(sim.default_calculation_period)
     df = sim.to_input_dataframe()
-    # Some bases (populace) ship pre-uprated columns for many periods;
+    # Some bases (Microcosm) ship pre-uprated columns for many periods;
     # keep only the base period so this pipeline is the single uprating
     # authority and out-year columns cannot bypass the value stages.
     base_columns = [c for c in df.columns if c.endswith(f"__{base_period}")]
@@ -590,7 +590,7 @@ def _sim_from_frame(df: pd.DataFrame, year: int, reform):
     """In-memory simulation over the current frame (no file round-trip).
 
     The constructor needs a dataset to scaffold entities before the frame
-    replaces it; the certified populace base (via policyengine.py) supplies it
+    replaces it; the certified Microcosm base (via policyengine.py) supplies it
     from the managed cache, with no bare-HuggingFace network dependency.
     """
     from policyengine_core.data.dataset import Dataset
@@ -758,7 +758,7 @@ def build_year(
     # ----- Stage A: materialize -----
     # The input frame must be extracted before any other calculation:
     # calculated caches would otherwise leak into the frame as stored
-    # outputs and shadow their formulas downstream. The certified populace base
+    # outputs and shadow their formulas downstream. The certified Microcosm base
     # is the default; an explicit local base_dataset path (a candidate build not
     # yet certified) is loaded as an unmanaged dataset, for sentinels.
     if base_dataset and Path(str(base_dataset)).is_file():

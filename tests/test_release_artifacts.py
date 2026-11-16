@@ -204,7 +204,7 @@ def test_release_baseline_income_tax_comes_from_raw_full_h5():
     assert (
         merged["federal_income_tax"] - merged["baseline_revenue"]
     ).abs().max() < 1e-6
-    # Federal income tax sits in a realistic band of GDP on the populace
+    # Federal income tax sits in a realistic band of GDP on the Microcosm
     # baseline (roughly 8-11%); v1's 25%+ reflected its over-calibration.
     income_tax_pct_gdp = baseline["federal_income_tax_pct_gdp"]
     assert float(income_tax_pct_gdp.max()) < 15.0

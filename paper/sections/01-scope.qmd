@@ -6,7 +6,7 @@ benefits over 2026-2100. They range from repealing the tax on benefits to taxing
 all benefits, and they include senior-deduction and credit redesigns, two swaps of
 that tax for income tax on employer payroll contributions, and a reverse-Roth
 design. We also report a shorter phase-in of one swap as a sensitivity case. We
-simulate every reform on the full populace microdata at a set of anchor years,
+simulate every reform on the full Microcosm microdata at a set of anchor years,
 interpolate between them, and publish the annual results, trust-fund splits, and
 household impacts on an
 [interactive dashboard](https://policyengine.org/us/taxation-of-benefits-reforms).

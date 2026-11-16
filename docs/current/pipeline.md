@@ -7,7 +7,7 @@ This page describes how the current outputs are supposed to be built.
 1. Generate exact yearly H5 datasets in the pinned `policyengine-us-data`
    worktree using the Trustees current-law target source and
    `trustees-2025-core-thresholds-v1`. Every year, including `2075+`, calibrates
-   records of the populace base with no added support records.
+   records of the Microcosm base with no added support records.
 2. Validate dataset metadata and exact coverage before any scoring run is
    submitted.
 3. Freeze a run-level reproducibility bundle that captures code SHAs, dirty
@@ -35,7 +35,7 @@ as standard deductions, and on May 6, 2026 that moving all inflation-indexed
 federal income-tax parameters to wages fits its projections best.
 
 The current pipeline uses no synthetic support at any horizon. Every delivered
-year — including `2075`–`2100` — calibrates records of the populace base only and
+year — including `2075`–`2100` — calibrates records of the Microcosm base only and
 clears the publication gates with margin (far-horizon taxation-of-benefits
 contributor effective sample sizes of `107`–`156`). The final calibration must
 remain exact for every delivered year.
@@ -79,7 +79,7 @@ The rebuild is supposed to fail closed on these checks:
 - late-year household and policy-target support gates, including separate
   OASDI/HI taxation-of-benefits contributor checks documented in
   [late-year-support-gates.md](late-year-support-gates.md)
-- no synthetic household support in the current v2/populace published H5s
+- no synthetic household support in the current v2/Microcosm published H5s
 - a reproducibility bundle stamped before submission, including dirty sibling
   repo overrides if they exist
 - launch-time env vars for required target source and tax assumption derived

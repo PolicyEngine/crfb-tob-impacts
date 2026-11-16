@@ -87,7 +87,7 @@ export function MethodologyDiagram() {
         width="760"
         height="600"
         role="img"
-        aria-label="Baseline construction pipeline: populace microdata and Trustees, Medicare, and CBO inputs feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of populace records, on which we score the reforms"
+        aria-label="Baseline construction pipeline: Microcosm microdata and Trustees, Medicare, and CBO inputs feed yearly demographic reweighting, value calibration, and a final entropy calibration with publication gates, producing 2026 to 2100 datasets of Microcosm records, on which we score the reforms"
         className="mx-auto h-auto max-w-full"
       >
         <rect x="0" y="0" width="760" height="600" fill="#f9fafb" rx="8" />
@@ -105,7 +105,7 @@ export function MethodologyDiagram() {
           y={62}
           w={170}
           h={56}
-          title="populace 2024"
+          title="Microcosm 2024"
           caption="Primary-source microdata"
           caption2="(ASEC, PUF, SCF, SIPP, MEPS)"
         />

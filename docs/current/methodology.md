@@ -19,12 +19,12 @@ The main delivery window is `2026-2100`.
 
 ## Standard Series Contract
 
-For the current v2/populace rerun, the release contract is:
+For the current v2/Microcosm rerun, the release contract is:
 
 - target source: 2026 Trustees Reports, intermediate assumptions, with OBBBA in
   current law
 - baseline run ID: `crfb-longrun-v2pop-tr2026-noclone-9f1260b-20260612`
-- populace base: `populace-us-2024-9f1260b-20260611`
+- Microcosm base: `populace-us-2024-9f1260b-20260611`
 - exact H5 anchors: `2026`, `2030`, and every fifth year from `2035` through
   `2100`
 - reforms: `option1` through `option12`, `reverse_roth`, and `tax93`
@@ -63,7 +63,7 @@ for the CRFB long-run TOB work, not default statutory current law.
 
 ## Late-Year Support
 
-The v2/populace construction does not use synthetic household support in
+The v2/Microcosm construction does not use synthetic household support in
 the published years. Demographics are carried through household weights; broad
 economic growth is carried through input values before a final light calibration
 to TR2026 benefits, taxable payroll, and TOB targets. Late-year support gates

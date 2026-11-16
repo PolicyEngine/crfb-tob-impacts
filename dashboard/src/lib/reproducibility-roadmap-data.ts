@@ -141,7 +141,7 @@ export const reproducibilityRoadmap = {
       status: "complete",
       icon: "play",
       outcome:
-        "Run reform workers from the documented v2 populace/TR2026 stack. Each worker saves the full reform H5 plus metadata; aggregate tables are derived afterward.",
+        "Run reform workers from the documented v2 Microcosm/TR2026 stack. Each worker saves the full reform H5 plus metadata; aggregate tables are derived afterward.",
       gate:
         "All current static selected-year cells and behavioral endpoints complete in R2. No aggregation uses raw household weights directly.",
       logTarget: "reform_full_h5/year=YYYY/reform=OPTION/metadata.json",

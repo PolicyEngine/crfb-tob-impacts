@@ -120,7 +120,7 @@ export function MethodologySection() {
             Reweighting alone can match dollar aggregates only by changing the
             population&apos;s makeup, and value scaling alone cannot shift the
             age structure, so we use each for its own channel. We add no records to the
-            populace database in any projected dataset.
+            Microcosm database in any projected dataset.
           </p>
         </AccordionItem>
 
@@ -176,10 +176,10 @@ export function MethodologySection() {
 
         <AccordionItem
           title="Data sources"
-          summary="We calibrate PolicyEngine's populace microdata to SSA and CMS projections, with income growth from CBO."
+          summary="We calibrate PolicyEngine's Microcosm microdata to SSA and CMS projections, with income growth from CBO."
         >
           <p>
-            <strong>Microdata foundation:</strong> PolicyEngine&apos;s populace
+            <strong>Microdata foundation:</strong> PolicyEngine&apos;s Microcosm
             2024 database, built from primary sources (CPS ASEC, IRS PUF, SCF,
             SIPP, CPS ORG, MEPS, ACS). PolicyEngine flags households that hold
             about half of the database&apos;s weight as IRS PUF clones. Each clone
@@ -359,7 +359,7 @@ export function MethodologySection() {
               rel="noreferrer"
               className="hover:underline"
             >
-              populace microdata
+              Microcosm microdata
             </a>
           </li>
           <li>

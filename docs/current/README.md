@@ -18,7 +18,7 @@ It is designed to answer four questions quickly:
 ## What This Covers
 
 - the standard `option1` through `option12` long-run analysis
-- the v2 populace/TR2026 baseline construction and full reform-H5 scoring path
+- the v2 Microcosm/TR2026 baseline construction and full reform-H5 scoring path
 - the delivery boundary between current dashboard outputs and legacy
   spreadsheet-reference values
 
@@ -28,7 +28,7 @@ The diagram below documents the current release workflow.
 
 ```mermaid
 flowchart LR
-  A["Trustees current-law targets"] --> B["Calibrated year-dataset builds (populace base, certified worktree)"]
+  A["Trustees current-law targets"] --> B["Calibrated year-dataset builds (Microcosm base, certified worktree)"]
   B --> C["Current full-H5 rescoring for 16 reforms"]
   C --> D["Unified results.csv"]
   D --> E["Dashboard current results"]
@@ -41,7 +41,7 @@ flowchart LR
 - [REFORM_MODELING_BIBLE.md](REFORM_MODELING_BIBLE.md)
   - current full-H5 retention, R2 durability, aggregation, and release rules
 - [v2-baseline-method.md](v2-baseline-method.md)
-  - current v2 populace/TR2026 baseline construction and validation limits
+  - current v2 Microcosm/TR2026 baseline construction and validation limits
 - [methodology.md](methodology.md)
   - scope, scenario families, modeling assumptions, and interpretation rules
 - [pipeline.md](pipeline.md)
