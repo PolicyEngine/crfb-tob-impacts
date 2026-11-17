@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# The base is the certified populace dataset pinned by the policyengine.py
+# The base is the certified Microcosm dataset pinned by the policyengine.py
 # release manifest; build_year loads it through the managed path. The optional
 # --base-dataset flag only overrides the provenance label in the build manifest.
 

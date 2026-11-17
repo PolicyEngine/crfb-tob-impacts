@@ -30,7 +30,7 @@ labor between weights and values created three structural problems:
 
 For each projection year Y, `scripts/build_v2_projected_datasets.py`:
 
-- **Stage A — materialize.** Simulate the populace base at
+- **Stage A — materialize.** Simulate the Microcosm base at
   year Y in a fresh simulation and export every true input variable at its
   year-Y (uprated) value. Derived variables are never stored, so formulas
   (including labor-supply responses) always recompute downstream.
@@ -53,8 +53,8 @@ For each projection year Y, `scripts/build_v2_projected_datasets.py`:
     becomes nearly inelastic to other income, so `gamma` is bounded and
     the final calibration closes the remainder.
 - **No synthetic support stage.** Every record in every published year is
-  a record of the populace base, which flags 42,706 of its 75,112 households
-  (50.8 percent of its weight) as PUF clones. The populace base stays broad enough at the far
+  a record of the Microcosm base, which flags 42,706 of its 75,112 households
+  (50.8 percent of its weight) as PUF clones. The Microcosm base stays broad enough at the far
   horizon that 2100 — the hardest year, with the most extreme age shift —
   passes every publication gate with margin (taxation-of-benefits
   contributor effective sample sizes of 152 OASDI and 127 HI against the
@@ -95,7 +95,7 @@ that earlier drafts of this work carried.
 ## Differences from v1, by design
 
 - **No synthetic records.** Values at year-Y scale keep the
-  TOB-contributing population broad enough that the populace base passes
+  TOB-contributing population broad enough that the Microcosm base passes
   every late-year gate bare.
 - **TR2026 current-law TOB is the calibration target** (OBBBA included
   natively), so dataset TOB equals the published baseline and the

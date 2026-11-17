@@ -327,7 +327,7 @@ def publish_full_h5_static_results(
         "long_horizon_display_policy": (
             "Every reform uses exact full-H5 microsimulation outputs "
             "for 2026, 2030, and every fifth year from 2035 to 2100 on the "
-            "populace baselines. Non-modeled annual display rows are "
+            "Microcosm baselines. Non-modeled annual display rows are "
             "linearly interpolated only for dashboard continuity."
         ),
     }

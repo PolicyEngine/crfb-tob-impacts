@@ -2,9 +2,9 @@
 
 One JSON artifact carries the full static panel (exact anchors and
 interpolated display rows) where each value chains back to its origins:
-the populace base release, the calibrated baseline year H5 (by SHA-256),
+the Microcosm base release, the calibrated baseline year H5 (by SHA-256),
 the Modal reform run and scenario H5 (by SHA-256), and the Trustees
-targets expressed in populace Target grammar (name / entity / measure /
+targets expressed in Microcosm Target grammar (name / entity / measure /
 aggregation / period / value / source).
 
 Usage:
@@ -104,7 +104,7 @@ TARGET_SPECS = (
 )
 
 
-def targets_in_populace_grammar(anchor_years: list[int]) -> list[dict]:
+def targets_in_microcosm_grammar(anchor_years: list[int]) -> list[dict]:
     aux = pd.read_csv(TR2026_AUX).set_index("year")
     targets: list[dict] = []
     for year in anchor_years:
@@ -348,7 +348,7 @@ def build_contract(
                 "year_h5_sha256": {str(y): s for y, s in sorted(year_sha.items())},
                 "supplemental_manifest_paths": supplemental_manifest_paths,
             },
-            "targets": targets_in_populace_grammar(static_anchor_years),
+            "targets": targets_in_microcosm_grammar(static_anchor_years),
             "reform_runs": [
                 {
                     "run_prefix": prefix,

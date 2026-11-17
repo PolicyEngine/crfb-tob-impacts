@@ -180,7 +180,7 @@ def test_interpolated_rows_name_their_anchors(contract: dict) -> None:
     assert not bad, f"Interpolated rows without anchors: {bad[:10]}"
 
 
-def test_targets_use_populace_grammar(contract: dict) -> None:
+def test_targets_use_microcosm_grammar(contract: dict) -> None:
     targets = contract["lineage"]["targets"]
     assert targets
     for target in targets:

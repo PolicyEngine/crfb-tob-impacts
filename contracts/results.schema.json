@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "title": "crfb_results_contract/v1",
- "description": "One canonical results artifact: every published number with its full lineage chain, in populace Target grammar where targets appear.",
+ "description": "One canonical results artifact: every published number with its full lineage chain, in Microcosm Target grammar where targets appear.",
  "type": "object",
  "required": [
   "schema",

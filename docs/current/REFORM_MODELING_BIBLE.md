@@ -7,13 +7,13 @@ results.
 
 ## Current Release Contract
 
-- Baseline method: v2 populace/TR2026, documented in
+- Baseline method: v2 Microcosm/TR2026, documented in
   [v2-baseline-method.md](v2-baseline-method.md).
 - Baseline manifest:
   `docs/current/manifests/baseline-dataset-manifest-v2pop-noclone.json`.
 - Public baseline run ID:
   `crfb-longrun-v2pop-tr2026-noclone-9f1260b-20260612`.
-- Populace base: `populace-us-2024-9f1260b-20260611`.
+- Microcosm base: `populace-us-2024-9f1260b-20260611`.
 - Trustees target vintage: 2026 Trustees Reports, intermediate assumptions,
   with OBBBA in current law.
 - Tax-threshold assumption actually used by the H5s:
